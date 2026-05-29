@@ -1,0 +1,17 @@
+{
+  "name": "@vault/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "4.12.18",
+    "zod": "4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.2"
+  }
+}

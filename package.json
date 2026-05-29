@@ -1,0 +1,28 @@
+{
+  "name": "sanduqkin",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "overrides": {
+    "@expo/metro-config": {
+      "postcss": "8.5.14"
+    },
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native-safe-area-context": "5.6.0"
+  },
+  "scripts": {
+    "mobile": "npm run start --workspace @vault/mobile",
+    "mobile:android": "npm run android --workspace @vault/mobile",
+    "mobile:ios": "npm run ios --workspace @vault/mobile",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
