@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
 import { Text, View } from "react-native";
 
-import { SignOutButton } from "@/features/auth";
+import { BiometricPreferencesPanel, SignOutButton } from "@/features/auth";
 import { colors } from "@/shared/theme/colors";
 
 type SettingsScreenProps = {
@@ -72,6 +72,8 @@ export function SettingsScreen({
             Upgrade to Premium
           </Link>
         ) : null}
+
+        <BiometricPreferencesPanel storage={storage} />
 
         <SignOutButton storage={storage} vaultSignOut={vaultSignOut} />
 

@@ -22,7 +22,7 @@ export type AuthServiceResult =
   | { message: string; status: "error" }
   | {
       message: string;
-      nextStep: "email-verification" | "totp-verification";
+      nextStep: "email-verification" | "totp-verification" | "vault-unlock";
       status: "ok";
     }
   | { message: string; status: "unavailable" };
@@ -42,8 +42,8 @@ export function createAuthService(client: SupabaseAuthClient | null) {
       }
 
       return {
-        message: "Continue to two-factor verification.",
-        nextStep: "totp-verification",
+        message: "Opening your vault.",
+        nextStep: "vault-unlock",
         status: "ok",
       };
     },

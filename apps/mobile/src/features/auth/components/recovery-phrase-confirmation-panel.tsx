@@ -11,7 +11,7 @@ import {
 import { createRecoveryPhraseConfirmationViewModel } from "../recovery-phrase-confirmation-view-model";
 
 type RecoveryPhraseConfirmationPanelProps = {
-  onConfirmed: () => Promise<void>;
+  onConfirmed: (password: string) => Promise<void>;
   words: readonly string[];
 };
 
@@ -23,12 +23,14 @@ export function RecoveryPhraseConfirmationPanel({
   const challenges = useMemo(() => createConfirmationChallenge(words), [words]);
   const [inputs, setInputs] = useState<Record<number, string>>({});
   const [error, setError] = useState<string | null>(null);
+  const [password, setPassword] = useState("");
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const allFilled = challenges.every(
     (challenge) => (inputs[challenge.position] ?? "").trim().length > 0,
   );
+  const canSubmit = allFilled && password.trim().length > 0;
 
   return (
     <View style={{ gap: 20 }}>
@@ -68,6 +70,33 @@ export function RecoveryPhraseConfirmationPanel({
         ))}
       </View>
 
+      <View style={{ gap: 6 }}>
+        <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
+          Account password
+        </Text>
+        <TextInput
+          onChangeText={(value) => {
+            setPassword(value);
+            setError(null);
+          }}
+          placeholder="Re-enter your password"
+          placeholderTextColor={colors.inkMuted}
+          secureTextEntry
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            borderCurve: "continuous",
+            borderRadius: 8,
+            borderWidth: 1,
+            color: colors.ink,
+            fontSize: 17,
+            paddingHorizontal: 14,
+            paddingVertical: 12,
+          }}
+          value={password}
+        />
+      </View>
+
       {error ? (
         <Text selectable style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}>
           {error}
@@ -82,7 +111,7 @@ export function RecoveryPhraseConfirmationPanel({
 
       <Pressable
         accessibilityRole="button"
-        disabled={isSubmitting || !allFilled || success}
+        disabled={isSubmitting || !canSubmit || success}
         onPress={async () => {
           setIsSubmitting(true);
 
@@ -95,7 +124,7 @@ export function RecoveryPhraseConfirmationPanel({
             const isValid = validateConfirmationInputs(words, inputValues);
 
             if (isValid) {
-              await onConfirmed();
+              await onConfirmed(password);
               setSuccess(true);
               setError(null);
             } else {
@@ -109,7 +138,7 @@ export function RecoveryPhraseConfirmationPanel({
         style={{
           alignItems: "center",
           backgroundColor:
-            isSubmitting || !allFilled || success ? colors.inkMuted : colors.action,
+            isSubmitting || !canSubmit || success ? colors.inkMuted : colors.action,
           borderCurve: "continuous",
           borderRadius: 8,
           paddingHorizontal: 18,

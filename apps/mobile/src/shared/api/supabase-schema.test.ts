@@ -42,6 +42,25 @@ describe("Supabase Phase 1 schema migration", () => {
     );
     expect(migration).toContain("(select auth.uid()) = user_id");
   });
+
+  it("hardens Phase 1 table grants so anon has no direct vault table access", () => {
+    const migrations = readAllMigrations();
+
+    for (const table of ["vault_key_material", "vault_assets", "audit_events"]) {
+      expect(migrations).toContain(`revoke all on table public.${table} from anon`);
+      expect(migrations).toContain(`revoke all on table public.${table} from public`);
+    }
+
+    expect(migrations).toContain(
+      "grant select, insert, update on table public.vault_key_material to authenticated",
+    );
+    expect(migrations).toContain(
+      "grant select, insert, update, delete on table public.vault_assets to authenticated",
+    );
+    expect(migrations).toContain(
+      "grant select, insert on table public.audit_events to authenticated",
+    );
+  });
 });
 
 function readPhase1Migration(): string {
@@ -65,4 +84,17 @@ function readSupabaseConfig(): string {
     path.resolve(process.cwd(), "../../supabase/config.toml"),
     "utf8",
   );
+}
+
+function readAllMigrations(): string {
+  const migrationsDir = path.resolve(
+    process.cwd(),
+    "../../supabase/migrations",
+  );
+
+  return readdirSync(migrationsDir)
+    .filter((file) => file.endsWith(".sql"))
+    .sort()
+    .map((file) => readFileSync(path.join(migrationsDir, file), "utf8"))
+    .join("\n");
 }

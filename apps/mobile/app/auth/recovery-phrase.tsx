@@ -4,8 +4,8 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 
 import { useRecoveryPhraseSession } from "@/features/auth";
+import { generateRandomBytes as generateSecureRandomBytes } from "@/shared/crypto/random-bytes";
 import { screenStyles } from "@/shared/ui/screen";
-import sodium from "libsodium-wrappers-sumo";
 
 const RecoveryPhrasePanel = lazy(() =>
   import("@/features/auth/components/recovery-phrase-panel").then((m) => ({
@@ -14,12 +14,12 @@ const RecoveryPhrasePanel = lazy(() =>
 );
 
 export default function RecoveryPhraseRoute() {
-  const [isReady, setIsReady] = useState(false);
+  const [entropy, setEntropy] = useState<Uint8Array | null>(null);
   const router = useRouter();
   const { setRecoveryPhraseSession } = useRecoveryPhraseSession();
 
   useEffect(() => {
-    sodium.ready.then(() => setIsReady(true));
+    generateSecureRandomBytes(16).then(setEntropy);
   }, []);
 
   return (
@@ -29,10 +29,10 @@ export default function RecoveryPhraseRoute() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={screenStyles.content}
       >
-        {isReady ? (
+        {entropy ? (
           <Suspense fallback={null}>
             <RecoveryPhrasePanel
-              generateRandomBytes={(length) => sodium.randombytes_buf(length)}
+              generateRandomBytes={() => entropy}
               onContinue={(session) => {
                 setRecoveryPhraseSession(session);
                 router.push("/auth/confirm-recovery-phrase");

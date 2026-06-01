@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Purchases from "react-native-purchases";
 
-import { createPurchaseService } from "../purchase-service";
+import { createPurchaseService, hasSanduqkinPro } from "../purchase-service";
 
 export function usePremiumStatus(): boolean | undefined {
   const [isPremium, setIsPremium] = useState<boolean | undefined>(undefined);
@@ -21,8 +21,17 @@ export function usePremiumStatus(): boolean | undefined {
 
     void check();
 
+    const listener = (customerInfo: Parameters<typeof hasSanduqkinPro>[0]) => {
+      if (isMounted) {
+        setIsPremium(hasSanduqkinPro(customerInfo));
+      }
+    };
+
+    Purchases.addCustomerInfoUpdateListener(listener);
+
     return () => {
       isMounted = false;
+      Purchases.removeCustomerInfoUpdateListener(listener);
     };
   }, []);
 

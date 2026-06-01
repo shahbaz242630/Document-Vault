@@ -1,5 +1,7 @@
 import sodium from "libsodium-wrappers-sumo";
 
+import { assertVaultCryptoRuntimeSupported } from "./vault-crypto-runtime";
+
 /**
  * BRD §4.2: Argon2id tuned for mobile.
  * Uses libsodium's MODERATE preset for a balance of security and UX:
@@ -18,6 +20,7 @@ const MEMLIMIT = 256 * 1024 * 1024; // 256 MiB
 const KEY_LENGTH = 32; // 256 bits for XChaCha20-Poly1305
 
 export async function generateSalt(): Promise<Uint8Array> {
+  assertVaultCryptoRuntimeSupported();
   await sodium.ready;
   return sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
 }
@@ -26,6 +29,7 @@ export async function deriveKEK(
   password: string,
   salt: Uint8Array,
 ): Promise<Uint8Array> {
+  assertVaultCryptoRuntimeSupported();
   await sodium.ready;
 
   if (salt.length !== sodium.crypto_pwhash_SALTBYTES) {

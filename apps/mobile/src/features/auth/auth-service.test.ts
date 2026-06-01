@@ -63,8 +63,8 @@ describe("createAuthService", () => {
         password: "correct horse battery staple",
       }),
     ).resolves.toEqual({
-      message: "Continue to two-factor verification.",
-      nextStep: "totp-verification",
+      message: "Opening your vault.",
+      nextStep: "vault-unlock",
       status: "ok",
     });
     expect(calls).toEqual([

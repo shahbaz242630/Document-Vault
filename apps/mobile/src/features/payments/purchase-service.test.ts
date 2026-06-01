@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { createPurchaseService } from "./purchase-service";
 
+const activeProEntitlement = { "Sanduqkin Pro": { expiresDate: null } };
+
 describe("createPurchaseService", () => {
   describe("configure", () => {
     it("returns unavailable when the Purchases client is null", () => {
@@ -76,13 +78,13 @@ describe("createPurchaseService", () => {
       expect(result).toBe(false);
     });
 
-    it("returns true when the premium entitlement is active", async () => {
+    it("returns true when the Sanduqkin Pro entitlement is active", async () => {
       const service = createPurchaseService({
         configure: () => {},
         async getCustomerInfo() {
           return {
             entitlements: {
-              active: { premium: { expiresDate: null } },
+              active: activeProEntitlement,
             },
           };
         },
@@ -99,7 +101,7 @@ describe("createPurchaseService", () => {
       expect(result).toBe(true);
     });
 
-    it("returns false when the premium entitlement is missing", async () => {
+    it("returns false when the Sanduqkin Pro entitlement is missing", async () => {
       const service = createPurchaseService({
         configure: () => {},
         async getCustomerInfo() {
@@ -135,6 +137,37 @@ describe("createPurchaseService", () => {
       const result = await service.checkPremiumAccess();
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe("findPackage", () => {
+    it("finds monthly and yearly packages from the current offering", async () => {
+      const service = createPurchaseService({
+        configure: () => {},
+        async getCustomerInfo() {
+          return { entitlements: { active: {} } };
+        },
+        async getOfferings() {
+          return {
+            current: {
+              availablePackages: [
+                { identifier: "monthly", product: { identifier: "monthly" } },
+                { identifier: "yearly", product: { identifier: "yearly" } },
+              ],
+            },
+          };
+        },
+        async purchasePackage() {
+          return { customerInfo: { entitlements: { active: {} } } };
+        },
+      });
+
+      await expect(service.findPackage("monthly")).resolves.toMatchObject({
+        identifier: "monthly",
+      });
+      await expect(service.findPackage("yearly")).resolves.toMatchObject({
+        identifier: "yearly",
+      });
     });
   });
 
@@ -190,7 +223,7 @@ describe("createPurchaseService", () => {
         async purchasePackage() {
           return {
             customerInfo: {
-              entitlements: { active: { premium: {} } },
+              entitlements: { active: activeProEntitlement },
             },
           };
         },
@@ -222,6 +255,30 @@ describe("createPurchaseService", () => {
       const result = await service.purchasePackage({ id: "monthly" });
 
       expect(result).toEqual({ cancelled: true });
+    });
+  });
+
+  describe("restorePurchases", () => {
+    it("returns isPremium true when restore returns the Sanduqkin Pro entitlement", async () => {
+      const service = createPurchaseService({
+        configure: () => {},
+        async getCustomerInfo() {
+          return { entitlements: { active: {} } };
+        },
+        async getOfferings() {
+          return null;
+        },
+        async purchasePackage() {
+          return { customerInfo: { entitlements: { active: {} } } };
+        },
+        async restorePurchases() {
+          return { entitlements: { active: activeProEntitlement } };
+        },
+      });
+
+      await expect(service.restorePurchases()).resolves.toEqual({
+        isPremium: true,
+      });
     });
   });
 });

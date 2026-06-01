@@ -109,6 +109,14 @@ export {
   type VaultKeyMaterial,
 } from "./supabase-vault-codec";
 export {
+  createSupabaseVaultRepository,
+  type SupabaseVaultClient,
+} from "./supabase-vault-repository";
+export {
+  createSupabaseKeyMaterialRepository,
+  type SupabaseKeyMaterialClient,
+} from "./supabase-key-material-repository";
+export {
   createVaultStore,
   type VaultDeletedAsset,
   type VaultDecryptedAsset,
@@ -124,6 +132,7 @@ export {
 } from "./recently-deleted-view-model";
 export {
   createVaultSession,
+  type VaultAssetRepository,
   type VaultSession,
 } from "./vault-session";
 export {

@@ -10,6 +10,28 @@ import {
 } from "./vault-crypto";
 
 describe("vault crypto", () => {
+  it("fails clearly when the sodium-wasm backend runs without WebAssembly", async () => {
+    const webAssemblyDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "WebAssembly",
+    );
+
+    Object.defineProperty(globalThis, "WebAssembly", {
+      configurable: true,
+      value: undefined,
+    });
+
+    try {
+      await expect(generateMasterEncryptionKey()).rejects.toThrow(
+        "Vault crypto backend sodium-wasm requires WebAssembly.",
+      );
+    } finally {
+      if (webAssemblyDescriptor) {
+        Object.defineProperty(globalThis, "WebAssembly", webAssemblyDescriptor);
+      }
+    }
+  });
+
   it("generates a 256-bit master encryption key", async () => {
     const key = await generateMasterEncryptionKey();
 

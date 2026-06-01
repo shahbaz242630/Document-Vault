@@ -1,5 +1,7 @@
 import sodium from "libsodium-wrappers-sumo";
 
+import { assertVaultCryptoRuntimeSupported } from "./vault-crypto-runtime";
+
 export const vaultCryptoConstants = {
   keyBytes: 32,
   nonceBytes: 24,
@@ -19,6 +21,7 @@ type DecryptVaultPayloadInput = {
 };
 
 export async function generateMasterEncryptionKey(): Promise<Uint8Array> {
+  assertVaultCryptoRuntimeSupported();
   await sodium.ready;
 
   return sodium.crypto_aead_xchacha20poly1305_ietf_keygen();
@@ -32,6 +35,7 @@ export async function encryptVaultPayload({
   ciphertext: Uint8Array;
   nonce: Uint8Array;
 }> {
+  assertVaultCryptoRuntimeSupported();
   await sodium.ready;
   validateKey(key);
 
@@ -56,6 +60,7 @@ export async function decryptVaultPayload({
   key,
   nonce,
 }: DecryptVaultPayloadInput): Promise<string> {
+  assertVaultCryptoRuntimeSupported();
   await sodium.ready;
   validateKey(key);
   validateNonce(nonce);
@@ -81,11 +86,13 @@ function validateKey(key: Uint8Array): void {
 }
 
 export async function toBase64(data: Uint8Array): Promise<string> {
+  assertVaultCryptoRuntimeSupported();
   await sodium.ready;
   return sodium.to_base64(data);
 }
 
 export async function fromBase64(base64: string): Promise<Uint8Array> {
+  assertVaultCryptoRuntimeSupported();
   await sodium.ready;
   return sodium.from_base64(base64);
 }

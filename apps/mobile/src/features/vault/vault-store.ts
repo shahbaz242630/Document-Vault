@@ -119,6 +119,13 @@ export function createVaultStore({
 
       return cloneEncryptedRecord(restoredRecord);
     },
+    replaceEncryptedRecords(nextRecords: VaultEncryptedAssetRecord[]): void {
+      records.clear();
+
+      for (const record of nextRecords) {
+        records.set(record.id, cloneEncryptedRecord(record));
+      }
+    },
     softDeleteAsset(id: string): VaultEncryptedAssetRecord | null {
       const record = records.get(id);
 
@@ -187,7 +194,18 @@ function cloneEncryptedRecord(record: VaultEncryptedAssetRecord): VaultEncrypted
 }
 
 function createLocalIdGenerator(): () => string {
-  let nextId = 1;
+  return () => {
+    const crypto = globalThis.crypto;
 
-  return () => `local-asset-${nextId++}`;
+    if (crypto?.randomUUID) {
+      return crypto.randomUUID();
+    }
+
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char) => {
+      const random = Math.floor(Math.random() * 16);
+      const value = char === "x" ? random : (random & 0x3) | 0x8;
+
+      return value.toString(16);
+    });
+  };
 }

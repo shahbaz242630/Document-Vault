@@ -8,8 +8,24 @@ import {
 
 type VaultStore = ReturnType<typeof createVaultStore>;
 
+export type VaultAssetRepository = {
+  listAssets: () => Promise<VaultEncryptedAssetRecord[]>;
+  permanentlyDeleteAsset: (id: string) => Promise<boolean>;
+  restoreAsset: (input: {
+    id: string;
+    updatedAt: string;
+  }) => Promise<VaultEncryptedAssetRecord | null>;
+  saveAsset: (record: VaultEncryptedAssetRecord) => Promise<VaultEncryptedAssetRecord>;
+  softDeleteAsset: (input: {
+    deletedAt: string;
+    id: string;
+    updatedAt: string;
+  }) => Promise<VaultEncryptedAssetRecord | null>;
+};
+
 type CreateVaultSessionOptions = {
   key: Uint8Array;
+  repository?: VaultAssetRepository;
   store?: VaultStore;
 };
 
@@ -17,19 +33,22 @@ export type VaultSession = {
   addAsset: (payload: AssetPlaintextPayload) => Promise<VaultDecryptedAsset>;
   listActiveAssets: () => Promise<VaultDecryptedAsset[]>;
   listDeletedAssets: () => Promise<VaultDeletedAsset[]>;
-  permanentlyDeleteAsset: (id: string) => boolean;
-  restoreAsset: (id: string) => VaultEncryptedAssetRecord | null;
-  softDeleteAsset: (id: string) => VaultEncryptedAssetRecord | null;
+  loadPersistedAssets: () => Promise<void>;
+  permanentlyDeleteAsset: (id: string) => Promise<boolean>;
+  restoreAsset: (id: string) => Promise<VaultEncryptedAssetRecord | null>;
+  softDeleteAsset: (id: string) => Promise<VaultEncryptedAssetRecord | null>;
   updateAsset: (id: string, payload: AssetPlaintextPayload) => Promise<VaultDecryptedAsset | null>;
 };
 
 export function createVaultSession({
   key,
+  repository,
   store = createVaultStore(),
 }: CreateVaultSessionOptions): VaultSession {
   return {
     async addAsset(payload) {
       const record = await store.addAsset({ key, payload });
+      await repository?.saveAsset(record);
 
       return {
         ...payload,
@@ -42,14 +61,46 @@ export function createVaultSession({
     listDeletedAssets() {
       return store.listDeletedAssets({ key });
     },
-    permanentlyDeleteAsset(id) {
-      return store.permanentlyDeleteAsset(id);
+    async loadPersistedAssets() {
+      if (!repository) {
+        return;
+      }
+
+      store.replaceEncryptedRecords(await repository.listAssets());
     },
-    restoreAsset(id) {
-      return store.restoreAsset(id);
+    async permanentlyDeleteAsset(id) {
+      const deleted = store.permanentlyDeleteAsset(id);
+
+      if (deleted) {
+        await repository?.permanentlyDeleteAsset(id);
+      }
+
+      return deleted;
     },
-    softDeleteAsset(id) {
-      return store.softDeleteAsset(id);
+    async restoreAsset(id) {
+      const record = store.restoreAsset(id);
+
+      if (record) {
+        await repository?.restoreAsset({
+          id,
+          updatedAt: record.updatedAt,
+        });
+      }
+
+      return record;
+    },
+    async softDeleteAsset(id) {
+      const record = store.softDeleteAsset(id);
+
+      if (record?.deletedAt) {
+        await repository?.softDeleteAsset({
+          deletedAt: record.deletedAt,
+          id,
+          updatedAt: record.updatedAt,
+        });
+      }
+
+      return record;
     },
     async updateAsset(id, payload) {
       const record = await store.updateAsset({ id, key, payload });
@@ -57,6 +108,8 @@ export function createVaultSession({
       if (!record) {
         return null;
       }
+
+      await repository?.saveAsset(record);
 
       return {
         ...payload,

@@ -1,6 +1,9 @@
+import "@/shared/crypto/secure-random-polyfill-expo";
+
 import { useEffect } from "react";
 import { AppState, Platform } from "react-native";
 import Purchases from "react-native-purchases";
+import Constants from "expo-constants";
 import { Stack } from "expo-router/stack";
 import { StatusBar } from "expo-status-bar";
 
@@ -8,7 +11,11 @@ import { AppLockOverlay, RecoveryPhraseSessionProvider } from "@/features/auth";
 import { VaultSessionProvider } from "@/features/vault";
 import { initializeSslPinningIfAvailable } from "@/shared/security/ssl-pinning";
 import { colors } from "@/shared/theme/colors";
-import { getRevenueCatEnv } from "@/shared/config/revenuecat-env";
+import {
+  getRevenueCatEnv,
+  selectRevenueCatApiKey,
+} from "@/shared/config/revenuecat-env";
+import { shouldUseRevenueCatNativeBridge } from "@/shared/config/revenuecat-runtime";
 
 export default function RootLayout() {
   useEffect(() => {
@@ -20,8 +27,18 @@ export default function RootLayout() {
       typeof process !== "undefined" && process.env ? process.env : {},
     );
 
-    if (env.isConfigured) {
-      const apiKey = Platform.OS === "ios" ? env.iosKey : env.androidKey;
+    const apiKey = selectRevenueCatApiKey(env, Platform.OS);
+
+    const canUseRevenueCat = shouldUseRevenueCatNativeBridge({
+      appOwnership: Constants.appOwnership,
+      platform: Platform.OS,
+    });
+
+    if (!canUseRevenueCat) {
+      return;
+    }
+
+    if (apiKey) {
       Purchases.configure({ apiKey });
     }
 

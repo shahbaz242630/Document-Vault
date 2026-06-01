@@ -17,14 +17,22 @@ import {
 import * as ExpoSecureStore from "expo-secure-store";
 
 import type { AssetPlaintextPayload } from "./asset-payload";
-import { createVaultSession, type VaultSession } from "./vault-session";
+import {
+  createSupabaseVaultRepository,
+  type SupabaseVaultClient,
+} from "./supabase-vault-repository";
+import {
+  createVaultSession,
+  type VaultAssetRepository,
+  type VaultSession,
+} from "./vault-session";
 import type { VaultDecryptedAsset, VaultDeletedAsset } from "./vault-store";
 
 type VaultSessionContextValue = {
   addAsset: (payload: AssetPlaintextPayload) => Promise<VaultDecryptedAsset>;
   assets: VaultDecryptedAsset[];
   deletedAssets: VaultDeletedAsset[];
-  initialize: (keyBase64: string) => Promise<void>;
+  initialize: (keyBase64: string, client?: SupabaseVaultClient) => Promise<void>;
   isLocked: boolean;
   isReady: boolean;
   lock: () => void;
@@ -71,9 +79,14 @@ export function VaultSessionProvider({ children }: VaultSessionProviderProps) {
 
       const key = storedMek ? await fromBase64(storedMek) : await generateMasterEncryptionKey();
 
+      const newSession = createVaultSession({
+        key,
+      });
+
       if (isMounted) {
-        setSession(createVaultSession({ key }));
+        setSession(newSession);
         setIsReady(true);
+        await refreshAssets(newSession);
       }
 
       if (biometricEnabled) {
@@ -88,9 +101,13 @@ export function VaultSessionProvider({ children }: VaultSessionProviderProps) {
     };
   }, []);
 
-  const initialize = useCallback(async (keyBase64: string) => {
+  const initialize = useCallback(async (keyBase64: string, client?: SupabaseVaultClient) => {
     const key = await fromBase64(keyBase64);
-    const newSession = createVaultSession({ key });
+    const newSession = createVaultSession({
+      key,
+      repository: createOptionalVaultRepository(client),
+    });
+    await newSession.loadPersistedAssets();
     defaultAuditLog.log({ deviceInfo: "React Native", eventType: "vault_unlocked" });
     setSession(newSession);
     setIsReady(true);
@@ -140,7 +157,7 @@ export function VaultSessionProvider({ children }: VaultSessionProviderProps) {
         throw new Error("Vault session is not ready yet.");
       }
 
-      session.softDeleteAsset(id);
+      await session.softDeleteAsset(id);
       defaultAuditLog.log({
         deviceInfo: "React Native",
         eventType: "asset_soft_deleted",
@@ -157,7 +174,7 @@ export function VaultSessionProvider({ children }: VaultSessionProviderProps) {
         throw new Error("Vault session is not ready yet.");
       }
 
-      session.restoreAsset(id);
+      await session.restoreAsset(id);
       defaultAuditLog.log({
         deviceInfo: "React Native",
         eventType: "asset_restored",
@@ -174,7 +191,7 @@ export function VaultSessionProvider({ children }: VaultSessionProviderProps) {
         throw new Error("Vault session is not ready yet.");
       }
 
-      session.permanentlyDeleteAsset(id);
+      await session.permanentlyDeleteAsset(id);
       defaultAuditLog.log({
         deviceInfo: "React Native",
         eventType: "asset_permanently_deleted",
@@ -260,4 +277,14 @@ export function useVaultSession(): VaultSessionContextValue {
   }
 
   return value;
+}
+
+function createOptionalVaultRepository(
+  existingClient?: SupabaseVaultClient,
+): VaultAssetRepository | undefined {
+  if (!existingClient) {
+    return undefined;
+  }
+
+  return createSupabaseVaultRepository(existingClient);
 }

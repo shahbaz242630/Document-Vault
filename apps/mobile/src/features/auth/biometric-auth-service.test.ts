@@ -49,6 +49,25 @@ describe("createBiometricAuthService", () => {
         enrolled: false,
       });
     });
+
+    it("returns unavailable when hardware support checks fail", async () => {
+      const service = createBiometricAuthService({
+        async authenticateAsync() {
+          return { success: true };
+        },
+        async hasHardwareAsync() {
+          throw new Error("Unknown");
+        },
+        async isEnrolledAsync() {
+          return true;
+        },
+      });
+
+      await expect(service.checkSupport()).resolves.toEqual({
+        available: false,
+        enrolled: false,
+      });
+    });
   });
 
   describe("authenticate", () => {

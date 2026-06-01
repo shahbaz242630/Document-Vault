@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getRevenueCatEnv } from "./revenuecat-env";
+import { getRevenueCatEnv, selectRevenueCatApiKey } from "./revenuecat-env";
 
 describe("getRevenueCatEnv", () => {
   it("reports RevenueCat as unconfigured when keys are missing", () => {
@@ -22,11 +22,28 @@ describe("getRevenueCatEnv", () => {
     }
   });
 
-  it("reports unconfigured when only one key is present", () => {
+  it("supports a shared RevenueCat API key", () => {
+    const result = getRevenueCatEnv({
+      EXPO_PUBLIC_REVENUECAT_API_KEY: " test_shared_key ",
+    });
+
+    expect(result.isConfigured).toBe(true);
+    if (result.isConfigured) {
+      expect(result.sharedKey).toBe("test_shared_key");
+      expect(selectRevenueCatApiKey(result, "ios")).toBe("test_shared_key");
+      expect(selectRevenueCatApiKey(result, "android")).toBe("test_shared_key");
+    }
+  });
+
+  it("allows a single platform key", () => {
     const result = getRevenueCatEnv({
       EXPO_PUBLIC_REVENUECAT_IOS_KEY: "ios_only",
     });
 
-    expect(result.isConfigured).toBe(false);
+    expect(result.isConfigured).toBe(true);
+    if (result.isConfigured) {
+      expect(selectRevenueCatApiKey(result, "ios")).toBe("ios_only");
+      expect(selectRevenueCatApiKey(result, "android")).toBeNull();
+    }
   });
 });

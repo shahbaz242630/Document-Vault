@@ -2,7 +2,16 @@ import { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import { Pressable, Text, TextInput, View } from "react-native";
 
+import {
+  createSupabaseKeyMaterialRepository,
+  type SupabaseKeyMaterialClient,
+  type SupabaseVaultClient,
+  useVaultSession,
+} from "@/features/vault";
 import { createSupabaseClient } from "@/shared/api/supabase-client";
+import { deriveKEK } from "@/shared/crypto/kek-derivation";
+import { unwrapMEK } from "@/shared/crypto/mek-wrapping";
+import { toBase64 } from "@/shared/crypto/vault-crypto";
 import { colors } from "@/shared/theme/colors";
 import * as ExpoSecureStore from "expo-secure-store";
 
@@ -11,6 +20,8 @@ import { createAuthService, type AuthServiceResult } from "../auth-service";
 import type { AuthCredentialsInput } from "../auth-credentials";
 import { createFailedLoginTracker } from "../failed-login-tracker";
 import { createLoginLockoutViewModel } from "../login-lockout-view-model";
+import { createMekStorage } from "../mek-storage";
+import { unlockReturningUserVault } from "../returning-user-unlock-flow";
 import { createSignupProgressStorage } from "../signup-progress";
 
 type EmailPasswordAuthFormProps = {
@@ -39,9 +50,11 @@ export function EmailPasswordAuthForm({ mode }: EmailPasswordAuthFormProps) {
   const [values, setValues] = useState<AuthCredentialsInput>(initialValues);
   const [result, setResult] = useState<AuthServiceResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const authService = useMemo(() => createAuthService(createSupabaseClient()), []);
+  const supabaseClient = useMemo(() => createSupabaseClient(), []);
+  const authService = useMemo(() => createAuthService(supabaseClient), [supabaseClient]);
   const lockoutTracker = useMemo(() => createFailedLoginTracker(), []);
   const router = useRouter();
+  const vaultSession = useVaultSession();
   const screenCopy = content[mode];
 
   return (
@@ -195,6 +208,27 @@ export function EmailPasswordAuthForm({ mode }: EmailPasswordAuthFormProps) {
                   pathname: "/auth/verify-totp",
                   params: { factorId: "" },
                 });
+              } else if (nextResult.nextStep === "vault-unlock") {
+                if (!supabaseClient) {
+                  throw new Error("Supabase is not configured yet.");
+                }
+
+                await unlockReturningUserVault({
+                  deriveKEK,
+                  initializeVault: (keyBase64) =>
+                    vaultSession.initialize(
+                      keyBase64,
+                      supabaseClient as unknown as SupabaseVaultClient,
+                    ),
+                  keyMaterialRepository: createSupabaseKeyMaterialRepository(
+                    supabaseClient as unknown as SupabaseKeyMaterialClient,
+                  ),
+                  mekStorage: createMekStorage(ExpoSecureStore),
+                  password: values.password,
+                  toBase64,
+                  unwrapMEK,
+                });
+                router.replace("/vault");
               }
             }
           } catch (error) {

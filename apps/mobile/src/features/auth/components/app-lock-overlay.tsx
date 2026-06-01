@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useRouter } from "expo-router";
 import { AppState } from "react-native";
 import * as ExpoLocalAuthentication from "expo-local-authentication";
 import * as ExpoSecureStore from "expo-secure-store";
@@ -17,6 +18,7 @@ type AppLockOverlayProps = {
 
 export function AppLockOverlay({ children }: AppLockOverlayProps) {
   const { isLocked, lock, initialize } = useVaultSession();
+  const router = useRouter();
   const [privacyVisible, setPrivacyVisible] = useState(false);
   const [lockError, setLockError] = useState<string | null>(null);
   const backgroundedAtRef = useRef<number | null>(null);
@@ -56,6 +58,7 @@ export function AppLockOverlay({ children }: AppLockOverlayProps) {
 
       if (key) {
         await initialize(key);
+        router.replace("/vault");
       } else {
         setLockError("No cached key found. Please sign in again.");
       }
@@ -64,7 +67,7 @@ export function AppLockOverlay({ children }: AppLockOverlayProps) {
     } else {
       setLockError("Unlock was cancelled.");
     }
-  }, [initialize]);
+  }, [initialize, router]);
 
   return (
     <>

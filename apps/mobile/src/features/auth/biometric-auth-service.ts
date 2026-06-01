@@ -23,10 +23,14 @@ export function createBiometricAuthService(hardware: BiometricHardware | null) {
         return { available: false, enrolled: false };
       }
 
-      const compatible = await hardware.hasHardwareAsync();
-      const enrolled = compatible ? await hardware.isEnrolledAsync() : false;
+      try {
+        const compatible = await hardware.hasHardwareAsync();
+        const enrolled = compatible ? await hardware.isEnrolledAsync() : false;
 
-      return { available: compatible, enrolled: compatible && enrolled };
+        return { available: compatible, enrolled: compatible && enrolled };
+      } catch {
+        return { available: false, enrolled: false };
+      }
     },
 
     async authenticate(): Promise<BiometricAuthResult> {

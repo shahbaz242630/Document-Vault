@@ -6,8 +6,14 @@
 
 export {
   createPurchaseService,
+  hasSanduqkinPro,
   type PurchaseService,
 } from "./purchase-service";
+export {
+  REVENUECAT_ENTITLEMENT_ID,
+  REVENUECAT_PACKAGE_IDS,
+  type RevenueCatPackageId,
+} from "./revenuecat-config";
 
 export { PaywallPanel } from "./components/paywall-panel";
 export { CustomerCenterPanel } from "./components/customer-center-panel";

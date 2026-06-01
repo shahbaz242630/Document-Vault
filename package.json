@@ -19,10 +19,14 @@
     "mobile": "npm run start --workspace @vault/mobile",
     "mobile:android": "npm run android --workspace @vault/mobile",
     "mobile:ios": "npm run ios --workspace @vault/mobile",
+    "postinstall": "patch-package",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.1"
   }
 }

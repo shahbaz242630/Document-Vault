@@ -3,6 +3,28 @@ import { describe, expect, it } from "vitest";
 import { deriveKEK, generateSalt } from "./kek-derivation";
 
 describe("kek-derivation", () => {
+  it("fails clearly when the sodium-wasm backend runs without WebAssembly", async () => {
+    const webAssemblyDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "WebAssembly",
+    );
+
+    Object.defineProperty(globalThis, "WebAssembly", {
+      configurable: true,
+      value: undefined,
+    });
+
+    try {
+      await expect(generateSalt()).rejects.toThrow(
+        "Vault crypto backend sodium-wasm requires WebAssembly.",
+      );
+    } finally {
+      if (webAssemblyDescriptor) {
+        Object.defineProperty(globalThis, "WebAssembly", webAssemblyDescriptor);
+      }
+    }
+  });
+
   it("generateSalt produces 16-byte salt", async () => {
     const salt = await generateSalt();
     expect(salt).toBeInstanceOf(Uint8Array);

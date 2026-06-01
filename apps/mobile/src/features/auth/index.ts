@@ -12,6 +12,7 @@ export { AppLockOverlay } from "./components/app-lock-overlay";
 export { ForgotPasswordPanel } from "./components/forgot-password-panel";
 export { BackupCodesPanel } from "./components/backup-codes-panel";
 export { BiometricSetupPanel } from "./components/biometric-setup-panel";
+export { BiometricPreferencesPanel } from "./components/biometric-preferences-panel";
 export { EmailPasswordAuthForm } from "./components/email-password-auth-form";
 export { EmailVerificationPanel } from "./components/email-verification-panel";
 export { ProfileBasicsPanel } from "./components/profile-basics-panel";
@@ -110,6 +111,7 @@ export {
   completeRecoveryPhraseConfirmation,
   createMissingRecoveryPhraseSessionViewModel,
 } from "./recovery-phrase-flow";
+export { unlockReturningUserVault } from "./returning-user-unlock-flow";
 export {
   RecoveryPhraseSessionProvider,
   useRecoveryPhraseSession,
@@ -141,6 +143,7 @@ export {
   type BiometricSupportResult,
 } from "./biometric-auth-service";
 export { createBiometricStorage } from "./biometric-storage";
+export { createBiometricPreferenceService } from "./biometric-preference-service";
 export {
   createBiometricSetupViewModel,
   type BiometricSetupViewModel,

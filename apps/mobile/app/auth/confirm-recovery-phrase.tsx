@@ -10,6 +10,13 @@ import {
   useRecoveryPhraseSession,
   useSignupProgressStep,
 } from "@/features/auth";
+import {
+  createSupabaseKeyMaterialRepository,
+  type SupabaseKeyMaterialClient,
+} from "@/features/vault";
+import { createSupabaseClient } from "@/shared/api/supabase-client";
+import { deriveKEK, generateSalt } from "@/shared/crypto/kek-derivation";
+import { wrapMEK } from "@/shared/crypto/mek-wrapping";
 import { toBase64 } from "@/shared/crypto/vault-crypto";
 import { colors } from "@/shared/theme/colors";
 import { screenStyles } from "@/shared/ui/screen";
@@ -37,13 +44,18 @@ export default function ConfirmRecoveryPhraseRoute() {
           <Suspense fallback={null}>
             <RecoveryPhraseConfirmationPanel
               words={words}
-              onConfirmed={async () => {
+              onConfirmed={async (password) => {
                 await completeRecoveryPhraseConfirmation({
                   clearRecoveryPhraseSession,
+                  deriveKEK,
+                  generateSalt,
+                  keyMaterialRepository: createOptionalKeyMaterialRepository(),
                   mek,
                   mekStorage: createMekStorage(ExpoSecureStore),
+                  password,
                   progressStorage: createSignupProgressStorage(ExpoSecureStore),
                   toBase64,
+                  wrapMEK,
                 });
                 router.replace("/auth/setup-biometric");
               }}
@@ -59,6 +71,18 @@ export default function ConfirmRecoveryPhraseRoute() {
         )}
       </ScrollView>
     </>
+  );
+}
+
+function createOptionalKeyMaterialRepository() {
+  const client = createSupabaseClient();
+
+  if (!client) {
+    return null;
+  }
+
+  return createSupabaseKeyMaterialRepository(
+    client as unknown as SupabaseKeyMaterialClient,
   );
 }
 

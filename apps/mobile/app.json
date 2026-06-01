@@ -13,9 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "bundleIdentifier": "com.sanduqkin.mobile",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.sanduqkin.mobile",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -42,6 +44,10 @@
             "kotlinVersion": "2.2.0"
           }
         }
+      ],
+      [
+        "react-native-libsodium",
+        {}
       ]
     ],
     "experiments": {
