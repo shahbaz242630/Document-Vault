@@ -260,7 +260,7 @@ Current assessment against BRD Section 7.4:
 - User can add one asset of each 10 categories: **partially met locally**
 - User can edit and delete assets: **partially met locally**
 - User can log out, kill app, reopen, and log back in including biometric: **not met**
-- User can delete account: **partially met locally**
+- User can delete account: **partially met with server-side request queue plus local clear**
 - Vault content encrypted client-side and database contains ciphertext only: **not met because no database integration**
 - Audit logging works for sensitive actions: **partially met locally**
 - Auto-logout works: **partially met**
@@ -291,10 +291,10 @@ Work in this order:
    - Re-auth before deletion.
 
 3. Complete account deletion:
-   - Server-side deletion queue/path.
-   - Local clear.
-   - Audit anonymization.
+   - Server-side deletion processing worker/API path.
+   - Supabase Auth user cleanup using service role on the server only.
    - Confirmation email plan or placeholder endpoint.
+   - 30-day processing policy and 7-year anonymized audit retention policy.
 
 4. Resolve remaining SDK audit advisories:
    - Either wait for an SDK 54-compatible Expo patch that updates the transitive packages or plan an explicit Expo SDK upgrade slice.
@@ -1092,8 +1092,70 @@ Notes:
 
 Recommended next slice:
 
-- Commit/push the durable audit persistence and Android verification changes when ready.
-- Then move to account deletion/server-side retention work, or iOS native dev-client verification when a macOS/Xcode machine is available.
+- Finish the server-only account deletion processor/API path that consumes `account_deletion_requests`.
+- Add the confirmation email/notification placeholder.
+- Document and enforce the 30-day deletion and 7-year anonymized audit retention policy.
+- Run iOS native dev-client verification when a macOS/Xcode machine is available.
+
+### 2026-06-01 - Account Deletion Request Queue
+
+Changed:
+
+- Added `public.account_deletion_requests` with RLS, authenticated `select/insert`, no anon/public table access, a one-open-request-per-user unique index, and a default 30-day `scheduled_for` timestamp.
+- Added `createSupabaseAccountDeletionRequestRepository` so mobile can queue a deletion request through the authenticated Supabase client without service-role access.
+- Updated account deletion flow to save the server-side deletion request before local vault lock/clear, RevenueCat logout, local audit anonymization, and navigation.
+- Added tests for repository insert shape/errors, service sequencing, and schema/RLS guardrails.
+
+Verification:
+
+- Remote migration `20260601140548_add_account_deletion_requests.sql` applied with `supabase db push --linked`.
+- `supabase migration list --linked` shows local/remote match through `20260601140548`.
+- Live Supabase REST verification passed:
+  - anonymous read of `account_deletion_requests` is denied,
+  - authenticated test-account read succeeds,
+  - no real deletion request was inserted during verification.
+- `npm run test --workspace @vault/mobile` passes: 75 files passed, 1 skipped; 278 tests passed, 1 skipped.
+- `npm run typecheck` passes.
+- `npx expo-doctor` passes: 17/17 checks.
+- `supabase db dump` was not usable on this Windows machine because Docker Desktop is not running; REST/client verification was used instead.
+
+Remaining account-deletion work:
+
+- Decide whether deletion requests should trigger email confirmation before processing.
+- Deploy and schedule the server-only processor/API path.
+- Decide whether hard delete is required later; current processor uses Supabase Auth soft-delete.
+- Formalize retention behavior for anonymized audit rows.
+
+### 2026-06-01 - Server-Side Account Deletion Processor
+
+Changed:
+
+- Added `services/api/src/account-deletion/processor.ts` to process due `account_deletion_requests`.
+- Added `services/api/src/account-deletion/supabase-processor-client.ts` with a Supabase service-role adapter for server-only use.
+- Added protected Hono route `POST /internal/account-deletion/process`.
+- Route requires `ACCOUNT_DELETION_PROCESSOR_TOKEN`; processor config requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+- Processor selects pending due requests, marks them `processing`, calls Supabase Auth Admin `deleteUser(userId, true)` for soft delete, then marks requests `completed`.
+- Failed Auth deletion marks the request `failed` and stores `last_error`.
+- Added migration `20260601141825_add_account_deletion_processing_state.sql` for `failed`, `attempt_count`, and `last_error`.
+- Added API Vitest coverage for processor success/failure and route authorization.
+
+Verification:
+
+- Remote migration `20260601141825_add_account_deletion_processing_state.sql` applied with `supabase db push --linked`.
+- `supabase migration list --linked` shows local/remote match through `20260601141825`.
+- Live Supabase REST verification confirmed authenticated reads can select `attempt_count` and `last_error`.
+- `npm run test --workspace @vault/api` passes: 2 files, 4 tests.
+- `npm run typecheck --workspace @vault/api` passes.
+- `npm run test --workspace @vault/mobile` passes: 75 files passed, 1 skipped; 279 tests passed, 1 skipped.
+- `npm run typecheck` passes.
+- `npx expo-doctor` passes: 17/17 checks.
+
+Remaining account-deletion work:
+
+- Deploy the API service and configure the internal processor token/service-role env vars in the deployment platform only.
+- Add a scheduler/cron invocation for `POST /internal/account-deletion/process`.
+- Decide and document confirmation-email behavior before the 30-day scheduled deletion date.
+- Add an operational retention policy for anonymized audit rows.
 
 ## Commands To Run Before Claiming Completion
 
@@ -1128,18 +1190,17 @@ After Supabase/API integration exists, add backend/API tests and run them as par
 Use this opener to resume cleanly:
 
 ```text
-Partner, read HANDOFF.md first. We finished Android native dev-client verification for returning-user unlock, biometric cached-key unlock, and durable audit persistence. Android now supports signed-in biometric enable/disable from Settings, cached-key unlock avoids unauthenticated Supabase vault repository calls, and cold-start biometric unlock routes to the Vault screen with `Your vault is ready.` We also added the durable audit persistence boundary for Supabase `audit_events`, wired it into authenticated mobile paths, guarded against plaintext vault payload metadata, remotely applied migration `20260601085752_add_biometric_audit_event_types.sql`, and verified Android-generated `audit_events` rows for sign-in, vault unlock, asset create/delete/restore, and biometric enable/disable. On 2026-06-01, iOS native dev-build verification was attempted but blocked because this Windows environment has no Xcode/xcrun/iOS simulator. MFA remains intentionally on hold until launch because it is a paid Supabase feature.
+Partner, read HANDOFF.md first. We finished Android native dev-client verification for returning-user unlock, biometric cached-key unlock, durable audit persistence, and account-deletion queue/processor hardening. Android supports signed-in biometric enable/disable from Settings, cached-key unlock avoids unauthenticated Supabase vault repository calls, and cold-start biometric unlock routes to the Vault screen with `Your vault is ready.` Durable audit persistence is wired to Supabase `audit_events` with plaintext vault metadata guards. Account deletion now queues an authenticated row in `public.account_deletion_requests` before local clear, and the API service has a protected server-only processor route that soft-deletes due Supabase Auth users with service-role credentials outside mobile. Migrations through `20260601141825_add_account_deletion_processing_state.sql` are applied remotely and live RLS/column verification passed. On 2026-06-01, iOS native dev-build verification was attempted but blocked because this Windows environment has no Xcode/xcrun/iOS simulator. MFA remains intentionally on hold until launch because it is a paid Supabase feature.
 
-Start the next Windows/Android slice: commit/push the durable audit persistence work when ready, then move to account deletion/server-side retention hardening. If working on a Mac instead, run iOS native dev-client verification for returning-user unlock and biometric unlock.
+Start the next Windows/Android slice: add deployment/scheduler wiring for the protected account deletion processor, define confirmation-email behavior, or formalize anonymized audit retention. If working on a Mac instead, run iOS native dev-client verification for returning-user unlock and biometric unlock.
 ```
 
 Current next-slice checklist:
 
-- Commit/push the durable audit persistence code, migration, tests, and handoff updates.
-- Start account deletion/server-side retention hardening:
-  - server-side deletion queue/path,
-  - Supabase auth/user cleanup path,
-  - confirmation email or placeholder endpoint,
+- Commit/push the account deletion queue and server-processor code, migrations, tests, and handoff updates when ready.
+- Continue account deletion/server-side retention hardening:
+  - deployment and scheduler invocation for the server-only processor,
+  - confirmation-email behavior,
   - 30-day deletion handling,
   - 7-year anonymized audit retention.
 - Run closeout checks:
@@ -1147,7 +1208,7 @@ Current next-slice checklist:
   - `npm run typecheck --workspace @vault/mobile`,
   - `npx expo-doctor` from `apps/mobile`,
   - `npm audit --audit-level=moderate` from repo root.
-- Update this handoff with durable audit persistence status.
+- Update this handoff with deployment/scheduler or retention status.
 
 iOS later checklist:
 

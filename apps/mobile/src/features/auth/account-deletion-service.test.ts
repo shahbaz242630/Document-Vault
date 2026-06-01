@@ -24,6 +24,37 @@ describe("createAccountDeletionService", () => {
     expect(auditLog.events[0].eventType).toBe("account_deletion_requested");
   });
 
+  it("records a server-side deletion request before logging the local audit event", async () => {
+    const auditLog = createAuditLog();
+    const calls: string[] = [];
+    const service = createAccountDeletionService({
+      auditLog: {
+        anonymize: auditLog.anonymize,
+        log(input) {
+          calls.push(`audit:${input.eventType}`);
+          auditLog.log(input);
+        },
+      },
+      biometricStorage: {
+        clearKey: async () => {},
+        setEnabled: async () => {},
+      },
+      deletionRequestRepository: {
+        async requestDeletion() {
+          calls.push("server-request");
+        },
+      },
+      mekStorage: { clear: async () => {} },
+      progressStorage: {
+        clear: async () => {},
+      },
+    });
+
+    await service.requestDeletion();
+
+    expect(calls).toEqual(["server-request", "audit:account_deletion_requested"]);
+  });
+
   it("clears all stored data and anonymizes the audit log", async () => {
     const auditLog = createAuditLog();
     auditLog.log({

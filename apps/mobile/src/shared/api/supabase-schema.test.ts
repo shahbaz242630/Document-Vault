@@ -68,6 +68,38 @@ describe("Supabase Phase 1 schema migration", () => {
     expect(migrations).toContain("'biometric_unlock_enabled'");
     expect(migrations).toContain("'biometric_unlock_disabled'");
   });
+
+  it("creates RLS-protected account deletion requests for authenticated users", () => {
+    const migrations = readAllMigrations();
+
+    expect(migrations).toContain("create table public.account_deletion_requests");
+    expect(migrations).toContain("status text not null default 'pending'");
+    expect(migrations).toContain("requested_at timestamptz not null default now()");
+    expect(migrations).toContain("scheduled_for timestamptz not null default (now() + interval '30 days')");
+    expect(migrations).toContain(
+      "user_id uuid not null default auth.uid() references auth.users(id) on delete cascade",
+    );
+    expect(migrations).toContain(
+      "grant select, insert on table public.account_deletion_requests to authenticated",
+    );
+    expect(migrations).toContain(
+      "revoke all on table public.account_deletion_requests from anon",
+    );
+    expect(migrations).toContain(
+      "alter table public.account_deletion_requests enable row level security",
+    );
+    expect(migrations).toContain("Users can create their own account deletion request.");
+    expect(migrations).not.toContain("security definer");
+  });
+
+  it("tracks account deletion processor retries and failures", () => {
+    const migrations = readAllMigrations();
+
+    expect(migrations).toContain("alter table public.account_deletion_requests");
+    expect(migrations).toContain("add column attempt_count integer not null default 0");
+    expect(migrations).toContain("add column last_error text null");
+    expect(migrations).toContain("'failed'");
+  });
 });
 
 function readPhase1Migration(): string {

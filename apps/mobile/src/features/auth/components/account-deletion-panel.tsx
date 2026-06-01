@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { Pressable, Text, TextInput, View } from "react-native";
 import Purchases from "react-native-purchases";
 
+import { createSupabaseClient } from "@/shared/api/supabase-client";
 import { colors } from "@/shared/theme/colors";
 
 import { createAccountDeletionService } from "../account-deletion-service";
@@ -11,6 +12,10 @@ import { createBiometricStorage } from "../biometric-storage";
 import { createMekStorage } from "../mek-storage";
 import { createSignupProgressStorage } from "../signup-progress";
 import { createAccountDeletionViewModel } from "../account-deletion-view-model";
+import {
+  createSupabaseAccountDeletionRequestRepository,
+  type SupabaseAccountDeletionRequestClient,
+} from "../supabase-account-deletion-request-repository";
 import type { SecureStorage } from "../signup-progress";
 
 type AccountDeletionPanelProps = {
@@ -24,16 +29,25 @@ export function AccountDeletionPanel({ lockVault, storage }: AccountDeletionPane
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const supabaseClient = useMemo(() => createSupabaseClient(), []);
 
   const service = useMemo(
-    () =>
-      createAccountDeletionService({
+    () => {
+      const deletionRequestRepository = supabaseClient
+        ? createSupabaseAccountDeletionRequestRepository(
+            supabaseClient as unknown as SupabaseAccountDeletionRequestClient,
+          )
+        : null;
+
+      return createAccountDeletionService({
         auditLog: defaultAuditLog,
         biometricStorage: createBiometricStorage(storage),
+        deletionRequestRepository,
         mekStorage: createMekStorage(storage),
         progressStorage: createSignupProgressStorage(storage),
-      }),
-    [storage],
+      });
+    },
+    [storage, supabaseClient],
   );
 
   const canDelete = confirmation.trim() === "DELETE";
@@ -108,7 +122,7 @@ export function AccountDeletionPanel({ lockVault, storage }: AccountDeletionPane
           setError(null);
 
           try {
-            service.logRequest();
+            await service.requestDeletion();
             lockVault();
             await service.clearStoredData();
             try {
