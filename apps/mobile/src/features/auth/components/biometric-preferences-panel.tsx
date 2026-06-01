@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
 
+import { defaultAuditLog } from "../audit-log";
 import { createBiometricAuthService } from "../biometric-auth-service";
 import { createBiometricPreferenceService } from "../biometric-preference-service";
 import { createBiometricStorage } from "../biometric-storage";
@@ -95,6 +96,10 @@ export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanel
             setIsBusy(true);
             try {
               await service.disable();
+              defaultAuditLog.log({
+                deviceInfo: "React Native",
+                eventType: "biometric_unlock_disabled",
+              });
               setEnabled(false);
             } finally {
               setIsBusy(false);
@@ -117,6 +122,10 @@ export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanel
               const result = await service.enable();
 
               if (result.status === "enabled") {
+                defaultAuditLog.log({
+                  deviceInfo: "React Native",
+                  eventType: "biometric_unlock_enabled",
+                });
                 setEnabled(true);
               } else {
                 setError(result.message);

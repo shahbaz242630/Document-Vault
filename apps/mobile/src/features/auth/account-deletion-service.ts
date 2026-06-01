@@ -20,7 +20,7 @@ export type AccountDeletionService = {
 };
 
 export function createAccountDeletionService(deps: {
-  auditLog: AuditLog;
+  auditLog: Pick<AuditLog, "anonymize" | "log">;
   biometricStorage: BiometricStorage;
   mekStorage: MekStorage;
   progressStorage: ProgressStorage;

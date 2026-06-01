@@ -100,4 +100,49 @@ describe("createAuditLog", () => {
     expect(log.events[0].eventType).toBe("sign_in_attempt");
     expect(log.events[1].eventType).toBe("sign_in_success");
   });
+
+  it("forwards durable audit events without raw user email", async () => {
+    const durableEvents: unknown[] = [];
+    const log = createAuditLog({
+      durableSink: {
+        async recordEvent(event) {
+          durableEvents.push(event);
+        },
+      },
+    });
+
+    log.log({
+      deviceInfo: "test",
+      eventType: "sign_in_success",
+      metadata: { method: "password" },
+      userEmail: "partner@example.com",
+    });
+    await Promise.resolve();
+
+    expect(durableEvents).toEqual([
+      {
+        deviceInfo: "test",
+        eventType: "sign_in_success",
+        metadata: { method: "password" },
+      },
+    ]);
+  });
+
+  it("does not throw when durable audit persistence fails", () => {
+    const log = createAuditLog({
+      durableSink: {
+        async recordEvent() {
+          throw new Error("network unavailable");
+        },
+      },
+    });
+
+    expect(() => {
+      log.log({
+        deviceInfo: "test",
+        eventType: "vault_locked",
+      });
+    }).not.toThrow();
+    expect(log.events).toHaveLength(1);
+  });
 });

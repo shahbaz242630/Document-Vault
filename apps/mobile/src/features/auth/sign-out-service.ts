@@ -18,7 +18,7 @@ export type SignOutService = {
 };
 
 export function createSignOutService(deps: {
-  auditLog: AuditLog;
+  auditLog: Pick<AuditLog, "anonymize">;
   biometricStorage: BiometricStorage;
   mekStorage: MekStorage;
   progressStorage: ProgressStorage;

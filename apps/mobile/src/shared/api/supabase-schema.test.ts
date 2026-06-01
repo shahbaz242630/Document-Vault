@@ -61,6 +61,13 @@ describe("Supabase Phase 1 schema migration", () => {
       "grant select, insert on table public.audit_events to authenticated",
     );
   });
+
+  it("allows durable audit rows for biometric preference changes", () => {
+    const migrations = readAllMigrations();
+
+    expect(migrations).toContain("'biometric_unlock_enabled'");
+    expect(migrations).toContain("'biometric_unlock_disabled'");
+  });
 });
 
 function readPhase1Migration(): string {

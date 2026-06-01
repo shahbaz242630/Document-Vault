@@ -6,6 +6,8 @@ export type AuditEventType =
   | "sign_up_success"
   | "vault_unlocked"
   | "vault_locked"
+  | "biometric_unlock_enabled"
+  | "biometric_unlock_disabled"
   | "asset_created"
   | "asset_updated"
   | "asset_soft_deleted"
@@ -23,15 +25,27 @@ export type AuditEvent = {
   userEmail?: string;
 };
 
+export type DurableAuditEventInput = {
+  deviceInfo: string;
+  eventType: AuditEventType;
+  metadata?: Record<string, unknown>;
+};
+
+export type DurableAuditSink = {
+  recordEvent: (input: DurableAuditEventInput) => Promise<void>;
+};
+
 export type AuditLog = {
   readonly events: readonly AuditEvent[];
   anonymize: () => void;
   log: (input: Omit<AuditEvent, "id" | "timestamp">) => void;
+  setDurableSink: (sink: DurableAuditSink | null) => void;
 };
 
-export function createAuditLog(): AuditLog {
+export function createAuditLog(options?: { durableSink?: DurableAuditSink | null }): AuditLog {
   const events: AuditEvent[] = [];
   let nextId = 1;
+  let durableSink = options?.durableSink ?? null;
 
   return {
     get events(): readonly AuditEvent[] {
@@ -39,17 +53,34 @@ export function createAuditLog(): AuditLog {
     },
 
     log(input: Omit<AuditEvent, "id" | "timestamp">): void {
-      events.push({
+      const event = {
         ...input,
         id: `audit-${Date.now()}-${nextId++}`,
         timestamp: new Date().toISOString(),
-      });
+      };
+      events.push(event);
+
+      if (durableSink) {
+        void durableSink
+          .recordEvent({
+            deviceInfo: event.deviceInfo,
+            eventType: event.eventType,
+            metadata: event.metadata,
+          })
+          .catch(() => {
+            // Durable audit persistence must not block or break local security flows.
+          });
+      }
     },
 
     anonymize(): void {
       for (const event of events) {
         (event as { userEmail?: string }).userEmail = undefined;
       }
+    },
+
+    setDurableSink(sink: DurableAuditSink | null): void {
+      durableSink = sink;
     },
   };
 }

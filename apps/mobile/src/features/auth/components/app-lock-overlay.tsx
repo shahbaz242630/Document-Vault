@@ -4,11 +4,15 @@ import { AppState } from "react-native";
 import * as ExpoLocalAuthentication from "expo-local-authentication";
 import * as ExpoSecureStore from "expo-secure-store";
 
-import { useVaultSession } from "@/features/vault";
+import { type SupabaseVaultClient, useVaultSession } from "@/features/vault";
+import { createSupabaseClient } from "@/shared/api/supabase-client";
 
 import { shouldLockAfterBackground } from "../app-lock-service";
+import { defaultAuditLog } from "../audit-log";
 import { createBiometricAuthService } from "../biometric-auth-service";
 import { createBiometricStorage } from "../biometric-storage";
+import { configureDurableAuditLog } from "../durable-audit-log";
+import type { SupabaseAuditClient } from "../supabase-audit-event-repository";
 import { LockScreen } from "./lock-screen";
 import { PrivacyScreen } from "./privacy-screen";
 
@@ -57,7 +61,12 @@ export function AppLockOverlay({ children }: AppLockOverlayProps) {
       const key = await storage.getKey();
 
       if (key) {
-        await initialize(key);
+        const supabaseClient = createSupabaseClient();
+        configureDurableAuditLog({
+          auditLog: defaultAuditLog,
+          client: supabaseClient as unknown as SupabaseAuditClient,
+        });
+        await initialize(key, supabaseClient as unknown as SupabaseVaultClient);
         router.replace("/vault");
       } else {
         setLockError("No cached key found. Please sign in again.");

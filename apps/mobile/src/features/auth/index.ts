@@ -53,7 +53,14 @@ export {
   type AuditEvent,
   type AuditEventType,
   type AuditLog,
+  type DurableAuditEventInput,
+  type DurableAuditSink,
 } from "./audit-log";
+export { configureDurableAuditLog } from "./durable-audit-log";
+export {
+  createSupabaseAuditEventRepository,
+  type SupabaseAuditClient,
+} from "./supabase-audit-event-repository";
 export {
   createAuthCredentials,
   type AuthCredentials,

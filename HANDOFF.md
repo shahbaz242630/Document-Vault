@@ -1019,6 +1019,82 @@ Recommended next slice:
 - On Windows/Android: start Phase 1 durable audit persistence by wiring mobile sensitive-action audit events to Supabase `audit_events` through an encrypted/plain-metadata-safe repository with RLS.
 - On macOS later: run iOS native dev-client verification for returning-user unlock and biometric unlock.
 
+### 2026-06-01 - Durable Audit Persistence Boundary
+
+Changed:
+
+- Added `apps/mobile/src/features/auth/supabase-audit-event-repository.ts` for Supabase `audit_events` inserts.
+- Added `apps/mobile/src/features/auth/durable-audit-log.ts` to attach an authenticated Supabase audit sink to the existing local `defaultAuditLog`.
+- Updated `defaultAuditLog` so durable persistence is non-blocking and failures do not break auth/vault flows.
+- Durable writes intentionally omit raw `userEmail`; local in-memory audit events can still hold and anonymize it.
+- Added metadata guardrails so audit rows reject plaintext vault payload keys such as `title`, `fields`, and `notes`.
+- Wired durable audit setup after successful password auth and biometric cold-start unlock.
+- Added audit events for signed-in biometric enable/disable.
+- Added and remotely applied Supabase migration `20260601085752_add_biometric_audit_event_types.sql` to allow the biometric audit event types.
+
+Security notes:
+
+- The Supabase database password was used only for CLI migration commands and was not written to repo files.
+- Audit metadata remains limited to safe identifiers and event context; plaintext vault payloads must stay out of `audit_events`.
+- `audit_events` remains RLS-protected with authenticated select/insert grants from the previous Phase 1 hardening.
+
+Verification:
+
+- Test-first red checks:
+  - `supabase-audit-event-repository` initially failed because the module did not exist.
+  - `audit-log` initially failed because durable forwarding did not exist and then exposed unhandled durable sink rejection behavior.
+  - `durable-audit-log` initially failed because the configuration helper did not exist.
+  - `durable-audit-wiring` initially failed because app auth/biometric paths were not wired.
+- `npm run test --workspace @vault/mobile` passes: 74 files passed, 1 skipped; 274 tests passed, 1 skipped.
+- `npm run typecheck` passes.
+- `npx expo-doctor` passes: 17/17 checks.
+- `supabase db push --linked --dry-run` showed only `20260601085752_add_biometric_audit_event_types.sql`.
+- `supabase db push --linked` applied the migration remotely.
+- `supabase migration list --linked` confirms local/remote migrations match through `20260601085752`.
+- `npm audit --audit-level=moderate` still fails on known Expo SDK transitive `postcss` and `uuid` advisories. The available force fix still jumps to `expo@56.0.8`, so no force fix was applied.
+
+Recommended next slice:
+
+- Run Android dev-client verification for durable audit persistence:
+  - sign in,
+  - unlock vault,
+  - enable/disable biometric unlock,
+  - create/update/delete a vault asset,
+  - confirm `audit_events` rows appear with safe metadata only.
+- Then add account deletion/server-side retention work or continue iOS verification on macOS.
+
+### 2026-06-01 - Android Durable Audit Persistence Verified
+
+Android verification result:
+
+- Launched the Android dev client on the `Pixel_7` emulator against Metro on `http://10.0.2.2:8081`.
+- User entered the verified Supabase test account credentials manually.
+- Password sign-in reached the Vault screen with `Your vault is ready.`
+- Queried Supabase `audit_events` through the authenticated client and confirmed durable rows for:
+  - `sign_in_success`,
+  - `vault_unlocked`,
+  - `asset_created`,
+  - `asset_soft_deleted`,
+  - `asset_restored`,
+  - `biometric_unlock_enabled`,
+  - `biometric_unlock_disabled`.
+- Created a bank-account test record from the Android UI, soft-deleted it, restored it, enabled biometric unlock, and disabled biometric unlock.
+- Confirmed durable audit metadata stayed safe:
+  - asset events only included `assetId` and, for create, `assetType`,
+  - biometric/sign-in/unlock events used empty metadata,
+  - `user_email_hash` remained null,
+  - no plaintext title, institution name, last-four value, `fields`, or `notes` appeared in audit rows.
+
+Notes:
+
+- Clearing emulator-local app data was used only to get out of a stale biometric lock state and does not affect Supabase data.
+- Android biometric prompt accepted the enrolled emulator fingerprint event.
+
+Recommended next slice:
+
+- Commit/push the durable audit persistence and Android verification changes when ready.
+- Then move to account deletion/server-side retention work, or iOS native dev-client verification when a macOS/Xcode machine is available.
+
 ## Commands To Run Before Claiming Completion
 
 From repo root:
@@ -1052,17 +1128,20 @@ After Supabase/API integration exists, add backend/API tests and run them as par
 Use this opener to resume cleanly:
 
 ```text
-Partner, read HANDOFF.md first. We finished Android native dev-client verification for returning-user unlock and biometric cached-key unlock. Android now supports signed-in biometric enable/disable from Settings, cached-key unlock avoids unauthenticated Supabase vault repository calls, and cold-start biometric unlock routes to the Vault screen with `Your vault is ready.` On 2026-06-01, iOS native dev-build verification was attempted but blocked because this Windows environment has no Xcode/xcrun/iOS simulator. MFA remains intentionally on hold until launch because it is a paid Supabase feature.
+Partner, read HANDOFF.md first. We finished Android native dev-client verification for returning-user unlock, biometric cached-key unlock, and durable audit persistence. Android now supports signed-in biometric enable/disable from Settings, cached-key unlock avoids unauthenticated Supabase vault repository calls, and cold-start biometric unlock routes to the Vault screen with `Your vault is ready.` We also added the durable audit persistence boundary for Supabase `audit_events`, wired it into authenticated mobile paths, guarded against plaintext vault payload metadata, remotely applied migration `20260601085752_add_biometric_audit_event_types.sql`, and verified Android-generated `audit_events` rows for sign-in, vault unlock, asset create/delete/restore, and biometric enable/disable. On 2026-06-01, iOS native dev-build verification was attempted but blocked because this Windows environment has no Xcode/xcrun/iOS simulator. MFA remains intentionally on hold until launch because it is a paid Supabase feature.
 
-Start the next Windows/Android slice: durable audit persistence for Phase 1 sensitive actions using the existing Supabase `audit_events` table and RLS. Keep plaintext vault data out of audit rows. If working on a Mac instead, run iOS native dev-client verification for returning-user unlock and biometric unlock.
+Start the next Windows/Android slice: commit/push the durable audit persistence work when ready, then move to account deletion/server-side retention hardening. If working on a Mac instead, run iOS native dev-client verification for returning-user unlock and biometric unlock.
 ```
 
 Current next-slice checklist:
 
-- Add a Supabase audit event repository boundary for `audit_events`.
-- Keep audit payloads limited to non-sensitive event type, timestamp/server metadata, device info, and safe metadata.
-- Wire sensitive mobile actions to durable audit persistence without blocking the local audit singleton path.
-- Add repository/schema tests that assert no plaintext vault payload fields are accepted.
+- Commit/push the durable audit persistence code, migration, tests, and handoff updates.
+- Start account deletion/server-side retention hardening:
+  - server-side deletion queue/path,
+  - Supabase auth/user cleanup path,
+  - confirmation email or placeholder endpoint,
+  - 30-day deletion handling,
+  - 7-year anonymized audit retention.
 - Run closeout checks:
   - `npm run test --workspace @vault/mobile`,
   - `npm run typecheck --workspace @vault/mobile`,

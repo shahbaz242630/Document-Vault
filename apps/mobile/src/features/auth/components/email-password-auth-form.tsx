@@ -18,11 +18,13 @@ import * as ExpoSecureStore from "expo-secure-store";
 import { defaultAuditLog } from "../audit-log";
 import { createAuthService, type AuthServiceResult } from "../auth-service";
 import type { AuthCredentialsInput } from "../auth-credentials";
+import { configureDurableAuditLog } from "../durable-audit-log";
 import { createFailedLoginTracker } from "../failed-login-tracker";
 import { createLoginLockoutViewModel } from "../login-lockout-view-model";
 import { createMekStorage } from "../mek-storage";
 import { unlockReturningUserVault } from "../returning-user-unlock-flow";
 import { createSignupProgressStorage } from "../signup-progress";
+import type { SupabaseAuditClient } from "../supabase-audit-event-repository";
 
 type EmailPasswordAuthFormProps = {
   mode: "sign-in" | "sign-up";
@@ -179,6 +181,11 @@ export function EmailPasswordAuthForm({ mode }: EmailPasswordAuthFormProps) {
             }
 
             if (nextResult.status === "ok") {
+              configureDurableAuditLog({
+                auditLog: defaultAuditLog,
+                client: supabaseClient as unknown as SupabaseAuditClient,
+              });
+
               if (mode === "sign-in") {
                 defaultAuditLog.log({
                   deviceInfo: "React Native",
