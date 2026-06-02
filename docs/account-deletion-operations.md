@@ -9,7 +9,7 @@ The default schedule is 30 days after request creation. Users are locally signed
 
 ## Processor Deployment
 
-Deploy `services/api` as the API project root. The current production deployment is aliased at:
+Deploy `services/api` as the API project root. The Vercel project `sanduqkin-api` is configured with root directory `services/api`. The current production deployment is aliased at:
 
 ```text
 https://sanduqkin-api.vercel.app

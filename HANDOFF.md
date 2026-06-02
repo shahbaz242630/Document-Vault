@@ -1207,6 +1207,7 @@ Changed:
 - Updated `docs/account-deletion-operations.md` with required Vercel email env vars and mobile API config.
 - Configured Vercel production env vars `ACCOUNT_DELETION_APP_BASE_URL` and `ACCOUNT_DELETION_EMAIL_FROM`.
 - Deployed the updated API to Vercel production.
+- Updated the Vercel project `sanduqkin-api` root directory to `services/api` through the Vercel API so future Git deployments do not build from the monorepo root and break the API alias.
 
 Verification:
 
@@ -1222,6 +1223,7 @@ Verification:
 - `npx expo-doctor` passes: 17/17 checks.
 - Live `GET https://sanduqkin-api.vercel.app/health` returns `{"ok":true,"service":"sanduqkin-api"}`.
 - Live unauthenticated `POST https://sanduqkin-api.vercel.app/account-deletion/request` returns `401`.
+- `npx vercel@latest project inspect sanduqkin-api` shows `Root Directory services/api`.
 - `npm audit --audit-level=moderate` still fails on the known Expo SDK transitive `postcss` and `uuid` advisories. The available force fix still jumps to `expo@56.0.8`, so no force fix was applied.
 
 Remaining account-deletion work:
