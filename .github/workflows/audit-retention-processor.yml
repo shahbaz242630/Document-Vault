@@ -1,0 +1,28 @@
+name: Audit retention processor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  process-expired-audit-events:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call protected retention endpoint
+        env:
+          PROCESSOR_TOKEN: ${{ secrets.AUDIT_RETENTION_PROCESSOR_TOKEN }}
+          PROCESSOR_URL: ${{ secrets.AUDIT_RETENTION_PROCESSOR_URL }}
+        run: |
+          if [ -z "$PROCESSOR_URL" ] || [ -z "$PROCESSOR_TOKEN" ]; then
+            echo "Missing AUDIT_RETENTION_PROCESSOR_URL or AUDIT_RETENTION_PROCESSOR_TOKEN secret." >&2
+            exit 1
+          fi
+
+          curl --fail-with-body \
+            --request POST \
+            --header "Authorization: Bearer ${PROCESSOR_TOKEN}" \
+            "$PROCESSOR_URL/internal/audit-retention/process"

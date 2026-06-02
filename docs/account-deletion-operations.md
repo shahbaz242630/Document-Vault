@@ -20,6 +20,7 @@ The Vercel project must have these environment variables:
 - `SUPABASE_URL`: Supabase project URL.
 - `SUPABASE_SERVICE_ROLE_KEY`: Supabase service-role key. Keep this server-side only.
 - `ACCOUNT_DELETION_PROCESSOR_TOKEN`: high-entropy bearer token used by the scheduler.
+- `AUDIT_RETENTION_PROCESSOR_TOKEN`: high-entropy bearer token used by the audit retention scheduler.
 - `ACCOUNT_DELETION_APP_BASE_URL`: public Sanduqkin app/API origin.
 - `ACCOUNT_DELETION_EMAIL_FROM`: verified transactional sender, for example `Sanduqkin <support@example.com>`.
 - `RESEND_API_KEY`: Resend API key used only by the API service for transactional email.
@@ -51,6 +52,22 @@ npx vercel@latest deploy --prod --yes
 
 Do not put Supabase service-role credentials in GitHub Actions for this workflow.
 
+## Audit Retention
+
+`.github/workflows/audit-retention-processor.yml` runs daily and can be triggered manually. Configure these repository secrets:
+
+- `AUDIT_RETENTION_PROCESSOR_URL`: deployed API origin, currently `https://sanduqkin-api.vercel.app`.
+- `AUDIT_RETENTION_PROCESSOR_TOKEN`: the same bearer token configured as `AUDIT_RETENTION_PROCESSOR_TOKEN` on the API deployment.
+
+The protected endpoint is:
+
+```text
+POST /internal/audit-retention/process
+Authorization: Bearer <AUDIT_RETENTION_PROCESSOR_TOKEN>
+```
+
+The retention processor deletes only anonymized durable audit rows where `user_id` is null and `occurred_at` is older than seven years. User-linked audit rows and newer anonymized rows are not eligible for deletion.
+
 ## Confirmation Email
 
 Phase 1 queues the deletion request after explicit in-app confirmation through `POST /account-deletion/request`. The API verifies the Supabase bearer session, creates the server-side deletion request, and sends a transactional confirmation email with the scheduled deletion date.
@@ -65,8 +82,8 @@ EXPO_PUBLIC_API_URL=https://sanduqkin-api.vercel.app
 
 Do not put `RESEND_API_KEY` or Supabase service-role credentials in the mobile environment.
 
-## Retention
+## Account Deletion Retention
 
 Vault data and wrapped key material are deleted by the server-side processor when the request becomes due. Audit rows are retained for operational history with `user_id = null`; raw user email is not persisted in durable audit rows.
 
-The target retention policy is seven years for anonymized audit rows. Add a separate retention job when production audit retention automation is introduced.
+The target retention policy is seven years for anonymized audit rows. The audit retention processor enforces this automatically after the API and scheduler secrets are configured.
