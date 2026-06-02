@@ -4,18 +4,16 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import Purchases from "react-native-purchases";
 
 import { createSupabaseClient } from "@/shared/api/supabase-client";
+import { getApiEnv } from "@/shared/config/api-env";
 import { colors } from "@/shared/theme/colors";
 
 import { createAccountDeletionService } from "../account-deletion-service";
+import { createApiAccountDeletionRequestRepository } from "../api-account-deletion-request-repository";
 import { defaultAuditLog } from "../audit-log";
 import { createBiometricStorage } from "../biometric-storage";
 import { createMekStorage } from "../mek-storage";
 import { createSignupProgressStorage } from "../signup-progress";
 import { createAccountDeletionViewModel } from "../account-deletion-view-model";
-import {
-  createSupabaseAccountDeletionRequestRepository,
-  type SupabaseAccountDeletionRequestClient,
-} from "../supabase-account-deletion-request-repository";
 import type { SecureStorage } from "../signup-progress";
 
 type AccountDeletionPanelProps = {
@@ -30,13 +28,15 @@ export function AccountDeletionPanel({ lockVault, storage }: AccountDeletionPane
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const supabaseClient = useMemo(() => createSupabaseClient(), []);
+  const apiEnv = useMemo(() => getApiEnv(), []);
 
   const service = useMemo(
     () => {
-      const deletionRequestRepository = supabaseClient
-        ? createSupabaseAccountDeletionRequestRepository(
-            supabaseClient as unknown as SupabaseAccountDeletionRequestClient,
-          )
+      const deletionRequestRepository = supabaseClient && apiEnv.isConfigured
+        ? createApiAccountDeletionRequestRepository({
+            apiBaseUrl: apiEnv.url,
+            supabaseAuth: supabaseClient.auth,
+          })
         : null;
 
       return createAccountDeletionService({
@@ -47,7 +47,7 @@ export function AccountDeletionPanel({ lockVault, storage }: AccountDeletionPane
         progressStorage: createSignupProgressStorage(storage),
       });
     },
-    [storage, supabaseClient],
+    [apiEnv, storage, supabaseClient],
   );
 
   const canDelete = confirmation.trim() === "DELETE";

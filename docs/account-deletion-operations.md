@@ -20,6 +20,9 @@ The Vercel project must have these environment variables:
 - `SUPABASE_URL`: Supabase project URL.
 - `SUPABASE_SERVICE_ROLE_KEY`: Supabase service-role key. Keep this server-side only.
 - `ACCOUNT_DELETION_PROCESSOR_TOKEN`: high-entropy bearer token used by the scheduler.
+- `ACCOUNT_DELETION_APP_BASE_URL`: public Sanduqkin app/API origin.
+- `ACCOUNT_DELETION_EMAIL_FROM`: verified transactional sender, for example `Sanduqkin <support@example.com>`.
+- `RESEND_API_KEY`: Resend API key used only by the API service for transactional email.
 
 The protected endpoint is:
 
@@ -48,7 +51,15 @@ Do not put Supabase service-role credentials in GitHub Actions for this workflow
 
 ## Confirmation Email
 
-Phase 1 queues the deletion request immediately after explicit in-app confirmation. Email delivery is not yet implemented. Before production launch, add a transactional confirmation email when the request is queued and include the scheduled deletion date.
+Phase 1 queues the deletion request after explicit in-app confirmation through `POST /account-deletion/request`. The API verifies the Supabase bearer session, creates the server-side deletion request, and sends a transactional confirmation email with the scheduled deletion date.
+
+Mobile must be configured with:
+
+```text
+EXPO_PUBLIC_API_URL=https://sanduqkin-api.vercel.app
+```
+
+Do not put `RESEND_API_KEY` or Supabase service-role credentials in the mobile environment.
 
 ## Retention
 
