@@ -13,7 +13,9 @@ export type AccountDeletionProcessorSummary = {
 };
 
 export type AccountDeletionProcessorClient = {
+  anonymizeAuditEvents: (userId: string) => Promise<void>;
   deleteAuthUser: (userId: string, shouldSoftDelete: boolean) => Promise<void>;
+  deleteVaultData: (userId: string) => Promise<void>;
   markCompleted: (requestId: string, completedAt?: string) => Promise<void>;
   markFailed: (requestId: string, errorMessage: string) => Promise<void>;
   markProcessing: (requestId: string, nextAttemptCount?: number) => Promise<void>;
@@ -43,6 +45,8 @@ export async function processDueAccountDeletionRequests({
   for (const request of requests) {
     try {
       await client.markProcessing(request.id, (request.attempt_count ?? 0) + 1);
+      await client.deleteVaultData(request.user_id);
+      await client.anonymizeAuditEvents(request.user_id);
       await client.deleteAuthUser(request.user_id, true);
       await client.markCompleted(request.id, scheduledBefore);
       summary.completed += 1;

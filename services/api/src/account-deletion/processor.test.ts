@@ -32,6 +32,14 @@ describe("processDueAccountDeletionRequests", () => {
         requestId: "request-1",
       },
       {
+        method: "deleteVaultData",
+        userId: "user-1",
+      },
+      {
+        method: "anonymizeAuditEvents",
+        userId: "user-1",
+      },
+      {
         method: "deleteUser",
         shouldSoftDelete: true,
         userId: "user-1",
@@ -73,6 +81,8 @@ describe("processDueAccountDeletionRequests", () => {
 type Call =
   | { method: "selectDue"; scheduledBefore: string; limit: number }
   | { method: "markProcessing"; requestId: string }
+  | { method: "deleteVaultData"; userId: string }
+  | { method: "anonymizeAuditEvents"; userId: string }
   | { method: "deleteUser"; shouldSoftDelete: boolean; userId: string }
   | { method: "markCompleted"; requestId: string }
   | { errorMessage: string; method: "markFailed"; requestId: string };
@@ -90,12 +100,18 @@ function createProcessorClientDouble(
 
   return {
     calls,
+    async anonymizeAuditEvents(userId) {
+      calls.push({ method: "anonymizeAuditEvents", userId });
+    },
     async deleteAuthUser(userId, shouldSoftDelete) {
       calls.push({ method: "deleteUser", shouldSoftDelete, userId });
 
       if (options?.deleteError) {
         throw new Error(options.deleteError);
       }
+    },
+    async deleteVaultData(userId) {
+      calls.push({ method: "deleteVaultData", userId });
     },
     async markCompleted(requestId) {
       calls.push({ method: "markCompleted", requestId });

@@ -1,0 +1,28 @@
+name: Account deletion processor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  process-due-deletions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call protected processor endpoint
+        env:
+          PROCESSOR_TOKEN: ${{ secrets.ACCOUNT_DELETION_PROCESSOR_TOKEN }}
+          PROCESSOR_URL: ${{ secrets.ACCOUNT_DELETION_PROCESSOR_URL }}
+        run: |
+          if [ -z "$PROCESSOR_URL" ] || [ -z "$PROCESSOR_TOKEN" ]; then
+            echo "Missing ACCOUNT_DELETION_PROCESSOR_URL or ACCOUNT_DELETION_PROCESSOR_TOKEN secret." >&2
+            exit 1
+          fi
+
+          curl --fail-with-body \
+            --request POST \
+            --header "Authorization: Bearer ${PROCESSOR_TOKEN}" \
+            "$PROCESSOR_URL/internal/account-deletion/process"

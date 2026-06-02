@@ -1,11 +1,11 @@
 import type { Context } from "hono";
 
-import { processDueAccountDeletionRequests } from "./processor";
+import { processDueAccountDeletionRequests } from "./processor.js";
 import {
   createServiceRoleSupabaseClient,
   createSupabaseAccountDeletionProcessorClient,
-} from "./supabase-processor-client";
-import type { AccountDeletionProcessorSummary } from "./processor";
+} from "./supabase-processor-client.js";
+import type { AccountDeletionProcessorSummary } from "./processor.js";
 
 type AccountDeletionProcessorConfig = {
   processorToken: string;

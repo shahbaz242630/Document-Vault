@@ -1,0 +1,12 @@
+.git
+.codex-logs
+.vscode
+Details
+node_modules
+apps
+packages
+patches
+supabase
+
+.env
+*.xlsx

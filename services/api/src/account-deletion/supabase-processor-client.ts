@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-import type { AccountDeletionProcessorClient, AccountDeletionRequest } from "./processor";
+import type { AccountDeletionProcessorClient, AccountDeletionRequest } from "./processor.js";
 
 type SupabaseError = {
   message?: string;
@@ -12,6 +12,7 @@ type SupabaseResult<T> = {
 };
 
 type QueryBuilder<T = unknown> = PromiseLike<SupabaseResult<T>> & {
+  delete: () => QueryBuilder<unknown>;
   eq: (column: string, value: unknown) => QueryBuilder<T>;
   limit: (count: number) => Promise<SupabaseResult<AccountDeletionRequest[]>>;
   lte: (column: string, value: unknown) => QueryBuilder<T>;
@@ -29,7 +30,9 @@ type SupabaseAdminClientLike = {
       ) => Promise<SupabaseResult<unknown>>;
     };
   };
-  from: (table: "account_deletion_requests") => QueryBuilder;
+  from: (
+    table: "account_deletion_requests" | "audit_events" | "vault_assets" | "vault_key_material",
+  ) => QueryBuilder;
 };
 
 export function createServiceRoleSupabaseClient({
@@ -52,9 +55,30 @@ export function createSupabaseAccountDeletionProcessorClient(
   supabase: SupabaseAdminClientLike,
 ): AccountDeletionProcessorClient {
   return {
+    async anonymizeAuditEvents(userId) {
+      const result = await supabase
+        .from("audit_events")
+        .update({
+          user_id: null,
+        })
+        .eq("user_id", userId);
+      assertNoError(result.error, "Audit events could not be anonymized.");
+    },
+
     async deleteAuthUser(userId, shouldSoftDelete) {
       const result = await supabase.auth.admin.deleteUser(userId, shouldSoftDelete);
       assertNoError(result.error, "Auth user could not be deleted.");
+    },
+
+    async deleteVaultData(userId) {
+      const assetResult = await supabase.from("vault_assets").delete().eq("user_id", userId);
+      assertNoError(assetResult.error, "Vault assets could not be deleted.");
+
+      const keyMaterialResult = await supabase
+        .from("vault_key_material")
+        .delete()
+        .eq("user_id", userId);
+      assertNoError(keyMaterialResult.error, "Vault key material could not be deleted.");
     },
 
     async markCompleted(requestId, completedAt = new Date().toISOString()) {

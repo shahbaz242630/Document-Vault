@@ -37,3 +37,5 @@ config_out.txt
 Thumbs.db
 .vscode/
 .idea/
+
+.vercel

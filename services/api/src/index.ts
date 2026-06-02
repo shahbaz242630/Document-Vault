@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
-import { createAccountDeletionProcessorRoute } from "./account-deletion/routes";
-import { revenueCatWebhookHandler } from "./webhooks/revenuecat";
+import { createAccountDeletionProcessorRoute } from "./account-deletion/routes.js";
+import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
 
 export const app = new Hono();
 
