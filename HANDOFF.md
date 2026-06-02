@@ -1232,12 +1232,47 @@ Remaining account-deletion work:
 - After Resend approval, configure Vercel production `RESEND_API_KEY` with a real Resend key.
 - Verify `ACCOUNT_DELETION_EMAIL_FROM` is a Resend-verified sender/domain. Current configured sender is `Sanduqkin <support@sanduqkin.com>`.
 - Live-verify authenticated `POST /account-deletion/request` using a test account after `RESEND_API_KEY` is configured.
-- Add a separate retention job for seven-year anonymized audit row expiry when production retention automation is introduced.
+
+### 2026-06-02 - Seven-Year Anonymized Audit Retention Automation
+
+Changed:
+
+- Added `services/api/src/audit-retention/processor.ts` to compute a seven-year retention cutoff.
+- Added Supabase service-role retention client that deletes only `audit_events` rows where `user_id is null` and `occurred_at` is older than seven years.
+- Added protected API route `POST /internal/audit-retention/process`.
+- Route requires `AUDIT_RETENTION_PROCESSOR_TOKEN`; processor config also requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+- Added `.github/workflows/audit-retention-processor.yml` for daily/manual retention processing.
+- Configured Vercel production `AUDIT_RETENTION_PROCESSOR_TOKEN`.
+- Configured GitHub repository secrets `AUDIT_RETENTION_PROCESSOR_URL` and `AUDIT_RETENTION_PROCESSOR_TOKEN`.
+- Deployed the updated API to Vercel production.
+- Updated `docs/account-deletion-operations.md` with audit retention endpoint, scheduler, and eligibility rules.
+
+Verification:
+
+- Test-first red checks:
+  - `audit-retention/processor` initially failed because the module did not exist.
+  - `audit-retention/supabase-retention-client` initially failed because the adapter did not exist.
+  - `audit-retention/routes` initially failed because the protected route did not exist.
+- `npm run test --workspace @vault/api` passes: 7 files, 13 tests.
+- `npm run typecheck` passes across all workspaces.
+- `npm run test --workspace @vault/mobile` passes: 78 files passed, 1 skipped; 283 tests passed, 1 skipped.
+- `npx expo-doctor` passes: 17/17 checks.
+- Live `GET https://sanduqkin-api.vercel.app/health` returns `{"ok":true,"service":"sanduqkin-api"}`.
+- Live unauthenticated `POST https://sanduqkin-api.vercel.app/internal/audit-retention/process` returns `401`.
+- Manually dispatched GitHub Actions run `26824120201`; it completed successfully and the workflow log shows the protected retention endpoint returned `{"ok":true,"deleted":0}` with secrets masked.
+- `npx vercel@latest project inspect sanduqkin-api` shows `Root Directory services/api`.
+- `npm audit --audit-level=moderate` still fails on the known Expo SDK transitive `postcss` and `uuid` advisories. The available force fix still jumps to `expo@56.0.8`, so no force fix was applied.
+
+Remaining account-deletion work:
+
+- Resend account is pending approval. Confirmation-email live verification is blocked until approval is complete.
+- After Resend approval, configure Vercel production `RESEND_API_KEY` with a real Resend key.
+- Verify `ACCOUNT_DELETION_EMAIL_FROM` is a Resend-verified sender/domain. Current configured sender is `Sanduqkin <support@sanduqkin.com>`.
+- Live-verify authenticated `POST /account-deletion/request` using a test account after `RESEND_API_KEY` is configured.
 
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
-- Add seven-year anonymized audit expiry automation after the retention job design is chosen.
 - `services/api/src/webhooks/revenuecat.ts` still contains a production-path TODO for entitlement sync; this remains Phase 1 tech debt because Phase 1 should avoid production TODOs.
 - `npm audit --audit-level=moderate` still fails on Expo SDK transitive `postcss` and `uuid`; force fix proposes a breaking Expo 56 upgrade and has not been applied.
 - Real Supabase MFA remains launch-deferred because it is a paid Supabase feature; placeholder factor ids must not ship to production.
@@ -1276,16 +1311,15 @@ After Supabase/API integration exists, add backend/API tests and run them as par
 Use this opener to resume cleanly:
 
 ```text
-Partner, read HANDOFF.md first. We finished Android native dev-client verification for returning-user unlock, biometric cached-key unlock, durable audit persistence, and account-deletion queue/processor hardening. Android supports signed-in biometric enable/disable from Settings, cached-key unlock avoids unauthenticated Supabase vault repository calls, and cold-start biometric unlock routes to the Vault screen with `Your vault is ready.` Durable audit persistence is wired to Supabase `audit_events` with plaintext vault metadata guards. Account deletion now queues through the deployed API at `POST /account-deletion/request`, which validates the Supabase bearer session, creates the deletion request server-side, and sends a confirmation email through Resend when `RESEND_API_KEY` is configured. Resend account approval is currently pending, so live email verification is externally blocked. The processor explicitly deletes `vault_assets` and `vault_key_material`, anonymizes retained audit rows, then soft-deletes due Supabase Auth users with service-role credentials outside mobile. The API is deployed to Vercel production at `https://sanduqkin-api.vercel.app`; health, unauthorized processor rejection, authenticated processor invocation, manual GitHub scheduler dispatch, and unauthenticated deletion-request rejection are live-verified. Migrations through `20260601141825_add_account_deletion_processing_state.sql` are applied remotely and live RLS/column verification passed. On 2026-06-01, iOS native dev-build verification was attempted but blocked because this Windows environment has no Xcode/xcrun/iOS simulator. MFA remains intentionally on hold until launch because it is a paid Supabase feature.
+Partner, read HANDOFF.md first. We finished Android native dev-client verification for returning-user unlock, biometric cached-key unlock, durable audit persistence, and account-deletion queue/processor hardening. Android supports signed-in biometric enable/disable from Settings, cached-key unlock avoids unauthenticated Supabase vault repository calls, and cold-start biometric unlock routes to the Vault screen with `Your vault is ready.` Durable audit persistence is wired to Supabase `audit_events` with plaintext vault metadata guards. Account deletion now queues through the deployed API at `POST /account-deletion/request`, which validates the Supabase bearer session, creates the deletion request server-side, and sends a confirmation email through Resend when `RESEND_API_KEY` is configured. Resend account approval is currently pending, so live email verification is externally blocked. The processor explicitly deletes `vault_assets` and `vault_key_material`, anonymizes retained audit rows, then soft-deletes due Supabase Auth users with service-role credentials outside mobile. Seven-year anonymized audit retention automation is implemented and live-verified via `POST /internal/audit-retention/process`; manual GitHub workflow run `26824120201` returned `{"ok":true,"deleted":0}`. The API is deployed to Vercel production at `https://sanduqkin-api.vercel.app`; health, unauthorized processor rejection, authenticated processor invocation, manual GitHub scheduler dispatch, and unauthenticated deletion-request rejection are live-verified. Migrations through `20260601141825_add_account_deletion_processing_state.sql` are applied remotely and live RLS/column verification passed. On 2026-06-01, iOS native dev-build verification was attempted but blocked because this Windows environment has no Xcode/xcrun/iOS simulator. MFA remains intentionally on hold until launch because it is a paid Supabase feature.
 
-Start the next Windows/Android slice: if Resend is approved, configure Vercel `RESEND_API_KEY`, verify the sender/domain, and live-verify authenticated `POST /account-deletion/request`; otherwise work on seven-year anonymized audit expiry automation or another Pending Tech Debt item. If working on a Mac instead, run iOS native dev-client verification for returning-user unlock and biometric unlock.
+Start the next Windows/Android slice: if Resend is approved, configure Vercel `RESEND_API_KEY`, verify the sender/domain, and live-verify authenticated `POST /account-deletion/request`; otherwise work on another Pending Tech Debt item. If working on a Mac instead, run iOS native dev-client verification for returning-user unlock and biometric unlock.
 ```
 
 Current next-slice checklist:
 
 - Continue account deletion/server-side retention hardening:
-  - after Resend approval, configure `RESEND_API_KEY` and live-verify confirmation email,
-  - seven-year anonymized audit expiry automation.
+  - after Resend approval, configure `RESEND_API_KEY` and live-verify confirmation email.
 - Run closeout checks:
   - `npm run test --workspace @vault/mobile`,
   - `npm run typecheck --workspace @vault/mobile`,
