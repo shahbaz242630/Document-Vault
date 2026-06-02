@@ -24,6 +24,8 @@ The Vercel project must have these environment variables:
 - `ACCOUNT_DELETION_EMAIL_FROM`: verified transactional sender, for example `Sanduqkin <support@example.com>`.
 - `RESEND_API_KEY`: Resend API key used only by the API service for transactional email.
 
+`RESEND_API_KEY` is currently blocked because the Resend account is pending approval. Do not attempt live confirmation-email verification until Resend approves the account and the sender/domain is verified.
+
 The protected endpoint is:
 
 ```text
@@ -52,6 +54,8 @@ Do not put Supabase service-role credentials in GitHub Actions for this workflow
 ## Confirmation Email
 
 Phase 1 queues the deletion request after explicit in-app confirmation through `POST /account-deletion/request`. The API verifies the Supabase bearer session, creates the server-side deletion request, and sends a transactional confirmation email with the scheduled deletion date.
+
+Current status: the API and mobile boundary are implemented and deployed, but production email delivery is blocked by pending Resend account approval. After approval, configure `RESEND_API_KEY`, verify the sender/domain, redeploy if needed, and run an authenticated live deletion-request test.
 
 Mobile must be configured with:
 
