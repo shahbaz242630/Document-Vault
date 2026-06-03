@@ -1288,6 +1288,8 @@ Verification:
 - `npm run test --workspace @vault/api` passes: 8 files, 16 tests.
 - `npm run typecheck --workspace @vault/api` passes.
 - `rg -n "TODO|FIXME|XXX" services apps packages docs HANDOFF.md` now shows only historical handoff references until this handoff refresh removes them; no production code TODO remains.
+- Production health is reachable at `https://sanduqkin-api.vercel.app/health`.
+- Production `POST /webhooks/revenuecat` currently returns 503 because `REVENUECAT_WEBHOOK_SECRET` is not configured in Vercel yet.
 
 Remaining RevenueCat work:
 
@@ -1297,6 +1299,7 @@ Remaining RevenueCat work:
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
+- `REVENUECAT_WEBHOOK_SECRET` is not configured in Vercel production yet; `POST /webhooks/revenuecat` returns 503 until that secret is set.
 - `npm audit --audit-level=moderate` still fails on Expo SDK transitive `postcss` and `uuid`; force fix proposes a breaking Expo 56 upgrade and has not been applied.
 - Real Supabase MFA remains launch-deferred because it is a paid Supabase feature; placeholder factor ids must not ship to production.
 - iOS native dev-client verification remains blocked in this Windows environment.
