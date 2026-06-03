@@ -13,3 +13,15 @@ describe("SettingsScreen biometric preferences", () => {
     );
   });
 });
+
+describe("SettingsScreen emergency access entry", () => {
+  it("links to emergency access before account deletion", () => {
+    const source = readFileSync(resolve(__dirname, "settings-screen.tsx"), "utf8");
+
+    expect(source).toContain("/settings/emergency-access");
+    expect(source).toContain("Emergency access");
+    expect(source.indexOf("Emergency access")).toBeLessThan(
+      source.indexOf("Delete account"),
+    );
+  });
+});

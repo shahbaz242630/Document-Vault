@@ -78,6 +78,17 @@ export function SettingsScreen({
         <SignOutButton storage={storage} vaultSignOut={vaultSignOut} />
 
         <Link
+          href={"/settings/emergency-access" as unknown as "/auth/sign-up"}
+          style={{
+            color: colors.ink,
+            fontSize: 17,
+            textAlign: "center",
+          }}
+        >
+          Emergency access
+        </Link>
+
+        <Link
           href="/settings/re-auth"
           style={{
             color: colors.danger,

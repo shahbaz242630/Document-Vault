@@ -1536,6 +1536,23 @@ Verification:
 - `npm run test --workspace @vault/mobile` passes: 85 files passed, 2 skipped; 304 tests passed, 2 skipped.
 - `npx expo-doctor` from `apps/mobile` passes: 17/17 checks.
 
+### 2026-06-03 - Emergency Access Setup UX Shell
+
+Changed:
+
+- Added Settings entry for `Emergency access`.
+- Added `/settings/emergency-access` route.
+- Added emergency access setup shell with two transparent choices:
+  - `Pre-Authorized Kin` with `Highly recommended` badge,
+  - `Sealed Emergency Code` with `Backup option` badge and loss/theft risk copy.
+- Setup buttons are intentionally disabled in this shell slice; no emergency code generation, MEK wrapping, Supabase writes, or release flow is triggered from UI yet.
+
+Verification:
+
+- `npm run test --workspace @vault/mobile -- settings-screen.test.ts emergency-access-screen.test.ts emergency-access.test.ts` passes: 3 files, 6 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+- `npm run test --workspace @vault/mobile` passes: 87 files passed, 2 skipped; 309 tests passed, 2 skipped.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
