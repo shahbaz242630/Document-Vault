@@ -270,7 +270,7 @@ Current assessment against BRD Section 7.4:
 - Manual physical iOS and Android journey test: **not verified**
 - No TODO comments in production paths: **automated guard added; current failures are function-size only**
 - Folder structure matches Section 2.5: **partially met**
-- No file over 500 lines, no function over 100 lines: **not met; automated guard finds 24 functions over 100 lines and no files over 500 lines**
+- No file over 500 lines, no function over 100 lines: **not met; automated guard finds 23 functions over 100 lines and no files over 500 lines**
 
 ## Recommended Next Stage
 
@@ -1316,17 +1316,33 @@ Verification:
 Recommended next refactor targets:
 
 - Start with the largest Phase 1-auth files before vault/payment foundation files:
-  - `apps/mobile/src/features/auth/components/reset-password-panel.tsx`
   - `apps/mobile/src/features/auth/components/email-password-auth-form.tsx`
   - `apps/mobile/src/features/auth/components/forgot-password-panel.tsx`
   - `apps/mobile/src/features/auth/components/re-auth-panel.tsx`
   - `apps/mobile/src/features/vault/edit-asset-config.ts`
 
+### 2026-06-03 - Reset Password Panel Size Refactor
+
+Changed:
+
+- Split `apps/mobile/src/features/auth/components/reset-password-panel.tsx` into smaller local components and submit helpers.
+- Kept the public `ResetPasswordPanel` export and route usage unchanged.
+- Added a focused guard test proving `reset-password-panel.tsx` no longer violates the BRD 100-line function limit.
+
+Verification:
+
+- Test-first red check:
+  - `node --test scripts/phase1-dod-check.test.cjs` failed because `reset-password-panel.tsx` was still reported by `function-line-limit`.
+- `node --test scripts/phase1-dod-check.test.cjs` passes: 3 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+- `npm run check:phase1` still fails on existing function-size debt, but `reset-password-panel.tsx` is no longer in the report.
+- Current scan result: no production launch markers, no production source files over 500 lines, 23 production functions/components over 100 lines.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
 - `REVENUECAT_WEBHOOK_SECRET` is not configured in Vercel production yet; `POST /webhooks/revenuecat` returns 503 until that secret is set.
-- `npm run check:phase1` currently fails on 24 existing functions/components over the BRD 100-line function limit.
+- `npm run check:phase1` currently fails on 23 existing functions/components over the BRD 100-line function limit.
 - `npm audit --audit-level=moderate` still fails on Expo SDK transitive `postcss` and `uuid`; force fix proposes a breaking Expo 56 upgrade and has not been applied.
 - Real Supabase MFA remains launch-deferred because it is a paid Supabase feature; placeholder factor ids must not ship to production.
 - iOS native dev-client verification remains blocked in this Windows environment.
