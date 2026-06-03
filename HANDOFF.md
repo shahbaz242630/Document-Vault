@@ -270,7 +270,7 @@ Current assessment against BRD Section 7.4:
 - Manual physical iOS and Android journey test: **not verified**
 - No TODO comments in production paths: **automated guard added; current failures are function-size only**
 - Folder structure matches Section 2.5: **partially met**
-- No file over 500 lines, no function over 100 lines: **not met; automated guard finds 19 functions over 100 lines and no files over 500 lines**
+- No file over 500 lines, no function over 100 lines: **not met; automated guard finds 18 functions over 100 lines and no files over 500 lines**
 
 ## Recommended Next Stage
 
@@ -1316,7 +1316,7 @@ Verification:
 Recommended next refactor targets:
 
 - Start with the largest Phase 1-auth files before vault/payment foundation files:
-  - `apps/mobile/src/features/vault/edit-asset-config.ts`
+  - `apps/mobile/src/features/vault/vault-session-context.tsx`
 
 ### 2026-06-03 - Reset Password Panel Size Refactor
 
@@ -1393,11 +1393,29 @@ Verification:
 - `npm run check:phase1` still fails on existing function-size debt, but `re-auth-panel.tsx` is no longer in the report.
 - Current scan result: no production launch markers, no production source files over 500 lines, 19 production functions/components over 100 lines.
 
+### 2026-06-03 - Edit Asset Config Size Refactor
+
+Changed:
+
+- Split `apps/mobile/src/features/vault/edit-asset-config.ts` into a short public dispatcher plus `edit-asset-config-builders.ts`.
+- Kept the public `getEditAssetConfig(assetType)` API unchanged.
+- Added a focused guard test proving `edit-asset-config.ts` no longer violates the BRD 100-line function limit.
+
+Verification:
+
+- Test-first red check:
+  - `node --test scripts/phase1-dod-check.test.cjs` failed because `edit-asset-config.ts` was still reported by `function-line-limit`.
+- `node --test scripts/phase1-dod-check.test.cjs` passes: 7 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+- `npm run test --workspace @vault/mobile -- asset-payload.test.ts bank-account-form.test.ts investment-form.test.ts property-form.test.ts insurance-form.test.ts crypto-form.test.ts pension-form.test.ts subscription-form.test.ts document-location-form.test.ts contact-form.test.ts other-form.test.ts` passes: 11 files, 33 tests.
+- `npm run check:phase1` still fails on existing function-size debt, but `edit-asset-config.ts` is no longer in the report.
+- Current scan result: no production launch markers, no production source files over 500 lines, 18 production functions/components over 100 lines.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
 - `REVENUECAT_WEBHOOK_SECRET` is not configured in Vercel production yet; `POST /webhooks/revenuecat` returns 503 until that secret is set.
-- `npm run check:phase1` currently fails on 19 existing functions/components over the BRD 100-line function limit.
+- `npm run check:phase1` currently fails on 18 existing functions/components over the BRD 100-line function limit.
 - `npm audit --audit-level=moderate` still fails on Expo SDK transitive `postcss` and `uuid`; force fix proposes a breaking Expo 56 upgrade and has not been applied.
 - Real Supabase MFA remains launch-deferred because it is a paid Supabase feature; placeholder factor ids must not ship to production.
 - iOS native dev-client verification remains blocked in this Windows environment.
