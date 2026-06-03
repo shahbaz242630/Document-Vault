@@ -1517,6 +1517,25 @@ Verification:
 - `npm run typecheck --workspace @vault/mobile` passes.
 - `npm run test --workspace @vault/mobile` passes: 83 files passed, 2 skipped; 295 tests passed, 2 skipped.
 
+### 2026-06-03 - Emergency Access Foundation Schema And Crypto
+
+Changed:
+
+- Added approved Slice 1 design spec at `docs/superpowers/specs/2026-06-03-emergency-access-foundation-design.md`.
+- Added Supabase migration `20260603210500_emergency_access_foundation.sql`.
+- Migration creates RLS-protected `emergency_contacts`, `emergency_key_grants`, and `emergency_release_requests`.
+- Emergency grant storage is ciphertext/nonce/salt/KDF/status metadata only; no raw emergency code, plaintext MEK, recovery phrase, PDF, or vault plaintext fields are stored.
+- Added client-side high-entropy emergency access code generation and normalization.
+- Added sealed emergency code MEK wrapping/unwrapping using Argon2id-derived wrapping keys and XChaCha20-Poly1305.
+- Added pre-authorized kin MEK wrapping/unwrapping against a supplied 32-byte kin wrapping key placeholder; future slices still need the kin account/keypair exchange UX.
+
+Verification:
+
+- `npm run test --workspace @vault/mobile -- emergency-access-code.test.ts emergency-key-wrapping.test.ts supabase-schema.test.ts` passes: 3 files, 17 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+- `npm run test --workspace @vault/mobile` passes: 85 files passed, 2 skipped; 304 tests passed, 2 skipped.
+- `npx expo-doctor` from `apps/mobile` passes: 17/17 checks.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.

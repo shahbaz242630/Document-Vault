@@ -122,6 +122,33 @@ describe("Supabase Phase 1 schema migration", () => {
     expect(migrations).toContain("add column last_error text null");
     expect(migrations).toContain("'failed'");
   });
+
+  it("creates emergency access foundations without plaintext vault fields", () => {
+    const migrations = readAllMigrations();
+
+    for (const table of [
+      "emergency_contacts",
+      "emergency_key_grants",
+      "emergency_release_requests",
+    ]) {
+      expect(migrations).toContain(`create table public.${table}`);
+      expect(migrations).toContain(`alter table public.${table} enable row level security`);
+      expect(migrations).toContain(`grant all on table public.${table} to service_role`);
+    }
+
+    expect(migrations).toContain("'pre_authorized_kin'");
+    expect(migrations).toContain("'sealed_emergency_code'");
+    expect(migrations).toContain("wrapped_mek_ciphertext text not null");
+    expect(migrations).toContain("wrapped_mek_nonce text not null");
+    expect(migrations).toContain("kdf_algorithm text null");
+    expect(migrations).toContain("kdf_salt text null");
+    expect(migrations).not.toContain("emergency_code text");
+    expect(migrations).not.toContain("raw_code text");
+    expect(migrations).not.toContain("plaintext_mek text");
+    expect(migrations).not.toContain("vault_title");
+    expect(migrations).not.toContain("vault_notes");
+    expect(migrations).not.toContain("vault_fields");
+  });
 });
 
 function readPhase1Migration(): string {

@@ -83,6 +83,17 @@ export {
   type ExpandedAssetType,
 } from "./expanded-asset-form";
 export {
+  generateEmergencyAccessCode,
+  normalizeEmergencyAccessCode,
+} from "./emergency-access-code";
+export {
+  unwrapKinGrantMEK,
+  unwrapSealedEmergencyMEK,
+  wrapMEKForKinGrant,
+  wrapMEKWithEmergencyCode,
+  type EmergencyWrappedMEKPackage,
+} from "./emergency-key-wrapping";
+export {
   createPensionAssetPayload,
   type PensionFormValues,
 } from "./pension-form";
