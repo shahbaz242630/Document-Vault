@@ -19,7 +19,7 @@
     "mobile": "npm run start --workspace @vault/mobile",
     "mobile:android": "npm run android --workspace @vault/mobile",
     "mobile:ios": "npm run ios --workspace @vault/mobile",
-    "postinstall": "patch-package",
+    "postinstall": "node scripts/run-patch-package-if-available.cjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present"
   },
