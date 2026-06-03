@@ -33,12 +33,17 @@ import {
   type VaultAssetRepository,
   type VaultSession,
 } from "./vault-session";
-import type { VaultDecryptedAsset, VaultDeletedAsset } from "./vault-store";
+import type {
+  VaultDecryptedAsset,
+  VaultDeletedAsset,
+  VaultEncryptedAssetRecord,
+} from "./vault-store";
 
 type VaultSessionContextValue = {
   addAsset: (payload: AssetPlaintextPayload) => Promise<VaultDecryptedAsset>;
   assets: VaultDecryptedAsset[];
   deletedAssets: VaultDeletedAsset[];
+  encryptedRecords: VaultEncryptedAssetRecord[];
   initialize: (keyBase64: string, client?: SupabaseVaultClient) => Promise<void>;
   isLocked: boolean;
   isReady: boolean;
@@ -56,6 +61,7 @@ type VaultSessionContextValue = {
 type VaultSessionStateSetters = {
   setAssets: Dispatch<SetStateAction<VaultDecryptedAsset[]>>;
   setDeletedAssets: Dispatch<SetStateAction<VaultDeletedAsset[]>>;
+  setEncryptedRecords: Dispatch<SetStateAction<VaultEncryptedAssetRecord[]>>;
   setIsLocked: Dispatch<SetStateAction<boolean>>;
   setIsReady: Dispatch<SetStateAction<boolean>>;
   setSession: Dispatch<SetStateAction<VaultSession | null>>;
@@ -80,11 +86,19 @@ export function VaultSessionProvider({ children }: VaultSessionProviderProps) {
 function useVaultSessionContextValue(): VaultSessionContextValue {
   const [assets, setAssets] = useState<VaultDecryptedAsset[]>([]);
   const [deletedAssets, setDeletedAssets] = useState<VaultDeletedAsset[]>([]);
+  const [encryptedRecords, setEncryptedRecords] = useState<VaultEncryptedAssetRecord[]>([]);
   const [session, setSession] = useState<VaultSession | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const setters = useMemo(
-    () => ({ setAssets, setDeletedAssets, setIsLocked, setIsReady, setSession }),
+    () => ({
+      setAssets,
+      setDeletedAssets,
+      setEncryptedRecords,
+      setIsLocked,
+      setIsReady,
+      setSession,
+    }),
     [],
   );
   const refreshAssets = useRefreshAssets(setters);
@@ -100,6 +114,7 @@ function useVaultSessionContextValue(): VaultSessionContextValue {
       ...assetActions,
       assets,
       deletedAssets,
+      encryptedRecords,
       initialize,
       isLocked,
       isReady,
@@ -110,6 +125,7 @@ function useVaultSessionContextValue(): VaultSessionContextValue {
       assetActions,
       assets,
       deletedAssets,
+      encryptedRecords,
       initialize,
       isLocked,
       isReady,
@@ -277,6 +293,7 @@ function useRefreshAssets(setters: VaultSessionStateSetters) {
 
       setters.setAssets(nextAssets);
       setters.setDeletedAssets(nextDeletedAssets);
+      setters.setEncryptedRecords(activeSession.listEncryptedRecords());
     },
     [setters],
   );
@@ -303,6 +320,7 @@ function clearVaultSession(setters: VaultSessionStateSetters) {
   setters.setSession(null);
   setters.setAssets([]);
   setters.setDeletedAssets([]);
+  setters.setEncryptedRecords([]);
   setters.setIsReady(false);
 }
 

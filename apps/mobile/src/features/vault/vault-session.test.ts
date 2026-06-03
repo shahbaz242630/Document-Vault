@@ -252,6 +252,42 @@ describe("vault session", () => {
     expect(JSON.stringify(repository.savedRecords)).not.toContain("Updated private note");
   });
 
+  it("exposes encrypted storage preview records without plaintext vault fields", async () => {
+    const key = await generateMasterEncryptionKey();
+    const session = createVaultSession({
+      key,
+      store: createVaultStore({
+        generateId: () => "asset-1",
+        now: () => new Date("2026-06-03T10:00:00.000Z"),
+      }),
+    });
+
+    await session.addAsset({
+      assetType: "digital_account",
+      fields: {
+        provider: "Private Cloud",
+        username: "family@example.com",
+      },
+      notes: "Recovery instructions",
+      title: "Family cloud account",
+    });
+
+    const encryptedRecords = session.listEncryptedRecords();
+
+    expect(encryptedRecords).toHaveLength(1);
+    expect(encryptedRecords[0]).toMatchObject({
+      assetType: "digital_account",
+      createdAt: "2026-06-03T10:00:00.000Z",
+      deletedAt: null,
+      id: "asset-1",
+      updatedAt: "2026-06-03T10:00:00.000Z",
+    });
+    expect(JSON.stringify(encryptedRecords)).not.toContain("Family cloud account");
+    expect(JSON.stringify(encryptedRecords)).not.toContain("Private Cloud");
+    expect(JSON.stringify(encryptedRecords)).not.toContain("family@example.com");
+    expect(JSON.stringify(encryptedRecords)).not.toContain("Recovery instructions");
+  });
+
   it("persists soft delete, restore, and permanent delete operations", async () => {
     const key = await generateMasterEncryptionKey();
     const repository = createRepositoryDouble();

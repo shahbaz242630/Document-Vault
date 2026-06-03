@@ -5,7 +5,7 @@ import { VaultExportScreen, useVaultSession } from "@/features/vault";
 import { screenStyles } from "@/shared/ui/screen";
 
 export default function VaultExportRoute() {
-  const { assets, isReady } = useVaultSession();
+  const { assets, encryptedRecords, isReady } = useVaultSession();
 
   return (
     <>
@@ -14,7 +14,11 @@ export default function VaultExportRoute() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={screenStyles.content}
       >
-        <VaultExportScreen assets={assets} isReady={isReady} />
+        <VaultExportScreen
+          assets={assets}
+          encryptedRecords={encryptedRecords}
+          isReady={isReady}
+        />
       </ScrollView>
     </>
   );

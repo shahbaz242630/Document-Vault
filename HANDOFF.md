@@ -1502,6 +1502,21 @@ Verification:
 - `npx expo-doctor` from `apps/mobile` passes: 17/17 checks.
 - `npm audit --audit-level=moderate` still fails with 17 moderate Expo SDK transitive `postcss` and `uuid` advisories; `npm audit fix --force` still proposes breaking `expo@56.0.8`, so no force fix was applied.
 
+### 2026-06-03 - Real Encrypted Storage Preview Wiring
+
+Changed:
+
+- Exposed cloned encrypted vault records from the active vault session.
+- Threaded encrypted records through `VaultSessionProvider` and into `/vault/export`.
+- Updated the export preview to show real encrypted record samples when assets exist, while keeping decrypted titles, fields, and notes out of the preview model.
+- Added focused guard tests for session plaintext exclusion, context wiring, and export-route handoff.
+
+Verification:
+
+- `npm run test --workspace @vault/mobile -- vault-session.test.ts vault-session-context.test.ts export.test.ts encrypted-storage-preview.test.ts` passes: 4 files, 15 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+- `npm run test --workspace @vault/mobile` passes: 83 files passed, 2 skipped; 295 tests passed, 2 skipped.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.

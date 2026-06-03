@@ -33,6 +33,7 @@ export type VaultSession = {
   addAsset: (payload: AssetPlaintextPayload) => Promise<VaultDecryptedAsset>;
   listActiveAssets: () => Promise<VaultDecryptedAsset[]>;
   listDeletedAssets: () => Promise<VaultDeletedAsset[]>;
+  listEncryptedRecords: () => VaultEncryptedAssetRecord[];
   loadPersistedAssets: () => Promise<void>;
   permanentlyDeleteAsset: (id: string) => Promise<boolean>;
   restoreAsset: (id: string) => Promise<VaultEncryptedAssetRecord | null>;
@@ -60,6 +61,9 @@ export function createVaultSession({
     },
     listDeletedAssets() {
       return store.listDeletedAssets({ key });
+    },
+    listEncryptedRecords() {
+      return store.listEncryptedRecords();
     },
     async loadPersistedAssets() {
       if (!repository) {

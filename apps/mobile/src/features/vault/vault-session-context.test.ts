@@ -28,4 +28,15 @@ describe("VaultSessionProvider auth handoff", () => {
     expect(source).toContain("if (!existingClient) {");
     expect(source).not.toContain("existingClient ?? createSupabaseClient()");
   });
+
+  it("exposes encrypted records from the active local vault session", () => {
+    const source = readFileSync(
+      resolve(__dirname, "vault-session-context.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("encryptedRecords: VaultEncryptedAssetRecord[];");
+    expect(source).toContain("setEncryptedRecords(activeSession.listEncryptedRecords())");
+    expect(source).toContain("setEncryptedRecords([])");
+  });
 });
