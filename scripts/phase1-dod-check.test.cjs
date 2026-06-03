@@ -115,6 +115,20 @@ test("keeps edit asset config under the function line limit", () => {
   );
 });
 
+test("keeps vault session context under the function line limit", () => {
+  const workspaceRoot = path.join(__dirname, "..");
+  const result = runPhase1DodCheck({ cwd: workspaceRoot });
+
+  assert.equal(
+    result.violations.some(
+      (violation) =>
+        violation.path === "apps/mobile/src/features/vault/vault-session-context.tsx" &&
+        violation.rule === "function-line-limit",
+    ),
+    false,
+  );
+});
+
 function createWorkspace(files) {
   const workspace = mkdtempSync(path.join(tmpdir(), "sanduqkin-dod-"));
 
