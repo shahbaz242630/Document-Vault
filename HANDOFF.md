@@ -4,9 +4,9 @@
 
 Sanduqkin is still in **Phase 1 foundation / integration hardening**.
 
-Do **not** move to Phase 2 beneficiary/activation work yet. Do **not** continue Phase 3 payments work until Phase 1 is integrated and verified end-to-end.
+Do **not** move to Phase 2 beneficiary/activation work yet. Do **not** continue Phase 3 payments work until the remaining Phase 1 verification and production hardening items below are closed.
 
-The codebase contains a large amount of Phase 1 UI and domain logic, plus some early Phase 3 RevenueCat/payment work, but the core Phase 1 Definition of Done is not met because several critical flows are local-only or placeholder-wired.
+The codebase now has verified Phase 1 Supabase persistence, wrapped MEK returning-user unlock, Android native-dev-client biometric unlock, durable audit persistence, and server-side account-deletion/retention foundations. Phase 1 is still not green because real Supabase MFA is launch-deferred, iOS native verification is blocked in this Windows environment, Resend confirmation email live verification depends on account approval, the Phase 1 guard still reports function-size debt, and Expo SDK transitive audit advisories remain unresolved.
 
 ## Source Of Truth
 
@@ -16,7 +16,7 @@ The codebase contains a large amount of Phase 1 UI and domain logic, plus some e
 - App/product name: Sanduqkin
 - Domain: `sanduqkin`
 - Repository root: `C:\Projects\GitHub\Sandoq Kin`
-- Current date of this handoff refresh: 2026-06-01
+- Current date of this handoff refresh: 2026-06-03
 
 ## Product Guardrails
 
@@ -48,9 +48,12 @@ Implication for future phases: do not design Phase 1 encryption as device-only p
   - `packages/shared-validation` - shared Zod validation.
   - `services/api` - Hono API scaffold.
 - Mobile dependencies include Supabase, libsodium, SecureStore, local authentication, RevenueCat, and Zod.
-- Backend currently exposes only:
+- Backend currently exposes:
   - `GET /health`
   - `POST /webhooks/revenuecat`
+  - `POST /account-deletion/request`
+  - `POST /internal/account-deletion/process`
+  - `POST /internal/audit-retention/process`
 
 ## What Is Built
 
@@ -105,40 +108,19 @@ Implemented and tested in local modules:
 
 ## Critical Gaps
 
-### P0 - Vault Persistence Is Not Integrated
+### P0 - Real Supabase MFA Is Launch-Deferred
 
-Assets are still stored at runtime in an in-memory `Map` in `apps/mobile/src/features/vault/vault-store.ts`.
-
-A local Supabase migration now exists at `supabase/migrations/20260529184326_phase1_secure_data_foundation.sql` for encrypted vault assets, wrapped MEK key material, and audit events with RLS. It has not yet been applied to the remote Supabase project. Mobile vault asset persistence is wired locally but not remote-verified.
-
-A tested mobile Supabase vault asset repository now exists at `apps/mobile/src/features/vault/supabase-vault-repository.ts`. It saves, lists, soft-deletes, restores, and permanently deletes already-encrypted vault asset records through `vault_assets`. The mobile vault session now accepts this repository, loads persisted encrypted records after MEK unlock, and persists encrypted create/update/delete metadata operations when Supabase is configured.
+Supabase MFA is intentionally on hold until launch because it is a paid feature. During development, password sign-in proceeds to persisted vault unlock rather than the placeholder TOTP route.
 
 Impact:
 
-- Assets should no longer be limited to the in-memory session once Supabase is configured and the remote migration is applied, but this has not yet been verified against the remote project.
-- Assets are still effectively local-only in environments where Supabase is not configured or the remote migration is not applied.
-- Supabase persistence schema exists locally but is not applied to the remote project.
-- No backend vault CRUD endpoints exist.
-- The BRD requirement that encrypted vault data syncs/persists end-to-end is not met.
-
-Required next work:
-
-- Verify the live vault session against the remote Supabase project after migration deployment.
-- Ensure only ciphertext, nonce, asset type, timestamps, owner id, and deletion metadata are server-visible during live device/simulator testing.
-
-### Launch-Deferred - Real Supabase MFA Is Not Wired
-
-Supabase MFA is intentionally on hold until launch because it is a paid feature. During development, password sign-in now proceeds to persisted vault unlock rather than the placeholder TOTP route.
+- Mandatory 2FA cannot be considered enforced for production until Supabase MFA is enabled.
+- Re-auth before deletion is not production-valid while placeholder factor ids remain.
 
 Current placeholders:
 
 - TOTP enrollment route links with `factorId=placeholder-factor-id`.
 - Re-auth uses `placeholder-factor-id`.
-
-Impact:
-
-- Mandatory 2FA cannot be considered enforced for production until Supabase MFA is enabled.
-- Re-auth before deletion is not production-valid.
 
 Required launch work:
 
@@ -148,84 +130,62 @@ Required launch work:
 - Enforce AAL/session checks before vault access.
 - Remove all placeholder factor ids.
 
-### P0 - Recovery Phrase / MEK Lifecycle Is Not Production-Safe
-
-Current issues:
-
-- Recovery words are no longer passed through route params in the local signup flow.
-- MEK is no longer saved to SecureStore when generated; it is saved only after phrase confirmation succeeds.
-- KEK/MEK wrapping is now saved during recovery phrase confirmation when Supabase is configured.
-- Returning-user password sign-in now loads wrapped MEK, derives KEK, unwraps MEK, stores it locally, initializes the vault session, and loads persisted encrypted asset records.
-- This returning-user unlock path still needs live Supabase journey verification.
+### P0 - iOS Native Verification Is Blocked Locally
 
 Impact:
 
-- The zero-knowledge key lifecycle is partially integrated but not yet physically/live verified.
+- Android native-dev-client returning-user unlock, biometric cached-key unlock, durable audit persistence, and account-deletion queue/processor hardening have been verified.
+- iOS native dev-build verification was attempted on 2026-06-01 and blocked because this Windows environment has no Xcode, `xcrun`, or iOS simulator.
+
+Required next work:
+
+- Run the iOS native/dev-client returning-user and biometric unlock journeys from a macOS/Xcode-capable environment.
+- Confirm iOS reaches the Vault screen and logs show no native crypto/session/Supabase errors.
+
+### P1 - Password Reset / Recovery MEK Rotation Is Not Complete
+
+Current issues:
+
+- KEK/MEK wrapping is now saved during recovery phrase confirmation when Supabase is configured.
+- Returning-user password sign-in now loads wrapped MEK, derives KEK, unwraps MEK, stores it locally, initializes the vault session, and loads persisted encrypted asset records.
+- Live Supabase returning-user verification has passed.
+- Password reset/recovery still does not safely rotate or re-wrap persisted MEK key material.
+
+Impact:
+
 - Password reset/recovery cannot safely restore a persisted vault yet.
 
 Required next work:
 
-- Verify wrapped MEK save/load/unwrap against the remote Supabase project in the app.
 - Integrate password reset/recovery with wrapped MEK update flows.
 
-### P0 - Returning User Flow Is Not End-To-End
-
-The BRD requires: log out, kill app, reopen, log back in including biometric, and render decrypted vault.
-
-Current issues:
-
-- Password login now unwraps server-stored MEK and initializes the vault session when key material exists.
-- Persisted encrypted asset load is wired after MEK unlock.
-- This has not yet been verified in a live app journey against the remote Supabase project.
-- Biometric unlock still depends on cached local key state.
-
-Required next work:
-
-- Run a live returning-user journey: sign up, confirm phrase, save asset, sign out, sign back in with password, unwrap MEK, and render decrypted remote asset.
-- Verify biometric unlock after the returning-user persisted-data path is proven.
-
-### P1 - Account Deletion Is Local-Only
+### P1 - Account Deletion Confirmation Email Is Externally Blocked
 
 Current behavior:
 
-- Locks/clears local vault state.
-- Clears local SecureStore values.
-- Anonymizes local audit log.
-- Logs out RevenueCat.
-- Navigates home.
+- Account deletion queues through the deployed API at `POST /account-deletion/request`.
+- The API validates the Supabase bearer session and creates the deletion request server-side.
+- The processor explicitly deletes `vault_assets` and `vault_key_material`, anonymizes retained audit rows, then soft-deletes due Supabase Auth users with service-role credentials outside mobile.
+- Seven-year anonymized audit retention automation is implemented and live-verified via `POST /internal/audit-retention/process`.
 
-Missing:
+Remaining blocker:
 
-- Server-side account deletion queue.
-- Supabase vault data deletion.
-- Supabase auth/user cleanup path.
-- Confirmation email.
-- 30-day deletion handling.
-- 7-year anonymized audit retention.
+- Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
 
-Also, re-auth currently includes a prototype bypass when Supabase is unavailable. That must be removed before production hardening.
+Required next work:
 
-### P1 - Audit Logging Is Local-Only
-
-Audit events are stored in an in-memory singleton.
-
-Missing:
-
-- Durable audit persistence.
-- Server-side/auditable timestamps.
-- IP address capture for login attempts.
-- Device metadata beyond the hardcoded `"React Native"`.
-- Retention/anonymization model in the database.
+- After Resend approval, configure Vercel production `RESEND_API_KEY`, verify sender/domain status, and live-verify authenticated `POST /account-deletion/request` sends the confirmation email.
 
 ### P1 - Tests / Tooling Baseline
 
 Most recent verification results:
 
-- `npm run test --workspace @vault/mobile` passes: 56 files, 213 tests.
-- Latest vault persistence wiring slice: `npm run test --workspace @vault/mobile` passes: 59 files, 228 tests.
-- `npm run typecheck` passes across mobile, shared packages, and API.
+- Latest full mobile suite in the slice log: `npm run test --workspace @vault/mobile` passes: 78 files passed, 1 skipped; 283 tests passed, 1 skipped.
+- Latest focused mobile slice: `npm run test --workspace @vault/mobile -- vault-session-context.test.ts vault-session.test.ts` passes: 2 files, 11 tests.
+- `npm run typecheck --workspace @vault/mobile` passed in the latest refactor slices; full `npm run typecheck` also passed in the account-deletion/API slices.
 - `npx expo-doctor` passes: 17/17 checks.
-- `npm audit --audit-level=moderate` still fails with 14 moderate vulnerabilities.
+- `npm run check:phase1` currently fails only on 16 existing function-line-limit violations; no production launch markers or files over 500 lines are reported.
+- `npm audit --audit-level=moderate` still fails with 17 moderate vulnerabilities.
 
 Audit details:
 
@@ -256,56 +216,48 @@ Recommendation:
 
 Current assessment against BRD Section 7.4:
 
-- New user can sign up, complete real 2FA, save recovery phrase, and reach dashboard on iOS/Android: **not met**
-- User can add one asset of each 10 categories: **partially met locally**
-- User can edit and delete assets: **partially met locally**
-- User can log out, kill app, reopen, and log back in including biometric: **not met**
+- New user can sign up, complete real 2FA, save recovery phrase, and reach dashboard on iOS/Android: **not met because real MFA is launch-deferred and iOS native verification is blocked locally**
+- User can add one asset of each 10 categories: **implemented and covered locally; Android/live Supabase returning-user path verified**
+- User can edit and delete assets: **implemented with encrypted Supabase repository; device coverage still needs final closeout**
+- User can log out, kill app, reopen, and log back in including biometric: **Android verified; iOS pending macOS/Xcode verification**
 - User can delete account: **partially met with server-side request queue plus local clear**
-- Vault content encrypted client-side and database contains ciphertext only: **not met because no database integration**
-- Audit logging works for sensitive actions: **partially met locally**
+- Vault content encrypted client-side and database contains ciphertext only: **implemented and live Supabase returning-user path verified; continue guarding plaintext metadata**
+- Audit logging works for sensitive actions: **durable Supabase persistence wired with plaintext metadata guards; continue expanding event/device metadata as needed**
 - Auto-logout works: **partially met**
-- Background privacy screen works: **implemented, needs device verification**
+- Background privacy screen works: **implemented, needs final device closeout verification**
 - Failed-login lockout works: **implemented in memory, needs persistence review**
-- Tests pass for crypto/auth/CRUD: **not met**
-- Manual physical iOS and Android journey test: **not verified**
+- Tests pass for crypto/auth/CRUD: **mobile and API tests have passed in recent slices; rerun closeout checks before claiming completion**
+- Manual physical iOS and Android journey test: **Android native-dev-client verified; iOS blocked in this Windows environment**
 - No TODO comments in production paths: **automated guard added; current failures are function-size only**
 - Folder structure matches Section 2.5: **partially met**
-- No file over 500 lines, no function over 100 lines: **not met; automated guard finds 17 functions over 100 lines and no files over 500 lines**
+- No file over 500 lines, no function over 100 lines: **not met; automated guard finds 16 functions over 100 lines and no files over 500 lines**
 
 ## Recommended Next Stage
 
 Work in this order:
 
-1. Wire real Supabase Phase 1 persistence:
-   - Schema/migrations.
-   - RLS.
-   - Encrypted asset CRUD.
-   - Durable audit log.
-   - Wrapped MEK storage.
+1. Close externally/environment-blocked verification:
+   - After Resend approval, configure `RESEND_API_KEY` and live-verify account-deletion confirmation email.
+   - From a macOS/Xcode-capable environment, run iOS native-dev-client returning-user unlock and biometric unlock.
 
-2. Wire real Supabase MFA:
+2. Wire real Supabase MFA when launch budget/features allow it:
    - Enrollment QR/factor id.
    - Verification.
    - Returning-user factor retrieval.
    - AAL/session gating.
    - Re-auth before deletion.
 
-3. Complete account deletion:
-   - Server-side deletion processing worker/API path.
-   - Supabase Auth user cleanup using service role on the server only.
-   - Confirmation email plan or placeholder endpoint.
-   - 30-day processing policy and 7-year anonymized audit retention policy.
+3. Finish password reset / recovery key lifecycle:
+   - Re-wrap persisted MEK/key material when password reset succeeds.
+   - Verify reset/recovery cannot orphan an encrypted vault.
 
 4. Resolve remaining SDK audit advisories:
    - Either wait for an SDK 54-compatible Expo patch that updates the transitive packages or plan an explicit Expo SDK upgrade slice.
    - Do not apply `npm audit fix --force` casually; it proposes a breaking Expo 56 upgrade.
 
-5. Device verification:
-   - Full sign-up journey on iOS.
-   - Full sign-up journey on Android.
-   - Auto-lock/background privacy.
-   - Biometric unlock.
-   - Returning-user login.
+5. Reduce Phase 1 guard debt:
+   - Continue splitting the 16 functions/components over the BRD 100-line function limit.
+   - Keep `npm run check:phase1` as the closeout gate.
 
 ## Slice Log
 
@@ -1431,11 +1383,131 @@ Verification:
 - `npm run check:phase1` still fails on existing function-size debt, but `vault-session-context.tsx` is no longer in the report.
 - Current scan result: no production launch markers, no production source files over 500 lines, 17 production functions/components over 100 lines.
 
+### 2026-06-03 - Profile Basics Panel Size Refactor
+
+Changed:
+
+- Split `apps/mobile/src/features/auth/components/profile-basics-panel.tsx` into smaller local header, fields, submit button, and submit-flow helpers.
+- Kept the public `ProfileBasicsPanel` export and signup progress behavior unchanged.
+- Preserved validation through `createProfileBasics`, signup progress persistence, and routing to `/auth/setup-totp`.
+
+Verification:
+
+- Test-first red check:
+  - `npm run check:phase1` failed because `profile-basics-panel.tsx` was still reported by `function-line-limit`.
+- `npm run typecheck --workspace @vault/mobile` passes.
+- `npm run test --workspace @vault/mobile -- profile-basics` passes: 2 files, 5 tests.
+- `npm run check:phase1` still fails on existing function-size debt, but `profile-basics-panel.tsx` is no longer in the report.
+- Current scan result: no production launch markers, no production source files over 500 lines, 16 production functions/components over 100 lines.
+
+### 2026-06-03 - Android Debug Build Verification
+
+Changed:
+
+- No source changes were required.
+- Verified the existing Android native project can produce a local debug APK from Gradle.
+
+Build command:
+
+```powershell
+$env:JAVA_HOME='C:\Program Files\Java\jdk-21'; $env:PATH="$env:JAVA_HOME\bin;$env:PATH"; .\gradlew.bat assembleDebug
+```
+
+Verification:
+
+- Initial build attempt failed before compilation because machine-level `JAVA_HOME` points to missing `C:\Program Files\Android\Android Studio\jbr`.
+- Rerun with process-local `JAVA_HOME=C:\Program Files\Java\jdk-21` succeeded.
+- `.\gradlew.bat assembleDebug` result: `BUILD SUCCESSFUL in 3m 56s`.
+- Output APK: `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk`.
+- APK size: 172,450,890 bytes.
+
+Notes:
+
+- Android command-line tooling emitted SDK XML compatibility warnings.
+- CMake emitted Windows path-length warnings for generated `react-native-ssl-public-key-pinning` object paths.
+- Gradle emitted deprecation warnings for future Gradle 9 compatibility.
+- None of those warnings blocked the debug APK build.
+
+### 2026-06-03 - Expanded MVP Asset Categories Wired
+
+Changed:
+
+- Added these 7 MVP asset categories to shared/mobile asset type validation:
+  - `card`,
+  - `vehicle`,
+  - `loan_debt`,
+  - `medical_care`,
+  - `dependent_pet`,
+  - `business_interest`,
+  - `digital_account`.
+- Added generic encrypted form config/routes for the 7 expanded categories.
+- Updated dashboard add links, asset labels, detail labels, recently deleted labels, and edit config wiring.
+- Added Supabase migration `20260603125545_expand_vault_asset_categories.sql` to expand `vault_assets.asset_type`.
+- Applied the migration to the linked remote Supabase project.
+
+Verification:
+
+- Test-first red checks failed as expected before implementation:
+  - mobile asset payload validation rejected new categories,
+  - schema test could not find `'card'` in the migrations,
+  - mobile typecheck rejected new asset types.
+- `npm run test --workspace @vault/mobile -- asset-payload.test.ts supabase-schema vault-dashboard-view-model recently-deleted-view-model` passes: 4 files, 15 tests.
+- `npm run test --workspace @vault/mobile` passes: 78 files passed, 1 skipped; 285 tests passed, 1 skipped.
+- `npm run typecheck` passes across mobile, shared packages, and API.
+- `supabase db push --linked` applied `20260603125545_expand_vault_asset_categories.sql` successfully.
+- `supabase migration list --linked` shows remote migration `20260603125545`.
+- Remote schema dump confirms live `vault_assets_asset_type_check` includes all 17 MVP categories.
+- No plaintext category-specific Supabase columns were added; category details remain inside encrypted `ciphertext`.
+
+### 2026-06-03 - Live Supabase Encrypted Asset Smoke
+
+Changed:
+
+- Added skipped-by-default live smoke test `apps/mobile/src/features/vault/encrypted-vault-live-supabase-smoke.test.ts`.
+- The smoke signs in with a verified Supabase test account, creates a `card` vault asset through the app encryption/session/repository path, reads the raw `vault_assets` row, asserts plaintext sentinels are absent, and deletes the test asset row.
+
+Verification:
+
+- Initial signup-based smoke was blocked because Supabase email confirmation does not return a session for new users.
+- Rerun with verified test credentials passed.
+- Raw Supabase row summary from the passing smoke:
+  - columns: `id`, `user_id`, `asset_type`, `ciphertext`, `nonce`, `created_at`, `updated_at`, `deleted_at`,
+  - `asset_type`: `card`,
+  - `ciphertextLength`: 303,
+  - `nonceLength`: 32,
+  - `hasTitlePlaintext`: false,
+  - `hasIssuerPlaintext`: false,
+  - `hasAccountNumberPlaintext`: false,
+  - `hasNotesPlaintext`: false.
+- `npm run test --workspace @vault/mobile -- encrypted-vault-live-supabase-smoke.test.ts` passes.
+- `npm run typecheck --workspace @vault/mobile` passes.
+
+### 2026-06-03 - Local PDF Export And Encrypted Storage Preview
+
+Changed:
+
+- Added local-only readable PDF export from unlocked in-memory vault assets.
+- Added PDF export route at `/vault/export` and dashboard link.
+- Added Expo-native local PDF/share dependencies: `expo-print` and `expo-sharing`.
+- Added encrypted storage preview as a transparency feature, not a backup.
+- Added safe audit event `vault_pdf_export_created` with no asset names, notes, file paths, or field values.
+- Added Supabase migration `20260603190000_add_pdf_export_audit_event_type.sql` so durable audit persistence accepts the PDF export event.
+- Kept generated PDFs off Supabase, backend services, and email flows.
+
+Verification:
+
+- `npm run test --workspace @vault/mobile -- supabase-schema.test.ts vault-export-model.test.ts vault-pdf-template.test.ts vault-pdf-exporter.test.ts encrypted-storage-preview.test.ts` passes: 5 files, 14 tests.
+- `npm run test --workspace @vault/mobile` passes: 82 files passed, 2 skipped; 292 tests passed, 2 skipped.
+- `npm run typecheck --workspace @vault/mobile` passes.
+- `npx expo-doctor` from `apps/mobile` passes: 17/17 checks.
+- `npm audit --audit-level=moderate` still fails with 17 moderate Expo SDK transitive `postcss` and `uuid` advisories; `npm audit fix --force` still proposes breaking `expo@56.0.8`, so no force fix was applied.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
 - `REVENUECAT_WEBHOOK_SECRET` is not configured in Vercel production yet; `POST /webhooks/revenuecat` returns 503 until that secret is set.
-- `npm run check:phase1` currently fails on 17 existing functions/components over the BRD 100-line function limit.
+- `npm run check:phase1` currently fails on 16 existing functions/components over the BRD 100-line function limit.
+- Machine-level `JAVA_HOME` points to a missing Android Studio JBR path; use `C:\Program Files\Java\jdk-21` for local Android Gradle builds or fix the user environment variable.
 - `npm audit --audit-level=moderate` still fails on Expo SDK transitive `postcss` and `uuid`; force fix proposes a breaking Expo 56 upgrade and has not been applied.
 - Real Supabase MFA remains launch-deferred because it is a paid Supabase feature; placeholder factor ids must not ship to production.
 - iOS native dev-client verification remains blocked in this Windows environment.
@@ -1476,12 +1548,48 @@ Use this opener to resume cleanly:
 ```text
 Partner, read HANDOFF.md first. We finished Android native dev-client verification for returning-user unlock, biometric cached-key unlock, durable audit persistence, and account-deletion queue/processor hardening. Android supports signed-in biometric enable/disable from Settings, cached-key unlock avoids unauthenticated Supabase vault repository calls, and cold-start biometric unlock routes to the Vault screen with `Your vault is ready.` Durable audit persistence is wired to Supabase `audit_events` with plaintext vault metadata guards. Account deletion now queues through the deployed API at `POST /account-deletion/request`, which validates the Supabase bearer session, creates the deletion request server-side, and sends a confirmation email through Resend when `RESEND_API_KEY` is configured. Resend account approval is currently pending, so live email verification is externally blocked. The processor explicitly deletes `vault_assets` and `vault_key_material`, anonymizes retained audit rows, then soft-deletes due Supabase Auth users with service-role credentials outside mobile. Seven-year anonymized audit retention automation is implemented and live-verified via `POST /internal/audit-retention/process`; manual GitHub workflow run `26824120201` returned `{"ok":true,"deleted":0}`. RevenueCat webhook TODO debt is cleared: the webhook now validates and acknowledges events with `entitlementSync: "deferred_phase_1"` and does not gate Phase 1 vault access. The API is deployed to Vercel production at `https://sanduqkin-api.vercel.app`; health, unauthorized processor rejection, authenticated processor invocation, manual GitHub scheduler dispatch, and unauthenticated deletion-request rejection are live-verified. Migrations through `20260601141825_add_account_deletion_processing_state.sql` are applied remotely and live RLS/column verification passed. On 2026-06-01, iOS native dev-build verification was attempted but blocked because this Windows environment has no Xcode/xcrun/iOS simulator. MFA remains intentionally on hold until launch because it is a paid Supabase feature.
 
-Start the next Windows/Android slice: if Resend is approved, configure Vercel `RESEND_API_KEY`, verify the sender/domain, and live-verify authenticated `POST /account-deletion/request`; otherwise work on another Pending Tech Debt item. If working on a Mac instead, run iOS native dev-client verification for returning-user unlock and biometric unlock.
+Start the next Windows/Android slice: emergency access and PDF export must be handled as a critical, staged security design/build, not one large feature. Keep the zero-knowledge vault model: Sanduqkin/Supabase must not decrypt user vault data directly and must not email plaintext vault information. Emergency access should release permission plus encrypted/wrapped key material only after verification; kin decrypts locally in the app/web flow. Support two user choices: pre-authorized kin as the highly recommended path, and sealed emergency access code as an opt-in backup path. PDF export should decrypt locally in the app and save/share from the device only. If Resend is approved, account-deletion email verification can remain a separate pending hardening slice. If working on a Mac instead, run iOS native dev-client verification for returning-user unlock and biometric unlock.
 ```
 
 Current next-slice checklist:
 
-- Continue account deletion/server-side retention hardening:
+- Critical emergency-access/PDF work must be done in small gated slices:
+  - Slice 0 - Write and review the security design:
+    - document the exact key-release model before schema or UI changes,
+    - cover pre-authorized kin, sealed emergency access code, release verification, local decryption, local PDF export, encrypted storage preview, audit logging, and failure cases,
+    - explicitly state that Sanduqkin/Supabase never sees vault plaintext, emergency codes, recovery phrases, MEKs, or generated PDFs,
+    - stop after the design document and get founder approval before implementation.
+  - Slice 1 - Data model and crypto primitives:
+    - add Supabase schema for emergency contacts, release policies, sealed packages, release requests, and audit state without plaintext vault fields,
+    - add local crypto helpers for wrapping/unwrapping MEK for pre-authorized kin and emergency-code sealed packages,
+    - generate emergency codes client-side with high entropy and human-readable formatting,
+    - store only salts, nonces, encrypted key material, release metadata, and status values server-side,
+    - verify tests prove no plaintext secret/code/MEK/vault data is persisted or logged.
+  - Slice 2 - User setup UX:
+    - add the emergency access choice screen,
+    - show `Pre-Authorized Kin` first with a `Highly recommended` badge and transparent security explanation,
+    - show `Sealed Emergency Code` as a backup option with clear loss/theft risk copy,
+    - require acknowledgement before sealed-code creation,
+    - allow viewing/regenerating/revoking emergency access configuration safely.
+  - Slice 3 - Release request and kin access UX:
+    - add kin request intake and verification state screens,
+    - release only wrapped key material after approved verification,
+    - require kin local decrypt using either their pre-authorized key or the user-provided emergency access code,
+    - never send decrypted data by email and never decrypt on the backend.
+  - Slice 4 - Local PDF export:
+    - add readable PDF export from already-decrypted in-memory vault data only,
+    - show a strong warning before export,
+    - use native save/share from the device,
+    - never upload generated PDFs to Supabase and never email them.
+  - Slice 5 - Encrypted storage preview:
+    - add a transparency view showing representative encrypted stored records/ciphertext,
+    - label it as a storage/security preview, not a user backup,
+    - explain that Sanduqkin stores encrypted text and non-sensitive metadata, not readable account details.
+  - Slice 6 - End-to-end hardening:
+    - add tests for release state transitions, crypto unwrap success/failure, sealed-code loss/failure, revocation, local-only PDF generation, and plaintext guards,
+    - run mobile tests, typecheck, phase guard, Expo doctor, and audit checks,
+    - update this handoff after each completed slice.
+- Keep account deletion/server-side retention hardening pending:
   - after Resend approval, configure `RESEND_API_KEY` and live-verify confirmation email.
 - Run closeout checks:
   - `npm run test --workspace @vault/mobile`,
@@ -1559,28 +1667,12 @@ Recommended MVP category list:
 17. `other`
    - Flexible fallback for important information not covered above.
 
-Current implementation gap:
+Current implementation status:
 
-- Current Supabase `vault_assets.asset_type` check constraint and mobile `AssetType` enum already include:
-  - `bank_account`,
-  - `investment`,
-  - `property`,
-  - `insurance`,
-  - `crypto`,
-  - `pension`,
-  - `subscription`,
-  - `document_location`,
-  - `contact`,
-  - `other`.
-- The recommended MVP list adds these missing categories:
-  - `card`,
-  - `vehicle`,
-  - `loan_debt`,
-  - `medical_care`,
-  - `dependent_pet`,
-  - `business_interest`,
-  - `digital_account`.
-- Adding those requires a Supabase migration to update the `asset_type` check constraint and matching mobile schema/tests.
+- Current Supabase `vault_assets.asset_type` check constraint and mobile `AssetType` enum include all 17 recommended MVP categories.
+- The original 10 BRD categories have specialized mobile forms and encrypted payload builders.
+- The 7 expanded MVP categories use generic encrypted form routes with category-specific labels and fields.
+- No plaintext category-specific Supabase columns were added; structured category fields remain inside encrypted JSON payloads.
 
 Sensitive-field UX rule:
 
@@ -1591,8 +1683,44 @@ Sensitive-field UX rule:
 Future kin-access decision:
 
 - The existing vault is user-encrypted and cannot be decrypted by Supabase alone.
-- Before kin access can work, the product needs a key-release design, for example:
-  - user pre-authorizes kin and wraps the MEK for the kin/public key,
-  - or stores a recovery/key share released after a verified claim workflow,
-  - or uses another explicit emergency-access mechanism.
-- Do not build a kin-request flow that implies Supabase/admins can decrypt existing vault data unless the cryptographic key-release design exists and is documented.
+- The agreed product direction is to keep zero-knowledge vault storage and build emergency access as a key-release system.
+- Do not build a flow where Sanduqkin/Supabase decrypts vault data server-side, exports plaintext server-side, or emails plaintext to kin.
+- Emergency access must support two transparent user choices:
+  - `Pre-Authorized Kin` - the highly recommended path.
+  - `Sealed Emergency Code` - an opt-in backup path for users whose kin cannot set up an account in advance.
+- `Pre-Authorized Kin` UX requirements:
+  - show this option first with a `Highly recommended` badge,
+  - explain that the trusted person verifies their account in advance,
+  - explain that Sanduqkin can release access only after emergency review is approved,
+  - explain that the vault remains encrypted and Sanduqkin cannot read the user's saved information,
+  - allow the user to remove or replace the trusted person.
+- `Sealed Emergency Code` UX/security requirements:
+  - generate the code client-side from cryptographically secure random bytes,
+  - format it as a human-readable high-entropy code, not a JWT or normal short OTP,
+  - use it as secret key material to derive a wrapping key for a sealed emergency package,
+  - never store, log, email, or send the raw code to Sanduqkin/Supabase,
+  - store only KDF salt, nonce, encrypted/wrapped key material, release policy metadata, and status server-side,
+  - tell the user clearly that Sanduqkin cannot recover the code if lost,
+  - tell the user clearly that someone with the code may be able to access the vault after emergency approval,
+  - require an acknowledgement before creating the sealed code,
+  - advise the user to give the code to next of kin or keep it with important papers, not send it through email/chat.
+- The app should create a kin-specific or sealed-code-specific wrapped MEK/decryption capability in advance.
+- If the user dies, is in coma, or is unable to communicate, kin submits a verified access claim.
+- After the release policy is satisfied, the system releases only encrypted/wrapped key material/decryption capability to the kin flow.
+- Decryption should happen client-side in the kin/user app experience, not in a server email job.
+- Any Supabase schema for kin access must avoid plaintext vault fields; expected server-visible metadata is limited to ids, status, verification/release state, timestamps, and wrapped encrypted key material.
+
+Local PDF export decision:
+
+- Users should be able to download a readable PDF of their vault from inside the app after local decrypt.
+- PDF generation should happen on-device from already-decrypted vault data in memory.
+- Do not upload generated PDFs to Supabase.
+- Do not email generated PDFs.
+- Show a clear warning that the PDF contains sensitive information and should be stored safely.
+- Suggested label: `Download readable PDF`.
+- Suggested warning: `Creates a readable PDF from your unlocked vault on this device. Sanduqkin does not receive or email this file. Store it safely.`
+- Add a separate transparency feature for encrypted storage preview:
+  - label it `View encrypted storage preview`,
+  - do not present it as a normal downloadable backup unless a restore/import flow is intentionally designed,
+  - show representative encrypted ciphertext/non-sensitive metadata so users understand what Sanduqkin stores,
+  - explain that Sanduqkin stores encrypted text like this, not readable account details.

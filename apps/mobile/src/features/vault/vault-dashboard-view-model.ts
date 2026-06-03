@@ -23,28 +23,42 @@ export type VaultDashboardViewModel = {
 
 const categoryLabels: Record<AssetType, string> = {
   bank_account: "Bank accounts",
+  business_interest: "Business interests",
+  card: "Cards",
   contact: "Contacts",
   crypto: "Crypto references",
+  dependent_pet: "Dependents and pets",
+  digital_account: "Digital accounts",
   document_location: "Document locations",
   insurance: "Insurance",
   investment: "Investments",
+  loan_debt: "Loans and debts",
+  medical_care: "Medical care",
   other: "Other",
   pension: "Pensions",
   property: "Properties",
   subscription: "Subscriptions",
+  vehicle: "Vehicles",
 };
 
 const itemLabels: Record<AssetType, string> = {
   bank_account: "Bank account",
+  business_interest: "Business interest",
+  card: "Card",
   contact: "Contact",
   crypto: "Crypto reference",
+  dependent_pet: "Dependent or pet",
+  digital_account: "Digital account",
   document_location: "Document location",
   insurance: "Insurance",
   investment: "Investment",
+  loan_debt: "Loan or debt",
+  medical_care: "Medical care",
   other: "Other",
   pension: "Pension",
   property: "Property",
   subscription: "Subscription",
+  vehicle: "Vehicle",
 };
 
 export function createVaultDashboardViewModel(

@@ -6,6 +6,7 @@ export type AuditEventType =
   | "sign_up_success"
   | "vault_unlocked"
   | "vault_locked"
+  | "vault_pdf_export_created"
   | "biometric_unlock_enabled"
   | "biometric_unlock_disabled"
   | "asset_created"

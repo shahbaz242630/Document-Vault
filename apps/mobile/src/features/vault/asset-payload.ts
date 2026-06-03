@@ -1,22 +1,13 @@
 import { z } from "zod";
 
+import { assetTypes } from "@vault/shared-types";
+
 import {
   decryptVaultPayload,
   encryptVaultPayload,
 } from "@/shared/crypto/vault-crypto";
 
-const assetTypeSchema = z.enum([
-  "bank_account",
-  "investment",
-  "property",
-  "insurance",
-  "crypto",
-  "pension",
-  "subscription",
-  "document_location",
-  "contact",
-  "other",
-]);
+const assetTypeSchema = z.enum(assetTypes);
 
 export type AssetType = z.infer<typeof assetTypeSchema>;
 

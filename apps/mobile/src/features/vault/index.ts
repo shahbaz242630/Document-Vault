@@ -5,9 +5,12 @@
 
 // Components
 export { AssetDetailView } from "./components/asset-detail-view";
+export { AddExpandedAssetRoute } from "./components/add-expanded-asset-route";
 export { DynamicAssetForm } from "./components/dynamic-asset-form";
 export { RecentlyDeletedList } from "./components/recently-deleted-list";
 export { VaultDashboard } from "./components/vault-dashboard";
+export { VaultExportScreen } from "./components/vault-export-screen";
+export { createEncryptedStoragePreview } from "./encrypted-storage-preview";
 export {
   decryptAssetPayload,
   encryptAssetPayload,
@@ -75,6 +78,11 @@ export {
   type OtherFormViewModel,
 } from "./other-form-view-model";
 export {
+  createExpandedAssetPayload,
+  getExpandedAssetConfig,
+  type ExpandedAssetType,
+} from "./expanded-asset-form";
+export {
   createPensionAssetPayload,
   type PensionFormValues,
 } from "./pension-form";
@@ -126,6 +134,9 @@ export {
   createVaultDashboardViewModel,
   type VaultDashboardViewModel,
 } from "./vault-dashboard-view-model";
+export { createVaultExportModel } from "./vault-export-model";
+export { exportVaultPdf } from "./vault-pdf-exporter";
+export { renderVaultPdfHtml } from "./vault-pdf-template";
 export {
   createRecentlyDeletedViewModel,
   type RecentlyDeletedViewModel,

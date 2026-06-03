@@ -9,6 +9,35 @@ import {
 } from "./asset-payload";
 
 describe("asset payload encryption", () => {
+  it("accepts expanded MVP asset categories", async () => {
+    const key = await generateMasterEncryptionKey();
+    const expandedAssetTypes = [
+      "card",
+      "vehicle",
+      "loan_debt",
+      "medical_care",
+      "dependent_pet",
+      "business_interest",
+      "digital_account",
+    ] as const;
+
+    for (const assetType of expandedAssetTypes) {
+      const payload: AssetPlaintextPayload = {
+        assetType,
+        fields: {
+          country: "UAE",
+          providerName: "Example provider",
+        },
+        title: `Example ${assetType}`,
+      };
+
+      const encrypted = await encryptAssetPayload({ key, payload });
+
+      expect(encrypted.assetType).toBe(assetType);
+      await expect(decryptAssetPayload({ encrypted, key })).resolves.toEqual(payload);
+    }
+  });
+
   it("encrypts and decrypts a validated asset payload", async () => {
     const key = await generateMasterEncryptionKey();
     const payload: AssetPlaintextPayload = {

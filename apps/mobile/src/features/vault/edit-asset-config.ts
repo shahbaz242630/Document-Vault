@@ -5,6 +5,7 @@ import {
   createContactEditConfig,
   createCryptoEditConfig,
   createDocumentLocationEditConfig,
+  createExpandedAssetEditConfig,
   createInsuranceEditConfig,
   createInvestmentEditConfig,
   createOtherEditConfig,
@@ -23,15 +24,22 @@ export type EditAssetConfig = {
 
 const editAssetConfigFactories: Record<AssetType, () => EditAssetConfig> = {
   bank_account: createBankAccountEditConfig,
+  business_interest: () => createExpandedAssetEditConfig("business_interest"),
+  card: () => createExpandedAssetEditConfig("card"),
   contact: createContactEditConfig,
   crypto: createCryptoEditConfig,
+  dependent_pet: () => createExpandedAssetEditConfig("dependent_pet"),
+  digital_account: () => createExpandedAssetEditConfig("digital_account"),
   document_location: createDocumentLocationEditConfig,
   insurance: createInsuranceEditConfig,
   investment: createInvestmentEditConfig,
+  loan_debt: () => createExpandedAssetEditConfig("loan_debt"),
+  medical_care: () => createExpandedAssetEditConfig("medical_care"),
   other: createOtherEditConfig,
   pension: createPensionEditConfig,
   property: createPropertyEditConfig,
   subscription: createSubscriptionEditConfig,
+  vehicle: () => createExpandedAssetEditConfig("vehicle"),
 };
 
 export function getEditAssetConfig(assetType: AssetType): EditAssetConfig {

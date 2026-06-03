@@ -95,15 +95,22 @@ export function AssetDetailView({ asset, onDelete, onEdit }: AssetDetailViewProp
 function getAssetTypeLabel(assetType: VaultDecryptedAsset["assetType"]): string {
   const labels: Record<string, string> = {
     bank_account: "Bank account",
+    business_interest: "Business interest",
+    card: "Card",
     contact: "Contact",
     crypto: "Crypto wallet",
+    dependent_pet: "Dependent or pet",
+    digital_account: "Digital account",
     document_location: "Document location",
     insurance: "Insurance",
     investment: "Investment",
+    loan_debt: "Loan or debt",
+    medical_care: "Medical care",
     other: "Other",
     pension: "Pension",
     property: "Property",
     subscription: "Subscription",
+    vehicle: "Vehicle",
   };
 
   return labels[assetType] ?? "Reference";

@@ -43,6 +43,22 @@ describe("Supabase Phase 1 schema migration", () => {
     expect(migration).toContain("(select auth.uid()) = user_id");
   });
 
+  it("expands vault asset type metadata to the full MVP category set", () => {
+    const migrations = readAllMigrations();
+
+    for (const assetType of [
+      "card",
+      "vehicle",
+      "loan_debt",
+      "medical_care",
+      "dependent_pet",
+      "business_interest",
+      "digital_account",
+    ]) {
+      expect(migrations).toContain(`'${assetType}'`);
+    }
+  });
+
   it("hardens Phase 1 table grants so anon has no direct vault table access", () => {
     const migrations = readAllMigrations();
 
@@ -67,6 +83,12 @@ describe("Supabase Phase 1 schema migration", () => {
 
     expect(migrations).toContain("'biometric_unlock_enabled'");
     expect(migrations).toContain("'biometric_unlock_disabled'");
+  });
+
+  it("allows durable audit rows for local PDF export events", () => {
+    const migrations = readAllMigrations();
+
+    expect(migrations).toContain("'vault_pdf_export_created'");
   });
 
   it("creates RLS-protected account deletion requests for authenticated users", () => {

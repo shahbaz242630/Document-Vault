@@ -43,6 +43,9 @@ export function VaultDashboard({ assets }: VaultDashboardProps) {
         <Link href="/vault/recently-deleted" style={{ color: colors.inkMuted, fontSize: 15 }}>
           Recently deleted
         </Link>
+        <Link href="/vault/export" style={{ color: colors.inkMuted, fontSize: 15 }}>
+          Export vault
+        </Link>
         <SettingsLink />
       </View>
     );
@@ -92,11 +95,17 @@ export function VaultDashboard({ assets }: VaultDashboardProps) {
       <Link href="/vault/add-bank-account" style={{ color: colors.action, fontSize: 17 }}>
         Add bank account
       </Link>
+      <Link href="/vault/add-card" style={{ color: colors.action, fontSize: 17 }}>
+        Add card
+      </Link>
       <Link href="/vault/add-investment" style={{ color: colors.action, fontSize: 17 }}>
         Add investment
       </Link>
       <Link href="/vault/add-property" style={{ color: colors.action, fontSize: 17 }}>
         Add property
+      </Link>
+      <Link href="/vault/add-vehicle" style={{ color: colors.action, fontSize: 17 }}>
+        Add vehicle
       </Link>
       <Link href="/vault/add-insurance" style={{ color: colors.action, fontSize: 17 }}>
         Add insurance
@@ -107,6 +116,9 @@ export function VaultDashboard({ assets }: VaultDashboardProps) {
       <Link href="/vault/add-pension" style={{ color: colors.action, fontSize: 17 }}>
         Add pension
       </Link>
+      <Link href="/vault/add-loan-debt" style={{ color: colors.action, fontSize: 17 }}>
+        Add loan or debt
+      </Link>
       <Link href="/vault/add-subscription" style={{ color: colors.action, fontSize: 17 }}>
         Add subscription
       </Link>
@@ -116,11 +128,26 @@ export function VaultDashboard({ assets }: VaultDashboardProps) {
       <Link href="/vault/add-contact" style={{ color: colors.action, fontSize: 17 }}>
         Add contact
       </Link>
+      <Link href="/vault/add-medical-care" style={{ color: colors.action, fontSize: 17 }}>
+        Add medical care
+      </Link>
+      <Link href="/vault/add-dependent-pet" style={{ color: colors.action, fontSize: 17 }}>
+        Add dependent or pet
+      </Link>
+      <Link href="/vault/add-business-interest" style={{ color: colors.action, fontSize: 17 }}>
+        Add business interest
+      </Link>
+      <Link href="/vault/add-digital-account" style={{ color: colors.action, fontSize: 17 }}>
+        Add digital account
+      </Link>
       <Link href="/vault/add-other" style={{ color: colors.action, fontSize: 17 }}>
         Add other
       </Link>
       <Link href="/vault/recently-deleted" style={{ color: colors.inkMuted, fontSize: 15 }}>
         Recently deleted
+      </Link>
+      <Link href="/vault/export" style={{ color: colors.inkMuted, fontSize: 15 }}>
+        Export vault
       </Link>
       <SettingsLink />
     </View>

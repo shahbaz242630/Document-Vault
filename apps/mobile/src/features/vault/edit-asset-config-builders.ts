@@ -8,6 +8,11 @@ import { createCryptoFormViewModel } from "./crypto-form-view-model";
 import { createDocumentLocationAssetPayload } from "./document-location-form";
 import { createDocumentLocationFormViewModel } from "./document-location-form-view-model";
 import type { EditAssetConfig } from "./edit-asset-config";
+import {
+  createExpandedAssetPayload,
+  getExpandedAssetConfig,
+  type ExpandedAssetType,
+} from "./expanded-asset-form";
 import { createInsuranceAssetPayload } from "./insurance-form";
 import { createInsuranceFormViewModel } from "./insurance-form-view-model";
 import { createInvestmentAssetPayload } from "./investment-form";
@@ -315,6 +320,24 @@ export function createOtherEditConfig(): EditAssetConfig {
       country: assetField(asset, "country"),
       description: assetField(asset, "description"),
       documentLocation: assetField(asset, "documentLocation"),
+      notes: asset.notes ?? "",
+      title: asset.title,
+    }),
+  };
+}
+
+export function createExpandedAssetEditConfig(
+  assetType: ExpandedAssetType,
+): EditAssetConfig {
+  const config = getExpandedAssetConfig(assetType);
+
+  return {
+    categoryLabel: config.categoryLabel,
+    fields: config.fields,
+    createPayload: (values) => createExpandedAssetPayload({ assetType, values }),
+    getInitialValues: (asset) => ({
+      ...config.initialValues,
+      ...asset.fields,
       notes: asset.notes ?? "",
       title: asset.title,
     }),
