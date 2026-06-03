@@ -268,9 +268,9 @@ Current assessment against BRD Section 7.4:
 - Failed-login lockout works: **implemented in memory, needs persistence review**
 - Tests pass for crypto/auth/CRUD: **not met**
 - Manual physical iOS and Android journey test: **not verified**
-- No TODO comments in production paths: **needs fresh scan before completion**
+- No TODO comments in production paths: **automated guard added; current failures are function-size only**
 - Folder structure matches Section 2.5: **partially met**
-- No file over 500 lines, no function over 100 lines: **needs fresh automated check before completion**
+- No file over 500 lines, no function over 100 lines: **not met; automated guard finds 24 functions over 100 lines and no files over 500 lines**
 
 ## Recommended Next Stage
 
@@ -1296,10 +1296,37 @@ Remaining RevenueCat work:
 - Keep RevenueCat as payment foundation only until Phase 1 DoD is green.
 - When payment scope resumes, add idempotent entitlement persistence with retry/event-order handling before using webhooks to affect product access.
 
+### 2026-06-03 - Phase 1 DoD Guard
+
+Changed:
+
+- Added `npm run check:phase1` as a repeatable guard for BRD Phase 1 production-source hygiene.
+- The guard scans `apps`, `services`, `packages`, and `scripts` source files.
+- It fails on production launch markers, files over 500 lines, and function bodies over 100 lines.
+- It ignores test files and documentation so historical handoff notes do not block production hygiene.
+
+Verification:
+
+- Test-first red check:
+  - `node --test scripts/phase1-dod-check.test.cjs` initially failed because `scripts/phase1-dod-check.cjs` did not exist.
+- `node --test scripts/phase1-dod-check.test.cjs` passes: 2 tests.
+- `npm run check:phase1` now runs and fails only on existing `function-line-limit` violations.
+- Current scan result: no production launch markers, no production source files over 500 lines, 24 production functions/components over 100 lines.
+
+Recommended next refactor targets:
+
+- Start with the largest Phase 1-auth files before vault/payment foundation files:
+  - `apps/mobile/src/features/auth/components/reset-password-panel.tsx`
+  - `apps/mobile/src/features/auth/components/email-password-auth-form.tsx`
+  - `apps/mobile/src/features/auth/components/forgot-password-panel.tsx`
+  - `apps/mobile/src/features/auth/components/re-auth-panel.tsx`
+  - `apps/mobile/src/features/vault/edit-asset-config.ts`
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
 - `REVENUECAT_WEBHOOK_SECRET` is not configured in Vercel production yet; `POST /webhooks/revenuecat` returns 503 until that secret is set.
+- `npm run check:phase1` currently fails on 24 existing functions/components over the BRD 100-line function limit.
 - `npm audit --audit-level=moderate` still fails on Expo SDK transitive `postcss` and `uuid`; force fix proposes a breaking Expo 56 upgrade and has not been applied.
 - Real Supabase MFA remains launch-deferred because it is a paid Supabase feature; placeholder factor ids must not ship to production.
 - iOS native dev-client verification remains blocked in this Windows environment.
@@ -1311,6 +1338,7 @@ From repo root:
 ```powershell
 npm run test --workspace @vault/mobile
 npm run typecheck
+npm run check:phase1
 npm audit --audit-level=moderate
 ```
 
