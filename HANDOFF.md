@@ -236,11 +236,11 @@ Audit details:
 - `npm audit fix --force` proposes installing `expo@56.0.8`, a breaking SDK-family upgrade. Do not take that as part of Phase 1 hardening without an explicit Expo upgrade slice.
 - A previous targeted root `@expo/metro-config.postcss` override remains in `package.json`, but npm currently still resolves the nested vulnerable `postcss@8.4.49` under `@expo/metro-config`.
 
-### P1 - Production TODO Exists
+### P1 - RevenueCat Webhook Is Acknowledgement-Only
 
-`services/api/src/webhooks/revenuecat.ts` contains a TODO to sync entitlement state to Supabase.
+`services/api/src/webhooks/revenuecat.ts` now validates and acknowledges RevenueCat webhook events without syncing entitlements during Phase 1.
 
-This violates the Phase 1 BRD Definition of Done rule: no TODO comments in production code paths.
+This keeps the existing payment foundation contained while Phase 1 vault integration remains the priority. Do not gate Phase 1 vault behavior behind subscriptions.
 
 ### P1 - Phase Drift
 
@@ -268,7 +268,7 @@ Current assessment against BRD Section 7.4:
 - Failed-login lockout works: **implemented in memory, needs persistence review**
 - Tests pass for crypto/auth/CRUD: **not met**
 - Manual physical iOS and Android journey test: **not verified**
-- No TODO comments in production paths: **not met**
+- No TODO comments in production paths: **needs fresh scan before completion**
 - Folder structure matches Section 2.5: **partially met**
 - No file over 500 lines, no function over 100 lines: **needs fresh automated check before completion**
 
@@ -1270,10 +1270,33 @@ Remaining account-deletion work:
 - Verify `ACCOUNT_DELETION_EMAIL_FROM` is a Resend-verified sender/domain. Current configured sender is `Sanduqkin <support@sanduqkin.com>`.
 - Live-verify authenticated `POST /account-deletion/request` using a test account after `RESEND_API_KEY` is configured.
 
+### 2026-06-03 - RevenueCat Webhook Phase 1 Cleanup
+
+Changed:
+
+- Removed the production-path TODO from `services/api/src/webhooks/revenuecat.ts`.
+- Refactored the RevenueCat webhook into `createRevenueCatWebhookHandler` for dependency-injected tests while keeping `revenueCatWebhookHandler` as the app route handler.
+- Defined Phase 1 webhook behavior as validated acknowledgement only.
+- Valid webhook events now return `{ "ok": true, "entitlementSync": "deferred_phase_1" }`.
+- Added `docs/revenuecat-operations.md` documenting that entitlement persistence is intentionally deferred and Phase 1 vault access must not be subscription-gated.
+
+Verification:
+
+- Test-first red check:
+  - `webhooks/revenuecat` initially failed because the webhook was not injectable and valid events did not return the deferred entitlement-sync marker.
+- `npm run test --workspace @vault/api -- webhooks/revenuecat.test.ts` passes: 1 file, 3 tests.
+- `npm run test --workspace @vault/api` passes: 8 files, 16 tests.
+- `npm run typecheck --workspace @vault/api` passes.
+- `rg -n "TODO|FIXME|XXX" services apps packages docs HANDOFF.md` now shows only historical handoff references until this handoff refresh removes them; no production code TODO remains.
+
+Remaining RevenueCat work:
+
+- Keep RevenueCat as payment foundation only until Phase 1 DoD is green.
+- When payment scope resumes, add idempotent entitlement persistence with retry/event-order handling before using webhooks to affect product access.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
-- `services/api/src/webhooks/revenuecat.ts` still contains a production-path TODO for entitlement sync; this remains Phase 1 tech debt because Phase 1 should avoid production TODOs.
 - `npm audit --audit-level=moderate` still fails on Expo SDK transitive `postcss` and `uuid`; force fix proposes a breaking Expo 56 upgrade and has not been applied.
 - Real Supabase MFA remains launch-deferred because it is a paid Supabase feature; placeholder factor ids must not ship to production.
 - iOS native dev-client verification remains blocked in this Windows environment.
@@ -1311,7 +1334,7 @@ After Supabase/API integration exists, add backend/API tests and run them as par
 Use this opener to resume cleanly:
 
 ```text
-Partner, read HANDOFF.md first. We finished Android native dev-client verification for returning-user unlock, biometric cached-key unlock, durable audit persistence, and account-deletion queue/processor hardening. Android supports signed-in biometric enable/disable from Settings, cached-key unlock avoids unauthenticated Supabase vault repository calls, and cold-start biometric unlock routes to the Vault screen with `Your vault is ready.` Durable audit persistence is wired to Supabase `audit_events` with plaintext vault metadata guards. Account deletion now queues through the deployed API at `POST /account-deletion/request`, which validates the Supabase bearer session, creates the deletion request server-side, and sends a confirmation email through Resend when `RESEND_API_KEY` is configured. Resend account approval is currently pending, so live email verification is externally blocked. The processor explicitly deletes `vault_assets` and `vault_key_material`, anonymizes retained audit rows, then soft-deletes due Supabase Auth users with service-role credentials outside mobile. Seven-year anonymized audit retention automation is implemented and live-verified via `POST /internal/audit-retention/process`; manual GitHub workflow run `26824120201` returned `{"ok":true,"deleted":0}`. The API is deployed to Vercel production at `https://sanduqkin-api.vercel.app`; health, unauthorized processor rejection, authenticated processor invocation, manual GitHub scheduler dispatch, and unauthenticated deletion-request rejection are live-verified. Migrations through `20260601141825_add_account_deletion_processing_state.sql` are applied remotely and live RLS/column verification passed. On 2026-06-01, iOS native dev-build verification was attempted but blocked because this Windows environment has no Xcode/xcrun/iOS simulator. MFA remains intentionally on hold until launch because it is a paid Supabase feature.
+Partner, read HANDOFF.md first. We finished Android native dev-client verification for returning-user unlock, biometric cached-key unlock, durable audit persistence, and account-deletion queue/processor hardening. Android supports signed-in biometric enable/disable from Settings, cached-key unlock avoids unauthenticated Supabase vault repository calls, and cold-start biometric unlock routes to the Vault screen with `Your vault is ready.` Durable audit persistence is wired to Supabase `audit_events` with plaintext vault metadata guards. Account deletion now queues through the deployed API at `POST /account-deletion/request`, which validates the Supabase bearer session, creates the deletion request server-side, and sends a confirmation email through Resend when `RESEND_API_KEY` is configured. Resend account approval is currently pending, so live email verification is externally blocked. The processor explicitly deletes `vault_assets` and `vault_key_material`, anonymizes retained audit rows, then soft-deletes due Supabase Auth users with service-role credentials outside mobile. Seven-year anonymized audit retention automation is implemented and live-verified via `POST /internal/audit-retention/process`; manual GitHub workflow run `26824120201` returned `{"ok":true,"deleted":0}`. RevenueCat webhook TODO debt is cleared: the webhook now validates and acknowledges events with `entitlementSync: "deferred_phase_1"` and does not gate Phase 1 vault access. The API is deployed to Vercel production at `https://sanduqkin-api.vercel.app`; health, unauthorized processor rejection, authenticated processor invocation, manual GitHub scheduler dispatch, and unauthenticated deletion-request rejection are live-verified. Migrations through `20260601141825_add_account_deletion_processing_state.sql` are applied remotely and live RLS/column verification passed. On 2026-06-01, iOS native dev-build verification was attempted but blocked because this Windows environment has no Xcode/xcrun/iOS simulator. MFA remains intentionally on hold until launch because it is a paid Supabase feature.
 
 Start the next Windows/Android slice: if Resend is approved, configure Vercel `RESEND_API_KEY`, verify the sender/domain, and live-verify authenticated `POST /account-deletion/request`; otherwise work on another Pending Tech Debt item. If working on a Mac instead, run iOS native dev-client verification for returning-user unlock and biometric unlock.
 ```
