@@ -288,6 +288,23 @@ describe("vault session", () => {
     expect(JSON.stringify(encryptedRecords)).not.toContain("Recovery instructions");
   });
 
+  it("creates sealed emergency code setup without exposing the session MEK", async () => {
+    const key = await generateMasterEncryptionKey();
+    const repository = createEmergencyGrantRepositoryDouble();
+    const session = createVaultSession({ key });
+
+    const result = await session.createSealedEmergencyCodeSetup(repository, {
+      codeGenerator: async () => "K7Q9-M2XD-8V4P-ZR6T-AL3N",
+    });
+
+    expect(result).toEqual({
+      code: "K7Q9-M2XD-8V4P-ZR6T-AL3N",
+      status: "pending_confirmation",
+    });
+    expect(repository.savedGrantCount).toBe(1);
+    expect("getMek" in session).toBe(false);
+  });
+
   it("persists soft delete, restore, and permanent delete operations", async () => {
     const key = await generateMasterEncryptionKey();
     const repository = createRepositoryDouble();
@@ -384,6 +401,24 @@ function createRepositoryDouble(initialRecords: VaultEncryptedAssetRecord[] = []
       records.set(input.id, deleted);
 
       return deleted;
+    },
+  };
+}
+
+function createEmergencyGrantRepositoryDouble() {
+  let savedGrantCount = 0;
+
+  return {
+    get savedGrantCount() {
+      return savedGrantCount;
+    },
+    async revokeActiveSealedCodeGrants() {
+      return undefined;
+    },
+    async saveSealedCodeGrant<T>(grant: T) {
+      savedGrantCount += 1;
+
+      return grant;
     },
   };
 }

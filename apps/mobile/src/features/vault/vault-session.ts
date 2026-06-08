@@ -5,6 +5,14 @@ import {
   type VaultDeletedAsset,
   type VaultEncryptedAssetRecord,
 } from "./vault-store";
+import {
+  createSealedEmergencyCodeSetup,
+  regenerateSealedEmergencyCodeSetup,
+  revokeSealedEmergencyCodeSetup,
+  type SealedEmergencyCodeGrantRepository,
+  type SealedEmergencyCodeSetupOptions,
+  type SealedEmergencyCodeSetupResult,
+} from "./sealed-emergency-code-service";
 
 type VaultStore = ReturnType<typeof createVaultStore>;
 
@@ -36,6 +44,18 @@ export type VaultSession = {
   listEncryptedRecords: () => VaultEncryptedAssetRecord[];
   loadPersistedAssets: () => Promise<void>;
   permanentlyDeleteAsset: (id: string) => Promise<boolean>;
+  createSealedEmergencyCodeSetup: (
+    repository: SealedEmergencyCodeGrantRepository,
+    options?: Omit<SealedEmergencyCodeSetupOptions, "mek" | "repository">,
+  ) => Promise<SealedEmergencyCodeSetupResult>;
+  regenerateSealedEmergencyCodeSetup: (
+    repository: SealedEmergencyCodeGrantRepository,
+    options?: Omit<SealedEmergencyCodeSetupOptions, "mek" | "repository">,
+  ) => Promise<SealedEmergencyCodeSetupResult>;
+  revokeSealedEmergencyCodeSetup: (
+    repository: Pick<SealedEmergencyCodeGrantRepository, "revokeActiveSealedCodeGrants">,
+    options?: { auditLog?: SealedEmergencyCodeSetupOptions["auditLog"] },
+  ) => Promise<void>;
   restoreAsset: (id: string) => Promise<VaultEncryptedAssetRecord | null>;
   softDeleteAsset: (id: string) => Promise<VaultEncryptedAssetRecord | null>;
   updateAsset: (id: string, payload: AssetPlaintextPayload) => Promise<VaultDecryptedAsset | null>;
@@ -80,6 +100,26 @@ export function createVaultSession({
       }
 
       return deleted;
+    },
+    createSealedEmergencyCodeSetup(repository, options = {}) {
+      return createSealedEmergencyCodeSetup({
+        ...options,
+        mek: key,
+        repository,
+      });
+    },
+    regenerateSealedEmergencyCodeSetup(repository, options = {}) {
+      return regenerateSealedEmergencyCodeSetup({
+        ...options,
+        mek: key,
+        repository,
+      });
+    },
+    revokeSealedEmergencyCodeSetup(repository, options = {}) {
+      return revokeSealedEmergencyCodeSetup({
+        ...options,
+        repository,
+      });
     },
     async restoreAsset(id) {
       const record = store.restoreAsset(id);

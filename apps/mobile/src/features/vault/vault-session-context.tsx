@@ -34,6 +34,11 @@ import {
   type VaultSession,
 } from "./vault-session";
 import type {
+  SealedEmergencyCodeGrantRepository,
+  SealedEmergencyCodeSetupOptions,
+  SealedEmergencyCodeSetupResult,
+} from "./sealed-emergency-code-service";
+import type {
   VaultDecryptedAsset,
   VaultDeletedAsset,
   VaultEncryptedAssetRecord,
@@ -49,6 +54,18 @@ type VaultSessionContextValue = {
   isReady: boolean;
   lock: () => void;
   permanentlyDeleteAsset: (id: string) => Promise<void>;
+  createSealedEmergencyCodeSetup: (
+    repository: SealedEmergencyCodeGrantRepository,
+    options?: Omit<SealedEmergencyCodeSetupOptions, "mek" | "repository">,
+  ) => Promise<SealedEmergencyCodeSetupResult>;
+  regenerateSealedEmergencyCodeSetup: (
+    repository: SealedEmergencyCodeGrantRepository,
+    options?: Omit<SealedEmergencyCodeSetupOptions, "mek" | "repository">,
+  ) => Promise<SealedEmergencyCodeSetupResult>;
+  revokeSealedEmergencyCodeSetup: (
+    repository: Pick<SealedEmergencyCodeGrantRepository, "revokeActiveSealedCodeGrants">,
+    options?: { auditLog?: SealedEmergencyCodeSetupOptions["auditLog"] },
+  ) => Promise<void>;
   restoreAsset: (id: string) => Promise<void>;
   signOut: () => void;
   softDeleteAsset: (id: string) => Promise<void>;
@@ -108,10 +125,12 @@ function useVaultSessionContextValue(): VaultSessionContextValue {
   const initialize = useVaultInitialize({ refreshAssets, setters });
   const { lock, signOut } = useVaultLifecycleActions(setters);
   const assetActions = useVaultAssetActions({ refreshAssets, session });
+  const emergencyCodeActions = useVaultEmergencyCodeActions(session);
 
   return useMemo(
     () => ({
       ...assetActions,
+      ...emergencyCodeActions,
       assets,
       deletedAssets,
       encryptedRecords,
@@ -123,6 +142,7 @@ function useVaultSessionContextValue(): VaultSessionContextValue {
     }),
     [
       assetActions,
+      emergencyCodeActions,
       assets,
       deletedAssets,
       encryptedRecords,
@@ -131,6 +151,43 @@ function useVaultSessionContextValue(): VaultSessionContextValue {
       isReady,
       lock,
       signOut,
+    ],
+  );
+}
+
+function useVaultEmergencyCodeActions(session: VaultSession | null) {
+  const createSealedEmergencyCodeSetup = useCallback(
+    (
+      repository: SealedEmergencyCodeGrantRepository,
+      options?: Omit<SealedEmergencyCodeSetupOptions, "mek" | "repository">,
+    ) => requireVaultSession(session).createSealedEmergencyCodeSetup(repository, options),
+    [session],
+  );
+  const regenerateSealedEmergencyCodeSetup = useCallback(
+    (
+      repository: SealedEmergencyCodeGrantRepository,
+      options?: Omit<SealedEmergencyCodeSetupOptions, "mek" | "repository">,
+    ) => requireVaultSession(session).regenerateSealedEmergencyCodeSetup(repository, options),
+    [session],
+  );
+  const revokeSealedEmergencyCodeSetup = useCallback(
+    (
+      repository: Pick<SealedEmergencyCodeGrantRepository, "revokeActiveSealedCodeGrants">,
+      options?: { auditLog?: SealedEmergencyCodeSetupOptions["auditLog"] },
+    ) => requireVaultSession(session).revokeSealedEmergencyCodeSetup(repository, options),
+    [session],
+  );
+
+  return useMemo(
+    () => ({
+      createSealedEmergencyCodeSetup,
+      regenerateSealedEmergencyCodeSetup,
+      revokeSealedEmergencyCodeSetup,
+    }),
+    [
+      createSealedEmergencyCodeSetup,
+      regenerateSealedEmergencyCodeSetup,
+      revokeSealedEmergencyCodeSetup,
     ],
   );
 }

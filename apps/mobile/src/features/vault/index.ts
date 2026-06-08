@@ -143,6 +143,14 @@ export {
   type SupabaseEmergencyKeyGrantRow,
 } from "./supabase-emergency-grant-repository";
 export {
+  createSealedEmergencyCodeSetup,
+  regenerateSealedEmergencyCodeSetup,
+  revokeSealedEmergencyCodeSetup,
+  type SealedEmergencyCodeGrantRepository,
+  type SealedEmergencyCodeSetupOptions,
+  type SealedEmergencyCodeSetupResult,
+} from "./sealed-emergency-code-service";
+export {
   createVaultStore,
   type VaultDeletedAsset,
   type VaultDecryptedAsset,

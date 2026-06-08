@@ -1589,6 +1589,22 @@ Verification:
 - `npm run test --workspace @vault/mobile -- supabase-emergency-grant-repository.test.ts emergency-key-wrapping.test.ts` passes: 2 files, 8 tests.
 - `npm run typecheck --workspace @vault/mobile` passes.
 
+### 2026-06-08 - Sealed Emergency Code Setup Slice 3
+
+Changed:
+
+- Added `sealed-emergency-code-service` to create, regenerate, and revoke sealed emergency code setup grants.
+- Service returns the raw emergency code only in the immediate setup result for one-time display and does not persist it.
+- Regeneration revokes active sealed-code grants before saving the replacement package.
+- Revocation and setup actions log only safe audit metadata such as `grantType: "sealed_emergency_code"` and `previousGrantRevoked: "true"`.
+- Added narrow vault session/context operations for sealed emergency code setup, regenerate, and revoke without exposing a generic MEK getter.
+- Added tests proving repository saves exclude raw code text, audit metadata excludes raw code/MEK/vault plaintext indicators, and `VaultSession` does not expose `getMek`.
+
+Verification:
+
+- `npm run test --workspace @vault/mobile -- sealed-emergency-code-service.test.ts vault-session.test.ts vault-session-context.test.ts` passes: 3 files, 17 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
