@@ -34,6 +34,21 @@ describe("createAuditLog", () => {
     expect(log.events[0].metadata).toEqual({ reason: "invalid credentials" });
   });
 
+  it("accepts sealed emergency code event types without secret metadata", () => {
+    const log = createAuditLog();
+
+    log.log({
+      deviceInfo: "React Native",
+      eventType: "sealed_emergency_code_created",
+      metadata: { grantType: "sealed_emergency_code" },
+    });
+
+    expect(log.events[0]?.eventType).toBe("sealed_emergency_code_created");
+    expect(log.events[0]?.metadata).toEqual({
+      grantType: "sealed_emergency_code",
+    });
+  });
+
   it("returns a copy of events that cannot mutate internal state", () => {
     const log = createAuditLog();
 

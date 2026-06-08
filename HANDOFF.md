@@ -1553,6 +1553,24 @@ Verification:
 - `npm run typecheck --workspace @vault/mobile` passes.
 - `npm run test --workspace @vault/mobile` passes: 87 files passed, 2 skipped; 309 tests passed, 2 skipped.
 
+### 2026-06-08 - Sealed Emergency Code Setup Slice 1
+
+Changed:
+
+- Added the approved sealed emergency code setup implementation plan at `docs/superpowers/plans/2026-06-08-sealed-emergency-code-setup.md`.
+- Installed `expo-screen-capture` for the future protected one-time emergency code display screen.
+- Added safe sealed emergency code audit event types:
+  - `sealed_emergency_code_created`,
+  - `sealed_emergency_code_revoked`,
+  - `sealed_emergency_code_regenerated`.
+- Added focused audit-log coverage for sealed emergency code event metadata without introducing raw emergency code, MEK, ciphertext, or vault plaintext fields.
+
+Verification:
+
+- `npm run test --workspace @vault/mobile -- audit-log.test.ts` passes: 2 files, 12 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+- `npx expo install expo-screen-capture` completed with the known existing 17 moderate npm audit advisories still present.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
