@@ -136,6 +136,13 @@ export {
   type SupabaseKeyMaterialClient,
 } from "./supabase-key-material-repository";
 export {
+  createSupabaseEmergencyGrantRepository,
+  deserializeEmergencyGrantRow,
+  serializeEmergencyWrappedMEKPackage,
+  type SupabaseEmergencyGrantClient,
+  type SupabaseEmergencyKeyGrantRow,
+} from "./supabase-emergency-grant-repository";
+export {
   createVaultStore,
   type VaultDeletedAsset,
   type VaultDecryptedAsset,

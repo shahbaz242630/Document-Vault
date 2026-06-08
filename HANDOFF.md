@@ -1571,6 +1571,24 @@ Verification:
 - `npm run typecheck --workspace @vault/mobile` passes.
 - `npx expo install expo-screen-capture` completed with the known existing 17 moderate npm audit advisories still present.
 
+### 2026-06-08 - Sealed Emergency Code Setup Slice 2
+
+Changed:
+
+- Added `createSupabaseEmergencyGrantRepository` for `emergency_key_grants`.
+- Added serialization/deserialization for sealed emergency code wrapped-MEK packages:
+  - wrapped MEK ciphertext,
+  - wrapped MEK nonce,
+  - Argon2id KDF salt and params,
+  - grant type/status/wrapping algorithm metadata.
+- Added repository operations to load the active sealed-code grant, save a new active sealed-code grant, and revoke active sealed-code grants.
+- Added tests proving raw emergency codes, plaintext MEKs, `mek`, and `emergency_code` fields are not persisted in emergency grant rows.
+
+Verification:
+
+- `npm run test --workspace @vault/mobile -- supabase-emergency-grant-repository.test.ts emergency-key-wrapping.test.ts` passes: 2 files, 8 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.
