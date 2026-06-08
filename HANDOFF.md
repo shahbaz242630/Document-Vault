@@ -1627,6 +1627,20 @@ Verification:
 - `npm run test --workspace @vault/mobile -- emergency-access-screen.test.ts sealed-emergency-code-service.test.ts` passes: 2 files, 6 tests.
 - `npm run typecheck --workspace @vault/mobile` passes.
 
+### 2026-06-08 - Sealed Emergency Code Setup Closeout
+
+Changed:
+
+- Refactored `/settings/emergency-access` route setup state into smaller helpers after `npm run check:phase1` caught a new route function-size violation.
+- Confirmed the sealed emergency code setup work no longer adds new Phase 1 function-size debt.
+
+Verification:
+
+- `npm run test --workspace @vault/mobile -- emergency-access-code.test.ts emergency-key-wrapping.test.ts supabase-emergency-grant-repository.test.ts sealed-emergency-code-service.test.ts emergency-access-screen.test.ts` passes: 5 files, 17 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+- `npx expo-doctor` from `apps/mobile` passes: 17/17 checks.
+- `npm run check:phase1` still fails on the known existing function-line-limit debt in 16 files/functions; after refactoring this slice, no `app/settings/emergency-access.tsx` violation remains.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.

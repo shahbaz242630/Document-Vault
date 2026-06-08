@@ -16,45 +16,7 @@ import { screenStyles } from "@/shared/ui/screen";
 const pendingConfirmationKey = "sanduqkin.sealedEmergencyCode.pendingConfirmation";
 
 export default function EmergencyAccessRoute() {
-  const vaultSession = useVaultSession();
-  const supabaseClient = useMemo(() => createSupabaseClient(), []);
-  const repository = useMemo(
-    () =>
-      supabaseClient
-        ? createSupabaseEmergencyGrantRepository(
-            supabaseClient as unknown as SupabaseEmergencyGrantClient,
-          )
-        : null,
-    [supabaseClient],
-  );
-  const [status, setStatus] = useState<SealedCodeSetupStatus>("none");
-  const [oneTimeCode, setOneTimeCode] = useState<string | null>(null);
-  const [isBusy, setIsBusy] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadInterruptedSetup() {
-      if (!repository) {
-        return;
-      }
-
-      const pending = await SecureStore.getItemAsync(pendingConfirmationKey);
-      const activeGrant = pending
-        ? await repository.loadActiveSealedCodeGrant()
-        : null;
-
-      if (isMounted && pending && activeGrant) {
-        setStatus("interrupted");
-      }
-    }
-
-    void loadInterruptedSetup();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [repository]);
+  const setupState = useEmergencyAccessSetupState();
 
   return (
     <>
@@ -64,17 +26,37 @@ export default function EmergencyAccessRoute() {
         contentContainerStyle={screenStyles.content}
       >
         <EmergencyAccessScreen
-          activeSealedCodeStatus={status}
-          isBusy={isBusy}
-          oneTimeCode={oneTimeCode}
-          onConfirmSealedCodeWritten={confirmSealedCodeWritten}
-          onCreateSealedCode={createSealedCode}
-          onRegenerateSealedCode={regenerateSealedCode}
-          onRevokeSealedCode={revokeSealedCode}
+          activeSealedCodeStatus={setupState.status}
+          isBusy={setupState.isBusy}
+          oneTimeCode={setupState.oneTimeCode}
+          onConfirmSealedCodeWritten={setupState.confirmSealedCodeWritten}
+          onCreateSealedCode={setupState.createSealedCode}
+          onRegenerateSealedCode={setupState.regenerateSealedCode}
+          onRevokeSealedCode={setupState.revokeSealedCode}
         />
       </ScrollView>
     </>
   );
+}
+
+function useEmergencyAccessSetupState() {
+  const vaultSession = useVaultSession();
+  const repository = useEmergencyGrantRepository();
+  const [status, setStatus] = useState<SealedCodeSetupStatus>("none");
+  const [oneTimeCode, setOneTimeCode] = useState<string | null>(null);
+  const [isBusy, setIsBusy] = useState(false);
+
+  useInterruptedSetupStatus({ repository, setStatus });
+
+  return {
+    confirmSealedCodeWritten,
+    createSealedCode,
+    isBusy,
+    oneTimeCode,
+    regenerateSealedCode,
+    revokeSealedCode,
+    status,
+  };
 
   async function createSealedCode() {
     if (!repository) {
@@ -140,4 +122,51 @@ export default function EmergencyAccessRoute() {
       setIsBusy(false);
     }
   }
+}
+
+function useEmergencyGrantRepository() {
+  const supabaseClient = useMemo(() => createSupabaseClient(), []);
+
+  return useMemo(
+    () =>
+      supabaseClient
+        ? createSupabaseEmergencyGrantRepository(
+            supabaseClient as unknown as SupabaseEmergencyGrantClient,
+          )
+        : null,
+    [supabaseClient],
+  );
+}
+
+function useInterruptedSetupStatus({
+  repository,
+  setStatus,
+}: {
+  repository: ReturnType<typeof useEmergencyGrantRepository>;
+  setStatus: (status: SealedCodeSetupStatus) => void;
+}) {
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadInterruptedSetup() {
+      if (!repository) {
+        return;
+      }
+
+      const pending = await SecureStore.getItemAsync(pendingConfirmationKey);
+      const activeGrant = pending
+        ? await repository.loadActiveSealedCodeGrant()
+        : null;
+
+      if (isMounted && pending && activeGrant) {
+        setStatus("interrupted");
+      }
+    }
+
+    void loadInterruptedSetup();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [repository, setStatus]);
 }
