@@ -1605,6 +1605,28 @@ Verification:
 - `npm run test --workspace @vault/mobile -- sealed-emergency-code-service.test.ts vault-session.test.ts vault-session-context.test.ts` passes: 3 files, 17 tests.
 - `npm run typecheck --workspace @vault/mobile` passes.
 
+### 2026-06-08 - Sealed Emergency Code Setup Slice 4
+
+Changed:
+
+- Replaced the disabled sealed emergency code shell with a prop-driven setup UI covering:
+  - initial risk acknowledgement,
+  - protected one-time code display,
+  - explicit written-code confirmation,
+  - active sealed-code status,
+  - interrupted setup recovery,
+  - regenerate and revoke actions.
+- Added `usePreventScreenCapture()` on the one-time code panel so normal OS-level screenshots/screen recordings are blocked while the code is visible.
+- Wired `/settings/emergency-access` to create a Supabase emergency grant repository and call the vault-session sealed-code create/regenerate/revoke operations.
+- Added a SecureStore pending-confirmation marker so timeout, lock, reload, or crash after grant persistence but before confirmation is shown as an interrupted setup instead of a completed setup.
+- Confirming the code clears the raw code from route state and deletes the pending-confirmation marker.
+- Revoke clears the pending-confirmation marker and returns the UI to the unconfigured state.
+
+Verification:
+
+- `npm run test --workspace @vault/mobile -- emergency-access-screen.test.ts sealed-emergency-code-service.test.ts` passes: 2 files, 6 tests.
+- `npm run typecheck --workspace @vault/mobile` passes.
+
 ## Pending Tech Debt
 
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified yet.

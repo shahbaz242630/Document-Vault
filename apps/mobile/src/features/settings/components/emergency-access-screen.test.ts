@@ -28,7 +28,7 @@ describe("EmergencyAccessScreen", () => {
     expect(source).toContain("Someone with the code may be able to access");
   });
 
-  it("keeps setup actions disabled for this shell slice", () => {
+  it("supports the sealed emergency code setup states", () => {
     const source = readFileSync(
       resolve(__dirname, "emergency-access-screen.tsx"),
       "utf8",
@@ -36,6 +36,11 @@ describe("EmergencyAccessScreen", () => {
 
     expect(source).toContain("Set up trusted person");
     expect(source).toContain("Create emergency code");
-    expect(source).toContain("disabled");
+    expect(source).toContain("Write this code down now. Sanduqkin cannot show it again after you confirm.");
+    expect(source).toContain("Regenerate code");
+    expect(source).toContain("Revoke code");
+    expect(source).toContain("Revoke unusable code");
+    expect(source).toContain("usePreventScreenCapture");
+    expect(source).not.toContain("router.setParams");
   });
 });
