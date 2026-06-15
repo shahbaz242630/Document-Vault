@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "expo-router";
 import { AppState } from "react-native";
-import * as ExpoLocalAuthentication from "expo-local-authentication";
 import * as ExpoSecureStore from "expo-secure-store";
 
 import { type SupabaseVaultClient, useVaultSession } from "@/features/vault";
@@ -9,7 +8,6 @@ import { createSupabaseClient } from "@/shared/api/supabase-client";
 
 import { shouldLockAfterBackground } from "../app-lock-service";
 import { defaultAuditLog } from "../audit-log";
-import { createBiometricAuthService } from "../biometric-auth-service";
 import { createBiometricStorage } from "../biometric-storage";
 import { configureDurableAuditLog } from "../durable-audit-log";
 import type { SupabaseAuditClient } from "../supabase-audit-event-repository";
@@ -53,11 +51,15 @@ export function AppLockOverlay({ children }: AppLockOverlayProps) {
 
   const handleUnlock = useCallback(async () => {
     setLockError(null);
-    const auth = createBiometricAuthService(ExpoLocalAuthentication);
     const storage = createBiometricStorage(ExpoSecureStore);
-    const result = await auth.authenticate();
+    const enabled = await storage.isEnabled();
 
-    if (result.status === "success") {
+    if (!enabled) {
+      setLockError("Biometric unlock is not enabled. Please sign in again.");
+      return;
+    }
+
+    try {
       const key = await storage.getKey();
 
       if (key) {
@@ -71,10 +73,8 @@ export function AppLockOverlay({ children }: AppLockOverlayProps) {
       } else {
         setLockError("No cached key found. Please sign in again.");
       }
-    } else if (result.status === "error") {
-      setLockError(result.message ?? "Authentication failed.");
-    } else {
-      setLockError("Unlock was cancelled.");
+    } catch {
+      setLockError("Authentication failed. Try again or use your password.");
     }
   }, [initialize, router]);
 

@@ -1,11 +1,14 @@
 import type { Context } from "hono";
 
+import { isRequestBodyTooLarge, readBearerToken, timingSafeStringEqual } from "../security/http.js";
 import { processDueAccountDeletionRequests } from "./processor.js";
 import {
   createServiceRoleSupabaseClient,
   createSupabaseAccountDeletionProcessorClient,
 } from "./supabase-processor-client.js";
 import type { AccountDeletionProcessorSummary } from "./processor.js";
+
+const MAX_INTERNAL_PROCESSOR_BODY_BYTES = 1024;
 
 type AccountDeletionProcessorConfig = {
   processorToken: string;
@@ -23,13 +26,18 @@ type RouteDeps = {
 
 export function createAccountDeletionProcessorRoute(deps: RouteDeps = {}) {
   return async (context: Context) => {
+    if (isRequestBodyTooLarge(context, MAX_INTERNAL_PROCESSOR_BODY_BYTES)) {
+      return context.json({ error: "Payload too large" }, 413);
+    }
+
     const config = (deps.getConfig ?? getAccountDeletionProcessorConfig)();
 
     if (!config) {
       return context.json({ error: "Account deletion processor is not configured" }, 503);
     }
 
-    if (context.req.header("Authorization")?.trim() !== `Bearer ${config.processorToken}`) {
+    const token = readBearerToken(context.req.header("Authorization"));
+    if (!timingSafeStringEqual(token ?? undefined, config.processorToken)) {
       return context.json({ error: "Unauthorized" }, 401);
     }
 

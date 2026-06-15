@@ -1,0 +1,96 @@
+name: Security CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app-security:
+    name: App security gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.3.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test --workspaces --if-present
+
+      - name: Static security guard
+        run: npm run check:security
+
+      - name: GitHub Actions security guard
+        run: npm run check:github-actions-security
+
+      - name: Mobile secret scan
+        run: npm run check:mobile-secrets
+
+      - name: Security guard tests
+        run: node --test scripts/security-check.test.cjs scripts/mobile-secret-scan.test.cjs scripts/supabase-db-security-check.test.cjs scripts/github-actions-security-check.test.cjs
+
+      - name: Production dependency audit for high or critical advisories
+        run: npm audit --omit=dev --workspaces --audit-level=high
+
+  supabase-live-security:
+    name: Supabase live security gates
+    runs-on: ubuntu-latest
+    needs: app-security
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.3.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v2
+        with:
+          version: 2.106.0
+
+      - name: Start local Supabase
+        run: supabase start --workdir supabase
+
+      - name: Apply local Supabase migrations
+        run: |
+          set -euo pipefail
+          for migration in supabase/migrations/*.sql; do
+            echo "Applying ${migration}"
+            docker exec -i supabase_db_supabase \
+              psql -v ON_ERROR_STOP=1 -U postgres -d postgres < "${migration}"
+          done
+
+      - name: Live database catalog security check
+        run: npm run check:supabase-db-security
+
+      - name: Live RLS attack test
+        run: npm run check:supabase-rls
+
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop --workdir supabase

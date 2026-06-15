@@ -8,12 +8,12 @@
     "services/*"
   ],
   "overrides": {
-    "@expo/metro-config": {
-      "postcss": "8.5.14"
+    "react-devtools-core": {
+      "shell-quote": "1.8.4"
     },
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-native-safe-area-context": "5.6.0"
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native-safe-area-context": "5.7.0"
   },
   "scripts": {
     "mobile": "npm run start --workspace @vault/mobile",
@@ -21,11 +21,16 @@
     "mobile:ios": "npm run ios --workspace @vault/mobile",
     "check:phase1": "node scripts/phase1-dod-check.cjs",
     "postinstall": "node scripts/run-patch-package-if-available.cjs",
+    "check:github-actions-security": "node scripts/github-actions-security-check.cjs",
+    "check:security": "node scripts/security-check.cjs",
+    "check:mobile-secrets": "node scripts/mobile-secret-scan.cjs",
+    "check:supabase-db-security": "node scripts/supabase-db-security-check.cjs",
+    "check:supabase-rls": "node scripts/supabase-rls-attack-test.cjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^22.13.0 || >=24.3.0"
   },
   "devDependencies": {
     "patch-package": "^8.0.1"

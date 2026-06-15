@@ -41,6 +41,104 @@ describe("account deletion request route", () => {
     expect(response.status).toBe(401);
   });
 
+  it("rejects oversized request bodies before touching Supabase or email services", async () => {
+    const calls: unknown[] = [];
+    const app = new Hono();
+    app.post(
+      "/account-deletion/request",
+      createAccountDeletionRequestRoute({
+        getConfig: () => {
+          calls.push({ method: "getConfig" });
+
+          return {
+            appBaseUrl: "https://sanduqkin.example",
+            emailFrom: "Sanduqkin <support@sanduqkin.example>",
+            serviceRoleKey: "service-role",
+            supabaseUrl: "https://project.supabase.co",
+          };
+        },
+      }),
+    );
+
+    const response = await app.request("/account-deletion/request", {
+      body: "x",
+      headers: {
+        Authorization: "Bearer session-token",
+        "Content-Length": "1025",
+      },
+      method: "POST",
+    });
+
+    await expect(response.json()).resolves.toEqual({ error: "Payload too large" });
+    expect(response.status).toBe(413);
+    expect(calls).toEqual([]);
+  });
+
+  it("rejects malformed authorization schemes", async () => {
+    const calls: unknown[] = [];
+    const app = new Hono();
+    app.post(
+      "/account-deletion/request",
+      createAccountDeletionRequestRoute({
+        getConfig: () => ({
+          appBaseUrl: "https://sanduqkin.example",
+          emailFrom: "Sanduqkin <support@sanduqkin.example>",
+          serviceRoleKey: "service-role",
+          supabaseUrl: "https://project.supabase.co",
+        }),
+        createClient: () => ({
+          async createRequest(userId) {
+            calls.push({ method: "createRequest", userId });
+            throw new Error("should not create request");
+          },
+          async getUser(jwt) {
+            calls.push({ jwt, method: "getUser" });
+            throw new Error("should not load user");
+          },
+        }),
+      }),
+    );
+
+    const response = await app.request("/account-deletion/request", {
+      headers: { Authorization: "Basic session-token" },
+      method: "POST",
+    });
+
+    expect(response.status).toBe(401);
+    expect(calls).toEqual([]);
+  });
+
+  it("returns 401 instead of leaking auth client errors for invalid bearer tokens", async () => {
+    const app = new Hono();
+    app.post(
+      "/account-deletion/request",
+      createAccountDeletionRequestRoute({
+        getConfig: () => ({
+          appBaseUrl: "https://sanduqkin.example",
+          emailFrom: "Sanduqkin <support@sanduqkin.example>",
+          serviceRoleKey: "service-role",
+          supabaseUrl: "https://project.supabase.co",
+        }),
+        createClient: () => ({
+          async createRequest() {
+            throw new Error("should not create request");
+          },
+          async getUser() {
+            throw new Error("invalid JWT");
+          },
+        }),
+      }),
+    );
+
+    const response = await app.request("/account-deletion/request", {
+      headers: { Authorization: "Bearer invalid-token" },
+      method: "POST",
+    });
+
+    await expect(response.json()).resolves.toEqual({ error: "Unauthorized" });
+    expect(response.status).toBe(401);
+  });
+
   it("queues a deletion request and sends a confirmation email for an authenticated user", async () => {
     const calls: unknown[] = [];
     const app = new Hono();
