@@ -50,6 +50,28 @@ test("runs Security CI for pushes to every branch", () => {
   assert.match(workflow, /\n  push:\s*\n\s*permissions:/);
 });
 
+test("configures CodeQL scanning for JavaScript and TypeScript", () => {
+  const workflowPath = path.resolve(
+    __dirname,
+    "..",
+    ".github",
+    "workflows",
+    "codeql.yml",
+  );
+
+  assert.equal(fs.existsSync(workflowPath), true, "CodeQL workflow must exist");
+
+  const workflow = fs.readFileSync(workflowPath, "utf8");
+
+  assert.match(workflow, /\n  pull_request:\s*\n\s*branches: \[main\]/);
+  assert.match(workflow, /\n  push:\s*\n\s*branches: \[main\]/);
+  assert.match(workflow, /\n  schedule:\s*\n\s*- cron: "[^"]+"/);
+  assert.match(workflow, /\npermissions:\s*\n\s*contents: read\s*\n\s*security-events: write/);
+  assert.match(workflow, /language: \["javascript-typescript"\]/);
+  assert.match(workflow, /github\/codeql-action\/init@[a-f0-9]{40}/);
+  assert.match(workflow, /github\/codeql-action\/analyze@[a-f0-9]{40}/);
+});
+
 test("rejects mutable action tags and accepts full commit SHAs", () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
   const workflowDir = path.join(tmp, ".github", "workflows");
