@@ -41,6 +41,74 @@ test("runs Expo Doctor in Security CI", () => {
   assert.match(workflow, /- name: Expo Doctor[\s\S]*?run: npm run doctor --workspace @vault\/mobile/);
 });
 
+test("runs Security CI for pushes to every branch", () => {
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+
+  assert.match(workflow, /\n  push:\s*\n\s*permissions:/);
+});
+
+test("rejects mutable action tags and accepts full commit SHAs", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
+  const workflowDir = path.join(tmp, ".github", "workflows");
+
+  fs.mkdirSync(workflowDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(workflowDir, "pins.yml"),
+    [
+      "name: pins",
+      "on:",
+      "  push:",
+      "permissions:",
+      "  contents: read",
+      "jobs:",
+      "  test:",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      "      - uses: actions/checkout@v4",
+      "      - uses: actions/setup-node@0123456789abcdef0123456789abcdef01234567 # v4",
+      "",
+    ].join("\n"),
+  );
+
+  const result = runGitHubActionsSecurityCheck({ cwd: tmp });
+
+  assert.deepEqual(result.violations.map((violation) => violation.rule), [
+    "github-actions-pinned-actions",
+  ]);
+});
+
+test("checks action allowlisting when a SHA pin has a version comment", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
+  const workflowDir = path.join(tmp, ".github", "workflows");
+
+  fs.mkdirSync(workflowDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(workflowDir, "comment-bypass.yml"),
+    [
+      "name: comment bypass",
+      "on:",
+      "  push:",
+      "permissions:",
+      "  contents: read",
+      "jobs:",
+      "  test:",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      "      - uses: untrusted/action@0123456789abcdef0123456789abcdef01234567 # v1",
+      "",
+    ].join("\n"),
+  );
+
+  const result = runGitHubActionsSecurityCheck({ cwd: tmp });
+
+  assert.deepEqual(result.violations.map((violation) => violation.rule), [
+    "github-actions-allowed-actions",
+  ]);
+});
+
 test("flags dangerous workflow triggers, permissions, actions, and PR secrets", () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
   const workflowDir = path.join(tmp, ".github", "workflows");
@@ -74,6 +142,7 @@ test("flags dangerous workflow triggers, permissions, actions, and PR secrets", 
       "github-actions-no-pull-request-target",
       "github-actions-no-write-all-permissions",
       "github-actions-minimal-permissions",
+      "github-actions-pinned-actions",
       "github-actions-pinned-actions",
       "github-actions-allowed-actions",
       "github-actions-no-secrets-on-pr",

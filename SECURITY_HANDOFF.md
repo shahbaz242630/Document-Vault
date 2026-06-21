@@ -29,7 +29,7 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 - [x] GitHub Actions workflow security guard runs with `npm run check:github-actions-security`.
   - It rejects `pull_request_target`, broad write permissions, missing action versions, unapproved actions, and pull-request workflows that reference secrets.
 - [x] Mobile secret scan runs with `npm run check:mobile-secrets`.
-- [x] Twenty security-guard regression tests run in CI, including all eight Phase 1 guard tests and workflow wiring for Expo Doctor.
+- [x] Twenty-three security-guard regression tests run in CI, including Phase 1 guards, workflow wiring, all-branch push coverage, and immutable action-pin enforcement.
 - [x] Production dependency audit rejects high and critical advisories.
   - Audit result: no high or critical advisories; 13 low/moderate findings remain accepted by the current threshold.
   - Do not use `npm audit fix --force`; the current suggested forced fix downgrades Expo to an incompatible release.
@@ -88,12 +88,20 @@ Current state: complete. The workflow command includes the Phase 1 guard tests, 
 
 ### 4. Scan feature-branch pushes
 
-- [ ] Decide whether CI must run on every branch push or only on pull requests plus `main`.
-- [ ] If every pushed commit must be scanned, add an appropriate `push` branch pattern.
-- [ ] Preserve concurrency cancellation to control CI usage.
+- [x] Decide whether CI must run on every branch push or only on pull requests plus `main`.
+- [x] If every pushed commit must be scanned, add an appropriate `push` branch pattern.
+- [x] Preserve concurrency cancellation to control CI usage.
 - [ ] Verify a feature-branch push starts Security CI before a pull request exists.
 
-Current state: feature-branch pushes do not run Security CI until a pull request is opened. Pull requests and pushes to `main` are covered.
+Current state: Security CI is configured for pushes to every branch while retaining per-reference concurrency cancellation. Local workflow regression coverage passes; live feature-branch push confirmation is pending.
+
+#### Completion evidence — 2026-06-21 (local verification)
+
+- Regression proof: the all-branch workflow test failed before implementation because `push.branches` allowed only `main`.
+- Implementation: removed the `main`-only push filter while preserving pull-request coverage and `cancel-in-progress` concurrency behavior.
+- Focused command: `node --test scripts/github-actions-security-check.test.cjs`.
+- Focused local result: 8 tests passed, 0 failed.
+- GitHub Actions run and disposable feature-branch verification: pending commit and push.
 
 ### 5. Cover the two skipped live Supabase integration tests
 
@@ -195,13 +203,24 @@ Current state: complete. The shared-validation workspace has a Vitest script and
 
 ### 13. Pin GitHub Actions immutably
 
-- [ ] Pin `actions/checkout`, `actions/setup-node`, and `supabase/setup-cli` to reviewed full commit SHAs.
-- [ ] Keep readable version comments beside SHA pins.
-- [ ] Update the workflow security guard so a mutable tag alone is not accepted as a pin.
-- [ ] Add regression tests for rejecting tag-only action references.
+- [x] Pin `actions/checkout`, `actions/setup-node`, and `supabase/setup-cli` to reviewed full commit SHAs.
+- [x] Keep readable version comments beside SHA pins.
+- [x] Update the workflow security guard so a mutable tag alone is not accepted as a pin.
+- [x] Add regression tests for rejecting tag-only action references.
 - [ ] Use Dependabot to propose reviewed SHA updates.
 
-Current state: workflows use explicit mutable version tags such as `@v4` and `@v2`. The current custom guard accepts any explicit version or SHA and therefore does not enforce immutable pins.
+Current state: all actions in Security CI use full upstream commit SHAs with readable release comments. The guard rejects missing, tag-only, branch, abbreviated, and otherwise non-40-character pins. Dependabot-based SHA update proposals remain pending under finding 11.
+
+#### Completion evidence — 2026-06-21 (local verification)
+
+- Regression proof: mutable `@v4` tags passed before implementation, and an inline version comment bypassed action allowlisting entirely.
+- Upstream pins resolved: `actions/checkout` v4.3.1, `actions/setup-node` v4.4.0, and `supabase/setup-cli` v2.1.1.
+- Guard hardening: action references are parsed even with inline comments and must contain a full 40-character hexadecimal commit SHA.
+- Focused command: `node --test scripts/github-actions-security-check.test.cjs`.
+- Focused local result: 8 tests passed, 0 failed.
+- Static workflow command: `npm run check:github-actions-security`.
+- Static local result: passed.
+- GitHub Actions run: pending commit and push.
 
 ## Additional Recommended Security Work
 

@@ -73,20 +73,21 @@ function checkWorkflowPermissions(filePath, contents) {
 
 function checkWorkflowActions(filePath, contents) {
   const violations = [];
-  const usesMatches = [...contents.matchAll(/^\s*-?\s*uses\s*:\s*([^\s#]+)\s*$/gm)];
+  const usesMatches = [...contents.matchAll(/^\s*-?\s*uses\s*:\s*([^\s#]+)(?:\s+#.*)?\s*$/gm)];
 
   for (const match of usesMatches) {
     const actionRef = String(match[1]).replace(/^["']|["']$/g, "");
-    const [actionName, version] = actionRef.split("@");
+    const separatorIndex = actionRef.lastIndexOf("@");
+    const actionName = separatorIndex >= 0 ? actionRef.slice(0, separatorIndex) : actionRef;
+    const version = separatorIndex >= 0 ? actionRef.slice(separatorIndex + 1) : "";
 
-    if (!version) {
+    if (!/^[a-f0-9]{40}$/i.test(version)) {
       violations.push({
         action: actionRef,
-        message: `Action ${actionRef} must include an explicit version or SHA ref.`,
+        message: `Action ${actionRef} must be pinned to a full 40-character commit SHA.`,
         path: filePath,
         rule: "github-actions-pinned-actions",
       });
-      continue;
     }
 
     if (!ALLOWED_ACTIONS.has(actionName)) {
