@@ -120,7 +120,7 @@ describe("vault session", () => {
     ]);
   });
 
-  it("permanently deletes soft-deleted assets", async () => {
+  it("permanently deletes active assets without a restore window", async () => {
     const key = await generateMasterEncryptionKey();
     const session = createVaultSession({ key });
     const created = await session.addAsset({
@@ -134,10 +134,6 @@ describe("vault session", () => {
       },
       title: "Primary family account",
     });
-
-    await expect(session.permanentlyDeleteAsset(created.id)).resolves.toBe(false);
-
-    await session.softDeleteAsset(created.id);
 
     await expect(session.permanentlyDeleteAsset(created.id)).resolves.toBe(true);
     await expect(session.listActiveAssets()).resolves.toEqual([]);
@@ -305,7 +301,7 @@ describe("vault session", () => {
     expect("getMek" in session).toBe(false);
   });
 
-  it("persists soft delete, restore, and permanent delete operations", async () => {
+  it("persists direct permanent delete operations", async () => {
     const key = await generateMasterEncryptionKey();
     const repository = createRepositoryDouble();
     const session = createVaultSession({
@@ -322,27 +318,12 @@ describe("vault session", () => {
       title: "Important details",
     });
 
-    const deleted = await session.softDeleteAsset("asset-1");
-    const restored = await session.restoreAsset("asset-1");
     const permanentlyDeleted = await session.permanentlyDeleteAsset("asset-1");
 
-    expect(deleted?.deletedAt).toBe("2026-05-30T10:00:00.000Z");
-    expect(restored?.deletedAt).toBeNull();
-    expect(permanentlyDeleted).toBe(false);
-    expect(repository.softDeletedAssets).toEqual([
-      {
-        deletedAt: "2026-05-30T10:00:00.000Z",
-        id: "asset-1",
-        updatedAt: "2026-05-30T10:00:00.000Z",
-      },
-    ]);
-    expect(repository.restoredAssets).toEqual([
-      {
-        id: "asset-1",
-        updatedAt: "2026-05-30T10:00:00.000Z",
-      },
-    ]);
-    expect(repository.permanentlyDeletedAssetIds).toEqual([]);
+    expect(permanentlyDeleted).toBe(true);
+    expect(repository.softDeletedAssets).toEqual([]);
+    expect(repository.restoredAssets).toEqual([]);
+    expect(repository.permanentlyDeletedAssetIds).toEqual(["asset-1"]);
   });
 });
 

@@ -14,6 +14,8 @@ describe("VaultSessionProvider auth handoff", () => {
       "initialize: (keyBase64: string, client?: SupabaseVaultClient) => Promise<void>;",
     );
     expect(source).toContain("repository: createOptionalVaultRepository(client)");
+    expect(source).toContain("supabaseClient: SupabaseVaultClient | null;");
+    expect(source).toContain("setSupabaseClient(client ?? null)");
     expect(source).not.toContain(
       "if (storedMek) {\n        await newSession.loadPersistedAssets();\n      }",
     );
@@ -26,6 +28,7 @@ describe("VaultSessionProvider auth handoff", () => {
     );
 
     expect(source).toContain("if (!existingClient) {");
+    expect(source).toContain("setSupabaseClient(null)");
     expect(source).not.toContain("existingClient ?? createSupabaseClient()");
   });
 

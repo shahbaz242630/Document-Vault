@@ -54,6 +54,7 @@ type VaultSessionContextValue = {
   isReady: boolean;
   lock: () => void;
   permanentlyDeleteAsset: (id: string) => Promise<void>;
+  supabaseClient: SupabaseVaultClient | null;
   createSealedEmergencyCodeSetup: (
     repository: SealedEmergencyCodeGrantRepository,
     options?: Omit<SealedEmergencyCodeSetupOptions, "mek" | "repository">,
@@ -82,6 +83,7 @@ type VaultSessionStateSetters = {
   setIsLocked: Dispatch<SetStateAction<boolean>>;
   setIsReady: Dispatch<SetStateAction<boolean>>;
   setSession: Dispatch<SetStateAction<VaultSession | null>>;
+  setSupabaseClient: Dispatch<SetStateAction<SupabaseVaultClient | null>>;
 };
 
 const VaultSessionContext = createContext<VaultSessionContextValue | null>(null);
@@ -105,6 +107,7 @@ function useVaultSessionContextValue(): VaultSessionContextValue {
   const [deletedAssets, setDeletedAssets] = useState<VaultDeletedAsset[]>([]);
   const [encryptedRecords, setEncryptedRecords] = useState<VaultEncryptedAssetRecord[]>([]);
   const [session, setSession] = useState<VaultSession | null>(null);
+  const [supabaseClient, setSupabaseClient] = useState<SupabaseVaultClient | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const setters = useMemo(
@@ -115,6 +118,7 @@ function useVaultSessionContextValue(): VaultSessionContextValue {
       setIsLocked,
       setIsReady,
       setSession,
+      setSupabaseClient,
     }),
     [],
   );
@@ -139,6 +143,7 @@ function useVaultSessionContextValue(): VaultSessionContextValue {
       isReady,
       lock,
       signOut,
+      supabaseClient,
     }),
     [
       assetActions,
@@ -151,6 +156,7 @@ function useVaultSessionContextValue(): VaultSessionContextValue {
       isReady,
       lock,
       signOut,
+      supabaseClient,
     ],
   );
 }
@@ -253,6 +259,7 @@ function useVaultInitialize({
       await newSession.loadPersistedAssets();
       defaultAuditLog.log({ deviceInfo: "React Native", eventType: "vault_unlocked" });
       setters.setSession(newSession);
+      setters.setSupabaseClient(client ?? null);
       setters.setIsReady(true);
       setters.setIsLocked(false);
       await refreshAssets(newSession);
@@ -375,6 +382,7 @@ async function loadStartupVaultKey() {
 
 function clearVaultSession(setters: VaultSessionStateSetters) {
   setters.setSession(null);
+  setters.setSupabaseClient(null);
   setters.setAssets([]);
   setters.setDeletedAssets([]);
   setters.setEncryptedRecords([]);

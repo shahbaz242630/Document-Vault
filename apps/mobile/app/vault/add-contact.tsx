@@ -26,7 +26,8 @@ export default function AddContactRoute() {
       <Stack.Screen options={{ title: "Add contact" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Contact"
@@ -47,7 +48,7 @@ export default function AddContactRoute() {
                 | "other",
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/contacts");
           }}
         />
       </ScrollView>

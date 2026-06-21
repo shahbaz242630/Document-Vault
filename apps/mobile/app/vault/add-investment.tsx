@@ -30,7 +30,8 @@ export default function AddInvestmentRoute() {
       <Stack.Screen options={{ title: "Add investment" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Investment"
@@ -56,7 +57,7 @@ export default function AddInvestmentRoute() {
               title: values.title,
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/investments");
           }}
         />
       </ScrollView>

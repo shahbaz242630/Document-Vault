@@ -6,15 +6,10 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "bundleIdentifier": "com.sanduqkin.mobile",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "deploymentTarget": "16.4"
     },
     "android": {
       "package": "com.sanduqkin.mobile",
@@ -22,7 +17,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "scheme": "sanduqkin",
@@ -37,9 +31,6 @@
       [
         "expo-build-properties",
         {
-          "ios": {
-            "deploymentTarget": "15.1"
-          },
           "android": {
             "kotlinVersion": "2.2.0"
           }
@@ -48,7 +39,8 @@
       [
         "react-native-libsodium",
         {}
-      ]
+      ],
+      "expo-splash-screen"
     ],
     "experiments": {
       "typedRoutes": true

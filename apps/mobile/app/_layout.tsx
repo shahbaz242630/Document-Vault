@@ -1,3 +1,4 @@
+import "@/shared/runtime/buffer-polyfill";
 import "@/shared/crypto/secure-random-polyfill-expo";
 
 import { useEffect } from "react";

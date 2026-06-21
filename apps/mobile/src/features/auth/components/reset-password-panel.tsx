@@ -2,6 +2,10 @@ import { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import { Pressable, Text, TextInput, View } from "react-native";
 
+import {
+  createSupabaseKeyMaterialRepository,
+  type SupabaseKeyMaterialClient,
+} from "@/features/vault";
 import { createSupabaseClient } from "@/shared/api/supabase-client";
 import { colors } from "@/shared/theme/colors";
 
@@ -28,7 +32,18 @@ export function ResetPasswordPanel({ lockVault, mode, storage }: ResetPasswordPa
   const viewModel = createResetPasswordViewModel();
   const isRecover = mode === "recover";
   const [form, setForm] = useState(createInitialFormState());
-  const service = useMemo(() => createPasswordResetService(createSupabaseClient()), []);
+  const supabaseClient = useMemo(() => createSupabaseClient(), []);
+  const service = useMemo(
+    () =>
+      createPasswordResetService(supabaseClient, {
+        keyMaterialRepository: supabaseClient
+          ? createSupabaseKeyMaterialRepository(
+              supabaseClient as unknown as SupabaseKeyMaterialClient,
+            )
+          : null,
+      }),
+    [supabaseClient],
+  );
   const deletionService = useMemo(
     () =>
       createAccountDeletionService({

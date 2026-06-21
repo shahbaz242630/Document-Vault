@@ -12,7 +12,7 @@ import {
 describe("supabase emergency grant repository", () => {
   it("saves sealed emergency code grants without raw code or plaintext MEK", async () => {
     const table = createEmergencyGrantTableDouble();
-    const repository = createSupabaseEmergencyGrantRepository({ from: table.from });
+    const repository = createSupabaseEmergencyGrantRepository(table);
     const mek = await generateMasterEncryptionKey();
     const wrapped = await wrapMEKWithEmergencyCode({
       emergencyCode: "K7Q9-M2XD-8V4P-ZR6T-AL3N",
@@ -39,7 +39,7 @@ describe("supabase emergency grant repository", () => {
 
   it("loads the active sealed emergency code grant", async () => {
     const table = createEmergencyGrantTableDouble();
-    const repository = createSupabaseEmergencyGrantRepository({ from: table.from });
+    const repository = createSupabaseEmergencyGrantRepository(table);
     const wrapped = await wrapMEKWithEmergencyCode({
       emergencyCode: "K7Q9-M2XD-8V4P-ZR6T-AL3N",
       mek: await generateMasterEncryptionKey(),
@@ -88,6 +88,22 @@ describe("supabase emergency grant repository", () => {
       },
     });
     await expect(repository.loadActiveSealedCodeGrant()).resolves.toBeNull();
+  });
+
+  it("keeps the Supabase client context when selecting the grant table", () => {
+    const table = createEmergencyGrantTableDouble();
+    const client = {
+      from(this: { fromCalledWithContext: boolean }, tableName: "emergency_key_grants") {
+        this.fromCalledWithContext = true;
+
+        return table.from(tableName);
+      },
+      fromCalledWithContext: false,
+    };
+
+    createSupabaseEmergencyGrantRepository(client);
+
+    expect(client.fromCalledWithContext).toBe(true);
   });
 });
 

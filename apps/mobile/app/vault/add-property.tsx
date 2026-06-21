@@ -28,7 +28,8 @@ export default function AddPropertyRoute() {
       <Stack.Screen options={{ title: "Add property" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Property"
@@ -52,7 +53,7 @@ export default function AddPropertyRoute() {
               title: values.title,
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/properties");
           }}
         />
       </ScrollView>

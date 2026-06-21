@@ -91,6 +91,14 @@ describe("Supabase Phase 1 schema migration", () => {
     expect(migrations).toContain("'vault_pdf_export_created'");
   });
 
+  it("allows durable audit rows for sealed emergency code changes", () => {
+    const migrations = readAllMigrations();
+
+    expect(migrations).toContain("'sealed_emergency_code_created'");
+    expect(migrations).toContain("'sealed_emergency_code_revoked'");
+    expect(migrations).toContain("'sealed_emergency_code_regenerated'");
+  });
+
   it("creates RLS-protected account deletion requests for authenticated users", () => {
     const migrations = readAllMigrations();
 
@@ -148,6 +156,49 @@ describe("Supabase Phase 1 schema migration", () => {
     expect(migrations).not.toContain("vault_title");
     expect(migrations).not.toContain("vault_notes");
     expect(migrations).not.toContain("vault_fields");
+  });
+
+  it("explicitly protects every user-owned Phase 1 table from public and cross-user access", () => {
+    const migrations = readAllMigrations();
+
+    for (const table of [
+      "vault_key_material",
+      "vault_assets",
+      "audit_events",
+      "account_deletion_requests",
+      "emergency_contacts",
+      "emergency_key_grants",
+      "emergency_release_requests",
+    ]) {
+      expect(migrations).toContain(`revoke all on table public.${table} from anon`);
+      expect(migrations).toContain(`revoke all on table public.${table} from public`);
+      expect(migrations).toContain(`alter table public.${table} enable row level security`);
+      expect(migrations).toContain(`grant all on table public.${table} to service_role`);
+    }
+
+    for (const table of [
+      "vault_key_material",
+      "vault_assets",
+      "audit_events",
+      "account_deletion_requests",
+      "emergency_contacts",
+      "emergency_key_grants",
+      "emergency_release_requests",
+    ]) {
+      expect(migrations).toContain(`on public.${table}`);
+      expect(migrations).toContain("(select auth.uid()) is not null and (select auth.uid()) = user_id");
+    }
+  });
+
+  it("enforces the maximum active vault records per user and asset type in the database", () => {
+    const migrations = readAllMigrations();
+
+    expect(migrations).toContain("enforce_vault_assets_active_record_limit");
+    expect(migrations).toContain("vault_assets_active_record_limit_trigger");
+    expect(migrations).toContain("active_record_count >= 20");
+    expect(migrations).toContain("user_id = new.user_id");
+    expect(migrations).toContain("asset_type = new.asset_type");
+    expect(migrations).toContain("deleted_at is null");
   });
 });
 

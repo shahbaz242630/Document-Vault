@@ -39,8 +39,18 @@ describe("createVaultDashboardViewModel", () => {
     expect(viewModel).toEqual({
       activeCount: 3,
       categories: [
-        { assetType: "bank_account", count: 2, label: "Bank accounts" },
-        { assetType: "insurance", count: 1, label: "Insurance" },
+        {
+          assetType: "bank_account",
+          count: 2,
+          label: "Bank accounts",
+          routeHref: "/vault/bank-accounts",
+        },
+        {
+          assetType: "insurance",
+          count: 1,
+          label: "Insurance",
+          routeHref: "/vault/insurance",
+        },
       ],
       hasAssets: true,
       items: [

@@ -94,9 +94,7 @@ export function createVaultStore({
       return Array.from(records.values()).map(cloneEncryptedRecord);
     },
     permanentlyDeleteAsset(id: string): boolean {
-      const record = records.get(id);
-
-      if (!record || record.deletedAt === null) {
+      if (!records.has(id)) {
         return false;
       }
 

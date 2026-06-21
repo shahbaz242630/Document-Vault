@@ -29,7 +29,8 @@ export default function AddInsuranceRoute() {
       <Stack.Screen options={{ title: "Add insurance" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Insurance"
@@ -54,7 +55,7 @@ export default function AddInsuranceRoute() {
               title: values.title,
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/insurance");
           }}
         />
       </ScrollView>

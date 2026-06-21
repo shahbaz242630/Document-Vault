@@ -64,11 +64,11 @@ export type SupabaseEmergencyGrantClient = {
   from: (table: "emergency_key_grants") => EmergencyGrantTable;
 };
 
-export function createSupabaseEmergencyGrantRepository({
-  from,
-  now = () => new Date(),
-}: SupabaseEmergencyGrantClient & { now?: () => Date }) {
-  const table = from("emergency_key_grants");
+export function createSupabaseEmergencyGrantRepository(
+  client: SupabaseEmergencyGrantClient & { now?: () => Date },
+) {
+  const table = client.from("emergency_key_grants");
+  const now = client.now ?? (() => new Date());
 
   return {
     async loadActiveSealedCodeGrant(): Promise<EmergencyWrappedMEKPackage | null> {

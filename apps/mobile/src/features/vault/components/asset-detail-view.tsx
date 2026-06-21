@@ -1,7 +1,12 @@
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
 
+import {
+  createPermanentDeleteConfirmationState,
+  requestPermanentDelete,
+} from "../permanent-delete-confirmation";
 import type { VaultDecryptedAsset } from "../vault-store";
 
 type AssetDetailViewProps = {
@@ -11,6 +16,11 @@ type AssetDetailViewProps = {
 };
 
 export function AssetDetailView({ asset, onDelete, onEdit }: AssetDetailViewProps) {
+  const [deleteConfirmation, setDeleteConfirmation] = useState(
+    createPermanentDeleteConfirmationState,
+  );
+  const isConfirmingDelete = deleteConfirmation.pendingAssetId === asset.id;
+
   return (
     <View style={{ gap: 20 }}>
       <View style={{ gap: 6 }}>
@@ -67,25 +77,41 @@ export function AssetDetailView({ asset, onDelete, onEdit }: AssetDetailViewProp
         ) : null}
 
         {onDelete ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              void onDelete(asset.id);
-            }}
-            style={{
-              alignItems: "center",
-              borderColor: colors.danger,
-              borderCurve: "continuous",
-              borderRadius: 8,
-              borderWidth: 1,
-              paddingHorizontal: 18,
-              paddingVertical: 14,
-            }}
-          >
-            <Text style={{ color: colors.danger, fontSize: 17, fontWeight: "700" }}>
-              Delete reference
-            </Text>
-          </Pressable>
+          <View style={{ gap: 8 }}>
+            {isConfirmingDelete ? (
+              <Text style={{ color: colors.danger, fontSize: 14, lineHeight: 20 }}>
+                This record will be removed from Sanduqkin and cannot be recovered.
+                Sanduqkin cannot restore deleted encrypted vault records.
+              </Text>
+            ) : null}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                const result = requestPermanentDelete({
+                  assetId: asset.id,
+                  state: deleteConfirmation,
+                });
+                setDeleteConfirmation(result.nextState);
+
+                if (result.confirmedAssetId) {
+                  void onDelete(result.confirmedAssetId);
+                }
+              }}
+              style={{
+                alignItems: "center",
+                borderColor: colors.danger,
+                borderCurve: "continuous",
+                borderRadius: 8,
+                borderWidth: 1,
+                paddingHorizontal: 18,
+                paddingVertical: 14,
+              }}
+            >
+              <Text style={{ color: colors.danger, fontSize: 17, fontWeight: "700" }}>
+                {isConfirmingDelete ? "Delete permanently" : "Delete reference"}
+              </Text>
+            </Pressable>
+          </View>
         ) : null}
       </View>
     </View>

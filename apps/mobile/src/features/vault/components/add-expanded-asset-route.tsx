@@ -9,6 +9,7 @@ import {
   getExpandedAssetConfig,
   type ExpandedAssetType,
 } from "../expanded-asset-form";
+import { getVaultCategoryConfig } from "../vault-category-config";
 import { useVaultSession } from "../vault-session-context";
 
 type AddExpandedAssetRouteProps = {
@@ -19,13 +20,15 @@ export function AddExpandedAssetRoute({ assetType }: AddExpandedAssetRouteProps)
   const { addAsset } = useVaultSession();
   const router = useRouter();
   const config = getExpandedAssetConfig(assetType);
+  const categoryConfig = getVaultCategoryConfig(assetType);
 
   return (
     <>
       <Stack.Screen options={{ title: `Add ${config.categoryLabel.toLowerCase()}` }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel={config.categoryLabel}
@@ -33,7 +36,7 @@ export function AddExpandedAssetRoute({ assetType }: AddExpandedAssetRouteProps)
           initialValues={config.initialValues}
           onSave={async (values) => {
             await addAsset(createExpandedAssetPayload({ assetType, values }));
-            router.replace("/vault");
+            router.replace(categoryConfig.routeHref);
           }}
         />
       </ScrollView>

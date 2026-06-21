@@ -1,6 +1,7 @@
 import { deriveKEK, generateSalt } from "@/shared/crypto/kek-derivation";
 import { wrapMEK } from "@/shared/crypto/mek-wrapping";
-import { fromBase64, toBase64 } from "@/shared/crypto/vault-crypto";
+import { toBase64 } from "@/shared/crypto/vault-crypto";
+import type { VaultKeyMaterial } from "@/features/vault";
 
 import { deriveMasterKeyFromPhrase } from "./recovery-phrase-service";
 
@@ -12,7 +13,17 @@ type SupabaseAuthResponse = Promise<{
 type SupabaseAuthClient = {
   auth: {
     resetPasswordForEmail?: (email: string, options?: { redirectTo?: string }) => SupabaseAuthResponse;
+    updateUser?: (attributes: { password: string }) => SupabaseAuthResponse;
   };
+};
+
+type KeyMaterialRepository = {
+  loadKeyMaterial?: () => Promise<VaultKeyMaterial | null>;
+  saveKeyMaterial: (keyMaterial: VaultKeyMaterial) => Promise<unknown>;
+};
+
+type PasswordResetServiceDependencies = {
+  keyMaterialRepository?: KeyMaterialRepository | null;
 };
 
 export type PasswordResetRequestResult =
@@ -24,7 +35,10 @@ export type RecoveryResetResult =
   | { message: string; status: "error" }
   | { mekBase64: string; saltBase64: string; wrapped: { ciphertextBase64: string; nonceBase64: string }; status: "ok" };
 
-export function createPasswordResetService(client: SupabaseAuthClient | null) {
+export function createPasswordResetService(
+  client: SupabaseAuthClient | null,
+  dependencies: PasswordResetServiceDependencies = {},
+) {
   return {
     async requestReset(email: string): Promise<PasswordResetRequestResult> {
       if (!client?.auth.resetPasswordForEmail) {
@@ -74,6 +88,33 @@ export function createPasswordResetService(client: SupabaseAuthClient | null) {
         const salt = await generateSalt();
         const kek = await deriveKEK(opts.newPassword, salt);
         const wrapped = await wrapMEK(mek, kek);
+        const existingKeyMaterial =
+          await dependencies.keyMaterialRepository?.loadKeyMaterial?.();
+
+        if (client?.auth.updateUser) {
+          const { error } = await client.auth.updateUser({
+            password: opts.newPassword,
+          });
+
+          if (error) {
+            return {
+              message: "Could not update password. Open the reset link again and try recovery.",
+              status: "error",
+            };
+          }
+        }
+
+        await dependencies.keyMaterialRepository?.saveKeyMaterial({
+          kdfAlgorithm: "argon2id",
+          kdfParams: {
+            keyLength: 32,
+            memlimit: 268435456,
+            opslimit: 3,
+          },
+          kekSalt: salt,
+          recoveryVersion: (existingKeyMaterial?.recoveryVersion ?? 1) + 1,
+          wrappedMek: wrapped,
+        });
 
         return {
           mekBase64: await toBase64(mek),

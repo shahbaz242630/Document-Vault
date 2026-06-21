@@ -8,6 +8,8 @@ export { AssetDetailView } from "./components/asset-detail-view";
 export { AddExpandedAssetRoute } from "./components/add-expanded-asset-route";
 export { DynamicAssetForm } from "./components/dynamic-asset-form";
 export { RecentlyDeletedList } from "./components/recently-deleted-list";
+export { VaultCategoryList } from "./components/vault-category-list";
+export { VaultCategoryRoute } from "./components/vault-category-route";
 export { VaultDashboard } from "./components/vault-dashboard";
 export { VaultExportScreen } from "./components/vault-export-screen";
 export { createEncryptedStoragePreview } from "./encrypted-storage-preview";
@@ -160,6 +162,25 @@ export {
   createVaultDashboardViewModel,
   type VaultDashboardViewModel,
 } from "./vault-dashboard-view-model";
+export {
+  createVaultCategoryListViewModel,
+  type VaultCategoryListViewModel,
+} from "./vault-category-list-view-model";
+export {
+  cancelVaultBulkSelection,
+  createBulkDeleteConfirmation,
+  createVaultBulkSelectionState,
+  enterVaultBulkSelection,
+  permanentlyDeleteVaultAssets,
+  toggleVaultBulkSelection,
+  type BulkDeleteMode,
+  type VaultBulkSelectionState,
+} from "./vault-bulk-selection";
+export {
+  getVaultCategoryConfig,
+  vaultCategoryConfigs,
+  type VaultCategoryConfig,
+} from "./vault-category-config";
 export { createVaultExportModel } from "./vault-export-model";
 export { exportVaultPdf } from "./vault-pdf-exporter";
 export { renderVaultPdfHtml } from "./vault-pdf-template";
