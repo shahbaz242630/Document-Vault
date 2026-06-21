@@ -5,6 +5,7 @@ const WORKFLOW_DIR = path.join(".github", "workflows");
 const ALLOWED_ACTIONS = new Set([
   "actions/checkout",
   "actions/setup-node",
+  "actions/upload-artifact",
   "github/codeql-action/analyze",
   "github/codeql-action/init",
   "supabase/setup-cli",

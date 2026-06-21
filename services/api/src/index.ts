@@ -8,6 +8,9 @@ import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
 export const app = new Hono();
 
 app.get("/health", (context) => {
+  context.header("Cache-Control", "no-store");
+  context.header("Cross-Origin-Resource-Policy", "same-origin");
+  context.header("X-Content-Type-Options", "nosniff");
   return context.json({ ok: true, service: "sanduqkin-api" });
 });
 
