@@ -15,6 +15,23 @@ test("passes the repository GitHub Actions security check", () => {
   });
 });
 
+test("runs every security guard regression suite in Security CI", () => {
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+
+  for (const testFile of [
+    "scripts/security-check.test.cjs",
+    "scripts/mobile-secret-scan.test.cjs",
+    "scripts/supabase-db-security-check.test.cjs",
+    "scripts/github-actions-security-check.test.cjs",
+    "scripts/phase1-dod-check.test.cjs",
+  ]) {
+    assert.match(workflow, new RegExp(`node --test[^\\n]*${testFile.replaceAll(".", "\\.")}`));
+  }
+});
+
 test("flags dangerous workflow triggers, permissions, actions, and PR secrets", () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
   const workflowDir = path.join(tmp, ".github", "workflows");

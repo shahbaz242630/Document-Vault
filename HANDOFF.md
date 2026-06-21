@@ -597,6 +597,23 @@ npm run typecheck --workspace @vault/mobile
 - Result: 5 test files passed, 15 tests passed, and mobile typecheck exited successfully.
 - `npm run check:phase1` still fails only on tracked function-size debt. After extracting the record-card functions it reports 19 functions over the 100-line limit, including the pre-existing shared `VaultCategoryList` violation; no new second violation remains in that file.
 
+## Security CI Checklist Slice Started 2026-06-21
+
+- Added root security tracking document: `SECURITY_HANDOFF.md`.
+- Began with finding 3, the lowest-risk missing CI coverage slice.
+- Added `scripts/phase1-dod-check.test.cjs` to the `Security CI` security-guard test command.
+- Added a workflow-wiring regression test that requires every security guard test suite, including the Phase 1 guard tests, to remain present in Security CI.
+- TDD proof captured: the new regression test failed before the workflow change because the Phase 1 test file was missing.
+- Fresh local verification passed:
+
+```powershell
+node --test scripts/github-actions-security-check.test.cjs
+node --test scripts/security-check.test.cjs scripts/mobile-secret-scan.test.cjs scripts/supabase-db-security-check.test.cjs scripts/github-actions-security-check.test.cjs scripts/phase1-dod-check.test.cjs
+```
+
+- Results: focused workflow tests passed 4/4; complete security guard tests passed 19/19, including all 8 Phase 1 guard tests.
+- GitHub Actions confirmation is pending review, commit, and push. Do not mark security finding 3 fully complete until that run is green.
+
 ## Critical Remaining Phase 1 Gaps
 
 - Real Supabase MFA remains launch-deferred because it is paid. Placeholder TOTP/factor-id paths are not production-valid.
