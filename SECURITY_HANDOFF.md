@@ -180,12 +180,29 @@ Current state: the root script delegates to workspace lint scripts, but no works
 
 ### 10. Enable GitHub code scanning
 
-- [ ] Add a minimal-permission CodeQL workflow for JavaScript/TypeScript.
-- [ ] Run it on pull requests, `main`, and an appropriate schedule.
-- [ ] Confirm the initial analysis completes and triage all findings.
-- [ ] Configure code-scanning results as a required merge control after the baseline is clean.
+- [x] Add a minimal-permission CodeQL workflow for JavaScript/TypeScript.
+- [x] Run it on pull requests, `main`, and an appropriate schedule.
+- [x] Confirm the initial analysis completes and triage all findings.
+- [x] Configure code-scanning results as a required merge control after the baseline is clean.
 
-Current state: the GitHub API reported that no code-scanning analysis exists for this repository. The custom static guard is useful but is not a replacement for semantic SAST.
+Current state: complete. CodeQL scans JavaScript and TypeScript on pull requests to `main`, pushes to `main`, a weekly schedule, and manual dispatch. The initial analysis completed with zero open alerts, and the CodeQL job is a required `main` branch-protection check.
+
+#### Completion evidence — 2026-06-21
+
+- Scope: add semantic JavaScript/TypeScript SAST and enforce it before merge.
+- Files/workflows changed: `.github/workflows/codeql.yml`, `scripts/github-actions-security-check.cjs`, `scripts/github-actions-security-check.test.cjs`.
+- Permissions: `contents: read` and `security-events: write`; the workflow does not reference repository secrets.
+- Immutable action pin: `github/codeql-action` v4.36.2 at commit `8aad20d150bbac5944a9f9d289da16a4b0d87c1e`.
+- Regression proof: the focused workflow-wiring test failed before implementation because `.github/workflows/codeql.yml` did not exist.
+- Focused command: `node --test scripts/github-actions-security-check.test.cjs`.
+- Focused result: 9 tests passed, 0 failed.
+- Static workflow command: `npm run check:github-actions-security`.
+- Full security-guard result: 24 tests passed, 0 failed.
+- Verification PR: [PR 4](https://github.com/shahbaz242630/Document-Vault/pull/4).
+- Initial CodeQL run: [run 27912805720](https://github.com/shahbaz242630/Document-Vault/actions/runs/27912805720) passed for JavaScript/TypeScript.
+- Initial alert triage: GitHub code-scanning API returned zero open alerts after the analysis.
+- Required merge control: strict `main` protection requires `CodeQL JavaScript/TypeScript (javascript-typescript)` alongside both existing Security CI jobs.
+- Residual risk: CodeQL complements but does not replace dependency scanning, secret scanning, runtime testing, or manual security review.
 
 ### 11. Enable Dependabot security coverage
 
