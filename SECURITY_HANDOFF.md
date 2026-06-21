@@ -91,9 +91,9 @@ Current state: complete. The workflow command includes the Phase 1 guard tests, 
 - [x] Decide whether CI must run on every branch push or only on pull requests plus `main`.
 - [x] If every pushed commit must be scanned, add an appropriate `push` branch pattern.
 - [x] Preserve concurrency cancellation to control CI usage.
-- [ ] Verify a feature-branch push starts Security CI before a pull request exists.
+- [x] Verify a feature-branch push starts Security CI before a pull request exists.
 
-Current state: Security CI is configured for pushes to every branch while retaining per-reference concurrency cancellation. Local workflow regression coverage passes; live feature-branch push confirmation is pending.
+Current state: complete. Security CI runs for pushes to every branch while retaining per-reference concurrency cancellation. A disposable feature branch triggered and passed both jobs without a pull request.
 
 #### Completion evidence — 2026-06-21 (local verification)
 
@@ -101,7 +101,10 @@ Current state: Security CI is configured for pushes to every branch while retain
 - Implementation: removed the `main`-only push filter while preserving pull-request coverage and `cancel-in-progress` concurrency behavior.
 - Focused command: `node --test scripts/github-actions-security-check.test.cjs`.
 - Focused local result: 8 tests passed, 0 failed.
-- GitHub Actions run and disposable feature-branch verification: pending commit and push.
+- Main GitHub Actions run: [Security CI run 27898797833](https://github.com/shahbaz242630/Document-Vault/actions/runs/27898797833), commit `0c468744da3f7ee4114ad722301299c175ce6e7a`; both jobs passed.
+- Feature-branch verification: [Security CI run 27898888410](https://github.com/shahbaz242630/Document-Vault/actions/runs/27898888410) was triggered by a push to `codex/verify-security-ci-branch-push` with no pull request; both jobs passed.
+- Cleanup: the disposable remote branch was deleted after verification.
+- Residual risk: none for finding 4. Pull requests may also produce a second run for the same commit; concurrency remains scoped by Git reference.
 
 ### 5. Cover the two skipped live Supabase integration tests
 
@@ -220,7 +223,9 @@ Current state: all actions in Security CI use full upstream commit SHAs with rea
 - Focused local result: 8 tests passed, 0 failed.
 - Static workflow command: `npm run check:github-actions-security`.
 - Static local result: passed.
-- GitHub Actions run: pending commit and push.
+- GitHub Actions run: [Security CI run 27898797833](https://github.com/shahbaz242630/Document-Vault/actions/runs/27898797833), commit `0c468744da3f7ee4114ad722301299c175ce6e7a`.
+- GitHub result: both `App security gates` and `Supabase live security gates` passed using the immutable pins.
+- Residual risk: automated reviewed SHA update proposals remain pending until finding 11 adds and enables Dependabot.
 
 ## Additional Recommended Security Work
 
