@@ -32,6 +32,15 @@ test("runs every security guard regression suite in Security CI", () => {
   }
 });
 
+test("runs Expo Doctor in Security CI", () => {
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+
+  assert.match(workflow, /- name: Expo Doctor[\s\S]*?run: npm run doctor --workspace @vault\/mobile/);
+});
+
 test("flags dangerous workflow triggers, permissions, actions, and PR secrets", () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
   const workflowDir = path.join(tmp, ".github", "workflows");

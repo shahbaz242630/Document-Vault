@@ -29,7 +29,7 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 - [x] GitHub Actions workflow security guard runs with `npm run check:github-actions-security`.
   - It rejects `pull_request_target`, broad write permissions, missing action versions, unapproved actions, and pull-request workflows that reference secrets.
 - [x] Mobile secret scan runs with `npm run check:mobile-secrets`.
-- [x] Ten security-guard regression tests run in CI.
+- [x] Nineteen security-guard regression tests run in CI, including all eight Phase 1 guard tests.
 - [x] Production dependency audit rejects high and critical advisories.
   - Audit result: no high or critical advisories; 13 low/moderate findings remain accepted by the current threshold.
   - Do not use `npm audit fix --force`; the current suggested forced fix downgrades Expo to an incompatible release.
@@ -69,9 +69,9 @@ Current state: the gate fails on 19 functions exceeding the 100-line limit. Do n
 ### 3. Run the Phase 1 guard's own tests in CI
 
 - [x] Add `scripts/phase1-dod-check.test.cjs` to the CI security-guard test command.
-- [ ] Confirm all eight Phase 1 guard tests execute in GitHub Actions.
+- [x] Confirm all eight Phase 1 guard tests execute in GitHub Actions.
 
-Current state: the workflow command now includes the Phase 1 guard tests and all eight pass locally. GitHub Actions confirmation remains pending until this slice is reviewed, committed, and pushed.
+Current state: complete. The workflow command includes the Phase 1 guard tests, and the GitHub-hosted Security CI run passed both jobs.
 
 #### Completion evidence — 2026-06-21 (local verification)
 
@@ -82,8 +82,9 @@ Current state: the workflow command now includes the Phase 1 guard tests and all
 - Focused result after implementation: 4 tests passed, 0 failed.
 - Full security-guard command: `node --test scripts/security-check.test.cjs scripts/mobile-secret-scan.test.cjs scripts/supabase-db-security-check.test.cjs scripts/github-actions-security-check.test.cjs scripts/phase1-dod-check.test.cjs`.
 - Full local result: 19 tests passed, 0 failed, including all 8 Phase 1 guard tests.
-- GitHub Actions run: pending review, commit, and push.
-- Residual risk: finding 3 remains open until a GitHub-hosted run proves the expanded command passes in CI.
+- GitHub Actions run: [Security CI run 27897926527](https://github.com/shahbaz242630/Document-Vault/actions/runs/27897926527), commit `62356c403ab33e5a76c2677aa66940bcfeb3716e`.
+- GitHub result: `App security gates` passed, including `Security guard tests`; `Supabase live security gates` also passed.
+- Residual risk: none for finding 3. The separate Phase 1 production gate remains tracked under finding 2.
 
 ### 4. Scan feature-branch pushes
 
@@ -107,9 +108,20 @@ Current state: the normal mobile suite skips these two tests unless their explic
 
 ### 6. Add Expo Doctor
 
-- [ ] Add `npx expo-doctor` or an equivalent pinned command to CI.
-- [ ] Confirm Expo SDK and React Native dependency compatibility is checked on pull requests.
+- [x] Add `npx expo-doctor` or an equivalent pinned command to CI.
+- [x] Confirm Expo SDK and React Native dependency compatibility is checked on pull requests.
 - [ ] Confirm the check is green on the CI Node version.
+
+Current state: `expo-doctor@1.19.10` is pinned as a mobile development dependency and the `Expo Doctor` step is wired into Security CI. Local Expo Doctor passes 21/21 checks. GitHub-hosted confirmation is pending commit and push.
+
+#### Completion evidence — 2026-06-21 (local verification)
+
+- Regression proof: the workflow-wiring test failed before implementation because Security CI had no Expo Doctor step.
+- Initial diagnostic result: Expo Doctor identified a deprecated direct `@expo/metro-config` dependency/import and four SDK 56 patch mismatches.
+- Root-cause fixes: moved Metro configuration to `expo/metro-config`; aligned Expo, Expo Build Properties, Expo Router, and Expo Sharing to the expected SDK 56 patches.
+- Local command: `.\node_modules\.bin\expo-doctor.cmd apps/mobile --verbose`.
+- Local result: 21 checks passed, 0 failed.
+- GitHub Actions run: pending commit and push.
 
 ### 7. Add native build and end-to-end coverage
 
@@ -162,12 +174,20 @@ Current state: Dependabot alerts and security updates are disabled.
 
 ### 12. Add direct shared-validation tests
 
-- [ ] Add tests for `lastFourDigitsSchema` accepting exactly four ASCII digits.
-- [ ] Add rejection cases for short, long, non-digit, whitespace-padded, punctuation, and non-string values.
-- [ ] Add a test script to the shared-validation workspace or place the tests in a clearly owned existing test workspace.
+- [x] Add tests for `lastFourDigitsSchema` accepting exactly four ASCII digits.
+- [x] Add rejection cases for short, long, non-digit, whitespace-padded, punctuation, and non-string values.
+- [x] Add a test script to the shared-validation workspace or place the tests in a clearly owned existing test workspace.
 - [ ] Confirm CI executes the new tests.
 
-Current state: `packages/shared-validation` is typechecked but has no direct runtime unit tests.
+Current state: the shared-validation workspace now has a Vitest script and 10 direct schema cases. Local tests pass; GitHub-hosted confirmation is pending commit and push.
+
+#### Completion evidence — 2026-06-21 (local verification)
+
+- Integration proof: `npm test --workspace @vault/shared-validation` failed before implementation because the workspace had no `test` script.
+- Added coverage: valid zero-padded and ordinary four-digit values; short, long, letters, leading/trailing whitespace, punctuation, non-ASCII digits, number, and null rejection cases.
+- Local command: `npm test --workspace @vault/shared-validation`.
+- Local result: 1 file passed, 10 tests passed, 0 failed.
+- GitHub Actions run: pending commit and push.
 
 ### 13. Pin GitHub Actions immutably
 

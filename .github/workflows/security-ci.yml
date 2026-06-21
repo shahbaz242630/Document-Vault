@@ -33,6 +33,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Expo Doctor
+        run: npm run doctor --workspace @vault/mobile
+
       - name: Unit tests
         run: npm test --workspaces --if-present
 
