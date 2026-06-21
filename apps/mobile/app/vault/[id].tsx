@@ -8,7 +8,7 @@ import { screenStyles } from "@/shared/ui/screen";
 
 export default function AssetDetailRoute() {
   const params = useLocalSearchParams<{ id?: string }>();
-  const { assets, softDeleteAsset } = useVaultSession();
+  const { assets, permanentlyDeleteAsset } = useVaultSession();
   const router = useRouter();
   const asset = assets.find((a) => a.id === params.id);
 
@@ -23,7 +23,7 @@ export default function AssetDetailRoute() {
           <AssetDetailView
             asset={asset}
             onDelete={async (id) => {
-              await softDeleteAsset(id);
+              await permanentlyDeleteAsset(id);
               router.replace("/vault");
             }}
             onEdit={() => {

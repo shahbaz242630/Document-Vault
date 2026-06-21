@@ -10,7 +10,6 @@ import {
   type SupabaseEmergencyGrantClient,
   useVaultSession,
 } from "@/features/vault";
-import { createSupabaseClient } from "@/shared/api/supabase-client";
 import { screenStyles } from "@/shared/ui/screen";
 
 const pendingConfirmationKey = "sanduqkin.sealedEmergencyCode.pendingConfirmation";
@@ -125,16 +124,16 @@ function useEmergencyAccessSetupState() {
 }
 
 function useEmergencyGrantRepository() {
-  const supabaseClient = useMemo(() => createSupabaseClient(), []);
+  const vaultSession = useVaultSession();
 
   return useMemo(
     () =>
-      supabaseClient
+      vaultSession.supabaseClient
         ? createSupabaseEmergencyGrantRepository(
-            supabaseClient as unknown as SupabaseEmergencyGrantClient,
+            vaultSession.supabaseClient as unknown as SupabaseEmergencyGrantClient,
           )
         : null,
-    [supabaseClient],
+    [vaultSession.supabaseClient],
   );
 }
 
@@ -153,13 +152,13 @@ function useInterruptedSetupStatus({
         return;
       }
 
-      const pending = await SecureStore.getItemAsync(pendingConfirmationKey);
-      const activeGrant = pending
-        ? await repository.loadActiveSealedCodeGrant()
-        : null;
+      const [pending, activeGrant] = await Promise.all([
+        SecureStore.getItemAsync(pendingConfirmationKey),
+        repository.loadActiveSealedCodeGrant(),
+      ]);
 
-      if (isMounted && pending && activeGrant) {
-        setStatus("interrupted");
+      if (isMounted && activeGrant) {
+        setStatus(pending ? "interrupted" : "active");
       }
     }
 

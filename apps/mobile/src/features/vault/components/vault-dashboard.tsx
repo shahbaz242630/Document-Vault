@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
 
@@ -65,6 +65,28 @@ export function VaultDashboard({ assets }: VaultDashboardProps) {
         >
           {viewModel.activeCount} active items
         </Text>
+      </View>
+
+      <View style={{ gap: 10 }}>
+        {viewModel.categories.map((category) => (
+          <Link
+            key={category.assetType}
+            href={category.routeHref}
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              borderCurve: "continuous",
+              borderRadius: 8,
+              borderWidth: 1,
+              color: colors.ink,
+              fontSize: 17,
+              fontWeight: "700",
+              padding: 16,
+            }}
+          >
+            {category.label} - {category.count}
+          </Link>
+        ))}
       </View>
 
       <View style={{ gap: 10 }}>

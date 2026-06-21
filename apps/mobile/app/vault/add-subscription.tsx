@@ -28,7 +28,8 @@ export default function AddSubscriptionRoute() {
       <Stack.Screen options={{ title: "Add subscription" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Subscription"
@@ -51,7 +52,7 @@ export default function AddSubscriptionRoute() {
               title: values.title,
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/subscriptions");
           }}
         />
       </ScrollView>

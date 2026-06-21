@@ -1,6 +1,10 @@
 import type { Context } from "hono";
 import { z } from "zod";
 
+import { isRequestBodyTooLarge, timingSafeStringEqual } from "../security/http.js";
+
+const MAX_REVENUECAT_WEBHOOK_BODY_BYTES = 256 * 1024;
+
 const eventSchema = z.object({
   event: z.object({
     app_user_id: z.string(),
@@ -21,13 +25,17 @@ function getRevenueCatWebhookSecret(): string | null {
 
 export function createRevenueCatWebhookHandler(deps: RevenueCatWebhookDeps = {}) {
   return async (context: Context) => {
+    if (isRequestBodyTooLarge(context, MAX_REVENUECAT_WEBHOOK_BODY_BYTES)) {
+      return context.json({ error: "Payload too large" }, 413);
+    }
+
     const secret = (deps.getWebhookSecret ?? getRevenueCatWebhookSecret)();
     if (!secret) {
       return context.json({ error: "Webhook not configured" }, 503);
     }
 
     const authorization = context.req.header("Authorization")?.trim();
-    if (authorization !== secret) {
+    if (!timingSafeStringEqual(authorization, secret)) {
       return context.json({ error: "Unauthorized" }, 401);
     }
 

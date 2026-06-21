@@ -84,26 +84,45 @@ describe("createBiometricStorage", () => {
       async deleteItemAsync(key) {
         calls.push({ type: "delete", key });
       },
-      async getItemAsync(key) {
-        calls.push({ type: "get", key });
+      async getItemAsync(key, options) {
+        calls.push({ type: "get", key, options });
         return "cached-mek";
       },
-      async setItemAsync(key, value) {
-        calls.push({ type: "set", key, value });
+      async setItemAsync(key, value, options) {
+        calls.push({ type: "set", key, value, options });
       },
+      WHEN_UNLOCKED_THIS_DEVICE_ONLY: 1,
     });
 
     await expect(storage.getKey()).resolves.toBe("cached-mek");
     await storage.setKey("new-mek");
 
-    expect(calls).toContainEqual({ type: "set", key: "biometric_mek_cache", value: "new-mek" });
+    expect(calls).toContainEqual({
+      type: "get",
+      key: "biometric_mek_cache",
+      options: {
+        authenticationPrompt: "Unlock Sanduqkin",
+        keychainAccessible: 1,
+        requireAuthentication: true,
+      },
+    });
+    expect(calls).toContainEqual({
+      type: "set",
+      key: "biometric_mek_cache",
+      value: "new-mek",
+      options: {
+        authenticationPrompt: "Unlock Sanduqkin",
+        keychainAccessible: 1,
+        requireAuthentication: true,
+      },
+    });
   });
 
   it("clears the cached key", async () => {
     const calls: unknown[] = [];
     const storage = createBiometricStorage({
-      async deleteItemAsync(key) {
-        calls.push({ type: "delete", key });
+      async deleteItemAsync(key, options) {
+        calls.push({ type: "delete", key, options });
       },
       async getItemAsync() {
         return null;
@@ -111,6 +130,7 @@ describe("createBiometricStorage", () => {
       async setItemAsync() {
         // no-op
       },
+      WHEN_UNLOCKED_THIS_DEVICE_ONLY: 1,
     });
 
     await storage.clearKey();
@@ -118,6 +138,11 @@ describe("createBiometricStorage", () => {
     expect(calls).toContainEqual({
       type: "delete",
       key: "biometric_mek_cache",
+      options: {
+        authenticationPrompt: "Unlock Sanduqkin",
+        keychainAccessible: 1,
+        requireAuthentication: true,
+      },
     });
   });
 });

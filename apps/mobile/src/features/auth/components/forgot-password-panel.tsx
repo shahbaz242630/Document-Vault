@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useRouter, type Router } from "expo-router";
+import { useRouter } from "expo-router";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 import { createSupabaseClient } from "@/shared/api/supabase-client";
@@ -11,6 +11,7 @@ import { createForgotPasswordViewModel } from "../forgot-password-view-model";
 type ForgotPasswordViewModel = ReturnType<typeof createForgotPasswordViewModel>;
 type PasswordResetService = ReturnType<typeof createPasswordResetService>;
 type RequestResetResult = { message: string; status: "error" | "ok" | "unavailable" };
+type AppRouter = ReturnType<typeof useRouter>;
 
 export function ForgotPasswordPanel() {
   const viewModel = createForgotPasswordViewModel();
@@ -129,7 +130,7 @@ function UnavailableMessage({
   ) : null;
 }
 
-function RecoveryActions({ router, viewModel }: { router: Router; viewModel: ForgotPasswordViewModel }) {
+function RecoveryActions({ router, viewModel }: { router: AppRouter; viewModel: ForgotPasswordViewModel }) {
   return (
     <View style={{ gap: 10 }}>
       <SecondaryAction

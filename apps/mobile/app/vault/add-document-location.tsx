@@ -26,7 +26,8 @@ export default function AddDocumentLocationRoute() {
       <Stack.Screen options={{ title: "Add document" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Document location"
@@ -42,7 +43,7 @@ export default function AddDocumentLocationRoute() {
               title: values.title,
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/document-locations");
           }}
         />
       </ScrollView>

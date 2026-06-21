@@ -27,7 +27,8 @@ export default function AddOtherRoute() {
       <Stack.Screen options={{ title: "Add other asset" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Other"
@@ -44,7 +45,7 @@ export default function AddOtherRoute() {
               title: values.title,
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/other-records");
           }}
         />
       </ScrollView>

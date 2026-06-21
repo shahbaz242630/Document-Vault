@@ -1,6 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Context } from "hono";
 
+import { isRequestBodyTooLarge, readBearerToken } from "../security/http.js";
+
+const MAX_ACCOUNT_DELETION_REQUEST_BODY_BYTES = 1024;
+
 type AccountDeletionRequestConfig = {
   appBaseUrl: string;
   emailFrom: string;
@@ -42,6 +46,10 @@ type RouteDeps = {
 
 export function createAccountDeletionRequestRoute(deps: RouteDeps = {}) {
   return async (context: Context) => {
+    if (isRequestBodyTooLarge(context, MAX_ACCOUNT_DELETION_REQUEST_BODY_BYTES)) {
+      return context.json({ error: "Payload too large" }, 413);
+    }
+
     const jwt = readBearerToken(context.req.header("Authorization"));
     if (!jwt) {
       return context.json({ error: "Unauthorized" }, 401);
@@ -54,7 +62,13 @@ export function createAccountDeletionRequestRoute(deps: RouteDeps = {}) {
 
     const client = (deps.createClient ?? createSupabaseAccountDeletionRequestClient)(config);
     const emailSender = deps.emailSender ?? createResendAccountDeletionEmailSender(config);
-    const user = await client.getUser(jwt);
+    let user: AccountDeletionRequestUser;
+    try {
+      user = await client.getUser(jwt);
+    } catch {
+      return context.json({ error: "Unauthorized" }, 401);
+    }
+
     const request = await client.createRequest(user.id);
 
     await emailSender.send({
@@ -79,12 +93,6 @@ function getAccountDeletionRequestConfig(): AccountDeletionRequestConfig | null 
   }
 
   return { appBaseUrl, emailFrom, resendApiKey, serviceRoleKey, supabaseUrl };
-}
-
-function readBearerToken(authorization: string | undefined): string | null {
-  const match = authorization?.trim().match(/^Bearer\s+(.+)$/i);
-
-  return match?.[1]?.trim() || null;
 }
 
 function createSupabaseAccountDeletionRequestClient(

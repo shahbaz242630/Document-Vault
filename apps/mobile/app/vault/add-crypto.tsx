@@ -28,7 +28,8 @@ export default function AddCryptoRoute() {
       <Stack.Screen options={{ title: "Add crypto" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Crypto wallet"
@@ -52,7 +53,7 @@ export default function AddCryptoRoute() {
               walletIdentifier: values.walletIdentifier,
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/crypto");
           }}
         />
       </ScrollView>

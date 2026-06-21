@@ -29,7 +29,8 @@ export default function AddBankAccountRoute() {
       <Stack.Screen options={{ title: "Add bank account" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Bank account"
@@ -54,7 +55,7 @@ export default function AddBankAccountRoute() {
               title: values.title,
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/bank-accounts");
           }}
         />
       </ScrollView>

@@ -1,13 +1,22 @@
 type SecureStorage = {
-  deleteItemAsync: (key: string) => Promise<void>;
-  getItemAsync: (key: string) => Promise<string | null>;
-  setItemAsync: (key: string, value: string) => Promise<void>;
+  WHEN_UNLOCKED_THIS_DEVICE_ONLY?: number;
+  deleteItemAsync: (key: string, options?: SecureStorageOptions) => Promise<void>;
+  getItemAsync: (key: string, options?: SecureStorageOptions) => Promise<string | null>;
+  setItemAsync: (key: string, value: string, options?: SecureStorageOptions) => Promise<void>;
+};
+
+type SecureStorageOptions = {
+  authenticationPrompt?: string;
+  keychainAccessible?: number;
+  requireAuthentication?: boolean;
 };
 
 const BIOMETRIC_ENABLED_KEY = "biometric_unlock_enabled";
 const MEK_KEY = "biometric_mek_cache";
 
 export function createBiometricStorage(storage: SecureStorage | null) {
+  const authenticatedMekOptions = createAuthenticatedMekOptions(storage);
+
   return {
     async isEnabled(): Promise<boolean> {
       if (!storage) {
@@ -35,7 +44,7 @@ export function createBiometricStorage(storage: SecureStorage | null) {
         return null;
       }
 
-      return storage.getItemAsync(MEK_KEY);
+      return storage.getItemAsync(MEK_KEY, authenticatedMekOptions);
     },
 
     async setKey(key: string): Promise<void> {
@@ -43,7 +52,7 @@ export function createBiometricStorage(storage: SecureStorage | null) {
         return;
       }
 
-      await storage.setItemAsync(MEK_KEY, key);
+      await storage.setItemAsync(MEK_KEY, key, authenticatedMekOptions);
     },
 
     async clearKey(): Promise<void> {
@@ -51,7 +60,17 @@ export function createBiometricStorage(storage: SecureStorage | null) {
         return;
       }
 
-      await storage.deleteItemAsync(MEK_KEY);
+      await storage.deleteItemAsync(MEK_KEY, authenticatedMekOptions);
     },
+  };
+}
+
+function createAuthenticatedMekOptions(
+  storage: SecureStorage | null,
+): SecureStorageOptions {
+  return {
+    authenticationPrompt: "Unlock Sanduqkin",
+    keychainAccessible: storage?.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    requireAuthentication: true,
   };
 }

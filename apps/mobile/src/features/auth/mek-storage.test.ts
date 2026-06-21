@@ -4,12 +4,20 @@ import { createMekStorage } from "./mek-storage";
 
 function createFakeStorage() {
   const data = new Map<string, string>();
+  const calls: unknown[] = [];
   return {
-    deleteItemAsync: async (key: string) => {
+    calls,
+    WHEN_UNLOCKED_THIS_DEVICE_ONLY: 1,
+    deleteItemAsync: async (key: string, options?: unknown) => {
+      calls.push({ key, options, type: "delete" });
       data.delete(key);
     },
-    getItemAsync: async (key: string) => data.get(key) ?? null,
-    setItemAsync: async (key: string, value: string) => {
+    getItemAsync: async (key: string, options?: unknown) => {
+      calls.push({ key, options, type: "get" });
+      return data.get(key) ?? null;
+    },
+    setItemAsync: async (key: string, value: string, options?: unknown) => {
+      calls.push({ key, options, type: "set", value });
       data.set(key, value);
     },
   };
@@ -27,9 +35,21 @@ describe("mek-storage", () => {
   });
 
   it("round-trips a MEK through storage", async () => {
-    const mekStorage = createMekStorage(createFakeStorage());
+    const storage = createFakeStorage();
+    const mekStorage = createMekStorage(storage);
     await mekStorage.set("base64-encoded-mek");
     expect(await mekStorage.get()).toBe("base64-encoded-mek");
+    expect(storage.calls).toContainEqual({
+      key: "vault_mek_base64",
+      options: { keychainAccessible: 1 },
+      type: "set",
+      value: "base64-encoded-mek",
+    });
+    expect(storage.calls).toContainEqual({
+      key: "vault_mek_base64",
+      options: { keychainAccessible: 1 },
+      type: "get",
+    });
   });
 
   it("clears the stored MEK", async () => {

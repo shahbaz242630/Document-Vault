@@ -29,6 +29,23 @@ describe("revenueCatWebhookHandler", () => {
     expect(response.status).toBe(400);
   });
 
+  it("rejects oversized webhook bodies before parsing JSON", async () => {
+    const app = createApp();
+
+    const response = await app.request("/webhooks/revenuecat", {
+      body: "{",
+      headers: {
+        Authorization: "webhook-secret",
+        "Content-Length": String(256 * 1024 + 1),
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+
+    await expect(response.json()).resolves.toEqual({ error: "Payload too large" });
+    expect(response.status).toBe(413);
+  });
+
   it("acknowledges valid events without syncing entitlements during Phase 1", async () => {
     const app = createApp();
 

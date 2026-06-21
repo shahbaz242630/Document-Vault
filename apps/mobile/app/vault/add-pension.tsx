@@ -28,7 +28,8 @@ export default function AddPensionRoute() {
       <Stack.Screen options={{ title: "Add pension" }} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
+        contentContainerStyle={screenStyles.formContent}
+        keyboardShouldPersistTaps="handled"
       >
         <DynamicAssetForm
           categoryLabel="Pension"
@@ -52,7 +53,7 @@ export default function AddPensionRoute() {
               title: values.title,
             });
             await addAsset(payload);
-            router.replace("/vault");
+            router.replace("/vault/pensions");
           }}
         />
       </ScrollView>

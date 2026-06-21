@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useRouter, type Router } from "expo-router";
+import { useRouter } from "expo-router";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 import {
@@ -31,6 +31,7 @@ type EmailPasswordAuthFormProps = {
 };
 
 type AuthService = ReturnType<typeof createAuthService>;
+type AppRouter = ReturnType<typeof useRouter>;
 type FailedLoginTracker = ReturnType<typeof createFailedLoginTracker>;
 type VaultSession = ReturnType<typeof useVaultSession>;
 type SupabaseClient = ReturnType<typeof createSupabaseClient>;
@@ -147,7 +148,7 @@ function AuthResultMessage({ result }: { result: AuthServiceResult | null }) {
   ) : null;
 }
 
-function ForgotPasswordLink({ mode, router }: { mode: EmailPasswordAuthFormProps["mode"]; router: Router }) {
+function ForgotPasswordLink({ mode, router }: { mode: EmailPasswordAuthFormProps["mode"]; router: AppRouter }) {
   return mode === "sign-in" ? (
     <Pressable accessibilityRole="button" onPress={() => router.push("/auth/forgot-password")}>
       <Text style={{ color: colors.action, fontSize: 15, textAlign: "center" }}>Forgot password?</Text>
@@ -231,7 +232,7 @@ async function submitAuthForm({
   authService: AuthService;
   lockoutTracker: FailedLoginTracker;
   mode: EmailPasswordAuthFormProps["mode"];
-  router: Router;
+  router: AppRouter;
   setIsSubmitting: (value: boolean) => void;
   setResult: (result: AuthServiceResult | null) => void;
   supabaseClient: SupabaseClient;
@@ -311,7 +312,7 @@ async function handleAuthResult({
   lockoutTracker: FailedLoginTracker;
   mode: EmailPasswordAuthFormProps["mode"];
   nextResult: AuthServiceResult;
-  router: Router;
+  router: AppRouter;
   supabaseClient: SupabaseClient;
   values: AuthCredentialsInput;
   vaultSession: VaultSession;
@@ -362,7 +363,7 @@ async function routeAfterAuthSuccess({
   vaultSession,
 }: {
   nextResult: Extract<AuthServiceResult, { status: "ok" }>;
-  router: Router;
+  router: AppRouter;
   supabaseClient: SupabaseClient;
   values: AuthCredentialsInput;
   vaultSession: VaultSession;
@@ -376,7 +377,7 @@ async function routeAfterAuthSuccess({
   }
 }
 
-async function routeToEmailVerification(router: Router, email: string) {
+async function routeToEmailVerification(router: AppRouter, email: string) {
   await createSignupProgressStorage(ExpoSecureStore).save({
     email,
     step: "verify-email",
@@ -390,7 +391,7 @@ async function routeToUnlockedVault({
   values,
   vaultSession,
 }: {
-  router: Router;
+  router: AppRouter;
   supabaseClient: SupabaseClient;
   values: AuthCredentialsInput;
   vaultSession: VaultSession;

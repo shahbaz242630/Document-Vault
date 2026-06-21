@@ -133,7 +133,7 @@ describe("vault store", () => {
     ]);
   });
 
-  it("permanently deletes only records that are already soft-deleted", async () => {
+  it("permanently deletes active and soft-deleted records without recovery", async () => {
     const key = await generateMasterEncryptionKey();
     const store = createVaultStore({ now: () => new Date("2026-05-12T10:00:00.000Z") });
     const active = await store.addAsset({
@@ -158,11 +158,12 @@ describe("vault store", () => {
     });
     store.softDeleteAsset(deleted.id);
 
-    expect(store.permanentlyDeleteAsset(active.id)).toBe(false);
+    expect(store.permanentlyDeleteAsset(active.id)).toBe(true);
     expect(store.permanentlyDeleteAsset(deleted.id)).toBe(true);
 
-    expect(store.getEncryptedRecord(active.id)?.id).toBe(active.id);
+    expect(store.getEncryptedRecord(active.id)).toBeNull();
     expect(store.getEncryptedRecord(deleted.id)).toBeNull();
+    await expect(store.listActiveAssets({ key })).resolves.toEqual([]);
     await expect(store.listDeletedAssets({ key })).resolves.toEqual([]);
   });
 
