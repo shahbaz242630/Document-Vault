@@ -54,9 +54,9 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 - [x] Require `App security gates` and `Supabase live security gates` to pass.
 - [x] Require branches to be current before merge if that matches the chosen merge workflow.
 - [x] Prevent bypass/direct pushes except for explicitly approved administrators or emergency procedures.
-- [ ] Test the rule with a disposable pull request and record the evidence below.
+- [x] Test the rule with a disposable pull request and record the evidence below.
 
-Current state: protection is enabled for `main`. Pull requests and current branches are required; `App security gates` and `Supabase live security gates` are required; stale approvals are dismissed; conversations must be resolved; and administrator bypass, force pushes, and branch deletion are disabled. Disposable pull-request verification is in progress.
+Current state: complete. Protection is enabled for `main`. Pull requests and current branches are required; `App security gates` and `Supabase live security gates` are required; stale approvals are dismissed; conversations must be resolved; and administrator bypass, force pushes, and branch deletion are disabled.
 
 #### Completion evidence — 2026-06-21 (remote configuration)
 
@@ -66,7 +66,10 @@ Current state: protection is enabled for `main`. Pull requests and current branc
 - Bypass controls: enforcement applies to administrators; force pushes and branch deletion are disabled.
 - Additional merge control: unresolved pull-request conversations block merging.
 - API verification: `GET /repos/shahbaz242630/Document-Vault/branches/main/protection` returned the configured protection and both required GitHub Actions checks.
-- Pull-request verification: pending.
+- Disposable verification PR: [PR 3](https://github.com/shahbaz242630/Document-Vault/pull/3) was blocked while required checks were pending.
+- Pull-request Security CI run: [run 27912184737](https://github.com/shahbaz242630/Document-Vault/actions/runs/27912184737).
+- Pull-request result: `App security gates` and `Supabase live security gates` passed; Vercel and GitGuardian checks also passed.
+- Residual risk: repository administrators can deliberately edit or remove branch protection through GitHub settings. Administrative access must remain tightly controlled.
 
 ### 2. Integrate the Phase 1 Definition-of-Done gate
 
