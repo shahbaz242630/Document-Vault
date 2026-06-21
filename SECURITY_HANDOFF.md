@@ -29,7 +29,7 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 - [x] GitHub Actions workflow security guard runs with `npm run check:github-actions-security`.
   - It rejects `pull_request_target`, broad write permissions, missing action versions, unapproved actions, and pull-request workflows that reference secrets.
 - [x] Mobile secret scan runs with `npm run check:mobile-secrets`.
-- [x] Nineteen security-guard regression tests run in CI, including all eight Phase 1 guard tests.
+- [x] Twenty security-guard regression tests run in CI, including all eight Phase 1 guard tests and workflow wiring for Expo Doctor.
 - [x] Production dependency audit rejects high and critical advisories.
   - Audit result: no high or critical advisories; 13 low/moderate findings remain accepted by the current threshold.
   - Do not use `npm audit fix --force`; the current suggested forced fix downgrades Expo to an incompatible release.
@@ -110,9 +110,9 @@ Current state: the normal mobile suite skips these two tests unless their explic
 
 - [x] Add `npx expo-doctor` or an equivalent pinned command to CI.
 - [x] Confirm Expo SDK and React Native dependency compatibility is checked on pull requests.
-- [ ] Confirm the check is green on the CI Node version.
+- [x] Confirm the check is green on the CI Node version.
 
-Current state: `expo-doctor@1.19.10` is pinned as a mobile development dependency and the `Expo Doctor` step is wired into Security CI. Local Expo Doctor passes 21/21 checks. GitHub-hosted confirmation is pending commit and push.
+Current state: complete. `expo-doctor@1.19.10` is pinned as a mobile development dependency, and the `Expo Doctor` step passes in Security CI on Node.js 24.3.0.
 
 #### Completion evidence — 2026-06-21 (local verification)
 
@@ -121,7 +121,9 @@ Current state: `expo-doctor@1.19.10` is pinned as a mobile development dependenc
 - Root-cause fixes: moved Metro configuration to `expo/metro-config`; aligned Expo, Expo Build Properties, Expo Router, and Expo Sharing to the expected SDK 56 patches.
 - Local command: `.\node_modules\.bin\expo-doctor.cmd apps/mobile --verbose`.
 - Local result: 21 checks passed, 0 failed.
-- GitHub Actions run: pending commit and push.
+- GitHub Actions run: [Security CI run 27898190487](https://github.com/shahbaz242630/Document-Vault/actions/runs/27898190487), commit `a7614d3f05fae0fc47e67986c96bfffbd6b5ad2f`.
+- GitHub result: `Expo Doctor`, all other application gates, and `Supabase live security gates` passed.
+- Residual risk: none for finding 6.
 
 ### 7. Add native build and end-to-end coverage
 
@@ -177,9 +179,9 @@ Current state: Dependabot alerts and security updates are disabled.
 - [x] Add tests for `lastFourDigitsSchema` accepting exactly four ASCII digits.
 - [x] Add rejection cases for short, long, non-digit, whitespace-padded, punctuation, and non-string values.
 - [x] Add a test script to the shared-validation workspace or place the tests in a clearly owned existing test workspace.
-- [ ] Confirm CI executes the new tests.
+- [x] Confirm CI executes the new tests.
 
-Current state: the shared-validation workspace now has a Vitest script and 10 direct schema cases. Local tests pass; GitHub-hosted confirmation is pending commit and push.
+Current state: complete. The shared-validation workspace has a Vitest script and 10 direct schema cases, and its tests execute through the green CI workspace-test step.
 
 #### Completion evidence — 2026-06-21 (local verification)
 
@@ -187,7 +189,9 @@ Current state: the shared-validation workspace now has a Vitest script and 10 di
 - Added coverage: valid zero-padded and ordinary four-digit values; short, long, letters, leading/trailing whitespace, punctuation, non-ASCII digits, number, and null rejection cases.
 - Local command: `npm test --workspace @vault/shared-validation`.
 - Local result: 1 file passed, 10 tests passed, 0 failed.
-- GitHub Actions run: pending commit and push.
+- GitHub Actions run: [Security CI run 27898190487](https://github.com/shahbaz242630/Document-Vault/actions/runs/27898190487), commit `a7614d3f05fae0fc47e67986c96bfffbd6b5ad2f`.
+- GitHub result: `Unit tests` passed with the shared-validation workspace included; all remaining application and Supabase gates also passed.
+- Residual risk: none for finding 12.
 
 ### 13. Pin GitHub Actions immutably
 
