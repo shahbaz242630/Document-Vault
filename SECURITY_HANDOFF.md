@@ -44,6 +44,7 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 - [x] Audit-retention processor runs daily and its latest audited scheduled execution passed.
 - [x] Supabase Phase 1 schema guards cover RLS, owner policies, grants, safe columns, and the 20-active-record category limit.
 - [x] Current security workflows do not expose repository secrets to pull-request code.
+- [x] OWASP ZAP runs a passive baseline scan against an isolated local API on pull requests, `main`, and a weekly schedule.
 
 ## Open Findings — Required Checklist
 
@@ -256,6 +257,34 @@ Current state: all actions in Security CI use full upstream commit SHAs with rea
 - GitHub Actions run: [Security CI run 27898797833](https://github.com/shahbaz242630/Document-Vault/actions/runs/27898797833), commit `0c468744da3f7ee4114ad722301299c175ce6e7a`.
 - GitHub result: both `App security gates` and `Supabase live security gates` passed using the immutable pins.
 - Residual risk: automated reviewed SHA update proposals remain pending until finding 11 adds and enables Dependabot.
+
+### 14. Add OWASP ZAP dynamic API scanning
+
+- [x] Run ZAP against an isolated local API instead of production or third-party infrastructure.
+- [x] Run the baseline on pull requests, `main`, an appropriate schedule, and manual dispatch.
+- [x] Pin the ZAP container by immutable digest and keep workflow permissions minimal.
+- [x] Fail CI when the ZAP JSON report contains a high-risk alert.
+- [x] Retain HTML, JSON, and Markdown reports for review without including credentials or production data.
+- [x] Make `OWASP ZAP baseline` a required `main` merge check after a clean baseline.
+
+Current state: complete. The workflow starts the Hono API locally without production credentials, scans `http://127.0.0.1:8787/health`, enforces a high-risk alert threshold, uploads reports for seven days, and stops the test API during unconditional cleanup. It does not scan production, Supabase, or authenticated mobile traffic.
+
+#### Completion evidence — 2026-06-21
+
+- Scope: add a bounded OWASP ZAP passive DAST baseline for the API health surface.
+- Files/workflows changed: `.github/workflows/zap.yml`, `.zap/rules.tsv`, `.github/workflows/security-ci.yml`, `services/api/scripts/zap-server.ts`, `services/api/src/index.ts`, `services/api/src/index.test.ts`, `scripts/zap-report-check.cjs`, `scripts/zap-report-check.test.cjs`, `scripts/github-actions-security-check.cjs`, and `scripts/github-actions-security-check.test.cjs`.
+- Regression proof: the workflow-wiring test failed before implementation because `.github/workflows/zap.yml` did not exist; the report-gate test failed because the checker did not exist; API header tests failed before the ZAP-driven header fixes.
+- Container pin: official `ghcr.io/zaproxy/zaproxy` amd64 manifest digest `sha256:461415b7526ca60af0ddc15389419d05df243aed1b665b64d3a8c3ebd67c6056`.
+- Local Docker result: 66 passive checks passed, 0 warnings, 0 high-risk alerts, and 1 documented ignore for intentionally non-storable health content.
+- API verification: 10 test files and 27 tests passed; API typecheck passed.
+- Security-guard verification: 26 tests passed, including workflow wiring and the high-risk report threshold.
+- Production dependency audit: no high or critical findings.
+- Verification PR: [PR 5](https://github.com/shahbaz242630/Document-Vault/pull/5).
+- GitHub Actions run: [OWASP ZAP run 27913963018](https://github.com/shahbaz242630/Document-Vault/actions/runs/27913963018) passed in 1 minute 21 seconds.
+- GitHub-hosted result: 66 passive checks passed, 0 warnings, 0 high-risk alerts, and the documented rule `10049` ignore was applied.
+- Artifact evidence: `owasp-zap-report` artifact `7778237071` uploaded six files with SHA-256 `a7c5a5aa0f0a387997b126bf7fae81a36684727da6730ac50e969602e82ada3c` and seven-day retention.
+- Required merge control: strict `main` protection requires `OWASP ZAP baseline` alongside CodeQL and both Security CI jobs.
+- Residual risk: this is an unauthenticated passive baseline of the current API health surface. Authenticated API paths, active scanning, the Expo mobile client, and third-party Supabase services require separately designed test environments and authorization boundaries.
 
 ## Additional Recommended Security Work
 

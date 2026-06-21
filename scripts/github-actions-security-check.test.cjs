@@ -72,6 +72,44 @@ test("configures CodeQL scanning for JavaScript and TypeScript", () => {
   assert.match(workflow, /github\/codeql-action\/analyze@[a-f0-9]{40}/);
 });
 
+test("configures an isolated OWASP ZAP baseline scan for the API", () => {
+  const workflowPath = path.resolve(
+    __dirname,
+    "..",
+    ".github",
+    "workflows",
+    "zap.yml",
+  );
+
+  assert.equal(fs.existsSync(workflowPath), true, "OWASP ZAP workflow must exist");
+
+  const workflow = fs.readFileSync(workflowPath, "utf8");
+  const securityWorkflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+  const apiPackage = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, "..", "services", "api", "package.json"), "utf8"),
+  );
+
+  assert.match(workflow, /\n  pull_request:\s*\n\s*branches: \[main\]/);
+  assert.match(workflow, /\n  push:\s*\n\s*branches: \[main\]/);
+  assert.match(workflow, /\n  schedule:\s*\n\s*- cron: "[^"]+"/);
+  assert.match(workflow, /\npermissions:\s*\n\s*contents: read/);
+  assert.match(workflow, /name: OWASP ZAP baseline/);
+  assert.match(workflow, /timeout-minutes: 15/);
+  assert.match(workflow, /ghcr\.io\/zaproxy\/zaproxy@sha256:[a-f0-9]{64}/);
+  assert.match(workflow, /http:\/\/127\.0\.0\.1:8787\/health/);
+  assert.match(workflow, /-c zap-rules\.tsv/);
+  assert.match(workflow, /node scripts\/zap-report-check\.cjs zap-reports\/zap-report\.json/);
+  assert.match(workflow, /actions\/upload-artifact@[a-f0-9]{40}/);
+  assert.match(securityWorkflow, /node --test[^\n]*scripts\/zap-report-check\.test\.cjs/);
+  assert.equal(apiPackage.scripts["start:zap"], "tsx scripts/zap-server.ts");
+
+  const zapRules = fs.readFileSync(path.resolve(__dirname, "..", ".zap", "rules.tsv"), "utf8");
+  assert.match(zapRules, /^10049\s+IGNORE\s+/m);
+});
+
 test("rejects mutable action tags and accepts full commit SHAs", () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
   const workflowDir = path.join(tmp, ".github", "workflows");
