@@ -67,7 +67,7 @@
     "expo-doctor": "1.19.10",
     "libsodium-wrappers": "0.8.4",
     "react-native-bundle-visualizer": "4.0.0",
-    "typescript": "~6.0.3",
+    "typescript": "^6.0.3",
     "vitest": "4.1.9"
   },
   "private": true
