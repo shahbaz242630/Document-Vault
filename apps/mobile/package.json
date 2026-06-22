@@ -28,7 +28,7 @@
     }
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.105.4",
+    "@supabase/supabase-js": "2.108.2",
     "@vault/shared-types": "0.1.0",
     "@vault/shared-validation": "0.1.0",
     "bip39": "3.1.0",
@@ -47,27 +47,27 @@
     "expo-sharing": "~56.0.18",
     "expo-splash-screen": "~56.0.10",
     "expo-status-bar": "~56.0.4",
-    "libsodium-wrappers-sumo": "0.7.15",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-native": "0.85.3",
+    "libsodium-wrappers-sumo": "0.8.4",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-native": "0.86.0",
     "react-native-libsodium": "^1.7.0",
-    "react-native-purchases": "^10.1.1",
-    "react-native-purchases-ui": "^10.1.1",
-    "react-native-safe-area-context": "5.7.0",
+    "react-native-purchases": "^10.4.0",
+    "react-native-purchases-ui": "^10.4.0",
+    "react-native-safe-area-context": "5.8.0",
     "react-native-screens": "4.25.2",
     "react-native-ssl-public-key-pinning": "^1.2.6",
-    "zod": "4.1.13"
+    "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/react": "19.2.14",
+    "@types/react": "19.2.17",
     "@types/react-dom": "~19.2.3",
     "cross-env": "10.1.0",
     "expo-doctor": "1.19.10",
     "libsodium-wrappers": "0.8.4",
     "react-native-bundle-visualizer": "4.0.0",
     "typescript": "~6.0.3",
-    "vitest": "4.1.6"
+    "vitest": "4.1.9"
   },
   "private": true
 }
