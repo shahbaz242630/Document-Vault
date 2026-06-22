@@ -6,6 +6,7 @@
   "scripts": {
     "start:zap": "tsx scripts/zap-server.ts",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

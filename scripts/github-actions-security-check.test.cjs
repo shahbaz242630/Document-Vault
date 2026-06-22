@@ -54,6 +54,36 @@ test("enforces workspace linting in Security CI", () => {
   assert.match(workflow, /- name: Lint[\s\S]*?run: npm run lint/);
 });
 
+test("enforces coverage thresholds and publishes summary-only artifacts", () => {
+  const mobilePackage = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, "..", "apps", "mobile", "package.json"), "utf8"),
+  );
+  const apiPackage = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, "..", "services", "api", "package.json"), "utf8"),
+  );
+  const mobileConfig = fs.readFileSync(
+    path.resolve(__dirname, "..", "apps", "mobile", "vitest.config.ts"),
+    "utf8",
+  );
+  const apiConfigPath = path.resolve(__dirname, "..", "services", "api", "vitest.config.ts");
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+
+  assert.equal(mobilePackage.scripts["test:coverage"], "vitest run --coverage");
+  assert.equal(apiPackage.scripts["test:coverage"], "vitest run --coverage");
+  assert.match(mobileConfig, /coverage:\s*\{/);
+  assert.match(mobileConfig, /thresholds:\s*\{/);
+  assert.equal(fs.existsSync(apiConfigPath), true, "API Vitest coverage config must exist");
+  assert.match(fs.readFileSync(apiConfigPath, "utf8"), /thresholds:\s*\{/);
+  assert.match(workflow, /- name: Coverage thresholds[\s\S]*?npm run test:coverage --workspaces --if-present/);
+  assert.match(workflow, /name: coverage-summaries/);
+  assert.match(workflow, /apps\/mobile\/coverage\/coverage-summary\.json/);
+  assert.match(workflow, /services\/api\/coverage\/coverage-summary\.json/);
+  assert.doesNotMatch(workflow, /coverage\/lcov-report|coverage\/index\.html/);
+});
+
 test("runs Security CI for pushes to every branch", () => {
   const workflow = fs.readFileSync(
     path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
