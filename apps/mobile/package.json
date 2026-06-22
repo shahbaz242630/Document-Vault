@@ -33,7 +33,7 @@
     "@vault/shared-types": "0.1.0",
     "@vault/shared-validation": "0.1.0",
     "bip39": "3.1.0",
-    "buffer": "^5.7.1",
+    "buffer": "^6.0.3",
     "expo": "~56.0.12",
     "expo-build-properties": "~56.0.19",
     "expo-constants": "~56.0.18",
