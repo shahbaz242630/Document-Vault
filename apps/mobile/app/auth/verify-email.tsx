@@ -1,8 +1,8 @@
 import { Stack } from "expo-router/stack";
 import { ScrollView } from "react-native";
 
-import { EmailVerificationPanel } from "@/features/auth";
-import { useSignupProgressStep } from "@/features/auth";
+import { EmailVerificationPanel , useSignupProgressStep } from "@/features/auth";
+
 import { screenStyles } from "@/shared/ui/screen";
 import * as ExpoSecureStore from "expo-secure-store";
 

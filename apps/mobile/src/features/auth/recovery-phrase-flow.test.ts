@@ -5,21 +5,6 @@ import {
   createMissingRecoveryPhraseSessionViewModel,
 } from "./recovery-phrase-flow";
 
-const words = [
-  "abandon",
-  "abandon",
-  "abandon",
-  "abandon",
-  "abandon",
-  "abandon",
-  "abandon",
-  "abandon",
-  "abandon",
-  "abandon",
-  "abandon",
-  "about",
-];
-
 describe("completeRecoveryPhraseConfirmation", () => {
   it("wraps and saves MEK key material before clearing the recovery phrase session", async () => {
     const mek = new Uint8Array([1, 2, 3]);

@@ -22,11 +22,6 @@ import { unlockReturningUserVault } from "./returning-user-unlock-flow";
 const runLive = process.env.RUN_LIVE_SUPABASE_RETURNING_USER === "1";
 const describeLive = runLive ? describe : describe.skip;
 
-const KEY_MATERIAL_COLUMNS =
-  "wrapped_mek_ciphertext, wrapped_mek_nonce, kek_salt, kdf_algorithm, kdf_params, recovery_version";
-const VAULT_ASSET_COLUMNS =
-  "id, asset_type, ciphertext, nonce, created_at, updated_at, deleted_at";
-
 describeLive("live Supabase returning-user vault unlock", () => {
   it(
     "persists wrapped MEK and encrypted assets, then unlocks them after password sign-in",
@@ -170,7 +165,7 @@ type LiveSupabaseRestClient = SupabaseKeyMaterialClient &
     };
     selectVaultAssetCiphertext: (
       id: string,
-    ) => Promise<Array<{ asset_type: string; ciphertext: string; nonce: string }>>;
+    ) => Promise<{ asset_type: string; ciphertext: string; nonce: string }[]>;
   };
 
 function createLiveSupabaseRestClient(): LiveSupabaseRestClient {
@@ -280,7 +275,7 @@ function createLiveSupabaseRestClient(): LiveSupabaseRestClient {
     from(table: "vault_key_material" | "vault_assets") {
       if (table === "vault_key_material") {
         return {
-          select(columns: typeof KEY_MATERIAL_COLUMNS) {
+          select(columns: string) {
             return {
               async maybeSingle() {
                 const rows = await selectRows(table, columns);
@@ -291,7 +286,7 @@ function createLiveSupabaseRestClient(): LiveSupabaseRestClient {
           },
           upsert(values: unknown) {
             return {
-              select(columns: typeof KEY_MATERIAL_COLUMNS) {
+              select(columns: string) {
                 return {
                   async single() {
                     return {
@@ -314,7 +309,7 @@ function createLiveSupabaseRestClient(): LiveSupabaseRestClient {
                 select(_columns: "id") {
                   return {
                     async maybeSingle() {
-                      const rows = await request<Array<{ id: string }>>(
+                      const rows = await request<{ id: string }[]>(
                         `/rest/v1/vault_assets?id=eq.${encodeURIComponent(value)}&select=id`,
                         {
                           headers: { Prefer: "return=representation" },
@@ -330,7 +325,7 @@ function createLiveSupabaseRestClient(): LiveSupabaseRestClient {
             },
           };
         },
-        select(columns: typeof VAULT_ASSET_COLUMNS) {
+        select(columns: string) {
           return {
             async order(_column: "created_at", _options: { ascending: true }) {
               return {
@@ -348,7 +343,7 @@ function createLiveSupabaseRestClient(): LiveSupabaseRestClient {
           return {
             eq(_column: "id", value: string) {
               return {
-                select(columns: typeof VAULT_ASSET_COLUMNS) {
+                select(columns: string) {
                   return {
                     async maybeSingle() {
                       const rows = await request<unknown[]>(
@@ -370,7 +365,7 @@ function createLiveSupabaseRestClient(): LiveSupabaseRestClient {
         },
         upsert(values: unknown) {
           return {
-            select(columns: typeof VAULT_ASSET_COLUMNS) {
+            select(columns: string) {
               return {
                 async single() {
                   return {

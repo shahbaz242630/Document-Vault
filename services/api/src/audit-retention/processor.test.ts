@@ -25,9 +25,9 @@ describe("processExpiredAnonymizedAuditEvents", () => {
 function createClientDouble(
   deletedCount: number,
 ): AuditRetentionProcessorClient & {
-  calls: Array<{ method: "deleteAnonymizedBefore"; occurredBefore: string }>;
+  calls: { method: "deleteAnonymizedBefore"; occurredBefore: string }[];
 } {
-  const calls: Array<{ method: "deleteAnonymizedBefore"; occurredBefore: string }> = [];
+  const calls: { method: "deleteAnonymizedBefore"; occurredBefore: string }[] = [];
 
   return {
     calls,

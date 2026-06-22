@@ -55,7 +55,7 @@ describe("createAuditLog", () => {
     log.log({ deviceInfo: "test", eventType: "sign_in_attempt" });
 
     const snapshot = log.events;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     (snapshot as any).push({
       deviceInfo: "tamper",
       eventType: "sign_in_success",

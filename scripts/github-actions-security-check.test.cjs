@@ -41,6 +41,19 @@ test("runs Expo Doctor in Security CI", () => {
   assert.match(workflow, /- name: Expo Doctor[\s\S]*?run: npm run doctor --workspace @vault\/mobile/);
 });
 
+test("enforces workspace linting in Security CI", () => {
+  const rootPackage = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, "..", "package.json"), "utf8"),
+  );
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+
+  assert.equal(rootPackage.scripts.lint, "eslint . --max-warnings=0");
+  assert.match(workflow, /- name: Lint[\s\S]*?run: npm run lint/);
+});
+
 test("runs Security CI for pushes to every branch", () => {
   const workflow = fs.readFileSync(
     path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),

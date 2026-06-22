@@ -27,12 +27,14 @@
     "check:supabase-db-security": "node scripts/supabase-db-security-check.cjs",
     "check:supabase-rls": "node scripts/supabase-rls-attack-test.cjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "eslint . --max-warnings=0"
   },
   "engines": {
     "node": "^22.13.0 || >=24.3.0"
   },
   "devDependencies": {
+    "eslint": "9.39.3",
+    "eslint-config-expo": "56.0.4",
     "patch-package": "^8.0.1"
   }
 }

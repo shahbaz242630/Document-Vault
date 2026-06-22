@@ -1,8 +1,8 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, Text } from "react-native";
 
-import { AssetDetailView } from "@/features/vault";
-import { useVaultSession } from "@/features/vault";
+import { AssetDetailView , useVaultSession } from "@/features/vault";
+
 import { colors } from "@/shared/theme/colors";
 import { screenStyles } from "@/shared/ui/screen";
 

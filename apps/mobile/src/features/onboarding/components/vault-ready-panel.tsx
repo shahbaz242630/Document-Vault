@@ -21,7 +21,7 @@ export function VaultReadyPanel() {
           Welcome to Sanduqkin
         </Text>
         <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-          You're set up. Let's add your first piece of information.
+          {"You're set up. Let's add your first piece of information."}
         </Text>
       </View>
 

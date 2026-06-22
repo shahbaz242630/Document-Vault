@@ -261,7 +261,7 @@ function createSmokeSupabaseRestClient(): SmokeSupabaseRestClient {
                 select(_columns: "id") {
                   return {
                     async maybeSingle() {
-                      const rows = await request<Array<{ id: string }>>(
+                      const rows = await request<{ id: string }[]>(
                         `/rest/v1/${table}?id=eq.${encodeURIComponent(value)}&select=id`,
                         {
                           headers: { Prefer: "return=representation" },

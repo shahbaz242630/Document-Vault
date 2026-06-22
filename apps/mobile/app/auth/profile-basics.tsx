@@ -1,8 +1,8 @@
 import { Stack, useLocalSearchParams } from "expo-router";
 import { ScrollView } from "react-native";
 
-import { ProfileBasicsPanel } from "@/features/auth";
-import { useSignupProgressStep } from "@/features/auth";
+import { ProfileBasicsPanel , useSignupProgressStep } from "@/features/auth";
+
 import { screenStyles } from "@/shared/ui/screen";
 import * as ExpoSecureStore from "expo-secure-store";
 

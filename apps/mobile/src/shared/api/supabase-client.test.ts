@@ -10,7 +10,7 @@ describe("createSupabaseClient", () => {
   });
 
   it("creates a client with public Supabase values", () => {
-    const calls: Array<[string, string]> = [];
+    const calls: [string, string][] = [];
 
     const client = createSupabaseClient(
       {

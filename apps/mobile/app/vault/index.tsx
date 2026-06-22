@@ -1,8 +1,8 @@
 import { Stack } from "expo-router/stack";
 import { ScrollView, Text, View } from "react-native";
 
-import { VaultDashboard } from "@/features/vault";
-import { useVaultSession } from "@/features/vault";
+import { VaultDashboard , useVaultSession } from "@/features/vault";
+
 import { colors } from "@/shared/theme/colors";
 import { screenStyles } from "@/shared/ui/screen";
 

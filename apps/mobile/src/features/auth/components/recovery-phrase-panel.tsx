@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
@@ -19,15 +19,10 @@ export function RecoveryPhrasePanel({
   onContinue,
 }: RecoveryPhrasePanelProps) {
   const viewModel = createRecoveryPhraseViewModel();
-  const [words, setWords] = useState<string[] | null>(null);
-  const [mek, setMek] = useState<Uint8Array | null>(null);
+  const [{ mek, words }] = useState(() =>
+    generateRecoveryPhraseAndMEK(generateRandomBytes),
+  );
   const [acknowledged, setAcknowledged] = useState(false);
-
-  useEffect(() => {
-    const { mek, words } = generateRecoveryPhraseAndMEK(generateRandomBytes);
-    setWords(words);
-    setMek(mek);
-  }, [generateRandomBytes]);
 
   return (
     <View style={{ gap: 20 }}>
@@ -125,7 +120,7 @@ export function RecoveryPhrasePanel({
         </Text>
       </Pressable>
 
-      {acknowledged && words && mek ? (
+      {acknowledged ? (
         <Pressable
           accessibilityRole="button"
           onPress={() => onContinue({ mek, words })}

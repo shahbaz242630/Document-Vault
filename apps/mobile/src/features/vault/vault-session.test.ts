@@ -330,8 +330,8 @@ describe("vault session", () => {
 function createRepositoryDouble(initialRecords: VaultEncryptedAssetRecord[] = []) {
   const records = new Map(initialRecords.map((record) => [record.id, record]));
   const savedRecords: VaultEncryptedAssetRecord[] = [];
-  const softDeletedAssets: Array<{ deletedAt: string; id: string; updatedAt: string }> = [];
-  const restoredAssets: Array<{ id: string; updatedAt: string }> = [];
+  const softDeletedAssets: { deletedAt: string; id: string; updatedAt: string }[] = [];
+  const restoredAssets: { id: string; updatedAt: string }[] = [];
   const permanentlyDeletedAssetIds: string[] = [];
 
   return {
