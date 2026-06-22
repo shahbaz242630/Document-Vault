@@ -75,7 +75,7 @@ describe("development build configuration", () => {
     const appConfigPath = resolve(repoRoot, "apps/mobile/app.json");
     const appConfig = JSON.parse(readFileSync(appConfigPath, "utf8")) as {
       expo?: {
-        plugins?: Array<string | [string, Record<string, unknown>]>;
+        plugins?: (string | [string, Record<string, unknown>])[];
       };
     };
 

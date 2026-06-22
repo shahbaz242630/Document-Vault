@@ -109,7 +109,7 @@ describe("supabase emergency grant repository", () => {
 
 type EmergencyGrantTableCall = {
   columns?: string;
-  filters?: Array<{ column: string; value: string }>;
+  filters?: { column: string; value: string }[];
   method: string;
   table: string;
   values?: Record<string, unknown>;
@@ -133,13 +133,13 @@ function createEmergencyGrantTableDouble(): {
           return createSingleResultBuilder(values);
         },
         select(columns: string) {
-          const filters: Array<{ column: string; value: string }> = [];
+          const filters: { column: string; value: string }[] = [];
           calls.push({ columns, filters, method: "select", table });
 
           return createFilterableMaybeSingleBuilder({ filters, rows });
         },
         update(values: Record<string, unknown>) {
-          const filters: Array<{ column: string; value: string }> = [];
+          const filters: { column: string; value: string }[] = [];
 
           return {
             eq(column: string, value: string) {
@@ -179,7 +179,7 @@ function createFilterableMaybeSingleBuilder({
   filters,
   rows,
 }: {
-  filters: Array<{ column: string; value: string }>;
+  filters: { column: string; value: string }[];
   rows: SupabaseEmergencyKeyGrantRow[];
 }) {
   return {

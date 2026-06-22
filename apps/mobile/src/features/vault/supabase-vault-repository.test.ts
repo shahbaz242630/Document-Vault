@@ -166,7 +166,7 @@ describe("supabase vault repository", () => {
 
 type AssetTableCall = {
   columns?: string;
-  filters?: Array<{ column: string; value: string }>;
+  filters?: { column: string; value: string }[];
   method: string;
   options?: unknown;
   order?: { ascending: boolean; column: string };
@@ -236,7 +236,7 @@ function createDeleteBuilder({
   rows: Map<string, Record<string, unknown>>;
   table: string;
 }) {
-  const filters: Array<{ column: string; value: string }> = [];
+  const filters: { column: string; value: string }[] = [];
 
   return {
     eq(column: string, value: string) {
@@ -265,7 +265,7 @@ function createUpdateBuilder({
   table: string;
   values: Record<string, unknown>;
 }) {
-  const filters: Array<{ column: string; value: string }> = [];
+  const filters: { column: string; value: string }[] = [];
 
   return {
     eq(column: string, value: string) {

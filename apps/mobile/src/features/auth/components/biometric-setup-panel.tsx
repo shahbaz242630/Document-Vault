@@ -35,7 +35,6 @@ export function BiometricSetupPanel({ hardware, storage }: BiometricSetupPanelPr
     enrolled: boolean;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [enabled, setEnabled] = useState(false);
   const biometricAuth = useMemo(() => createBiometricAuthService(hardware), [hardware]);
   const biometricStorage = useMemo(() => createBiometricStorage(storage), [storage]);
   const router = useRouter();
@@ -87,13 +86,7 @@ export function BiometricSetupPanel({ hardware, storage }: BiometricSetupPanelPr
         </Text>
       ) : null}
 
-      {enabled ? (
-        <Text selectable style={{ color: colors.action, fontSize: 15, lineHeight: 22 }}>
-          {viewModel.enabledActionLabel}
-        </Text>
-      ) : null}
-
-      {canEnable && !enabled ? (
+      {canEnable ? (
         <Pressable
           accessibilityRole="button"
           onPress={async () => {

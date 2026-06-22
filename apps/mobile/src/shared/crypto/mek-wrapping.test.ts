@@ -39,13 +39,9 @@ describe("mek-wrapping", () => {
     const salt = await generateSalt();
     const kek = await deriveKEK("user-password", salt);
 
-    const wrapped = await wrapMEK(mek, kek);
-
     // Create a wrapped object with same ciphertext/nonce but pretend
     // it came from a different associated-data context.
-    const { encryptVaultPayload, decryptVaultPayload } = await import(
-      "./vault-crypto"
-    );
+    const { encryptVaultPayload } = await import("./vault-crypto");
     const tamperedCiphertext = await encryptVaultPayload({
       associatedData: "vault:mek-wrap-tampered",
       key: kek,

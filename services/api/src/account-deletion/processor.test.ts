@@ -88,12 +88,12 @@ type Call =
   | { errorMessage: string; method: "markFailed"; requestId: string };
 
 function createProcessorClientDouble(
-  rows: Array<{
+  rows: {
     id: string;
     scheduled_for: string;
     status: "pending";
     user_id: string;
-  }>,
+  }[],
   options?: { deleteError?: string },
 ): AccountDeletionProcessorClient & { calls: Call[] } {
   const calls: Call[] = [];
