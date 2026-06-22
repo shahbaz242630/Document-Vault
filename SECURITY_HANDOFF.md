@@ -260,6 +260,17 @@ Current state: complete. Dependabot alerts and automated security fixes are enab
 - Review cadence: review new security alerts promptly and review grouped version-update PRs each Monday; do not merge dependency changes until all required checks pass.
 - Residual risk: one moderate upstream Expo build-tooling advisory remains visible pending a compatible upstream release. The local Node.js `24.2.0` engine mismatch also remains and should be corrected separately.
 
+#### Follow-up Dependabot cleanup - 2026-06-22
+
+- Scope: repair and merge the failing grouped npm update without weakening lint, Expo compatibility, cryptography, coverage, or dependency-audit controls.
+- Root cause: the bot proposed `libsodium-wrappers-sumo@0.8.4`, which triggered strict crypto lint warnings, together with React Native, React DOM, and safe-area versions outside the installed Expo SDK 56 compatibility set.
+- Remediation: retained the compatible Supabase, RevenueCat, Zod, Hono, React type, and Vitest updates while keeping libsodium, React, React DOM, React Native, and safe-area dependencies at their verified Expo-compatible versions.
+- Local verification: CI-equivalent Node.js 24.3.0 Docker run passed typecheck, zero-warning lint, Expo Doctor 21/21, 375 workspace tests, both coverage thresholds, 29 security-guard tests, mobile secret scanning, and the high/critical production dependency audit gate.
+- Verification PR: [PR 14](https://github.com/shahbaz242630/Document-Vault/pull/14), merged as commit `381aacbd438d88c563bfc4a09ae82daaade58328`.
+- Post-merge GitHub result: [Security CI run 27955829644](https://github.com/shahbaz242630/Document-Vault/actions/runs/27955829644), [CodeQL run 27955829603](https://github.com/shahbaz242630/Document-Vault/actions/runs/27955829603), and [OWASP ZAP run 27955829948](https://github.com/shahbaz242630/Document-Vault/actions/runs/27955829948) passed. All three post-merge Dependabot update jobs also passed.
+- Next cleanup: [PR 9](https://github.com/shahbaz242630/Document-Vault/pull/9) remains blocked because the TypeScript 6 update is incompatible with current Node/Supabase type declarations. Handle it as a separate slice.
+- Residual risk: the accepted moderate Expo tooling `uuid` advisory remains; no high or critical production advisory is open.
+
 ### 12. Add direct shared-validation tests
 
 - [x] Add tests for `lastFourDigitsSchema` accepting exactly four ASCII digits.
@@ -373,7 +384,7 @@ Copy this block beneath the relevant checklist item after each completed slice:
 5. Push through a pull request and wait for all required GitHub checks.
 6. Record the GitHub run link and exact result in this document.
 7. Mark the item `[x]` only after all required evidence is green.
-8. Update `HANDOFF.md` with the completed slice and next task.
+8. Update `SECURITY_HANDOFF.md` with the completed slice and next task; do not duplicate security work in the normal handoff.
 
 ## Standard Verification Commands
 
