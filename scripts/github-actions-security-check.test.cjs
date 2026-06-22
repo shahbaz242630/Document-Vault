@@ -110,6 +110,26 @@ test("configures an isolated OWASP ZAP baseline scan for the API", () => {
   assert.match(zapRules, /^10049\s+IGNORE\s+/m);
 });
 
+test("configures weekly Dependabot updates for npm and GitHub Actions", () => {
+  const configPath = path.resolve(__dirname, "..", ".github", "dependabot.yml");
+
+  assert.equal(fs.existsSync(configPath), true, "Dependabot configuration must exist");
+
+  const config = fs.readFileSync(configPath, "utf8");
+  const securityWorkflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+
+  assert.match(config, /package-ecosystem: "npm"[\s\S]*?directory: "\/"[\s\S]*?interval: "weekly"/);
+  assert.match(
+    config,
+    /package-ecosystem: "github-actions"[\s\S]*?directory: "\/"[\s\S]*?interval: "weekly"/,
+  );
+  assert.match(config, /reviewers:\s*\n\s*- "shahbaz242630"/);
+  assert.match(securityWorkflow, /npm audit --omit=dev --workspaces --audit-level=high/);
+});
+
 test("rejects mutable action tags and accepts full commit SHAs", () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
   const workflowDir = path.join(tmp, ".github", "workflows");
