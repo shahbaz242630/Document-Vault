@@ -184,11 +184,27 @@ Current state: complete. The root `eslint . --max-warnings=0` command checks eve
 
 ### 9. Add test coverage reporting and thresholds
 
-- [ ] Enable Vitest coverage for mobile and API code.
-- [ ] Establish an initial measured baseline before choosing thresholds.
-- [ ] Set thresholds for security-critical modules first: cryptography, authentication, recovery, vault persistence, hard delete, audit, account deletion, and RLS-related clients.
-- [ ] Publish a coverage summary or artifact without exposing secrets or source maps containing sensitive configuration.
-- [ ] Fail CI on meaningful coverage regression.
+- [x] Enable Vitest coverage for mobile and API code.
+- [x] Establish an initial measured baseline before choosing thresholds.
+- [x] Set thresholds for security-critical modules first: cryptography, authentication, recovery, vault persistence, hard delete, audit, account deletion, and RLS-related clients.
+- [x] Publish a coverage summary or artifact without exposing secrets or source maps containing sensitive configuration.
+- [x] Fail CI on meaningful coverage regression.
+
+Current state: complete. Vitest's pinned V8 provider measures all non-test mobile and API source except native-only implementations that require device coverage. Security CI enforces measured global and security-critical thresholds, prints terminal summaries, and retains only JSON summary artifacts for 14 days. HTML, LCOV, source maps, source content, and configuration values are not uploaded.
+
+#### Completion evidence — 2026-06-22
+
+- Scope: add reproducible mobile/API coverage measurement, establish the initial baseline, enforce regression thresholds, and retain safe summaries in CI.
+- Files/workflows changed: mobile and API Vitest configurations and package scripts, root coverage-provider dependency and lockfile, `.github/workflows/security-ci.yml`, and the workflow regression test.
+- Regression proof: `node --test scripts/github-actions-security-check.test.cjs` failed before implementation because both coverage scripts were absent; it passed after implementation with 13 of 13 tests.
+- Measured mobile baseline: statements 44.59% (817/1,832), branches 32.59% (325/997), functions 44.19% (297/672), and lines 45.66% (801/1,754).
+- Measured API baseline: statements 64.16% (111/173), branches 52.72% (58/110), functions 52.50% (21/40), and lines 64.16% (111/173).
+- Security-critical thresholds: dedicated groups cover mobile cryptography; authentication, recovery, audit, and account deletion; vault persistence, hard delete, emergency access, and Supabase/RLS clients; plus API account-deletion, audit-retention, and HTTP-security processors. Cryptography is held at 94% branches, 100% functions, and 98% lines/statements; the other groups are held at their measured initial baselines.
+- Deliberate failure proof: `.\node_modules\.bin\vitest.cmd run --coverage --coverage.thresholds.lines=100 --root services/api` exited 1 because measured API line coverage was 64.16%, proving regression thresholds fail the gate.
+- Local verification: clean `npm ci`; all workspace typechecks; zero-warning lint; Expo Doctor 21 of 21; 375 normal workspace tests passed with the two protected hosted-Supabase tests skipped; both coverage suites and thresholds passed; all 29 security-guard tests passed; and the production dependency audit reported no high or critical advisories.
+- GitHub Actions: [Security CI PR run 27940606957](https://github.com/shahbaz242630/Document-Vault/actions/runs/27940606957), [Security CI push run 27940587031](https://github.com/shahbaz242630/Document-Vault/actions/runs/27940587031), [CodeQL run 27940606954](https://github.com/shahbaz242630/Document-Vault/actions/runs/27940606954), and [OWASP ZAP run 27940606951](https://github.com/shahbaz242630/Document-Vault/actions/runs/27940606951), implementation commit `bf10257`.
+- GitHub result: both `App security gates` and both `Supabase live security gates` passed; CodeQL, OWASP ZAP, Vercel, and GitGuardian passed. Each Security CI run retained a non-expired `coverage-summaries` artifact of 4,058 bytes containing only the two `coverage-summary.json` files.
+- Residual risk: native-only cryptography implementations remain outside Node-based coverage and require the separate native build/E2E slice; overall mobile coverage reflects the initial baseline and should be raised incrementally rather than treated as a target ceiling.
 
 ### 10. Enable GitHub code scanning
 
