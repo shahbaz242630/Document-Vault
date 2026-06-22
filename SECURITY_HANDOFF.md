@@ -163,13 +163,24 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 
 ### 8. Configure and enforce linting
 
-- [ ] Select an Expo/React Native-compatible ESLint configuration.
-- [ ] Add workspace `lint` scripts where applicable.
-- [ ] Make the root `npm run lint` perform real checks.
-- [ ] Add lint to CI.
-- [ ] Keep formatting-only preferences separate from security/correctness rules where practical.
+- [x] Select an Expo/React Native-compatible ESLint configuration.
+- [x] Add workspace `lint` scripts where applicable.
+- [x] Make the root `npm run lint` perform real checks.
+- [x] Add lint to CI.
+- [x] Keep formatting-only preferences separate from security/correctness rules where practical.
 
-Current state: the root script delegates to workspace lint scripts, but no workspace currently defines one; CI therefore performs no lint check.
+Current state: complete. The root `eslint . --max-warnings=0` command checks every JavaScript and TypeScript workspace with Expo's maintained flat configuration, TypeScript path resolution, generated-output ignores, and Node globals for repository CommonJS scripts. A centralized root command is used instead of duplicated workspace scripts, and formatting remains outside this correctness lint gate.
+
+#### Completion evidence — 2026-06-22
+
+- Scope: replace the no-op root lint delegation with an Expo-compatible, zero-warning repository lint gate and enforce it in Security CI.
+- Files/workflows changed: `eslint.config.js`, root package manifest and lockfile, `.github/workflows/security-ci.yml`, the workflow regression test, and source/test files required to clear the initial lint baseline.
+- Regression proof: `node --test scripts/github-actions-security-check.test.cjs` failed before implementation because the root lint command still delegated to missing workspace scripts; it passed after implementation with 12 of 12 tests.
+- Local commands: `npm ci`; `npm run typecheck`; `npm run lint`; `npm run doctor --workspace @vault/mobile`; `npm test --workspaces --if-present`; all repository security guards and guard tests; and `npm audit --omit=dev --workspaces --audit-level=high`.
+- Local result: all workspace typechecks passed; lint completed with zero errors and zero warnings; Expo Doctor passed 21 of 21 checks; mobile passed 338 tests with the two protected hosted-Supabase tests skipped; shared validation passed 10 tests; API passed 27 tests; and all 28 security-guard tests passed.
+- GitHub Actions: [Security CI PR run 27925410054](https://github.com/shahbaz242630/Document-Vault/actions/runs/27925410054), [Security CI push run 27925404828](https://github.com/shahbaz242630/Document-Vault/actions/runs/27925404828), [CodeQL run 27925410077](https://github.com/shahbaz242630/Document-Vault/actions/runs/27925410077), and [OWASP ZAP run 27925410089](https://github.com/shahbaz242630/Document-Vault/actions/runs/27925410089), commit `5d78c2a`.
+- GitHub result: both `App security gates` and both `Supabase live security gates` passed; CodeQL, OWASP ZAP, Vercel, and GitGuardian passed.
+- Residual risk: the existing moderate Expo tooling `uuid` advisory remains accepted and independently tracked under dependency security coverage; the lint slice introduced no new high or critical production advisories.
 
 ### 9. Add test coverage reporting and thresholds
 
