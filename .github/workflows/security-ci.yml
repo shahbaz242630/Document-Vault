@@ -40,6 +40,20 @@ jobs:
       - name: Unit tests
         run: npm test --workspaces --if-present
 
+      - name: Coverage thresholds
+        run: npm run test:coverage --workspaces --if-present
+
+      - name: Upload coverage summaries
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-summaries
+          path: |
+            apps/mobile/coverage/coverage-summary.json
+            services/api/coverage/coverage-summary.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Static security guard
         run: npm run check:security
 

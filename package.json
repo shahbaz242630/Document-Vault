@@ -33,6 +33,7 @@
     "node": "^22.13.0 || >=24.3.0"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "4.1.6",
     "eslint": "9.39.3",
     "eslint-config-expo": "56.0.4",
     "patch-package": "^8.0.1"
