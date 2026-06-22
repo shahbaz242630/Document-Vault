@@ -207,14 +207,31 @@ Current state: complete. CodeQL scans JavaScript and TypeScript on pull requests
 
 ### 11. Enable Dependabot security coverage
 
-- [ ] Enable Dependabot alerts.
-- [ ] Enable Dependabot security updates.
-- [ ] Add `.github/dependabot.yml` for npm and GitHub Actions update checks.
-- [ ] Define a review cadence and ownership for dependency alerts.
-- [ ] Retain the CI `npm audit` high/critical gate as an independent control.
-- [ ] Triage the current 13 low/moderate audit findings without forcing an incompatible Expo downgrade.
+- [x] Enable Dependabot alerts.
+- [x] Enable Dependabot security updates.
+- [x] Add `.github/dependabot.yml` for npm and GitHub Actions update checks.
+- [x] Define a review cadence and ownership for dependency alerts.
+- [x] Retain the CI `npm audit` high/critical gate as an independent control.
+- [x] Triage the current audit and Dependabot findings without forcing an incompatible Expo downgrade.
 
-Current state: Dependabot alerts and security updates are disabled.
+Current state: complete. Dependabot alerts and automated security fixes are enabled. Weekly grouped npm and GitHub Actions updates run on Monday in the `Asia/Dubai` timezone and request review from `shahbaz242630`. The independent production high/critical audit gate remains in Security CI.
+
+#### Completion evidence — 2026-06-22
+
+- Scope: enable repository dependency alerts, security updates, and scheduled version-update proposals for npm and GitHub Actions.
+- GitHub settings: `PUT /vulnerability-alerts` and `PUT /automated-security-fixes` returned `204`; follow-up API checks confirmed alerts enabled and automated fixes `enabled: true`, `paused: false`.
+- Files changed: `.github/dependabot.yml`, `scripts/github-actions-security-check.test.cjs`, and `package-lock.json`.
+- Regression proof: the focused configuration test failed before implementation because `.github/dependabot.yml` did not exist.
+- Configuration validation: Dependabot YAML parsed with two update sources, `npm` and `github-actions`; both use weekly schedules, grouped updates, five-PR limits, and owner review.
+- Initial GitHub alert baseline: 4 open alerts — Vite high and medium development alerts, one low Babel alert, and one moderate `uuid` alert through Expo config tooling.
+- Remediation: non-breaking lockfile updates moved Vite from `8.0.12` to `8.0.16` and Babel core from `7.29.0` to `7.29.7`, removing the Vite and Babel alerts locally.
+- Retained finding: `GHSA-w5hq-g745-h8pq` remains through `@expo/config-plugins -> xcode@3.0.1 -> uuid@7.0.3`; npm only proposes incompatible Expo/package downgrades, so no forced fix was applied.
+- Current npm audit: 12 moderate entries cascading from the retained Expo/`uuid` tooling path; no high or critical production findings.
+- Local verification: all workspace typechecks passed; Expo Doctor passed 21/21; mobile 338 tests passed with 2 hosted-Supabase tests skipped; shared validation 10 tests passed; API 27 tests passed; security guards 27 tests passed.
+- Verification PR: [PR 6](https://github.com/shahbaz242630/Document-Vault/pull/6).
+- GitHub Actions: [Security CI run 27923590663](https://github.com/shahbaz242630/Document-Vault/actions/runs/27923590663), [CodeQL run 27923590657](https://github.com/shahbaz242630/Document-Vault/actions/runs/27923590657), and [OWASP ZAP run 27923590693](https://github.com/shahbaz242630/Document-Vault/actions/runs/27923590693) passed.
+- Review cadence: review new security alerts promptly and review grouped version-update PRs each Monday; do not merge dependency changes until all required checks pass.
+- Residual risk: one moderate upstream Expo build-tooling advisory remains visible pending a compatible upstream release. The local Node.js `24.2.0` engine mismatch also remains and should be corrected separately.
 
 ### 12. Add direct shared-validation tests
 
@@ -241,9 +258,9 @@ Current state: complete. The shared-validation workspace has a Vitest script and
 - [x] Keep readable version comments beside SHA pins.
 - [x] Update the workflow security guard so a mutable tag alone is not accepted as a pin.
 - [x] Add regression tests for rejecting tag-only action references.
-- [ ] Use Dependabot to propose reviewed SHA updates.
+- [x] Use Dependabot to propose reviewed SHA updates.
 
-Current state: all actions in Security CI use full upstream commit SHAs with readable release comments. The guard rejects missing, tag-only, branch, abbreviated, and otherwise non-40-character pins. Dependabot-based SHA update proposals remain pending under finding 11.
+Current state: complete. All actions in Security CI use full upstream commit SHAs with readable release comments. The guard rejects missing, tag-only, branch, abbreviated, and otherwise non-40-character pins. Dependabot is configured to propose grouped GitHub Actions updates for review.
 
 #### Completion evidence — 2026-06-21 (local verification)
 
@@ -256,7 +273,7 @@ Current state: all actions in Security CI use full upstream commit SHAs with rea
 - Static local result: passed.
 - GitHub Actions run: [Security CI run 27898797833](https://github.com/shahbaz242630/Document-Vault/actions/runs/27898797833), commit `0c468744da3f7ee4114ad722301299c175ce6e7a`.
 - GitHub result: both `App security gates` and `Supabase live security gates` passed using the immutable pins.
-- Residual risk: automated reviewed SHA update proposals remain pending until finding 11 adds and enables Dependabot.
+- Residual risk: proposed action updates still require review and all protected-branch checks before merge.
 
 ### 14. Add OWASP ZAP dynamic API scanning
 
