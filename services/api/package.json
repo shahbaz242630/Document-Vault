@@ -10,14 +10,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.108.2",
-    "hono": "4.12.26",
+    "@supabase/supabase-js": "2.110.0",
+    "hono": "4.12.27",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@hono/node-server": "2.0.6",
+    "@hono/node-server": "2.0.8",
     "@types/node": "24.10.1",
-    "tsx": "4.22.4",
+    "tsx": "4.23.0",
     "typescript": "5.9.2",
     "vitest": "4.1.9"
   }
