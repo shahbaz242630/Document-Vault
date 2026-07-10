@@ -6,9 +6,9 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 
 - Audit date: 2026-07-10
 - Audited branch: `codex/phase1-function-size-gate`
-- Audited commit: `6bd37ebf`
+- Audited commit: `1d4407f`
 - Working tree at audit time: clean
-- Latest audited GitHub run: [Security CI PR run 29086984489](https://github.com/shahbaz242630/Document-Vault/actions/runs/29086984489)
+- Latest audited GitHub run: [Security CI PR run 29121804737](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121804737)
 - Latest audited GitHub result: `App security gates` and `Supabase live security gates` passed; CodeQL, GitGuardian, OWASP ZAP, and Vercel also passed on [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21)
 - CI runtime: Node.js `24.3.0` on `ubuntu-latest`
 - Important local constraint: Node.js `24.2.0` is below the repository requirement `^22.13.0 || >=24.3.0` and should be upgraded.
@@ -76,10 +76,10 @@ Current state: complete. Protection is enabled for `main`. Pull requests and cur
 ### 2. Integrate the Phase 1 Definition-of-Done gate
 
 - [x] Resolve all violations from `npm run check:phase1`.
-- [ ] Add `npm run check:phase1` to required CI after it is green.
+- [x] Add `npm run check:phase1` to required CI after it is green.
 - [x] Confirm that a deliberate oversized-function fixture fails the gate.
 
-Current state: implementation debt is resolved and the production gate is now wired locally into the already-required `App security gates` job. A workflow regression test prevents silently removing the step. Keep the CI item unchecked until a protected PR confirms all required GitHub checks are green.
+Current state: complete. The production gate runs in the branch-protected `App security gates` job, and workflow regression coverage prevents silently removing the step. Both push and pull-request Security CI runs passed on the implementation commit.
 
 #### Local implementation evidence - 2026-07-11
 
@@ -89,7 +89,9 @@ Current state: implementation debt is resolved and the production gate is now wi
 - Focused result: 14 workflow-security tests passed; `npm run check:phase1` and `npm run check:github-actions-security` passed.
 - Full local result: static security guard and mobile secret scan passed; all 30 security-guard regression tests passed; the high/critical production dependency-audit threshold passed.
 - Dependency note: 12 known moderate Expo tooling findings remain through `xcode -> uuid`; `npm audit fix --force` would install an incompatible Expo version and was not used.
-- Remaining evidence: push through a protected PR, confirm `App security gates` (including the new step) and all other required checks pass, then mark the CI item complete.
+- GitHub evidence: [push Security CI run 29121802507](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121802507) and [PR Security CI run 29121804737](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121804737) both passed `App security gates`, including `Phase 1 Definition-of-Done`, and `Supabase live security gates`.
+- Additional checks: CodeQL, OWASP ZAP, GitGuardian, and Vercel passed on implementation commit `1d4407f` in [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21).
+- Residual risk: GitHub reports that the pinned checkout/setup-node action versions target the deprecated Node.js 20 action runtime and are currently forced onto Node.js 24. Track reviewed immutable action upgrades through Dependabot; do not replace SHA pins with mutable tags.
 
 #### Completion evidence - 2026-07-10
 
@@ -421,4 +423,4 @@ npm audit --omit=dev --workspaces --audit-level=high
 npm run check:phase1
 ```
 
-`npm run check:phase1` is expected to remain green after PR 21. Never describe the full security checklist as complete until the Phase 1 gate is also wired into required CI and all required GitHub checks are passing.
+`npm run check:phase1` is required by the branch-protected `App security gates` job and is expected to remain green. The remaining open security findings are the protected live-Supabase integration tests, native build/E2E coverage, and the additional recommended hardening work above.

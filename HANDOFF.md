@@ -12,7 +12,7 @@ Start here:
 
 Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 payments work until Phase 1 verification and hardening gaps are closed.
 
-2026-07-11 update: `npm run check:phase1` is now wired into the already-required `App security gates` job with regression coverage. Local security verification is green; the slice still needs protected PR/GitHub Actions evidence before it is marked complete.
+2026-07-11 update: `npm run check:phase1` is now enforced by the branch-protected `App security gates` job with regression coverage. Both push and PR Security CI runs passed on implementation commit `1d4407f`; move to the next remaining Phase 1 blocker.
 
 ## Source Of Truth
 
@@ -93,16 +93,18 @@ npm audit --omit=dev --workspaces --audit-level=high
 - Known local environment note: local Node.js is still `v24.2.0`, below the repository engine range `^22.13.0 || >=24.3.0`. Commands run, but npm prints EBADENGINE warnings. CI uses Node.js `24.3.0`.
 - GitHub noted one existing moderate Dependabot item on the default branch. It is separate from PR 21 and remains tracked in `SECURITY_HANDOFF.md`.
 
-## Current Slice: Enforce Phase 1 Gate In Security CI
+## Completed Slice: Enforce Phase 1 Gate In Security CI
 
-Implemented locally on 2026-07-11:
+Completed on 2026-07-11 in [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21):
 
 - Added `npm run check:phase1` to the required `App security gates` job in `.github/workflows/security-ci.yml`.
 - Added workflow regression coverage in `scripts/github-actions-security-check.test.cjs`.
 - Demonstrated the new regression test fails before the workflow step and passes after it.
 - Local verification passed: focused workflow tests (14), `npm run check:phase1`, both static security checks, mobile secret scanning, the full security-guard suite (30), and the high/critical dependency-audit threshold.
 - The audit retains the known 12 moderate Expo tooling findings through `xcode -> uuid`; no forced incompatible downgrade was applied.
-- Remaining completion evidence: push through a protected PR and confirm the required GitHub checks are green before checking off the security item.
+- [push Security CI run 29121802507](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121802507) and [PR Security CI run 29121804737](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121804737) passed both `App security gates` and `Supabase live security gates`.
+- CodeQL, OWASP ZAP, GitGuardian, and Vercel also passed on implementation commit `1d4407f`.
+- GitHub emitted a Node.js action-runtime deprecation annotation for the pinned checkout/setup-node versions. Keep immutable SHA pins and take reviewed upgrades through Dependabot.
 
 ## Last Completed Slice: Android Sealed Emergency Code Setup
 
@@ -653,7 +655,7 @@ npm run typecheck --workspace @vault/mobile
 - iOS native verification is blocked in this Windows environment. Needs macOS/Xcode/iOS simulator verification.
 - Password reset/recovery MEK rotation and re-wrapping is implemented, unit-verified, and Android/Supabase live-verified for key material and encrypted-asset continuity.
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified.
-- `npm run check:phase1` is wired into the already-required `App security gates` job locally; protected PR/GitHub Actions evidence remains before the slice is complete.
+- `npm run check:phase1` is enforced by the branch-protected `App security gates` job and passed in both push and PR Security CI runs.
 - Expo SDK audit blocker is mitigated as far as current SDK 56 packages allow: no critical advisories remain, and the residual moderate advisories are upstream `xcode -> uuid` through Expo config tooling.
 
 ## Known Technical Debt / Risks
