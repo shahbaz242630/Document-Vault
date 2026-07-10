@@ -63,6 +63,9 @@ jobs:
       - name: Mobile secret scan
         run: npm run check:mobile-secrets
 
+      - name: Phase 1 Definition-of-Done
+        run: npm run check:phase1
+
       - name: Security guard tests
         run: node --test scripts/security-check.test.cjs scripts/mobile-secret-scan.test.cjs scripts/supabase-db-security-check.test.cjs scripts/github-actions-security-check.test.cjs scripts/phase1-dod-check.test.cjs scripts/zap-report-check.test.cjs
 
