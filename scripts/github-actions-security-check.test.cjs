@@ -102,6 +102,41 @@ test("runs Security CI for pushes to every branch", () => {
   assert.match(workflow, /\n  push:\s*\n\s*permissions:/);
 });
 
+test("configures a bounded Android native debug compile gate", () => {
+  const workflowPath = path.resolve(
+    __dirname,
+    "..",
+    ".github",
+    "workflows",
+    "android-native-build.yml",
+  );
+
+  assert.equal(fs.existsSync(workflowPath), true, "Android native build workflow must exist");
+
+  const workflow = fs.readFileSync(workflowPath, "utf8");
+
+  assert.match(workflow, /\n  pull_request:\s*\n\s*branches: \[main\]/);
+  assert.match(workflow, /\n  push:\s*\n\s*branches: \[main\]/);
+  assert.match(workflow, /\n  workflow_dispatch:/);
+  assert.match(workflow, /\npermissions:\s*\n\s*contents: read/);
+  assert.match(workflow, /name: Android native debug compile/);
+  assert.match(workflow, /runs-on: ubuntu-latest/);
+  assert.match(workflow, /timeout-minutes: 30/);
+  assert.match(workflow, /actions\/checkout@[a-f0-9]{40}/);
+  assert.match(workflow, /actions\/setup-node@[a-f0-9]{40}/);
+  assert.match(workflow, /actions\/setup-java@[a-f0-9]{40}/);
+  assert.match(workflow, /node-version: 24\.3\.0/);
+  assert.match(workflow, /distribution: temurin[\s\S]*?java-version: "17"/);
+  assert.match(workflow, /run: npm ci/);
+  assert.match(workflow, /chmod \+x gradlew/);
+  assert.match(
+    workflow,
+    /\.\/gradlew app:assembleDebug --no-daemon --stacktrace -PreactNativeArchitectures=x86_64/,
+  );
+  assert.match(workflow, /test -f app\/build\/outputs\/apk\/debug\/app-debug\.apk/);
+  assert.doesNotMatch(workflow, /\$\{\{\s*secrets\./);
+});
+
 test("configures CodeQL scanning for JavaScript and TypeScript", () => {
   const workflowPath = path.resolve(
     __dirname,

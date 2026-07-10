@@ -12,7 +12,7 @@ Start here:
 
 Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 payments work until Phase 1 verification and hardening gaps are closed.
 
-2026-07-11 update: `npm run check:phase1` is now enforced by the branch-protected `App security gates` job with regression coverage. Both push and PR Security CI runs passed on implementation commit `1d4407f`; move to the next remaining Phase 1 blocker.
+2026-07-11 update: the Android native debug compile workflow is implemented locally and awaits authoritative Ubuntu/GitHub Actions verification. The local Windows build reached C++ compilation but hit the known 260-character Ninja path limit under this workspace path.
 
 ## Source Of Truth
 
@@ -21,9 +21,9 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - BRD: `Vault_BRD_v1.0.md`, version shown in file: 1.1
 - Active scope: Phase 1 - Core Single-User Vault
 - Current handoff refresh: 2026-07-11
-- Current branch: `codex/phase1-function-size-gate`
-- Current PR: [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21)
-- Current working tree was clean after pushing PR 21; this handoff update is the current uncommitted documentation slice.
+- Current branch: `codex/android-native-compile-gate`
+- Current PR: not opened yet
+- Current working tree contains the Android native compile gate slice described below.
 
 ## Product Guardrails
 
@@ -105,6 +105,19 @@ Completed on 2026-07-11 in [PR 21](https://github.com/shahbaz242630/Document-Vau
 - [push Security CI run 29121802507](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121802507) and [PR Security CI run 29121804737](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121804737) passed both `App security gates` and `Supabase live security gates`.
 - CodeQL, OWASP ZAP, GitGuardian, and Vercel also passed on implementation commit `1d4407f`.
 - GitHub emitted a Node.js action-runtime deprecation annotation for the pinned checkout/setup-node versions. Keep immutable SHA pins and take reviewed upgrades through Dependabot.
+
+## Current Slice: Android Native Debug Compile Gate
+
+Implemented locally on 2026-07-11:
+
+- Added `.github/workflows/android-native-build.yml` for pull requests to `main`, pushes to `main`, and manual dispatch.
+- The isolated `Android native debug compile` job uses minimal `contents: read` permission, concurrency cancellation, a 30-minute timeout, Node.js 24.3.0, Temurin Java 17, Gradle caching, and immutable action SHAs.
+- The job installs with `npm ci`, builds only the CI-relevant `x86_64` debug APK with `app:assembleDebug`, and verifies that the APK exists without uploading or retaining the binary.
+- Added `actions/setup-java` to the workflow allowlist and added regression coverage for triggers, permissions, timeout, toolchain, immutable pins, build command, APK verification, and absence of secrets.
+- Regression proof: the focused workflow test failed before the workflow existed and passed after implementation.
+- Local verification passed: 15 focused workflow-security tests, `npm run check:github-actions-security`, `npm run check:phase1`, both static security scans, all 31 security-guard tests, and the high/critical dependency-audit threshold.
+- Local native diagnostic: the Windows build reached Ninja/C++ compilation, then failed because a generated React Native Gesture Handler object path exceeded Windows' 260-character limit. This is an environment/path limitation; Ubuntu CI remains the authoritative compile check.
+- Remaining evidence: push through a PR, confirm the Ubuntu Android compile job produces the debug APK, then mark the security checklist item complete. Do not make it a required branch-protection check until the first clean baseline is confirmed.
 
 ## Last Completed Slice: Android Sealed Emergency Code Setup
 
@@ -656,6 +669,7 @@ npm run typecheck --workspace @vault/mobile
 - Password reset/recovery MEK rotation and re-wrapping is implemented, unit-verified, and Android/Supabase live-verified for key material and encrypted-asset continuity.
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified.
 - `npm run check:phase1` is enforced by the branch-protected `App security gates` job and passed in both push and PR Security CI runs.
+- Android native debug compile CI is implemented locally; Ubuntu/GitHub Actions verification remains before the gate is complete or required.
 - Expo SDK audit blocker is mitigated as far as current SDK 56 packages allow: no critical advisories remain, and the residual moderate advisories are upstream `xcode -> uuid` through Expo config tooling.
 
 ## Known Technical Debt / Risks
