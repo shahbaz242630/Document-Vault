@@ -5,10 +5,10 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 ## Current Baseline
 
 - Audit date: 2026-07-10
-- Audited branch: `codex/phase1-function-size-gate`
-- Audited commit: `1d4407f`
+- Audited branch: `codex/android-native-compile-gate`
+- Audited commit: `16cfb7e`
 - Working tree at audit time: clean
-- Latest audited GitHub run: [Security CI PR run 29121804737](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121804737)
+- Latest audited GitHub run: [Android native build run 29123426723](https://github.com/shahbaz242630/Document-Vault/actions/runs/29123426723)
 - Latest audited GitHub result: `App security gates` and `Supabase live security gates` passed; CodeQL, GitGuardian, OWASP ZAP, and Vercel also passed on [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21)
 - CI runtime: Node.js `24.3.0` on `ubuntu-latest`
 - Important local constraint: Node.js `24.2.0` is below the repository requirement `^22.13.0 || >=24.3.0` and should be upgraded.
@@ -176,14 +176,14 @@ Current state: complete. `expo-doctor@1.19.10` is pinned as a mobile development
 
 ### 7. Add native build and end-to-end coverage
 
-- [ ] Add an Android debug/native compile gate.
+- [x] Add an Android debug/native compile gate.
 - [ ] Add an Android emulator smoke test for critical Phase 1 flows.
 - [ ] Add an iOS build gate on macOS when an approved runner/budget is available.
 - [ ] Add an iOS simulator smoke test when the macOS environment is available.
 - [ ] Cover at minimum sign-in, unlock, encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
 - [ ] Keep native build and E2E jobs separate from fast unit checks so failures are diagnosable.
 
-Current state: the Android debug compile workflow is implemented locally but remains unchecked until its first Ubuntu/GitHub Actions run passes. Emulator/E2E and iOS coverage remain separate future slices.
+Current state: the Android debug compile workflow passed its first Ubuntu/GitHub Actions run, including clean Expo native generation, Gradle compilation, and explicit APK verification. Emulator/E2E and iOS coverage remain separate future slices.
 
 #### Local implementation evidence - 2026-07-11
 
@@ -193,7 +193,10 @@ Current state: the Android debug compile workflow is implemented locally but rem
 - Regression proof: the focused workflow test failed before the workflow existed and passed after implementation.
 - Local checks: 15 focused workflow-security tests passed; the workflow guard and Phase 1 gate passed; both static security scans passed; all 31 security-guard tests passed; the high/critical dependency-audit threshold passed with the known 12 moderate Expo tooling findings retained.
 - Local native diagnostic: Gradle reached Ninja/C++ compilation on Windows but failed on a generated React Native Gesture Handler object path longer than 260 characters. This does not establish the Ubuntu result; GitHub Actions remains required evidence.
-- Remaining evidence: obtain a green Ubuntu `Android native debug compile` run through a PR, record the run link and exact result, then check off only the Android compile item. Keep emulator and iOS items open.
+- Initial hosted failure: [run 29123367191](https://github.com/shahbaz242630/Document-Vault/actions/runs/29123367191) stopped in setup-java cache discovery because generated Android files are intentionally absent from the checkout. The workflow was corrected to run Expo prebuild before Java/Gradle cache setup.
+- GitHub result: [Android native build run 29123426723](https://github.com/shahbaz242630/Document-Vault/actions/runs/29123426723) passed `Android native debug compile` in 14m9s on commit `16cfb7e`; Gradle compiled the debug APK and the explicit output check passed.
+- Hosted annotations: checkout/setup-node still emit the tracked Node.js action-runtime deprecation warning; RevenueCat emits a native `onCatalystInstanceDestroy()` deprecation warning. Neither failed the compile and both should be handled through reviewed upstream-compatible dependency/action updates.
+- Remaining work: make `Android native debug compile` a required `main` status check after the final PR head is green. Keep emulator and iOS items open.
 
 ### 8. Configure and enforce linting
 
