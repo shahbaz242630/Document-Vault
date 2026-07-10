@@ -12,7 +12,7 @@ Start here:
 
 Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 payments work until Phase 1 verification and hardening gaps are closed.
 
-2026-07-11 update: the Android native debug compile workflow passed authoritative Ubuntu/GitHub Actions verification in 14m9s, including Expo native generation, Gradle compilation, and explicit APK output verification. Finalize branch protection after the evidence commit is green.
+2026-07-11 update: the Android native debug compile workflow passed authoritative Ubuntu/GitHub Actions verification, including Expo native generation, Gradle compilation, and explicit APK output verification. It is now a strict required `main` check; move next to the Android emulator smoke-test slice.
 
 ## Source Of Truth
 
@@ -119,8 +119,10 @@ Completed on 2026-07-11 in [PR 24](https://github.com/shahbaz242630/Document-Vau
 - Local native diagnostic: the Windows build reached Ninja/C++ compilation, then failed because a generated React Native Gesture Handler object path exceeded Windows' 260-character limit. This is an environment/path limitation; Ubuntu CI remains the authoritative compile check.
 - The initial hosted run failed before compilation because setup-java cache discovery ran before the intentionally generated/ignored Android project existed. The workflow now runs Expo prebuild before Java/Gradle cache setup.
 - [Android native build run 29123426723](https://github.com/shahbaz242630/Document-Vault/actions/runs/29123426723) passed `Android native debug compile` in 14m9s on commit `16cfb7e`, including explicit APK verification.
+- [Final Android native build run 29124236012](https://github.com/shahbaz242630/Document-Vault/actions/runs/29124236012) passed in 7m35s on evidence commit `1381957`; both Security CI/Supabase runs, CodeQL, OWASP ZAP, and GitGuardian also passed.
+- Strict `main` branch protection now requires `Android native debug compile` alongside the existing application, Supabase, CodeQL, and ZAP checks.
 - Hosted annotations remain for the tracked checkout/setup-node Node.js runtime deprecation and a RevenueCat native API deprecation; neither failed compilation.
-- Finalization: confirm the evidence commit is green and add `Android native debug compile` to required `main` checks. Emulator smoke testing remains the next separate slice.
+- Emulator smoke testing remains the next separate slice.
 
 ## Last Completed Slice: Android Sealed Emergency Code Setup
 
@@ -672,7 +674,7 @@ npm run typecheck --workspace @vault/mobile
 - Password reset/recovery MEK rotation and re-wrapping is implemented, unit-verified, and Android/Supabase live-verified for key material and encrypted-asset continuity.
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified.
 - `npm run check:phase1` is enforced by the branch-protected `App security gates` job and passed in both push and PR Security CI runs.
-- Android native debug compile CI passed on Ubuntu; final branch-protection enforcement is being completed in PR 24.
+- Android native debug compile CI passed on Ubuntu and is enforced by strict `main` branch protection.
 - Expo SDK audit blocker is mitigated as far as current SDK 56 packages allow: no critical advisories remain, and the residual moderate advisories are upstream `xcode -> uuid` through Expo config tooling.
 
 ## Known Technical Debt / Risks

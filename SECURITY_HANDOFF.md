@@ -183,7 +183,7 @@ Current state: complete. `expo-doctor@1.19.10` is pinned as a mobile development
 - [ ] Cover at minimum sign-in, unlock, encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
 - [ ] Keep native build and E2E jobs separate from fast unit checks so failures are diagnosable.
 
-Current state: the Android debug compile workflow passed its first Ubuntu/GitHub Actions run, including clean Expo native generation, Gradle compilation, and explicit APK verification. Emulator/E2E and iOS coverage remain separate future slices.
+Current state: complete. The Android debug compile workflow passed clean Ubuntu/GitHub Actions runs, including Expo native generation, Gradle compilation, and explicit APK verification, and `Android native debug compile` is now a strict required `main` check. Emulator/E2E and iOS coverage remain separate future slices.
 
 #### Local implementation evidence - 2026-07-11
 
@@ -195,8 +195,10 @@ Current state: the Android debug compile workflow passed its first Ubuntu/GitHub
 - Local native diagnostic: Gradle reached Ninja/C++ compilation on Windows but failed on a generated React Native Gesture Handler object path longer than 260 characters. This does not establish the Ubuntu result; GitHub Actions remains required evidence.
 - Initial hosted failure: [run 29123367191](https://github.com/shahbaz242630/Document-Vault/actions/runs/29123367191) stopped in setup-java cache discovery because generated Android files are intentionally absent from the checkout. The workflow was corrected to run Expo prebuild before Java/Gradle cache setup.
 - GitHub result: [Android native build run 29123426723](https://github.com/shahbaz242630/Document-Vault/actions/runs/29123426723) passed `Android native debug compile` in 14m9s on commit `16cfb7e`; Gradle compiled the debug APK and the explicit output check passed.
+- Final head result: [Android native build run 29124236012](https://github.com/shahbaz242630/Document-Vault/actions/runs/29124236012) passed in 7m35s on evidence commit `1381957`; both Security CI runs, both Supabase live security jobs, CodeQL, OWASP ZAP, and GitGuardian also passed.
+- Required merge control: strict `main` protection now requires `Android native debug compile` alongside `App security gates`, `Supabase live security gates`, CodeQL, and OWASP ZAP.
 - Hosted annotations: checkout/setup-node still emit the tracked Node.js action-runtime deprecation warning; RevenueCat emits a native `onCatalystInstanceDestroy()` deprecation warning. Neither failed the compile and both should be handled through reviewed upstream-compatible dependency/action updates.
-- Remaining work: make `Android native debug compile` a required `main` status check after the final PR head is green. Keep emulator and iOS items open.
+- Remaining work: keep emulator and iOS items open and handle them as separate slices.
 
 ### 8. Configure and enforce linting
 
