@@ -112,7 +112,7 @@ Implemented locally on 2026-07-11:
 
 - Added `.github/workflows/android-native-build.yml` for pull requests to `main`, pushes to `main`, and manual dispatch.
 - The isolated `Android native debug compile` job uses minimal `contents: read` permission, concurrency cancellation, a 30-minute timeout, Node.js 24.3.0, Temurin Java 17, Gradle caching, and immutable action SHAs.
-- The job installs with `npm ci`, builds only the CI-relevant `x86_64` debug APK with `app:assembleDebug`, and verifies that the APK exists without uploading or retaining the binary.
+- The repository intentionally ignores generated native folders, so the job installs with `npm ci`, generates Android from the committed Expo configuration, builds only the CI-relevant `x86_64` debug APK with `app:assembleDebug`, and verifies that the APK exists without uploading or retaining the binary.
 - Added `actions/setup-java` to the workflow allowlist and added regression coverage for triggers, permissions, timeout, toolchain, immutable pins, build command, APK verification, and absence of secrets.
 - Regression proof: the focused workflow test failed before the workflow existed and passed after implementation.
 - Local verification passed: 15 focused workflow-security tests, `npm run check:github-actions-security`, `npm run check:phase1`, both static security scans, all 31 security-guard tests, and the high/critical dependency-audit threshold.

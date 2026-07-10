@@ -128,6 +128,7 @@ test("configures a bounded Android native debug compile gate", () => {
   assert.match(workflow, /node-version: 24\.3\.0/);
   assert.match(workflow, /distribution: temurin[\s\S]*?java-version: "17"/);
   assert.match(workflow, /run: npm ci/);
+  assert.match(workflow, /npx expo prebuild --platform android --no-install/);
   assert.match(workflow, /chmod \+x gradlew/);
   assert.match(
     workflow,

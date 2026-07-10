@@ -189,7 +189,7 @@ Current state: the Android debug compile workflow is implemented locally but rem
 
 - Scope: add a bounded, secret-free Android native debug compile workflow without mixing emulator/E2E work into the fast compile signal.
 - Files changed: `.github/workflows/android-native-build.yml`, `scripts/github-actions-security-check.cjs`, `scripts/github-actions-security-check.test.cjs`, and both handoffs.
-- Workflow controls: pull requests and pushes to `main` plus manual dispatch; `contents: read`; concurrency cancellation; 30-minute timeout; immutable checkout, setup-node, and setup-java SHAs; Node.js 24.3.0; Temurin Java 17; Gradle cache; `x86_64` debug-only compile; explicit APK existence check; no secrets or artifact upload.
+- Workflow controls: pull requests and pushes to `main` plus manual dispatch; `contents: read`; concurrency cancellation; 30-minute timeout; immutable checkout, setup-node, and setup-java SHAs; Node.js 24.3.0; Android generation from committed Expo configuration; Temurin Java 17; Gradle cache; `x86_64` debug-only compile; explicit APK existence check; no secrets or artifact upload.
 - Regression proof: the focused workflow test failed before the workflow existed and passed after implementation.
 - Local checks: 15 focused workflow-security tests passed; the workflow guard and Phase 1 gate passed; both static security scans passed; all 31 security-guard tests passed; the high/critical dependency-audit threshold passed with the known 12 moderate Expo tooling findings retained.
 - Local native diagnostic: Gradle reached Ninja/C++ compilation on Windows but failed on a generated React Native Gesture Handler object path longer than 260 characters. This does not establish the Ubuntu result; GitHub Actions remains required evidence.
