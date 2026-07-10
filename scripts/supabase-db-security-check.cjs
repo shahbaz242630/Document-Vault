@@ -120,6 +120,21 @@ function analyzeCatalog(catalog) {
   const policies = catalog.policies ?? [];
   const privileges = catalog.privileges ?? [];
 
+  collectTableShapeViolations({ expectedTables, policies, tables, violations });
+  collectPrivilegeViolations({ privileges, violations });
+  collectPolicyViolations({ policies, privileges, violations });
+  collectViewViolations({ catalog, violations });
+  collectFunctionViolations({ catalog, violations });
+
+  return violations;
+}
+
+function collectTableShapeViolations({
+  expectedTables,
+  policies,
+  tables,
+  violations,
+}) {
   for (const table of tables) {
     if (!expectedTables.has(table.tableName)) {
       violations.push({
@@ -156,7 +171,9 @@ function analyzeCatalog(catalog) {
       });
     }
   }
+}
 
+function collectPrivilegeViolations({ privileges, violations }) {
   for (const privilege of privileges) {
     if (privilege.roleName === "anon" && privilege.hasPrivilege) {
       violations.push({
@@ -202,7 +219,9 @@ function analyzeCatalog(catalog) {
       }
     }
   }
+}
 
+function collectPolicyViolations({ policies, privileges, violations }) {
   for (const policy of policies) {
     const policyText = `${policy.qual ?? ""} ${policy.withCheck ?? ""}`;
     if (/\b(?:raw_user_meta_data|user_metadata)\b/i.test(policyText)) {
@@ -214,9 +233,7 @@ function analyzeCatalog(catalog) {
     }
   }
 
-  for (const tableName of Object.entries(EXPECTED_AUTHENTICATED_PRIVILEGES)
-    .filter(([, expected]) => expected.includes("UPDATE"))
-    .map(([tableName]) => tableName)) {
+  for (const tableName of getTablesWithExpectedUpdatePrivilege()) {
     const tablePolicies = policies.filter((policy) => policy.tableName === tableName);
     const hasSelectPolicy = tablePolicies.some((policy) => policy.command === "SELECT" || policy.command === "ALL");
     const hasUpdatePolicy = tablePolicies.some((policy) => policy.command === "UPDATE" || policy.command === "ALL");
@@ -229,7 +246,15 @@ function analyzeCatalog(catalog) {
       });
     }
   }
+}
 
+function getTablesWithExpectedUpdatePrivilege() {
+  return Object.entries(EXPECTED_AUTHENTICATED_PRIVILEGES)
+    .filter(([, expected]) => expected.includes("UPDATE"))
+    .map(([tableName]) => tableName);
+}
+
+function collectViewViolations({ catalog, violations }) {
   for (const view of catalog.views ?? []) {
     if (!view.reloptions?.includes("security_invoker=true")) {
       violations.push({
@@ -239,7 +264,9 @@ function analyzeCatalog(catalog) {
       });
     }
   }
+}
 
+function collectFunctionViolations({ catalog, violations }) {
   for (const fn of catalog.functions ?? []) {
     if (fn.securityDefiner) {
       violations.push({
@@ -249,8 +276,6 @@ function analyzeCatalog(catalog) {
       });
     }
   }
-
-  return violations;
 }
 
 function printResult(result) {

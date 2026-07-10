@@ -12,6 +12,7 @@ import {
   type BulkDeleteMode,
   permanentlyDeleteVaultAssets,
   toggleVaultBulkSelection,
+  type VaultBulkSelectionState,
 } from "../vault-bulk-selection";
 import type { VaultCategoryListViewModel } from "../vault-category-list-view-model";
 import { VaultCategoryRecordCard } from "./vault-category-record-card";
@@ -20,6 +21,8 @@ type VaultCategoryListProps = {
   onDeleteAsset: (id: string) => Promise<void>;
   viewModel: VaultCategoryListViewModel;
 };
+
+type VaultCategoryItem = VaultCategoryListViewModel["items"][number];
 
 export function VaultCategoryList({
   onDeleteAsset,
@@ -40,13 +43,13 @@ export function VaultCategoryList({
   };
 
   const confirmBulkDelete = async () => {
-    if (!pendingBulkDeleteMode || isBulkDeleting) {
-      return;
-    }
+    if (!pendingBulkDeleteMode || isBulkDeleting) return;
 
-    const assetIds = pendingBulkDeleteMode === "all"
-      ? viewModel.items.map((item) => item.id)
-      : bulkSelection.selectedIds;
+    const assetIds = getPendingBulkDeleteIds({
+      bulkSelection,
+      mode: pendingBulkDeleteMode,
+      viewModel,
+    });
     setIsBulkDeleting(true);
     setBulkDeleteError(null);
     const result = await permanentlyDeleteVaultAssets({ assetIds, deleteAsset: onDeleteAsset });
@@ -62,204 +65,417 @@ export function VaultCategoryList({
     cancelBulkActions();
   };
 
-  const pendingBulkDeleteIds = pendingBulkDeleteMode === "all"
-    ? viewModel.items.map((item) => item.id)
-    : bulkSelection.selectedIds;
+  const pendingBulkDeleteIds = getPendingBulkDeleteIds({
+    bulkSelection,
+    mode: pendingBulkDeleteMode,
+    viewModel,
+  });
 
   return (
     <View style={{ gap: 18 }}>
-      <View style={{ gap: 6 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Vault</Text>
-        <View
+      <VaultCategoryHeader
+        bulkDeleteError={bulkDeleteError}
+        bulkSelection={bulkSelection}
+        isBulkDeleting={isBulkDeleting}
+        isPageMenuOpen={isPageMenuOpen}
+        onCancelBulkActions={cancelBulkActions}
+        onCloseBulkConfirmation={() => setPendingBulkDeleteMode(null)}
+        onConfirmBulkDelete={() => {
+          void confirmBulkDelete();
+        }}
+        onDeleteAll={() => {
+          setPendingBulkDeleteMode("all");
+          setIsPageMenuOpen(false);
+          setBulkDeleteError(null);
+        }}
+        onSelectRecords={() => {
+          setBulkSelection(enterVaultBulkSelection(bulkSelection));
+          setIsPageMenuOpen(false);
+          setBulkDeleteError(null);
+        }}
+        onToggleMenu={() => setIsPageMenuOpen((isOpen) => !isOpen)}
+        pendingBulkDeleteIds={pendingBulkDeleteIds}
+        pendingBulkDeleteMode={pendingBulkDeleteMode}
+        viewModel={viewModel}
+      />
+
+      <VaultCategoryRecords
+        bulkSelection={bulkSelection}
+        items={viewModel.items}
+        onDeleteAsset={onDeleteAsset}
+        onToggleSelection={(assetId) => {
+          setBulkSelection(toggleVaultBulkSelection(bulkSelection, assetId));
+          setPendingBulkDeleteMode(null);
+          setBulkDeleteError(null);
+        }}
+        viewModel={viewModel}
+      />
+
+      <VaultCategoryFooter
+        bulkSelection={bulkSelection}
+        isBulkDeleting={isBulkDeleting}
+        onDeleteSelected={() => {
+          setPendingBulkDeleteMode("selected");
+          setBulkDeleteError(null);
+        }}
+        viewModel={viewModel}
+      />
+    </View>
+  );
+}
+
+function getPendingBulkDeleteIds({
+  bulkSelection,
+  mode,
+  viewModel,
+}: {
+  bulkSelection: VaultBulkSelectionState;
+  mode: BulkDeleteMode | null;
+  viewModel: VaultCategoryListViewModel;
+}) {
+  return mode === "all" ? viewModel.items.map((item) => item.id) : bulkSelection.selectedIds;
+}
+
+function VaultCategoryHeader({
+  bulkDeleteError,
+  bulkSelection,
+  isBulkDeleting,
+  isPageMenuOpen,
+  onCancelBulkActions,
+  onCloseBulkConfirmation,
+  onConfirmBulkDelete,
+  onDeleteAll,
+  onSelectRecords,
+  onToggleMenu,
+  pendingBulkDeleteIds,
+  pendingBulkDeleteMode,
+  viewModel,
+}: {
+  bulkDeleteError: string | null;
+  bulkSelection: VaultBulkSelectionState;
+  isBulkDeleting: boolean;
+  isPageMenuOpen: boolean;
+  onCancelBulkActions: () => void;
+  onCloseBulkConfirmation: () => void;
+  onConfirmBulkDelete: () => void;
+  onDeleteAll: () => void;
+  onSelectRecords: () => void;
+  onToggleMenu: () => void;
+  pendingBulkDeleteIds: string[];
+  pendingBulkDeleteMode: BulkDeleteMode | null;
+  viewModel: VaultCategoryListViewModel;
+}) {
+  return (
+    <View style={{ gap: 6 }}>
+      <VaultCategoryTitleRow
+        bulkSelection={bulkSelection}
+        onCancelBulkActions={onCancelBulkActions}
+        onToggleMenu={onToggleMenu}
+        viewModel={viewModel}
+      />
+      <Text style={{ color: colors.inkSoft, fontSize: 16 }}>
+        {bulkSelection.isSelecting
+          ? `${bulkSelection.selectedIds.length} selected`
+          : `${viewModel.count} of ${viewModel.limit} saved`}
+      </Text>
+      {isPageMenuOpen ? (
+        <VaultCategoryPageMenu onDeleteAll={onDeleteAll} onSelectRecords={onSelectRecords} />
+      ) : null}
+      {pendingBulkDeleteMode ? (
+        <VaultCategoryBulkConfirmation
+          count={pendingBulkDeleteIds.length}
+          isBulkDeleting={isBulkDeleting}
+          mode={pendingBulkDeleteMode}
+          onCancel={onCloseBulkConfirmation}
+          onConfirm={onConfirmBulkDelete}
+          title={viewModel.title}
+        />
+      ) : null}
+      {bulkDeleteError ? (
+        <Text style={{ color: colors.danger, fontSize: 14 }}>{bulkDeleteError}</Text>
+      ) : null}
+    </View>
+  );
+}
+
+function VaultCategoryTitleRow({
+  bulkSelection,
+  onCancelBulkActions,
+  onToggleMenu,
+  viewModel,
+}: {
+  bulkSelection: VaultBulkSelectionState;
+  onCancelBulkActions: () => void;
+  onToggleMenu: () => void;
+  viewModel: VaultCategoryListViewModel;
+}) {
+  return (
+    <>
+      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Vault</Text>
+      <View
+        style={{
+          alignItems: "center",
+          flexDirection: "row",
+          gap: 12,
+          justifyContent: "space-between",
+        }}
+      >
+        <Text
           style={{
-            alignItems: "center",
-            flexDirection: "row",
-            gap: 12,
-            justifyContent: "space-between",
+            color: colors.ink,
+            flex: 1,
+            fontSize: 30,
+            fontWeight: "700",
+            lineHeight: 36,
           }}
         >
-          <Text
-            style={{
-              color: colors.ink,
-              flex: 1,
-              fontSize: 30,
-              fontWeight: "700",
-              lineHeight: 36,
-            }}
-          >
-            {viewModel.title}
-          </Text>
-          {bulkSelection.isSelecting ? (
-            <Pressable accessibilityRole="button" onPress={cancelBulkActions}>
-              <Text style={{ color: colors.action, fontSize: 16, fontWeight: "700" }}>
-                Cancel
-              </Text>
-            </Pressable>
-          ) : viewModel.items.length > 0 ? (
-            <Pressable
-              accessibilityLabel="Open category actions"
-              accessibilityRole="button"
-              onPress={() => setIsPageMenuOpen((isOpen) => !isOpen)}
-              style={{ alignItems: "center", minHeight: 40, minWidth: 40 }}
-            >
-              <Text style={{ color: colors.ink, fontSize: 22, fontWeight: "700" }}>...</Text>
-            </Pressable>
-          ) : null}
-        </View>
-        <Text style={{ color: colors.inkSoft, fontSize: 16 }}>
-          {bulkSelection.isSelecting
-            ? `${bulkSelection.selectedIds.length} selected`
-            : `${viewModel.count} of ${viewModel.limit} saved`}
+          {viewModel.title}
         </Text>
-        {isPageMenuOpen ? (
-          <View
-            style={{
-              alignSelf: "flex-end",
-              backgroundColor: "rgba(255,255,255,0.96)",
-              borderColor: colors.border,
-              borderRadius: 10,
-              borderWidth: 1,
-              minWidth: 180,
-              padding: 8,
-            }}
-          >
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {
-                setBulkSelection(enterVaultBulkSelection(bulkSelection));
-                setIsPageMenuOpen(false);
-                setBulkDeleteError(null);
-              }}
-              style={{ padding: 10 }}
-            >
-              <Text style={{ color: colors.action, fontSize: 16, fontWeight: "700" }}>
-                Select records
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {
-                setPendingBulkDeleteMode("all");
-                setIsPageMenuOpen(false);
-                setBulkDeleteError(null);
-              }}
-              style={{ padding: 10 }}
-            >
-              <Text style={{ color: colors.danger, fontSize: 16, fontWeight: "700" }}>
-                Delete all
-              </Text>
-            </Pressable>
-          </View>
-        ) : null}
-        {pendingBulkDeleteMode ? (
-          <View style={{ gap: 10, paddingVertical: 8 }}>
-            <Text style={{ color: colors.danger, fontSize: 14, lineHeight: 20 }}>
-              {createBulkDeleteConfirmation({
-                count: pendingBulkDeleteIds.length,
-                mode: pendingBulkDeleteMode,
-                title: viewModel.title,
-              })}
-            </Text>
-            <View style={{ flexDirection: "row", gap: 16 }}>
-              <Pressable
-                accessibilityRole="button"
-                disabled={isBulkDeleting}
-                onPress={() => setPendingBulkDeleteMode(null)}
-              >
-                <Text style={{ color: colors.inkMuted, fontSize: 16, fontWeight: "700" }}>
-                  Keep records
-                </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                disabled={isBulkDeleting}
-                onPress={() => void confirmBulkDelete()}
-              >
-                <Text style={{ color: colors.danger, fontSize: 16, fontWeight: "700" }}>
-                  {isBulkDeleting ? "Deleting..." : "Delete permanently"}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        ) : null}
-        {bulkDeleteError ? (
-          <Text style={{ color: colors.danger, fontSize: 14 }}>{bulkDeleteError}</Text>
-        ) : null}
+        <VaultCategoryHeaderAction
+          bulkSelection={bulkSelection}
+          hasItems={viewModel.items.length > 0}
+          onCancelBulkActions={onCancelBulkActions}
+          onToggleMenu={onToggleMenu}
+        />
       </View>
+    </>
+  );
+}
 
-      {viewModel.items.length === 0 ? (
-        <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-          {viewModel.emptyTitle}
+function VaultCategoryHeaderAction({
+  bulkSelection,
+  hasItems,
+  onCancelBulkActions,
+  onToggleMenu,
+}: {
+  bulkSelection: VaultBulkSelectionState;
+  hasItems: boolean;
+  onCancelBulkActions: () => void;
+  onToggleMenu: () => void;
+}) {
+  if (bulkSelection.isSelecting) {
+    return (
+      <Pressable accessibilityRole="button" onPress={onCancelBulkActions}>
+        <Text style={{ color: colors.action, fontSize: 16, fontWeight: "700" }}>
+          Cancel
         </Text>
-      ) : (
-        <View style={{ gap: 12 }}>
-          {viewModel.items.map((item) => (
-            <VaultCategoryRecordCard
-              isSelected={bulkSelection.selectedIds.includes(item.id)}
-              isSelecting={bulkSelection.isSelecting}
-              item={item}
-              key={item.id}
-              onDeleteAsset={onDeleteAsset}
-              onToggleSelection={(assetId) => {
-                setBulkSelection(toggleVaultBulkSelection(bulkSelection, assetId));
-                setPendingBulkDeleteMode(null);
-                setBulkDeleteError(null);
-              }}
-            />
-          ))}
-        </View>
-      )}
+      </Pressable>
+    );
+  }
 
-      {bulkSelection.isSelecting && bulkSelection.selectedIds.length > 0 ? (
+  if (!hasItems) return null;
+
+  return (
+    <Pressable
+      accessibilityLabel="Open category actions"
+      accessibilityRole="button"
+      onPress={onToggleMenu}
+      style={{ alignItems: "center", minHeight: 40, minWidth: 40 }}
+    >
+      <Text style={{ color: colors.ink, fontSize: 22, fontWeight: "700" }}>...</Text>
+    </Pressable>
+  );
+}
+
+function VaultCategoryPageMenu({
+  onDeleteAll,
+  onSelectRecords,
+}: {
+  onDeleteAll: () => void;
+  onSelectRecords: () => void;
+}) {
+  return (
+    <View
+      style={{
+        alignSelf: "flex-end",
+        backgroundColor: "rgba(255,255,255,0.96)",
+        borderColor: colors.border,
+        borderRadius: 10,
+        borderWidth: 1,
+        minWidth: 180,
+        padding: 8,
+      }}
+    >
+      <VaultCategoryMenuItem label="Select records" onPress={onSelectRecords} tone="action" />
+      <VaultCategoryMenuItem label="Delete all" onPress={onDeleteAll} tone="danger" />
+    </View>
+  );
+}
+
+function VaultCategoryMenuItem({
+  label,
+  onPress,
+  tone,
+}: {
+  label: string;
+  onPress: () => void;
+  tone: "action" | "danger";
+}) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={{ padding: 10 }}>
+      <Text
+        style={{
+          color: tone === "action" ? colors.action : colors.danger,
+          fontSize: 16,
+          fontWeight: "700",
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+function VaultCategoryBulkConfirmation({
+  count,
+  isBulkDeleting,
+  mode,
+  onCancel,
+  onConfirm,
+  title,
+}: {
+  count: number;
+  isBulkDeleting: boolean;
+  mode: BulkDeleteMode;
+  onCancel: () => void;
+  onConfirm: () => void;
+  title: string;
+}) {
+  return (
+    <View style={{ gap: 10, paddingVertical: 8 }}>
+      <Text style={{ color: colors.danger, fontSize: 14, lineHeight: 20 }}>
+        {createBulkDeleteConfirmation({ count, mode, title })}
+      </Text>
+      <View style={{ flexDirection: "row", gap: 16 }}>
         <Pressable
           accessibilityRole="button"
           disabled={isBulkDeleting}
-          onPress={() => {
-            setPendingBulkDeleteMode("selected");
-            setBulkDeleteError(null);
-          }}
-          style={{
-            backgroundColor: colors.danger,
-            borderRadius: 10,
-            padding: 16,
-          }}
+          onPress={onCancel}
         >
-          <Text
-            style={{
-              color: colors.surface,
-              fontSize: 17,
-              fontWeight: "700",
-              textAlign: "center",
-            }}
-          >
-            Delete selected
+          <Text style={{ color: colors.inkMuted, fontSize: 16, fontWeight: "700" }}>
+            Keep records
           </Text>
         </Pressable>
-      ) : null}
+        <Pressable
+          accessibilityRole="button"
+          disabled={isBulkDeleting}
+          onPress={onConfirm}
+        >
+          <Text style={{ color: colors.danger, fontSize: 16, fontWeight: "700" }}>
+            {isBulkDeleting ? "Deleting..." : "Delete permanently"}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
 
-      {!bulkSelection.isSelecting && viewModel.canAddMore ? (
-        <Link
-          href={viewModel.addHref}
+function VaultCategoryRecords({
+  bulkSelection,
+  items,
+  onDeleteAsset,
+  onToggleSelection,
+  viewModel,
+}: {
+  bulkSelection: VaultBulkSelectionState;
+  items: VaultCategoryItem[];
+  onDeleteAsset: (id: string) => Promise<void>;
+  onToggleSelection: (assetId: string) => void;
+  viewModel: VaultCategoryListViewModel;
+}) {
+  if (items.length === 0) {
+    return (
+      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
+        {viewModel.emptyTitle}
+      </Text>
+    );
+  }
+
+  return (
+    <View style={{ gap: 12 }}>
+      {items.map((item) => (
+        <VaultCategoryRecordCard
+          isSelected={bulkSelection.selectedIds.includes(item.id)}
+          isSelecting={bulkSelection.isSelecting}
+          item={item}
+          key={item.id}
+          onDeleteAsset={onDeleteAsset}
+          onToggleSelection={onToggleSelection}
+        />
+      ))}
+    </View>
+  );
+}
+
+function VaultCategoryFooter({
+  bulkSelection,
+  isBulkDeleting,
+  onDeleteSelected,
+  viewModel,
+}: {
+  bulkSelection: VaultBulkSelectionState;
+  isBulkDeleting: boolean;
+  onDeleteSelected: () => void;
+  viewModel: VaultCategoryListViewModel;
+}) {
+  if (bulkSelection.isSelecting && bulkSelection.selectedIds.length > 0) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        disabled={isBulkDeleting}
+        onPress={onDeleteSelected}
+        style={{
+          backgroundColor: colors.danger,
+          borderRadius: 10,
+          padding: 16,
+        }}
+      >
+        <Text
           style={{
-            borderColor: colors.action,
-            borderCurve: "continuous",
-            borderRadius: 10,
-            borderStyle: "dashed",
-            borderWidth: 1,
-            color: colors.action,
+            color: colors.surface,
             fontSize: 17,
             fontWeight: "700",
-            padding: 16,
             textAlign: "center",
           }}
         >
-          + {viewModel.addLabel}
-        </Link>
-      ) : !bulkSelection.isSelecting ? (
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-          This category has reached the 20-record limit.
+          Delete selected
         </Text>
-      ) : null}
-    </View>
+      </Pressable>
+    );
+  }
+
+  if (bulkSelection.isSelecting) return null;
+  if (viewModel.canAddMore) return <VaultCategoryAddLink viewModel={viewModel} />;
+
+  return (
+    <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
+      This category has reached the 20-record limit.
+    </Text>
+  );
+}
+
+function VaultCategoryAddLink({
+  viewModel,
+}: {
+  viewModel: VaultCategoryListViewModel;
+}) {
+  return (
+    <Link
+      href={viewModel.addHref}
+      style={{
+        borderColor: colors.action,
+        borderCurve: "continuous",
+        borderRadius: 10,
+        borderStyle: "dashed",
+        borderWidth: 1,
+        color: colors.action,
+        fontSize: 17,
+        fontWeight: "700",
+        padding: 16,
+        textAlign: "center",
+      }}
+    >
+      + {viewModel.addLabel}
+    </Link>
   );
 }

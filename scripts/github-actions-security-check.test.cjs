@@ -41,6 +41,15 @@ test("runs Expo Doctor in Security CI", () => {
   assert.match(workflow, /- name: Expo Doctor[\s\S]*?run: npm run doctor --workspace @vault\/mobile/);
 });
 
+test("enforces the Phase 1 Definition-of-Done gate in Security CI", () => {
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+
+  assert.match(workflow, /- name: Phase 1 Definition-of-Done[\s\S]*?run: npm run check:phase1/);
+});
+
 test("enforces workspace linting in Security CI", () => {
   const rootPackage = JSON.parse(
     fs.readFileSync(path.resolve(__dirname, "..", "package.json"), "utf8"),

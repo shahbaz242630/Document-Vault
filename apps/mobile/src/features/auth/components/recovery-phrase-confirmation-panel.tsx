@@ -15,6 +15,10 @@ type RecoveryPhraseConfirmationPanelProps = {
   words: readonly string[];
 };
 
+type RecoveryPhraseConfirmationViewModel = ReturnType<
+  typeof createRecoveryPhraseConfirmationViewModel
+>;
+
 export function RecoveryPhraseConfirmationPanel({
   onConfirmed,
   words,
@@ -34,24 +38,7 @@ export function RecoveryPhraseConfirmationPanel({
 
   return (
     <View style={{ gap: 20 }}>
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-          {viewModel.statusLabel}
-        </Text>
-        <Text
-          style={{
-            color: colors.ink,
-            fontSize: 30,
-            fontWeight: "700",
-            lineHeight: 36,
-          }}
-        >
-          {viewModel.title}
-        </Text>
-        <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-          {viewModel.body}
-        </Text>
-      </View>
+      <RecoveryPhraseConfirmationHeader viewModel={viewModel} />
 
       <View style={{ gap: 14 }}>
         {challenges.map((challenge) => (
@@ -70,32 +57,13 @@ export function RecoveryPhraseConfirmationPanel({
         ))}
       </View>
 
-      <View style={{ gap: 6 }}>
-        <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
-          Account password
-        </Text>
-        <TextInput
-          onChangeText={(value) => {
-            setPassword(value);
-            setError(null);
-          }}
-          placeholder="Re-enter your password"
-          placeholderTextColor={colors.inkMuted}
-          secureTextEntry
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            borderCurve: "continuous",
-            borderRadius: 8,
-            borderWidth: 1,
-            color: colors.ink,
-            fontSize: 17,
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-          }}
-          value={password}
-        />
-      </View>
+      <RecoveryPasswordInput
+        onChange={(value) => {
+          setPassword(value);
+          setError(null);
+        }}
+        value={password}
+      />
 
       {error ? (
         <Text selectable style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}>
@@ -109,10 +77,11 @@ export function RecoveryPhraseConfirmationPanel({
         </Text>
       ) : null}
 
-      <Pressable
-        accessibilityRole="button"
+      <RecoveryConfirmationSubmitButton
         disabled={isSubmitting || !canSubmit || success}
-        onPress={async () => {
+        isSubmitting={isSubmitting}
+        label={viewModel.primaryActionLabel}
+        onSubmit={async () => {
           setIsSubmitting(true);
 
           try {
@@ -135,21 +104,103 @@ export function RecoveryPhraseConfirmationPanel({
             setIsSubmitting(false);
           }
         }}
+      />
+    </View>
+  );
+}
+
+function RecoveryPhraseConfirmationHeader({
+  viewModel,
+}: {
+  viewModel: RecoveryPhraseConfirmationViewModel;
+}) {
+  return (
+    <View style={{ gap: 8 }}>
+      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
+        {viewModel.statusLabel}
+      </Text>
+      <Text
         style={{
-          alignItems: "center",
-          backgroundColor:
-            isSubmitting || !canSubmit || success ? colors.inkMuted : colors.action,
-          borderCurve: "continuous",
-          borderRadius: 8,
-          paddingHorizontal: 18,
-          paddingVertical: 14,
+          color: colors.ink,
+          fontSize: 30,
+          fontWeight: "700",
+          lineHeight: 36,
         }}
       >
-        <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-          {isSubmitting ? "Verifying..." : viewModel.primaryActionLabel}
-        </Text>
-      </Pressable>
+        {viewModel.title}
+      </Text>
+      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
+        {viewModel.body}
+      </Text>
     </View>
+  );
+}
+
+function RecoveryPasswordInput({
+  onChange,
+  value,
+}: {
+  onChange: (value: string) => void;
+  value: string;
+}) {
+  return (
+    <View style={{ gap: 6 }}>
+      <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
+        Account password
+      </Text>
+      <TextInput
+        onChangeText={onChange}
+        placeholder="Re-enter your password"
+        placeholderTextColor={colors.inkMuted}
+        secureTextEntry
+        style={{
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderCurve: "continuous",
+          borderRadius: 8,
+          borderWidth: 1,
+          color: colors.ink,
+          fontSize: 17,
+          paddingHorizontal: 14,
+          paddingVertical: 12,
+        }}
+        value={value}
+      />
+    </View>
+  );
+}
+
+function RecoveryConfirmationSubmitButton({
+  disabled,
+  isSubmitting,
+  label,
+  onSubmit,
+}: {
+  disabled: boolean;
+  isSubmitting: boolean;
+  label: string;
+  onSubmit: () => Promise<void>;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={() => {
+        void onSubmit();
+      }}
+      style={{
+        alignItems: "center",
+        backgroundColor: disabled ? colors.inkMuted : colors.action,
+        borderCurve: "continuous",
+        borderRadius: 8,
+        paddingHorizontal: 18,
+        paddingVertical: 14,
+      }}
+    >
+      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
+        {isSubmitting ? "Verifying..." : label}
+      </Text>
+    </Pressable>
   );
 }
 

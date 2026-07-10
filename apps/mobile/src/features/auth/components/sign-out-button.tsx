@@ -42,86 +42,140 @@ export function SignOutButton({ storage, vaultSignOut }: SignOutButtonProps) {
   );
 
   if (isSigningOut) {
-    return (
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-        Signing out...
-      </Text>
-    );
+    return <SigningOutMessage />;
   }
 
   if (isConfirming) {
     return (
-      <View style={{ gap: 12 }}>
-        <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "700" }}>
-          {viewModel.confirmationTitle}
-        </Text>
-        <Text style={{ color: colors.inkSoft, fontSize: 15, lineHeight: 22 }}>
-          {viewModel.confirmationBody}
-        </Text>
-        <View style={{ flexDirection: "row", gap: 12 }}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setIsConfirming(false)}
-            style={{
-              alignItems: "center",
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              borderCurve: "continuous",
-              borderRadius: 8,
-              borderWidth: 1,
-              flex: 1,
-              paddingHorizontal: 18,
-              paddingVertical: 14,
-            }}
-          >
-            <Text style={{ color: colors.ink, fontSize: 17 }}>Cancel</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            onPress={async () => {
-              setIsSigningOut(true);
-              try {
-                await service.signOut();
-                try {
-                  await Purchases.logOut();
-                } catch {
-                  // Ignore RevenueCat logout errors (e.g., not configured).
-                }
-                router.replace("/");
-              } catch {
-                setIsSigningOut(false);
-                setIsConfirming(false);
-              }
-            }}
-            style={{
-              alignItems: "center",
-              backgroundColor: colors.danger,
-              borderCurve: "continuous",
-              borderRadius: 8,
-              flex: 1,
-              paddingHorizontal: 18,
-              paddingVertical: 14,
-            }}
-          >
-            <Text
-              style={{
-                color: colors.actionText,
-                fontSize: 17,
-                fontWeight: "700",
-              }}
-            >
-              {viewModel.actionLabel}
-            </Text>
-          </Pressable>
-        </View>
-      </View>
+      <SignOutConfirmation
+        actionLabel={viewModel.actionLabel}
+        body={viewModel.confirmationBody}
+        onCancel={() => setIsConfirming(false)}
+        onConfirm={async () => {
+          setIsSigningOut(true);
+          try {
+            await service.signOut();
+            await logOutRevenueCat();
+            router.replace("/");
+          } catch {
+            setIsSigningOut(false);
+            setIsConfirming(false);
+          }
+        }}
+        title={viewModel.confirmationTitle}
+      />
     );
   }
 
+  return <SignOutTrigger label={viewModel.actionLabel} onPress={() => setIsConfirming(true)} />;
+}
+
+function SigningOutMessage() {
+  return (
+    <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
+      Signing out...
+    </Text>
+  );
+}
+
+function SignOutConfirmation({
+  actionLabel,
+  body,
+  onCancel,
+  onConfirm,
+  title,
+}: {
+  actionLabel: string;
+  body: string;
+  onCancel: () => void;
+  onConfirm: () => Promise<void>;
+  title: string;
+}) {
+  return (
+    <View style={{ gap: 12 }}>
+      <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "700" }}>
+        {title}
+      </Text>
+      <Text style={{ color: colors.inkSoft, fontSize: 15, lineHeight: 22 }}>
+        {body}
+      </Text>
+      <View style={{ flexDirection: "row", gap: 12 }}>
+        <CancelSignOutButton onCancel={onCancel} />
+        <ConfirmSignOutButton actionLabel={actionLabel} onConfirm={onConfirm} />
+      </View>
+    </View>
+  );
+}
+
+function CancelSignOutButton({ onCancel }: { onCancel: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={() => setIsConfirming(true)}
+      onPress={onCancel}
+      style={{
+        alignItems: "center",
+        backgroundColor: colors.surface,
+        borderColor: colors.border,
+        borderCurve: "continuous",
+        borderRadius: 8,
+        borderWidth: 1,
+        flex: 1,
+        paddingHorizontal: 18,
+        paddingVertical: 14,
+      }}
+    >
+      <Text style={{ color: colors.ink, fontSize: 17 }}>Cancel</Text>
+    </Pressable>
+  );
+}
+
+function ConfirmSignOutButton({
+  actionLabel,
+  onConfirm,
+}: {
+  actionLabel: string;
+  onConfirm: () => Promise<void>;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => {
+        void onConfirm();
+      }}
+      style={{
+        alignItems: "center",
+        backgroundColor: colors.danger,
+        borderCurve: "continuous",
+        borderRadius: 8,
+        flex: 1,
+        paddingHorizontal: 18,
+        paddingVertical: 14,
+      }}
+    >
+      <Text
+        style={{
+          color: colors.actionText,
+          fontSize: 17,
+          fontWeight: "700",
+        }}
+      >
+        {actionLabel}
+      </Text>
+    </Pressable>
+  );
+}
+
+function SignOutTrigger({
+  label,
+  onPress,
+}: {
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
       style={{
         alignItems: "center",
         paddingHorizontal: 18,
@@ -131,8 +185,16 @@ export function SignOutButton({ storage, vaultSignOut }: SignOutButtonProps) {
       <Text
         style={{ color: colors.danger, fontSize: 17, textAlign: "center" }}
       >
-        {viewModel.actionLabel}
+        {label}
       </Text>
     </Pressable>
   );
+}
+
+async function logOutRevenueCat() {
+  try {
+    await Purchases.logOut();
+  } catch {
+    // Ignore RevenueCat logout errors (e.g., not configured).
+  }
 }

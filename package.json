@@ -37,5 +37,9 @@
     "eslint": "9.39.3",
     "eslint-config-expo": "56.0.4",
     "patch-package": "^8.0.1"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-linux-x64-gnu": "^1.0.3",
+    "@rolldown/binding-win32-x64-msvc": "^1.0.3"
   }
 }

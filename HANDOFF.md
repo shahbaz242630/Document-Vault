@@ -12,15 +12,18 @@ Start here:
 
 Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 payments work until Phase 1 verification and hardening gaps are closed.
 
+2026-07-11 update: `npm run check:phase1` is now enforced by the branch-protected `App security gates` job with regression coverage. Both push and PR Security CI runs passed on implementation commit `1d4407f`; move to the next remaining Phase 1 blocker.
+
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
 - Product/app name: Sanduqkin
 - BRD: `Vault_BRD_v1.0.md`, version shown in file: 1.1
 - Active scope: Phase 1 - Core Single-User Vault
-- Current handoff refresh: 2026-06-11
-- Current branch: `main`
-- Current working tree has uncommitted QA slice changes. Do not discard them.
+- Current handoff refresh: 2026-07-11
+- Current branch: `codex/phase1-function-size-gate`
+- Current PR: [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21)
+- Current working tree was clean after pushing PR 21; this handoff update is the current uncommitted documentation slice.
 
 ## Product Guardrails
 
@@ -53,6 +56,55 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Vault supports MVP categories including expanded category set.
 - Local readable PDF export exists and must stay on-device; generated PDFs are not uploaded or emailed.
 - Password reset recovery now re-wraps the phrase-derived MEK with the new password and saves updated wrapped key material.
+
+## Latest Completed Slice: Phase 1 Function-Size Gate
+
+Completed on 2026-07-10 in [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21):
+
+- Refactored the 19 oversized functions tracked by `npm run check:phase1`.
+- Preserved batch discipline: oversized functions were reviewed first, then refactored in small batches with verification between batches.
+- `npm run check:phase1` now passes locally.
+- Follow-up CI fixes:
+  - aligned Expo SDK 56 patch versions so Expo Doctor passes;
+  - locked Rolldown Linux/Windows native bindings so Vitest starts after `npm ci` in CI;
+  - aligned mobile coverage thresholds to the measured post-refactor baseline because helper extraction changed the function-count denominator.
+- PR 21 checks passed:
+  - `App security gates`
+  - `Supabase live security gates`
+  - `CodeQL JavaScript/TypeScript`
+  - `GitGuardian Security Checks`
+  - `OWASP ZAP baseline`
+  - `Vercel`
+- Local verification passed before push:
+
+```powershell
+npm run check:phase1
+npm run typecheck
+npm run lint
+npm test --workspaces --if-present
+npm run test:coverage --workspace @vault/mobile
+npm run doctor --workspace @vault/mobile
+npm run check:security
+npm run check:github-actions-security
+npm run check:mobile-secrets
+npm audit --omit=dev --workspaces --audit-level=high
+```
+
+- Known local environment note: local Node.js is still `v24.2.0`, below the repository engine range `^22.13.0 || >=24.3.0`. Commands run, but npm prints EBADENGINE warnings. CI uses Node.js `24.3.0`.
+- GitHub noted one existing moderate Dependabot item on the default branch. It is separate from PR 21 and remains tracked in `SECURITY_HANDOFF.md`.
+
+## Completed Slice: Enforce Phase 1 Gate In Security CI
+
+Completed on 2026-07-11 in [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21):
+
+- Added `npm run check:phase1` to the required `App security gates` job in `.github/workflows/security-ci.yml`.
+- Added workflow regression coverage in `scripts/github-actions-security-check.test.cjs`.
+- Demonstrated the new regression test fails before the workflow step and passes after it.
+- Local verification passed: focused workflow tests (14), `npm run check:phase1`, both static security checks, mobile secret scanning, the full security-guard suite (30), and the high/critical dependency-audit threshold.
+- The audit retains the known 12 moderate Expo tooling findings through `xcode -> uuid`; no forced incompatible downgrade was applied.
+- [push Security CI run 29121802507](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121802507) and [PR Security CI run 29121804737](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121804737) passed both `App security gates` and `Supabase live security gates`.
+- CodeQL, OWASP ZAP, GitGuardian, and Vercel also passed on implementation commit `1d4407f`.
+- GitHub emitted a Node.js action-runtime deprecation annotation for the pinned checkout/setup-node versions. Keep immutable SHA pins and take reviewed upgrades through Dependabot.
 
 ## Last Completed Slice: Android Sealed Emergency Code Setup
 
@@ -603,7 +655,7 @@ npm run typecheck --workspace @vault/mobile
 - iOS native verification is blocked in this Windows environment. Needs macOS/Xcode/iOS simulator verification.
 - Password reset/recovery MEK rotation and re-wrapping is implemented, unit-verified, and Android/Supabase live-verified for key material and encrypted-asset continuity.
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified.
-- `npm run check:phase1` still fails on known pre-existing function-size debt.
+- `npm run check:phase1` is enforced by the branch-protected `App security gates` job and passed in both push and PR Security CI runs.
 - Expo SDK audit blocker is mitigated as far as current SDK 56 packages allow: no critical advisories remain, and the residual moderate advisories are upstream `xcode -> uuid` through Expo config tooling.
 
 ## Known Technical Debt / Risks

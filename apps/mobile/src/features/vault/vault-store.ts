@@ -47,49 +47,25 @@ export function createVaultStore({
   now = () => new Date(),
 }: CreateVaultStoreOptions = {}) {
   const records = new Map<string, VaultEncryptedAssetRecord>();
+  const createTimestamp = () => now().toISOString();
 
   return {
-    async addAsset({ key, payload }: AddAssetInput): Promise<VaultEncryptedAssetRecord> {
-      const encryptedPayload = await encryptAssetPayload({ key, payload });
-      const timestamp = now().toISOString();
-      const record: VaultEncryptedAssetRecord = {
-        assetType: encryptedPayload.assetType,
-        createdAt: timestamp,
-        deletedAt: null,
-        encryptedPayload,
-        id: generateId(),
-        updatedAt: timestamp,
-      };
-
-      records.set(record.id, cloneEncryptedRecord(record));
-
-      return cloneEncryptedRecord(record);
-    },
+    addAsset: (input: AddAssetInput) =>
+      addAssetRecord({
+        createTimestamp,
+        generateId,
+        input,
+        records,
+      }),
     getEncryptedRecord(id: string): VaultEncryptedAssetRecord | null {
       const record = records.get(id);
 
       return record ? cloneEncryptedRecord(record) : null;
     },
-    async listActiveAssets({ key }: ListActiveAssetsInput): Promise<VaultDecryptedAsset[]> {
-      const activeRecords = Array.from(records.values()).filter(
-        (record) => record.deletedAt === null,
-      );
-
-      return Promise.all(activeRecords.map((record) => decryptRecord({ key, record })));
-    },
-    async listDeletedAssets({ key }: ListActiveAssetsInput): Promise<VaultDeletedAsset[]> {
-      const deletedRecords = Array.from(records.values()).filter(
-        (record): record is VaultEncryptedAssetRecord & { deletedAt: string } =>
-          record.deletedAt !== null,
-      );
-
-      return Promise.all(
-        deletedRecords.map(async (record) => ({
-          ...(await decryptRecord({ key, record })),
-          deletedAt: record.deletedAt,
-        })),
-      );
-    },
+    listActiveAssets: (input: ListActiveAssetsInput) =>
+      listActiveAssetRecords(records, input),
+    listDeletedAssets: (input: ListActiveAssetsInput) =>
+      listDeletedAssetRecords(records, input),
     listEncryptedRecords(): VaultEncryptedAssetRecord[] {
       return Array.from(records.values()).map(cloneEncryptedRecord);
     },
@@ -100,23 +76,7 @@ export function createVaultStore({
 
       return records.delete(id);
     },
-    restoreAsset(id: string): VaultEncryptedAssetRecord | null {
-      const record = records.get(id);
-
-      if (!record) {
-        return null;
-      }
-
-      const restoredRecord: VaultEncryptedAssetRecord = {
-        ...record,
-        deletedAt: null,
-        updatedAt: now().toISOString(),
-      };
-
-      records.set(id, cloneEncryptedRecord(restoredRecord));
-
-      return cloneEncryptedRecord(restoredRecord);
-    },
+    restoreAsset: (id: string) => restoreAssetRecord(records, id, createTimestamp),
     replaceEncryptedRecords(nextRecords: VaultEncryptedAssetRecord[]): void {
       records.clear();
 
@@ -124,44 +84,131 @@ export function createVaultStore({
         records.set(record.id, cloneEncryptedRecord(record));
       }
     },
-    softDeleteAsset(id: string): VaultEncryptedAssetRecord | null {
-      const record = records.get(id);
-
-      if (!record) {
-        return null;
-      }
-
-      const timestamp = now().toISOString();
-      const deletedRecord: VaultEncryptedAssetRecord = {
-        ...record,
-        deletedAt: timestamp,
-        updatedAt: timestamp,
-      };
-
-      records.set(id, cloneEncryptedRecord(deletedRecord));
-
-      return cloneEncryptedRecord(deletedRecord);
-    },
-    async updateAsset({ id, key, payload }: UpdateAssetInput): Promise<VaultEncryptedAssetRecord | null> {
-      const record = records.get(id);
-
-      if (!record) {
-        return null;
-      }
-
-      const encryptedPayload = await encryptAssetPayload({ key, payload });
-      const updatedRecord: VaultEncryptedAssetRecord = {
-        ...record,
-        assetType: encryptedPayload.assetType,
-        encryptedPayload,
-        updatedAt: now().toISOString(),
-      };
-
-      records.set(id, cloneEncryptedRecord(updatedRecord));
-
-      return cloneEncryptedRecord(updatedRecord);
-    },
+    softDeleteAsset: (id: string) => softDeleteAssetRecord(records, id, createTimestamp),
+    updateAsset: (input: UpdateAssetInput) =>
+      updateAssetRecord(records, input, createTimestamp),
   };
+}
+
+async function addAssetRecord({
+  createTimestamp,
+  generateId,
+  input,
+  records,
+}: {
+  createTimestamp: () => string;
+  generateId: () => string;
+  input: AddAssetInput;
+  records: Map<string, VaultEncryptedAssetRecord>;
+}): Promise<VaultEncryptedAssetRecord> {
+  const encryptedPayload = await encryptAssetPayload({
+    key: input.key,
+    payload: input.payload,
+  });
+  const timestamp = createTimestamp();
+  const record: VaultEncryptedAssetRecord = {
+    assetType: encryptedPayload.assetType,
+    createdAt: timestamp,
+    deletedAt: null,
+    encryptedPayload,
+    id: generateId(),
+    updatedAt: timestamp,
+  };
+
+  records.set(record.id, cloneEncryptedRecord(record));
+
+  return cloneEncryptedRecord(record);
+}
+
+async function listActiveAssetRecords(
+  records: Map<string, VaultEncryptedAssetRecord>,
+  { key }: ListActiveAssetsInput,
+): Promise<VaultDecryptedAsset[]> {
+  const activeRecords = Array.from(records.values()).filter(
+    (record) => record.deletedAt === null,
+  );
+
+  return Promise.all(activeRecords.map((record) => decryptRecord({ key, record })));
+}
+
+async function listDeletedAssetRecords(
+  records: Map<string, VaultEncryptedAssetRecord>,
+  { key }: ListActiveAssetsInput,
+): Promise<VaultDeletedAsset[]> {
+  const deletedRecords = Array.from(records.values()).filter(
+    (record): record is VaultEncryptedAssetRecord & { deletedAt: string } =>
+      record.deletedAt !== null,
+  );
+
+  return Promise.all(
+    deletedRecords.map(async (record) => ({
+      ...(await decryptRecord({ key, record })),
+      deletedAt: record.deletedAt,
+    })),
+  );
+}
+
+function restoreAssetRecord(
+  records: Map<string, VaultEncryptedAssetRecord>,
+  id: string,
+  createTimestamp: () => string,
+): VaultEncryptedAssetRecord | null {
+  const record = records.get(id);
+
+  if (!record) return null;
+
+  const restoredRecord: VaultEncryptedAssetRecord = {
+    ...record,
+    deletedAt: null,
+    updatedAt: createTimestamp(),
+  };
+
+  records.set(id, cloneEncryptedRecord(restoredRecord));
+
+  return cloneEncryptedRecord(restoredRecord);
+}
+
+function softDeleteAssetRecord(
+  records: Map<string, VaultEncryptedAssetRecord>,
+  id: string,
+  createTimestamp: () => string,
+): VaultEncryptedAssetRecord | null {
+  const record = records.get(id);
+
+  if (!record) return null;
+
+  const timestamp = createTimestamp();
+  const deletedRecord: VaultEncryptedAssetRecord = {
+    ...record,
+    deletedAt: timestamp,
+    updatedAt: timestamp,
+  };
+
+  records.set(id, cloneEncryptedRecord(deletedRecord));
+
+  return cloneEncryptedRecord(deletedRecord);
+}
+
+async function updateAssetRecord(
+  records: Map<string, VaultEncryptedAssetRecord>,
+  { id, key, payload }: UpdateAssetInput,
+  createTimestamp: () => string,
+): Promise<VaultEncryptedAssetRecord | null> {
+  const record = records.get(id);
+
+  if (!record) return null;
+
+  const encryptedPayload = await encryptAssetPayload({ key, payload });
+  const updatedRecord: VaultEncryptedAssetRecord = {
+    ...record,
+    assetType: encryptedPayload.assetType,
+    encryptedPayload,
+    updatedAt: createTimestamp(),
+  };
+
+  records.set(id, cloneEncryptedRecord(updatedRecord));
+
+  return cloneEncryptedRecord(updatedRecord);
 }
 
 async function decryptRecord({

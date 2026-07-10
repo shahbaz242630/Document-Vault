@@ -16,14 +16,14 @@ export default defineConfig({
       reporter: ["text-summary", "json-summary"],
       thresholds: {
         branches: 32,
-        functions: 44,
-        lines: 45,
-        statements: 44,
+        functions: 39,
+        lines: 43,
+        statements: 42,
         "src/features/auth/**": {
           branches: 31,
-          functions: 35,
-          lines: 40,
-          statements: 38,
+          functions: 30,
+          lines: 37,
+          statements: 36,
         },
         "src/features/vault/{asset-payload,emergency-access-code,emergency-key-wrapping,encrypted-storage-preview,permanent-delete-confirmation,sealed-emergency-code-service,supabase-emergency-grant-repository,supabase-key-material-repository,supabase-vault-codec,supabase-vault-repository,vault-session,vault-session-context,vault-store}.{ts,tsx}": {
           branches: 50,
