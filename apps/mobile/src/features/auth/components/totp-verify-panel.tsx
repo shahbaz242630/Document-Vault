@@ -14,6 +14,8 @@ type TotpVerifyPanelProps = {
   factorId: string;
 };
 
+type TotpVerifyViewModel = ReturnType<typeof createTotpVerifyViewModel>;
+
 export function TotpVerifyPanel({ factorId }: TotpVerifyPanelProps) {
   const viewModel = createTotpVerifyViewModel();
   const [code, setCode] = useState("");
@@ -24,73 +26,24 @@ export function TotpVerifyPanel({ factorId }: TotpVerifyPanelProps) {
 
   return (
     <View style={{ gap: 20 }}>
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-          {viewModel.statusLabel}
-        </Text>
-        <Text
-          style={{
-            color: colors.ink,
-            fontSize: 30,
-            fontWeight: "700",
-            lineHeight: 36,
-          }}
-        >
-          {viewModel.title}
-        </Text>
-        <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-          {viewModel.body}
-        </Text>
-      </View>
+      <TotpVerifyHeader viewModel={viewModel} />
 
-      <View style={{ gap: 14 }}>
-        <View style={{ gap: 6 }}>
-          <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
-            {viewModel.codeInputLabel}
-          </Text>
-          <TextInput
-            keyboardType="number-pad"
-            maxLength={6}
-            onChangeText={(text) => {
-              setCode(text);
-              setResult(null);
-            }}
-            placeholder="000000"
-            placeholderTextColor={colors.inkMuted}
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              borderCurve: "continuous",
-              borderRadius: 8,
-              borderWidth: 1,
-              color: colors.ink,
-              fontSize: 17,
-              letterSpacing: 4,
-              paddingHorizontal: 14,
-              paddingVertical: 12,
-            }}
-            value={code}
-          />
-        </View>
-      </View>
+      <TotpCodeInput
+        code={code}
+        label={viewModel.codeInputLabel}
+        onChange={(text) => {
+          setCode(text);
+          setResult(null);
+        }}
+      />
 
-      {result ? (
-        <Text
-          selectable
-          style={{
-            color: result.status === "error" ? colors.danger : colors.inkSoft,
-            fontSize: 15,
-            lineHeight: 22,
-          }}
-        >
-          {result.message}
-        </Text>
-      ) : null}
+      <TotpResultMessage result={result} />
 
-      <Pressable
-        accessibilityRole="button"
+      <TotpSubmitButton
         disabled={isSubmitting || code.length < 6}
-        onPress={async () => {
+        isSubmitting={isSubmitting}
+        label={viewModel.primaryActionLabel}
+        onSubmit={async () => {
           setIsSubmitting(true);
 
           try {
@@ -114,19 +67,125 @@ export function TotpVerifyPanel({ factorId }: TotpVerifyPanelProps) {
             setIsSubmitting(false);
           }
         }}
+      />
+    </View>
+  );
+}
+
+function TotpVerifyHeader({ viewModel }: { viewModel: TotpVerifyViewModel }) {
+  return (
+    <View style={{ gap: 8 }}>
+      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
+        {viewModel.statusLabel}
+      </Text>
+      <Text
         style={{
-          alignItems: "center",
-          backgroundColor: isSubmitting || code.length < 6 ? colors.inkMuted : colors.action,
-          borderCurve: "continuous",
-          borderRadius: 8,
-          paddingHorizontal: 18,
-          paddingVertical: 14,
+          color: colors.ink,
+          fontSize: 30,
+          fontWeight: "700",
+          lineHeight: 36,
         }}
       >
-        <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-          {isSubmitting ? "Verifying..." : viewModel.primaryActionLabel}
-        </Text>
-      </Pressable>
+        {viewModel.title}
+      </Text>
+      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
+        {viewModel.body}
+      </Text>
     </View>
+  );
+}
+
+function TotpCodeInput({
+  code,
+  label,
+  onChange,
+}: {
+  code: string;
+  label: string;
+  onChange: (text: string) => void;
+}) {
+  return (
+    <View style={{ gap: 14 }}>
+      <View style={{ gap: 6 }}>
+        <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
+          {label}
+        </Text>
+        <TextInput
+          keyboardType="number-pad"
+          maxLength={6}
+          onChangeText={onChange}
+          placeholder="000000"
+          placeholderTextColor={colors.inkMuted}
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            borderCurve: "continuous",
+            borderRadius: 8,
+            borderWidth: 1,
+            color: colors.ink,
+            fontSize: 17,
+            letterSpacing: 4,
+            paddingHorizontal: 14,
+            paddingVertical: 12,
+          }}
+          value={code}
+        />
+      </View>
+    </View>
+  );
+}
+
+function TotpResultMessage({
+  result,
+}: {
+  result: TotpVerifyServiceResult | null;
+}) {
+  if (!result) return null;
+
+  return (
+    <Text
+      selectable
+      style={{
+        color: result.status === "error" ? colors.danger : colors.inkSoft,
+        fontSize: 15,
+        lineHeight: 22,
+      }}
+    >
+      {result.message}
+    </Text>
+  );
+}
+
+function TotpSubmitButton({
+  disabled,
+  isSubmitting,
+  label,
+  onSubmit,
+}: {
+  disabled: boolean;
+  isSubmitting: boolean;
+  label: string;
+  onSubmit: () => Promise<void>;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={() => {
+        void onSubmit();
+      }}
+      style={{
+        alignItems: "center",
+        backgroundColor: disabled ? colors.inkMuted : colors.action,
+        borderCurve: "continuous",
+        borderRadius: 8,
+        paddingHorizontal: 18,
+        paddingVertical: 14,
+      }}
+    >
+      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
+        {isSubmitting ? "Verifying..." : label}
+      </Text>
+    </Pressable>
   );
 }

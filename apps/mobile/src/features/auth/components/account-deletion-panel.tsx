@@ -21,6 +21,8 @@ type AccountDeletionPanelProps = {
   storage: SecureStorage;
 };
 
+type AccountDeletionViewModel = ReturnType<typeof createAccountDeletionViewModel>;
+
 export function AccountDeletionPanel({ lockVault, storage }: AccountDeletionPanelProps) {
   const viewModel = createAccountDeletionViewModel();
   const [confirmation, setConfirmation] = useState("");
@@ -54,59 +56,17 @@ export function AccountDeletionPanel({ lockVault, storage }: AccountDeletionPane
 
   return (
     <View style={{ gap: 20 }}>
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Account</Text>
-        <Text
-          style={{
-            color: colors.ink,
-            fontSize: 30,
-            fontWeight: "700",
-            lineHeight: 36,
-          }}
-        >
-          {viewModel.title}
-        </Text>
-        <Text
-          style={{
-            color: colors.danger,
-            fontSize: 17,
-            fontWeight: "700",
-            lineHeight: 25,
-          }}
-        >
-          {viewModel.warningTitle}
-        </Text>
-        <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-          {viewModel.warningBody}
-        </Text>
-      </View>
+      <AccountDeletionHeader viewModel={viewModel} />
 
-      <View style={{ gap: 6 }}>
-        <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
-          {viewModel.confirmationInputLabel}
-        </Text>
-        <TextInput
-          autoCapitalize="characters"
-          onChangeText={(text) => {
-            setConfirmation(text);
-            setError(null);
-          }}
-          placeholder={viewModel.confirmationPlaceholder}
-          placeholderTextColor={colors.inkMuted}
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            borderCurve: "continuous",
-            borderRadius: 8,
-            borderWidth: 1,
-            color: colors.ink,
-            fontSize: 17,
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-          }}
-          value={confirmation}
-        />
-      </View>
+      <AccountDeletionConfirmationInput
+        label={viewModel.confirmationInputLabel}
+        onChange={(text) => {
+          setConfirmation(text);
+          setError(null);
+        }}
+        placeholder={viewModel.confirmationPlaceholder}
+        value={confirmation}
+      />
 
       {error ? (
         <Text selectable style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}>
@@ -114,10 +74,11 @@ export function AccountDeletionPanel({ lockVault, storage }: AccountDeletionPane
         </Text>
       ) : null}
 
-      <Pressable
-        accessibilityRole="button"
+      <AccountDeletionButton
         disabled={isDeleting || !canDelete}
-        onPress={async () => {
+        isDeleting={isDeleting}
+        label={viewModel.dangerActionLabel}
+        onDelete={async () => {
           setIsDeleting(true);
           setError(null);
 
@@ -142,19 +103,114 @@ export function AccountDeletionPanel({ lockVault, storage }: AccountDeletionPane
             setIsDeleting(false);
           }
         }}
+      />
+    </View>
+  );
+}
+
+function AccountDeletionHeader({
+  viewModel,
+}: {
+  viewModel: AccountDeletionViewModel;
+}) {
+  return (
+    <View style={{ gap: 8 }}>
+      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Account</Text>
+      <Text
         style={{
-          alignItems: "center",
-          backgroundColor: isDeleting || !canDelete ? colors.inkMuted : colors.danger,
-          borderCurve: "continuous",
-          borderRadius: 8,
-          paddingHorizontal: 18,
-          paddingVertical: 14,
+          color: colors.ink,
+          fontSize: 30,
+          fontWeight: "700",
+          lineHeight: 36,
         }}
       >
-        <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-          {isDeleting ? "Deleting..." : viewModel.dangerActionLabel}
-        </Text>
-      </Pressable>
+        {viewModel.title}
+      </Text>
+      <Text
+        style={{
+          color: colors.danger,
+          fontSize: 17,
+          fontWeight: "700",
+          lineHeight: 25,
+        }}
+      >
+        {viewModel.warningTitle}
+      </Text>
+      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
+        {viewModel.warningBody}
+      </Text>
     </View>
+  );
+}
+
+function AccountDeletionConfirmationInput({
+  label,
+  onChange,
+  placeholder,
+  value,
+}: {
+  label: string;
+  onChange: (text: string) => void;
+  placeholder: string;
+  value: string;
+}) {
+  return (
+    <View style={{ gap: 6 }}>
+      <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
+        {label}
+      </Text>
+      <TextInput
+        autoCapitalize="characters"
+        onChangeText={onChange}
+        placeholder={placeholder}
+        placeholderTextColor={colors.inkMuted}
+        style={{
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderCurve: "continuous",
+          borderRadius: 8,
+          borderWidth: 1,
+          color: colors.ink,
+          fontSize: 17,
+          paddingHorizontal: 14,
+          paddingVertical: 12,
+        }}
+        value={value}
+      />
+    </View>
+  );
+}
+
+function AccountDeletionButton({
+  disabled,
+  isDeleting,
+  label,
+  onDelete,
+}: {
+  disabled: boolean;
+  isDeleting: boolean;
+  label: string;
+  onDelete: () => Promise<void>;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={() => {
+        void onDelete();
+      }}
+      style={{
+        alignItems: "center",
+        backgroundColor: disabled ? colors.inkMuted : colors.danger,
+        borderCurve: "continuous",
+        borderRadius: 8,
+        paddingHorizontal: 18,
+        paddingVertical: 14,
+      }}
+    >
+      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
+        {isDeleting ? "Deleting..." : label}
+      </Text>
+    </Pressable>
   );
 }

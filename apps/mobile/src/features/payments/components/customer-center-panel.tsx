@@ -50,33 +50,47 @@ export function CustomerCenterPanel() {
   }, [env.isConfigured, router]);
 
   if (!env.isConfigured) {
-    return (
-      <View
-        style={{
-          alignItems: "center",
-          flex: 1,
-          gap: 12,
-          justifyContent: "center",
-          padding: 24,
-        }}
-      >
-        <Text style={{ color: colors.ink, fontSize: 20, fontWeight: "700" }}>
-          Subscription Management
-        </Text>
-        <Text
-          style={{
-            color: colors.inkMuted,
-            fontSize: 15,
-            textAlign: "center",
-          }}
-        >
-          In-app purchases are not yet configured. Add the RevenueCat public API
-          key to the app environment before testing subscription management.
-        </Text>
-      </View>
-    );
+    return <CustomerCenterNotConfigured />;
   }
 
+  return <CustomerCenterStatus error={error} onClose={() => router.back()} />;
+}
+
+function CustomerCenterNotConfigured() {
+  return (
+    <View
+      style={{
+        alignItems: "center",
+        flex: 1,
+        gap: 12,
+        justifyContent: "center",
+        padding: 24,
+      }}
+    >
+      <Text style={{ color: colors.ink, fontSize: 20, fontWeight: "700" }}>
+        Subscription Management
+      </Text>
+      <Text
+        style={{
+          color: colors.inkMuted,
+          fontSize: 15,
+          textAlign: "center",
+        }}
+      >
+        In-app purchases are not yet configured. Add the RevenueCat public API
+        key to the app environment before testing subscription management.
+      </Text>
+    </View>
+  );
+}
+
+function CustomerCenterStatus({
+  error,
+  onClose,
+}: {
+  error: string | null;
+  onClose: () => void;
+}) {
   return (
     <View
       style={{
@@ -103,7 +117,7 @@ export function CustomerCenterPanel() {
           </Text>
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.back()}
+            onPress={onClose}
             style={{
               backgroundColor: colors.ink,
               borderRadius: 8,

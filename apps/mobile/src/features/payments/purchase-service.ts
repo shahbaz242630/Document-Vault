@@ -58,127 +58,134 @@ export function createPurchaseService(
   client: PurchasesClient | null,
 ): PurchaseService {
   return {
-    configure() {
-      if (!client) {
-        return {
-          message: "RevenueCat is not configured yet.",
-          status: "unavailable",
-        };
-      }
-
-      const env = getRevenueCatEnv();
-
-      if (!env.isConfigured) {
-        return {
-          message: "RevenueCat API keys are missing.",
-          status: "unavailable",
-        };
-      }
-
-      const apiKey = selectRevenueCatApiKey(env, "ios");
-
-      if (!apiKey) {
-        return {
-          message: "RevenueCat API keys are missing.",
-          status: "unavailable",
-        };
-      }
-
-      client.configure({ apiKey });
-
-      return {
-        message: "RevenueCat is configured.",
-        status: "configured",
-      };
-    },
-
-    async checkPremiumAccess(): Promise<boolean> {
-      if (!client) return false;
-
-      try {
-        const customerInfo = await client.getCustomerInfo();
-        return hasSanduqkinPro(customerInfo);
-      } catch {
-        return false;
-      }
-    },
-
-    async getCustomerInfo(): Promise<CustomerInfoLike | null> {
-      if (!client) return null;
-
-      try {
-        return await client.getCustomerInfo();
-      } catch {
-        return null;
-      }
-    },
-
-    async getOfferings(): Promise<PurchasesOfferingsLike | null> {
-      if (!client) return null;
-
-      try {
-        return await client.getOfferings();
-      } catch {
-        return null;
-      }
-    },
-
-    async findPackage(packageId: RevenueCatPackageId): Promise<PurchasesPackageLike | null> {
-      if (!client) return null;
-
-      try {
-        const offerings = await client.getOfferings();
-        if (!offerings) return null;
-        return findPackageById(offerings, packageId);
-      } catch {
-        return null;
-      }
-    },
-
-    async purchasePackage(pkg: unknown) {
-      if (!client) {
-        return { error: true, message: "RevenueCat is not configured yet." };
-      }
-
-      try {
-        const { customerInfo } = await client.purchasePackage(pkg);
-        return {
-          isPremium: hasSanduqkinPro(customerInfo),
-        };
-      } catch (error: unknown) {
-        const err = error as { userCancelled?: boolean; message?: string };
-
-        if (err.userCancelled) {
-          return { cancelled: true };
-        }
-
-        return {
-          error: true,
-          message: err.message ?? "Purchase could not be completed.",
-        };
-      }
-    },
-
-    async restorePurchases() {
-      if (!client?.restorePurchases) {
-        return { error: true, message: "RevenueCat is not configured yet." };
-      }
-
-      try {
-        const customerInfo = await client.restorePurchases();
-        return {
-          isPremium: hasSanduqkinPro(customerInfo),
-        };
-      } catch (error: unknown) {
-        const err = error as { message?: string };
-
-        return {
-          error: true,
-          message: err.message ?? "Purchases could not be restored.",
-        };
-      }
-    },
+    checkPremiumAccess: () => checkPremiumAccess(client),
+    configure: () => configurePurchases(client),
+    findPackage: (packageId) => findPurchasePackage(client, packageId),
+    getCustomerInfo: () => getCustomerInfo(client),
+    getOfferings: () => getOfferings(client),
+    purchasePackage: (pkg) => purchasePackage(client, pkg),
+    restorePurchases: () => restorePurchases(client),
   };
+}
+
+function configurePurchases(client: PurchasesClient | null) {
+  if (!client) {
+    return {
+      message: "RevenueCat is not configured yet.",
+      status: "unavailable" as const,
+    };
+  }
+
+  const env = getRevenueCatEnv();
+  const apiKey = env.isConfigured ? selectRevenueCatApiKey(env, "ios") : null;
+
+  if (!apiKey) {
+    return {
+      message: "RevenueCat API keys are missing.",
+      status: "unavailable" as const,
+    };
+  }
+
+  client.configure({ apiKey });
+
+  return {
+    message: "RevenueCat is configured.",
+    status: "configured" as const,
+  };
+}
+
+async function checkPremiumAccess(client: PurchasesClient | null): Promise<boolean> {
+  if (!client) return false;
+
+  try {
+    const customerInfo = await client.getCustomerInfo();
+    return hasSanduqkinPro(customerInfo);
+  } catch {
+    return false;
+  }
+}
+
+async function getCustomerInfo(
+  client: PurchasesClient | null,
+): Promise<CustomerInfoLike | null> {
+  if (!client) return null;
+
+  try {
+    return await client.getCustomerInfo();
+  } catch {
+    return null;
+  }
+}
+
+async function getOfferings(
+  client: PurchasesClient | null,
+): Promise<PurchasesOfferingsLike | null> {
+  if (!client) return null;
+
+  try {
+    return await client.getOfferings();
+  } catch {
+    return null;
+  }
+}
+
+async function findPurchasePackage(
+  client: PurchasesClient | null,
+  packageId: RevenueCatPackageId,
+): Promise<PurchasesPackageLike | null> {
+  if (!client) return null;
+
+  try {
+    const offerings = await client.getOfferings();
+    if (!offerings) return null;
+    return findPackageById(offerings, packageId);
+  } catch {
+    return null;
+  }
+}
+
+async function purchasePackage(client: PurchasesClient | null, pkg: unknown) {
+  if (!client) {
+    return { error: true as const, message: "RevenueCat is not configured yet." };
+  }
+
+  try {
+    const { customerInfo } = await client.purchasePackage(pkg);
+    return {
+      isPremium: hasSanduqkinPro(customerInfo),
+    };
+  } catch (error: unknown) {
+    const err = error as { userCancelled?: boolean; message?: string };
+
+    if (err.userCancelled) {
+      return { cancelled: true as const };
+    }
+
+    return {
+      error: true as const,
+      message: err.message ?? "Purchase could not be completed.",
+    };
+  }
+}
+
+async function restorePurchases(client: PurchasesClient | null) {
+  if (!client?.restorePurchases) {
+    return { error: true as const, message: "RevenueCat is not configured yet." };
+  }
+
+  try {
+    const customerInfo = await client.restorePurchases();
+    return {
+      isPremium: hasSanduqkinPro(customerInfo),
+    };
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+
+    return {
+      error: true as const,
+      message: err.message ?? "Purchases could not be restored.",
+    };
+  }
 }
 
 export function hasSanduqkinPro(customerInfo: CustomerInfoLike): boolean {
