@@ -176,7 +176,7 @@ Current state: complete. `expo-doctor@1.19.10` is pinned as a mobile development
 
 ### 7. Add native build and end-to-end coverage
 
-- [ ] Add an Android debug/native compile gate.
+- [x] Add an Android debug/native compile gate.
 - [ ] Add an Android emulator smoke test for critical Phase 1 flows.
 - [ ] Add an iOS build gate on macOS when an approved runner/budget is available.
 - [ ] Add an iOS simulator smoke test when the macOS environment is available.
@@ -200,6 +200,7 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - First remote result: push run `29149675121` failed in `Set up Java` because Gradle caching was initialized before Expo generated the ignored Android project. Follow-up wiring generates Android before Java cache discovery.
 - Second remote result: push run `29149713679` passed native generation and Java setup, then exited 127 because `sdkmanager` was not on `PATH`. Follow-up uses its explicit `$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager` location.
 - Third remote result: push run `29149765641` failed workflow validation because the inline quoted SDK command was not valid YAML. The command now uses a block scalar and regression coverage parses all workflow files as YAML.
+- Completion result: [Security CI run 29149797724](https://github.com/shahbaz242630/Document-Vault/actions/runs/29149797724) passed. `Android native compile` completed successfully in 12m06s; `App security gates` and `Supabase live security gates` also passed.
 
 ### 8. Configure and enforce linting
 
