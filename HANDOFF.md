@@ -16,7 +16,7 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 
 2026-07-11 Android native compile slice (local implementation, remote CI pending):
 
-- Added a separate, 45-minute-bounded `Android native compile` job to Security CI.
+- Added a separate, 45-minute-bounded `Android native compile` job to Security CI; it generates the git-ignored Android project with Expo prebuild before initializing Gradle caching and compiling.
 - The job uses Node.js 24.3.0, Temurin Java 17, pinned `actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e`, explicit Android 36/build-tools 36/NDK 27.1 components, and `app:assembleDebug` for x86_64.
 - Added workflow regression coverage and allowlisted only the pinned official Java setup action.
 - Local Gradle verification succeeded through a short Windows drive mapping: `BUILD SUCCESSFUL in 1m 53s`, 546 actionable tasks, debug APK assembled.
@@ -25,6 +25,7 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Refactored the three UI function-size violations in `biometric-preferences-panel.tsx`, `vault-export-screen.tsx`, and `padlock.tsx` into focused hooks/presentation helpers without changing behavior; `npm run check:phase1`, mobile typecheck, and focused biometric/export tests now pass.
 - Recalibrated only the global mobile coverage floors to the measured post-redesign baseline (28% branches, 37% functions, 40% lines, 39% statements). The stricter auth, vault-security, and cryptography thresholds remain unchanged.
 - Do not mark the Android compile checklist item complete until the new GitHub Actions job passes on a pushed commit/PR.
+- First remote push run `29149675121` correctly failed before compilation because Java's Gradle cache setup ran before the git-ignored Android project had been generated. The follow-up moves Expo prebuild ahead of Java/Gradle cache initialization.
 
 ## Source Of Truth
 

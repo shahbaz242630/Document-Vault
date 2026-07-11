@@ -50,7 +50,7 @@ test("runs Android native compilation as a separate bounded Security CI job", ()
   assert.match(workflow, /android-native-compile:\s*\n\s*name: Android native compile/);
   assert.match(
     workflow,
-    /android-native-compile:[\s\S]*?timeout-minutes: 45[\s\S]*?actions\/setup-java@[a-f0-9]{40}/,
+    /android-native-compile:[\s\S]*?timeout-minutes: 45[\s\S]*?npx expo prebuild --platform android --no-install[\s\S]*?actions\/setup-java@[a-f0-9]{40}/,
   );
   assert.match(
     workflow,
