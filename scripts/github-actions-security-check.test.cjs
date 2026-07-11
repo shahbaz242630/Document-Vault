@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
+const YAML = require("yaml");
 
 const { runGitHubActionsSecurityCheck } = require("./github-actions-security-check.cjs");
 
@@ -39,6 +40,16 @@ test("runs Expo Doctor in Security CI", () => {
   );
 
   assert.match(workflow, /- name: Expo Doctor[\s\S]*?run: npm run doctor --workspace @vault\/mobile/);
+});
+
+test("parses every repository workflow as valid YAML", () => {
+  const workflowDirectory = path.resolve(__dirname, "..", ".github", "workflows");
+
+  for (const fileName of fs.readdirSync(workflowDirectory)) {
+    if (/\.ya?ml$/i.test(fileName)) {
+      YAML.parse(fs.readFileSync(path.join(workflowDirectory, fileName), "utf8"));
+    }
+  }
 });
 
 test("runs Android native compilation as a separate bounded Security CI job", () => {

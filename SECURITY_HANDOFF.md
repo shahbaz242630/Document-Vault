@@ -199,6 +199,7 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Required before checking item 7.1: push through a PR, obtain a green `Android native compile` GitHub job, and record its run URL and exact result here.
 - First remote result: push run `29149675121` failed in `Set up Java` because Gradle caching was initialized before Expo generated the ignored Android project. Follow-up wiring generates Android before Java cache discovery.
 - Second remote result: push run `29149713679` passed native generation and Java setup, then exited 127 because `sdkmanager` was not on `PATH`. Follow-up uses its explicit `$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager` location.
+- Third remote result: push run `29149765641` failed workflow validation because the inline quoted SDK command was not valid YAML. The command now uses a block scalar and regression coverage parses all workflow files as YAML.
 
 ### 8. Configure and enforce linting
 
