@@ -198,6 +198,7 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Coverage follow-up: the UI redesign changed the global source denominator, so only the global mobile floors were recalibrated to the measured post-redesign baseline (28% branches, 37% functions, 40% lines, 39% statements). Dedicated auth, vault-security, and cryptography thresholds remain unchanged.
 - Required before checking item 7.1: push through a PR, obtain a green `Android native compile` GitHub job, and record its run URL and exact result here.
 - First remote result: push run `29149675121` failed in `Set up Java` because Gradle caching was initialized before Expo generated the ignored Android project. Follow-up wiring generates Android before Java cache discovery.
+- Second remote result: push run `29149713679` passed native generation and Java setup, then exited 127 because `sdkmanager` was not on `PATH`. Follow-up uses its explicit `$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager` location.
 
 ### 8. Configure and enforce linting
 

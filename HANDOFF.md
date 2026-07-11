@@ -26,6 +26,7 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Recalibrated only the global mobile coverage floors to the measured post-redesign baseline (28% branches, 37% functions, 40% lines, 39% statements). The stricter auth, vault-security, and cryptography thresholds remain unchanged.
 - Do not mark the Android compile checklist item complete until the new GitHub Actions job passes on a pushed commit/PR.
 - First remote push run `29149675121` correctly failed before compilation because Java's Gradle cache setup ran before the git-ignored Android project had been generated. The follow-up moves Expo prebuild ahead of Java/Gradle cache initialization.
+- Second remote push run `29149713679` passed Expo prebuild and Java setup, then showed that `sdkmanager` is installed but not on the Ubuntu runner `PATH`. The follow-up invokes it explicitly from `$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager`.
 
 ## Source Of Truth
 

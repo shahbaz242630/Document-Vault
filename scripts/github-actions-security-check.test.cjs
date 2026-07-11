@@ -60,6 +60,7 @@ test("runs Android native compilation as a separate bounded Security CI job", ()
     workflow,
     /android-native-compile:[\s\S]*?-PreactNativeArchitectures=x86_64/,
   );
+  assert.match(workflow, /\$ANDROID_HOME\/cmdline-tools\/latest\/bin\/sdkmanager/);
 });
 
 test("enforces the Phase 1 Definition-of-Done gate in Security CI", () => {
