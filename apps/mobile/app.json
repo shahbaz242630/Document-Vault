@@ -41,7 +41,8 @@
         {}
       ],
       "expo-splash-screen",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

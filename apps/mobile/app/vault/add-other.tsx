@@ -1,11 +1,10 @@
-import { Stack, useRouter } from "expo-router";
-import { ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
 import { DynamicAssetForm , createOtherAssetPayload , createOtherFormViewModel , useVaultSession } from "@/features/vault";
 
 
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const initialValues: Record<string, string> = {
   approximateValue: "",
@@ -23,13 +22,7 @@ export default function AddOtherRoute() {
   const viewModel = createOtherFormViewModel();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Add other asset" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.formContent}
-        keyboardShouldPersistTaps="handled"
-      >
+    <Screen>
         <DynamicAssetForm
           categoryLabel="Other"
           fields={viewModel.fields}
@@ -48,7 +41,6 @@ export default function AddOtherRoute() {
             router.replace("/vault/other-records");
           }}
         />
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

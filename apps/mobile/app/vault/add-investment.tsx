@@ -1,11 +1,10 @@
-import { Stack, useRouter } from "expo-router";
-import { ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
 import { DynamicAssetForm , createInvestmentAssetPayload , createInvestmentFormViewModel , useVaultSession } from "@/features/vault";
 
 
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const initialValues: Record<string, string> = {
   accountType: "brokerage",
@@ -26,13 +25,7 @@ export default function AddInvestmentRoute() {
   const viewModel = createInvestmentFormViewModel();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Add investment" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.formContent}
-        keyboardShouldPersistTaps="handled"
-      >
+    <Screen>
         <DynamicAssetForm
           categoryLabel="Investment"
           fields={viewModel.fields}
@@ -60,7 +53,6 @@ export default function AddInvestmentRoute() {
             router.replace("/vault/investments");
           }}
         />
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

@@ -1,11 +1,11 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, Text } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Text } from "react-native";
 
 import { DynamicAssetForm , getEditAssetConfig , useVaultSession } from "@/features/vault";
 
 
 import { colors } from "@/shared/theme/colors";
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 export default function EditAssetRoute() {
   const params = useLocalSearchParams<{ id?: string }>();
@@ -15,17 +15,11 @@ export default function EditAssetRoute() {
 
   if (!asset) {
     return (
-      <>
-        <Stack.Screen options={{ title: "Edit reference" }} />
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={screenStyles.content}
-        >
+      <Screen>
           <Text style={{ color: colors.inkMuted, fontSize: 17 }}>
             Reference not found.
           </Text>
-        </ScrollView>
-      </>
+        </Screen>
     );
   }
 
@@ -33,12 +27,7 @@ export default function EditAssetRoute() {
   const initialValues = config.getInitialValues(asset);
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Edit reference" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
+    <Screen>
         {isReady ? (
           <DynamicAssetForm
             categoryLabel={config.categoryLabel}
@@ -56,7 +45,6 @@ export default function EditAssetRoute() {
             Opening vault...
           </Text>
         )}
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

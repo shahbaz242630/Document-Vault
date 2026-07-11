@@ -1,10 +1,10 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, Text } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Text } from "react-native";
 
 import { AssetDetailView , useVaultSession } from "@/features/vault";
 
 import { colors } from "@/shared/theme/colors";
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 export default function AssetDetailRoute() {
   const params = useLocalSearchParams<{ id?: string }>();
@@ -13,12 +13,7 @@ export default function AssetDetailRoute() {
   const asset = assets.find((a) => a.id === params.id);
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Reference detail" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
+    <Screen>
         {asset ? (
           <AssetDetailView
             asset={asset}
@@ -35,7 +30,6 @@ export default function AssetDetailRoute() {
             Reference not found.
           </Text>
         )}
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

@@ -1,6 +1,6 @@
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { lazy, Suspense } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { View } from "react-native";
 
 import {
   completeRecoveryPhraseConfirmation,
@@ -18,8 +18,13 @@ import { createSupabaseClient } from "@/shared/api/supabase-client";
 import { deriveKEK, generateSalt } from "@/shared/crypto/kek-derivation";
 import { wrapMEK } from "@/shared/crypto/mek-wrapping";
 import { toBase64 } from "@/shared/crypto/vault-crypto";
-import { colors } from "@/shared/theme/colors";
-import { screenStyles } from "@/shared/ui/screen";
+import {
+  PrimaryButton,
+  Screen,
+  ScreenHeader,
+  SerifTitle,
+  Subtitle,
+} from "@/shared/ui";
 import * as ExpoSecureStore from "expo-secure-store";
 
 const RecoveryPhraseConfirmationPanel = lazy(() =>
@@ -34,43 +39,37 @@ export default function ConfirmRecoveryPhraseRoute() {
   const { clearRecoveryPhraseSession, mek, words } = useRecoveryPhraseSession();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Confirm phrase" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
-        {words && mek ? (
-          <Suspense fallback={null}>
-            <RecoveryPhraseConfirmationPanel
-              words={words}
-              onConfirmed={async (password) => {
-                await completeRecoveryPhraseConfirmation({
-                  clearRecoveryPhraseSession,
-                  deriveKEK,
-                  generateSalt,
-                  keyMaterialRepository: createOptionalKeyMaterialRepository(),
-                  mek,
-                  mekStorage: createMekStorage(ExpoSecureStore),
-                  password,
-                  progressStorage: createSignupProgressStorage(ExpoSecureStore),
-                  toBase64,
-                  wrapMEK,
-                });
-                router.replace("/auth/setup-biometric");
-              }}
-            />
-          </Suspense>
-        ) : (
-          <MissingRecoveryPhraseSession
-            onRestart={() => {
-              clearRecoveryPhraseSession();
-              router.replace("/auth/recovery-phrase");
+    <Screen>
+      {words && mek ? (
+        <Suspense fallback={null}>
+          <RecoveryPhraseConfirmationPanel
+            words={words}
+            onConfirmed={async (password) => {
+              await completeRecoveryPhraseConfirmation({
+                clearRecoveryPhraseSession,
+                deriveKEK,
+                generateSalt,
+                keyMaterialRepository: createOptionalKeyMaterialRepository(),
+                mek,
+                mekStorage: createMekStorage(ExpoSecureStore),
+                password,
+                progressStorage: createSignupProgressStorage(ExpoSecureStore),
+                toBase64,
+                wrapMEK,
+              });
+              router.replace("/auth/setup-biometric");
             }}
           />
-        )}
-      </ScrollView>
-    </>
+        </Suspense>
+      ) : (
+        <MissingRecoveryPhraseSession
+          onRestart={() => {
+            clearRecoveryPhraseSession();
+            router.replace("/auth/recovery-phrase");
+          }}
+        />
+      )}
+    </Screen>
   );
 }
 
@@ -90,42 +89,17 @@ function MissingRecoveryPhraseSession({ onRestart }: { onRestart: () => void }) 
   const viewModel = createMissingRecoveryPhraseSessionViewModel();
 
   return (
-    <View style={{ gap: 20 }}>
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-          Recovery phrase
-        </Text>
-        <Text
-          style={{
-            color: colors.ink,
-            fontSize: 30,
-            fontWeight: "700",
-            lineHeight: 36,
-          }}
-        >
-          {viewModel.title}
-        </Text>
-        <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-          {viewModel.body}
-        </Text>
+    <View style={{ flex: 1, gap: 22 }}>
+      <ScreenHeader eyebrow="Recovery phrase" />
+
+      <View style={{ gap: 10 }}>
+        <SerifTitle>{viewModel.title}</SerifTitle>
+        <Subtitle>{viewModel.body}</Subtitle>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        onPress={onRestart}
-        style={{
-          alignItems: "center",
-          backgroundColor: colors.action,
-          borderCurve: "continuous",
-          borderRadius: 8,
-          paddingHorizontal: 18,
-          paddingVertical: 14,
-        }}
-      >
-        <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-          {viewModel.actionLabel}
-        </Text>
-      </Pressable>
+      <View style={{ marginTop: "auto" }}>
+        <PrimaryButton label={viewModel.actionLabel} onPress={onRestart} />
+      </View>
     </View>
   );
 }

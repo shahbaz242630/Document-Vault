@@ -1,11 +1,9 @@
-import { Stack , useRouter } from "expo-router";
-
+import { useRouter } from "expo-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { ScrollView } from "react-native";
 
 import { useRecoveryPhraseSession } from "@/features/auth";
 import { generateRandomBytes as generateSecureRandomBytes } from "@/shared/crypto/random-bytes";
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const RecoveryPhrasePanel = lazy(() =>
   import("@/features/auth/components/recovery-phrase-panel").then((m) => ({
@@ -23,24 +21,18 @@ export default function RecoveryPhraseRoute() {
   }, []);
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Recovery phrase" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
-        {entropy ? (
-          <Suspense fallback={null}>
-            <RecoveryPhrasePanel
-              generateRandomBytes={() => entropy}
-              onContinue={(session) => {
-                setRecoveryPhraseSession(session);
-                router.push("/auth/confirm-recovery-phrase");
-              }}
-            />
-          </Suspense>
-        ) : null}
-      </ScrollView>
-    </>
+    <Screen>
+      {entropy ? (
+        <Suspense fallback={null}>
+          <RecoveryPhrasePanel
+            generateRandomBytes={() => entropy}
+            onContinue={(session) => {
+              setRecoveryPhraseSession(session);
+              router.push("/auth/confirm-recovery-phrase");
+            }}
+          />
+        </Suspense>
+      ) : null}
+    </Screen>
   );
 }

@@ -1,11 +1,10 @@
-import { Stack, useRouter } from "expo-router";
-import { ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
 import { DynamicAssetForm , createPropertyAssetPayload , createPropertyFormViewModel , useVaultSession } from "@/features/vault";
 
 
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const initialValues: Record<string, string> = {
   address: "",
@@ -24,13 +23,7 @@ export default function AddPropertyRoute() {
   const viewModel = createPropertyFormViewModel();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Add property" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.formContent}
-        keyboardShouldPersistTaps="handled"
-      >
+    <Screen>
         <DynamicAssetForm
           categoryLabel="Property"
           fields={viewModel.fields}
@@ -56,7 +49,6 @@ export default function AddPropertyRoute() {
             router.replace("/vault/properties");
           }}
         />
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

@@ -2,6 +2,15 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
+import {
+  ErrorText,
+  Eyebrow,
+  MutedText,
+  ScreenHeader,
+  SerifTitle,
+  Subtitle,
+} from "@/shared/ui";
 
 import {
   createPermanentDeleteConfirmationState,
@@ -75,20 +84,12 @@ export function RecentlyDeletedList({
 function RecentlyDeletedEmptyState() {
   return (
     <View style={{ gap: 8 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Recently deleted</Text>
-      <Text
-        style={{
-          color: colors.ink,
-          fontSize: 30,
-          fontWeight: "700",
-          lineHeight: 36,
-        }}
-      >
-        Nothing deleted.
-      </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
+      <ScreenHeader />
+      <Eyebrow>Recently deleted</Eyebrow>
+      <SerifTitle size={28}>Nothing deleted.</SerifTitle>
+      <Subtitle>
         Soft-deleted records will appear here before permanent removal is added.
-      </Text>
+      </Subtitle>
     </View>
   );
 }
@@ -96,20 +97,12 @@ function RecentlyDeletedEmptyState() {
 function RecentlyDeletedHeader({ totalCount }: { totalCount: number }) {
   return (
     <View style={{ gap: 6 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Recently deleted</Text>
-      <Text
-        style={{
-          color: colors.ink,
-          fontSize: 30,
-          fontWeight: "700",
-          lineHeight: 36,
-        }}
-      >
+      <ScreenHeader />
+      <Eyebrow>Recently deleted</Eyebrow>
+      <SerifTitle size={28}>
         {totalCount} deleted item{totalCount === 1 ? "" : "s"}
-      </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-        Permanent deletion cannot be undone.
-      </Text>
+      </SerifTitle>
+      <MutedText>Permanent deletion cannot be undone.</MutedText>
     </View>
   );
 }
@@ -131,25 +124,21 @@ function RecentlyDeletedCard({
         backgroundColor: colors.surface,
         borderColor: colors.border,
         borderCurve: "continuous",
-        borderRadius: 8,
+        borderRadius: 14,
         borderWidth: 1,
         gap: 4,
         padding: 16,
       }}
     >
-      <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "700" }}>
+      <Text style={{ color: colors.ink, fontFamily: fonts.sans.medium, fontSize: 16 }}>
         {item.title}
       </Text>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-        {item.assetTypeLabel}
-      </Text>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-        {item.deletedAtLabel}
-      </Text>
+      <MutedText>{item.assetTypeLabel}</MutedText>
+      <MutedText>{item.deletedAtLabel}</MutedText>
       {isConfirmingDelete ? (
-        <Text style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}>
+        <ErrorText>
           Tap confirm to permanently delete this record. This cannot be undone.
-        </Text>
+        </ErrorText>
       ) : null}
       <RecentlyDeletedActions
         isConfirmingDelete={isConfirmingDelete}

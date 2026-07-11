@@ -8,9 +8,9 @@ export type TotpEnrollmentViewModel = {
 export function createTotpEnrollmentViewModel(): TotpEnrollmentViewModel {
   return {
     body:
-      "Sanduqkin will use Supabase MFA with an authenticator app. Once the Supabase project is ready, this screen will show a QR code and verify your first TOTP code.",
-    primaryActionLabel: "Continue to verification",
-    statusLabel: "Required security step",
-    title: "Set up two-factor authentication",
+      "Scan this with an authenticator app (like Google Authenticator or 1Password). Even if someone learns your password, they can't get in without this.",
+    primaryActionLabel: "I've added it",
+    statusLabel: "Security · Step 1 of 3",
+    title: "Add your second lock",
   };
 }

@@ -1,11 +1,10 @@
-import { Stack, useRouter } from "expo-router";
-import { ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
 import { DynamicAssetForm , createContactAssetPayload , createContactFormViewModel , useVaultSession } from "@/features/vault";
 
 
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const initialValues: Record<string, string> = {
   country: "",
@@ -22,13 +21,7 @@ export default function AddContactRoute() {
   const viewModel = createContactFormViewModel();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Add contact" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.formContent}
-        keyboardShouldPersistTaps="handled"
-      >
+    <Screen>
         <DynamicAssetForm
           categoryLabel="Contact"
           fields={viewModel.fields}
@@ -51,7 +44,6 @@ export default function AddContactRoute() {
             router.replace("/vault/contacts");
           }}
         />
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

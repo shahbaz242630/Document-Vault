@@ -18,8 +18,8 @@ export function createReAuthViewModel(): ReAuthViewModel {
     passwordLabel: "Password",
     primaryActionLabel: "Verify",
     subtitle:
-      "Re-authentication is required before deleting your account.",
-    title: "Verify your identity",
+      "This area affects who can reach your vault, so we double-check before opening it.",
+    title: "Confirm it's you",
     totpLabel: "Two-factor code",
     totpPlaceholder: "000000",
     unavailableMessage:

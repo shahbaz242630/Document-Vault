@@ -41,6 +41,27 @@ test("runs Expo Doctor in Security CI", () => {
   assert.match(workflow, /- name: Expo Doctor[\s\S]*?run: npm run doctor --workspace @vault\/mobile/);
 });
 
+test("runs Android native compilation as a separate bounded Security CI job", () => {
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+
+  assert.match(workflow, /android-native-compile:\s*\n\s*name: Android native compile/);
+  assert.match(
+    workflow,
+    /android-native-compile:[\s\S]*?timeout-minutes: 45[\s\S]*?actions\/setup-java@[a-f0-9]{40}/,
+  );
+  assert.match(
+    workflow,
+    /android-native-compile:[\s\S]*?working-directory: apps\/mobile\/android[\s\S]*?\.\/gradlew app:assembleDebug/,
+  );
+  assert.match(
+    workflow,
+    /android-native-compile:[\s\S]*?-PreactNativeArchitectures=x86_64/,
+  );
+});
+
 test("enforces the Phase 1 Definition-of-Done gate in Security CI", () => {
   const workflow = fs.readFileSync(
     path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),

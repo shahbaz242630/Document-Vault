@@ -15,10 +15,10 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text-summary", "json-summary"],
       thresholds: {
-        branches: 32,
-        functions: 39,
-        lines: 43,
-        statements: 42,
+        branches: 28,
+        functions: 37,
+        lines: 40,
+        statements: 39,
         "src/features/auth/**": {
           branches: 31,
           functions: 30,

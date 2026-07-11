@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import RevenueCatUI from "react-native-purchases-ui";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
 import { getRevenueCatEnv } from "@/shared/config/revenuecat-env";
 import { REVENUECAT_ENTITLEMENT_ID } from "../revenuecat-config";
 
@@ -58,13 +59,32 @@ function PaywallNotConfigured() {
         padding: 24,
       }}
     >
-      <Text style={{ color: colors.ink, fontSize: 20, fontWeight: "700" }}>
-        Premium
+      <Text
+        style={{
+          color: colors.gold,
+          fontFamily: fonts.serif.regular,
+          fontSize: 15,
+          letterSpacing: 1,
+        }}
+      >
+        Sanduqkin Premium
+      </Text>
+      <Text
+        style={{
+          color: colors.ink,
+          fontFamily: fonts.serif.medium,
+          fontSize: 26,
+          textAlign: "center",
+        }}
+      >
+        {"Room for everything they'll need."}
       </Text>
       <Text
         style={{
           color: colors.inkMuted,
+          fontFamily: fonts.sans.regular,
           fontSize: 15,
+          lineHeight: 22,
           textAlign: "center",
         }}
       >
@@ -94,12 +114,19 @@ function PaywallStatus({
     >
       {error ? (
         <>
-          <Text style={{ color: colors.ink, fontSize: 20, fontWeight: "700" }}>
+          <Text
+            style={{
+              color: colors.ink,
+              fontFamily: fonts.serif.medium,
+              fontSize: 24,
+            }}
+          >
             Paywall unavailable
           </Text>
           <Text
             style={{
               color: colors.inkMuted,
+              fontFamily: fonts.sans.regular,
               fontSize: 15,
               textAlign: "center",
             }}
@@ -109,22 +136,35 @@ function PaywallStatus({
           <Pressable
             accessibilityRole="button"
             onPress={onClose}
-            style={{
-              backgroundColor: colors.ink,
-              borderRadius: 8,
-              paddingHorizontal: 18,
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? colors.actionPressed : colors.action,
+              borderCurve: "continuous",
+              borderRadius: 10,
+              paddingHorizontal: 24,
               paddingVertical: 12,
-            }}
+            })}
           >
-            <Text style={{ color: colors.actionText, fontWeight: "700" }}>
+            <Text
+              style={{
+                color: colors.actionText,
+                fontFamily: fonts.sans.semibold,
+                fontSize: 16,
+              }}
+            >
               Close
             </Text>
           </Pressable>
         </>
       ) : (
         <>
-          <ActivityIndicator color={colors.ink} />
-          <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
+          <ActivityIndicator color={colors.action} />
+          <Text
+            style={{
+              color: colors.inkMuted,
+              fontFamily: fonts.sans.regular,
+              fontSize: 15,
+            }}
+          >
             Opening subscription options...
           </Text>
         </>

@@ -1,8 +1,6 @@
-import { Stack } from "expo-router/stack";
 import { lazy, Suspense } from "react";
-import { ScrollView } from "react-native";
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const TotpEnrollmentPanel = lazy(() =>
   import("@/features/auth/components/totp-enrollment-panel").then((m) => ({
@@ -12,16 +10,10 @@ const TotpEnrollmentPanel = lazy(() =>
 
 export default function SetupTotpRoute() {
   return (
-    <>
-      <Stack.Screen options={{ title: "Two-factor setup" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
-        <Suspense fallback={null}>
-          <TotpEnrollmentPanel />
-        </Suspense>
-      </ScrollView>
-    </>
+    <Screen>
+      <Suspense fallback={null}>
+        <TotpEnrollmentPanel />
+      </Suspense>
+    </Screen>
   );
 }

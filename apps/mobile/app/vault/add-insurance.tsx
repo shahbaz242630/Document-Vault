@@ -1,11 +1,10 @@
-import { Stack, useRouter } from "expo-router";
-import { ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
 import { DynamicAssetForm , createInsuranceAssetPayload , createInsuranceFormViewModel , useVaultSession } from "@/features/vault";
 
 
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const initialValues: Record<string, string> = {
   approximateValueRange: "prefer_not_to_say",
@@ -25,13 +24,7 @@ export default function AddInsuranceRoute() {
   const viewModel = createInsuranceFormViewModel();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Add insurance" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.formContent}
-        keyboardShouldPersistTaps="handled"
-      >
+    <Screen>
         <DynamicAssetForm
           categoryLabel="Insurance"
           fields={viewModel.fields}
@@ -58,7 +51,6 @@ export default function AddInsuranceRoute() {
             router.replace("/vault/insurance");
           }}
         />
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

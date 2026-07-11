@@ -1,82 +1,111 @@
-import { Pressable, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Animated, Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
+import { ErrorText, Padlock } from "@/shared/ui";
 
 type LockScreenProps = {
   error?: string;
   onUnlock: () => void;
 };
 
+/**
+ * Full-screen app lock. Tapping unlock lifts the padlock's shackle before
+ * handing off to the real unlock (which may show a biometric prompt); an
+ * error settles the shackle shut again.
+ */
 export function LockScreen({ error, onUnlock }: LockScreenProps) {
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [fadeIn] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(fadeIn, {
+      duration: 300,
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeIn]);
+
+  const [lastError, setLastError] = useState(error);
+  if (error !== lastError) {
+    setLastError(error);
+    if (error) {
+      setIsUnlocking(false);
+    }
+  }
+
   return (
-    <View
+    <Animated.View
       style={{
         alignItems: "center",
-        backgroundColor: colors.ink,
+        backgroundColor: colors.background,
         bottom: 0,
+        gap: 28,
         justifyContent: "center",
         left: 0,
-        paddingHorizontal: 24,
+        opacity: fadeIn,
+        paddingHorizontal: 32,
         position: "absolute",
         right: 0,
         top: 0,
         zIndex: 9999,
       }}
     >
-      <Text
-        style={{
-          color: colors.background,
-          fontSize: 30,
-          fontWeight: "700",
-        }}
-      >
-        Sanduqkin is locked
-      </Text>
-      <Text
-        style={{
-          color: colors.inkMuted,
-          fontSize: 17,
-          lineHeight: 25,
-          marginTop: 12,
-          textAlign: "center",
-        }}
-      >
-        Unlock to continue. For your security, Sanduqkin locks automatically after a period of inactivity.
-      </Text>
+      <Padlock state={isUnlocking ? "unlocking" : "locked"} />
 
-      {error ? (
+      <View style={{ alignItems: "center", gap: 8 }}>
         <Text
-          selectable
           style={{
-            color: colors.danger,
+            color: colors.ink,
+            fontFamily: fonts.serif.medium,
+            fontSize: 26,
+          }}
+        >
+          Sanduqkin is locked
+        </Text>
+        <Text
+          style={{
+            color: colors.inkSecondary,
+            fontFamily: fonts.sans.regular,
             fontSize: 15,
-            lineHeight: 22,
-            marginTop: 16,
             textAlign: "center",
           }}
         >
-          {error}
+          Your vault sealed itself when you left.
         </Text>
-      ) : null}
+      </View>
+
+      {error ? <ErrorText style={{ textAlign: "center" }}>{error}</ErrorText> : null}
 
       <Pressable
         accessibilityRole="button"
-        onPress={onUnlock}
-        style={{
-          alignItems: "center",
-          backgroundColor: colors.action,
-          borderCurve: "continuous",
-          borderRadius: 8,
-          marginTop: 32,
-          paddingHorizontal: 18,
-          paddingVertical: 14,
-          width: "100%",
+        onPress={() => {
+          if (isUnlocking) {
+            return;
+          }
+          setIsUnlocking(true);
+          setTimeout(onUnlock, 300);
         }}
+        style={({ pressed }) => ({
+          backgroundColor: pressed ? colors.actionPressed : colors.action,
+          borderCurve: "continuous",
+          borderRadius: 10,
+          paddingHorizontal: 28,
+          paddingVertical: 14,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
+        })}
       >
-        <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
+        <Text
+          style={{
+            color: colors.actionText,
+            fontFamily: fonts.sans.semibold,
+            fontSize: 16,
+          }}
+        >
           Unlock
         </Text>
       </Pressable>
-    </View>
+    </Animated.View>
   );
 }

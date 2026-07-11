@@ -1,8 +1,4 @@
-import { Stack } from "expo-router";
-import { ScrollView, Text } from "react-native";
-
-import { colors } from "@/shared/theme/colors";
-import { screenStyles } from "@/shared/ui/screen";
+import { MutedText, Screen } from "@/shared/ui";
 
 import type { VaultCategoryConfig } from "../vault-category-config";
 import { createVaultCategoryListViewModel } from "../vault-category-list-view-model";
@@ -25,21 +21,15 @@ export function VaultCategoryRoute({ config }: VaultCategoryRouteProps) {
   });
 
   return (
-    <>
-      <Stack.Screen options={{ title: config.title }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
-        {isReady ? (
-          <VaultCategoryList
-            onDeleteAsset={permanentlyDeleteAsset}
-            viewModel={viewModel}
-          />
-        ) : (
-          <Text style={{ color: colors.inkMuted, fontSize: 17 }}>Opening vault...</Text>
-        )}
-      </ScrollView>
-    </>
+    <Screen>
+      {isReady ? (
+        <VaultCategoryList
+          onDeleteAsset={permanentlyDeleteAsset}
+          viewModel={viewModel}
+        />
+      ) : (
+        <MutedText style={{ fontSize: 17 }}>Opening vault...</MutedText>
+      )}
+    </Screen>
   );
 }

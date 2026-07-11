@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Stack } from "expo-router/stack";
-import { Alert, ScrollView } from "react-native";
+import { Alert } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
 import { defaultAuditLog } from "@/features/auth/audit-log";
@@ -10,7 +9,7 @@ import {
   type SupabaseEmergencyGrantClient,
   useVaultSession,
 } from "@/features/vault";
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const pendingConfirmationKey = "sanduqkin.sealedEmergencyCode.pendingConfirmation";
 
@@ -18,23 +17,17 @@ export default function EmergencyAccessRoute() {
   const setupState = useEmergencyAccessSetupState();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Emergency access" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
-        <EmergencyAccessScreen
-          activeSealedCodeStatus={setupState.status}
-          isBusy={setupState.isBusy}
-          oneTimeCode={setupState.oneTimeCode}
-          onConfirmSealedCodeWritten={setupState.confirmSealedCodeWritten}
-          onCreateSealedCode={setupState.createSealedCode}
-          onRegenerateSealedCode={setupState.regenerateSealedCode}
-          onRevokeSealedCode={setupState.revokeSealedCode}
-        />
-      </ScrollView>
-    </>
+    <Screen>
+      <EmergencyAccessScreen
+        activeSealedCodeStatus={setupState.status}
+        isBusy={setupState.isBusy}
+        oneTimeCode={setupState.oneTimeCode}
+        onConfirmSealedCodeWritten={setupState.confirmSealedCodeWritten}
+        onCreateSealedCode={setupState.createSealedCode}
+        onRegenerateSealedCode={setupState.regenerateSealedCode}
+        onRevokeSealedCode={setupState.revokeSealedCode}
+      />
+    </Screen>
   );
 }
 

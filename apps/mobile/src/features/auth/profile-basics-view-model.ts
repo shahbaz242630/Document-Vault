@@ -14,14 +14,14 @@ export type ProfileBasicsViewModel = {
 
 export function createProfileBasicsViewModel(): ProfileBasicsViewModel {
   return {
-    body: "This helps us suggest the right templates and keeps your vault organized.",
+    body: "Just the essentials — so your kin know whose vault this is. Nothing here is shared or public.",
     fields: [
       { label: "First name", name: "firstName", required: true },
       { label: "Country of residence", name: "country", required: true },
       { label: "Nationality", name: "nationality", required: true },
     ],
     primaryActionLabel: "Continue",
-    statusLabel: "Your profile",
-    title: "A little about you",
+    statusLabel: "Account · Step 3 of 3",
+    title: "A few basics",
   };
 }

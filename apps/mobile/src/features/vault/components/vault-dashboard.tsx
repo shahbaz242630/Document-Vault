@@ -1,13 +1,22 @@
-import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { View } from "react-native";
 
-import { colors } from "@/shared/theme/colors";
+import {
+  Card,
+  EmptyStateCard,
+  ListRow,
+  MutedText,
+  PillButton,
+  SectionLabel,
+  SerifTitle,
+} from "@/shared/ui";
 
 import { createVaultDashboardViewModel } from "../vault-dashboard-view-model";
 import type { VaultDecryptedAsset } from "../vault-store";
 
 type VaultDashboardProps = {
   assets: VaultDecryptedAsset[];
+  onLock?: () => void;
 };
 
 type VaultDashboardViewModel = ReturnType<typeof createVaultDashboardViewModel>;
@@ -15,194 +24,161 @@ type VaultDashboardCategory = VaultDashboardViewModel["categories"][number];
 type VaultDashboardItem = VaultDashboardViewModel["items"][number];
 
 const ADD_LINKS = [
-  ["/vault/add-bank-account", "Add bank account"],
-  ["/vault/add-card", "Add card"],
-  ["/vault/add-investment", "Add investment"],
-  ["/vault/add-property", "Add property"],
-  ["/vault/add-vehicle", "Add vehicle"],
-  ["/vault/add-insurance", "Add insurance"],
-  ["/vault/add-crypto", "Add crypto"],
-  ["/vault/add-pension", "Add pension"],
-  ["/vault/add-loan-debt", "Add loan or debt"],
-  ["/vault/add-subscription", "Add subscription"],
-  ["/vault/add-document-location", "Add document location"],
-  ["/vault/add-contact", "Add contact"],
-  ["/vault/add-medical-care", "Add medical care"],
-  ["/vault/add-dependent-pet", "Add dependent or pet"],
-  ["/vault/add-business-interest", "Add business interest"],
-  ["/vault/add-digital-account", "Add digital account"],
-  ["/vault/add-other", "Add other"],
+  ["/vault/add-bank-account", "Bank account"],
+  ["/vault/add-card", "Card"],
+  ["/vault/add-investment", "Investment"],
+  ["/vault/add-property", "Property"],
+  ["/vault/add-vehicle", "Vehicle"],
+  ["/vault/add-insurance", "Insurance"],
+  ["/vault/add-crypto", "Crypto wallet"],
+  ["/vault/add-pension", "Pension"],
+  ["/vault/add-loan-debt", "Loan or debt"],
+  ["/vault/add-subscription", "Subscription"],
+  ["/vault/add-document-location", "Where documents live"],
+  ["/vault/add-contact", "Key contact"],
+  ["/vault/add-medical-care", "Medical care"],
+  ["/vault/add-dependent-pet", "Dependent or pet"],
+  ["/vault/add-business-interest", "Business interest"],
+  ["/vault/add-digital-account", "Digital account"],
+  ["/vault/add-other", "Something else"],
 ] as const;
 
-export function VaultDashboard({ assets }: VaultDashboardProps) {
+export function VaultDashboard({ assets, onLock }: VaultDashboardProps) {
   const viewModel = createVaultDashboardViewModel(assets);
-
-  if (!viewModel.hasAssets) {
-    return <EmptyVaultDashboard />;
-  }
+  const router = useRouter();
 
   return (
     <View style={{ gap: 20 }}>
-      <VaultDashboardHeader activeCount={viewModel.activeCount} />
-      <VaultCategoryLinks categories={viewModel.categories} />
-      <VaultRecentItemLinks items={viewModel.items} />
-      <VaultAddLinks />
-      <VaultUtilityLinks />
-      <SettingsLink />
-    </View>
-  );
-}
+      <VaultDashboardHeader onLock={onLock} />
 
-function EmptyVaultDashboard() {
-  return (
-    <View style={{ gap: 18 }}>
+      {viewModel.hasAssets ? (
+        <Card>
+          {viewModel.categories.map((category, index) => (
+            <CategoryRow
+              category={category}
+              isLast={index === viewModel.categories.length - 1}
+              key={category.assetType}
+            />
+          ))}
+        </Card>
+      ) : (
+        <EmptyStateCard
+          description="Add where things live — not the things themselves. Most people start with their primary bank account."
+          title="Nothing here yet"
+        />
+      )}
+
+      {viewModel.hasAssets ? <RecentItems items={viewModel.items} /> : null}
+
       <View style={{ gap: 8 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-          Secure records
-        </Text>
-        <Text
-          style={{
-            color: colors.ink,
-            fontSize: 30,
-            fontWeight: "700",
-            lineHeight: 36,
-          }}
-        >
-          Your vault is ready.
-        </Text>
-        <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-          Most people start with their primary bank account. Would you like to add that?
-        </Text>
+        <SectionLabel>Add to your vault</SectionLabel>
+        <Card>
+          {ADD_LINKS.map(([href, label], index) => (
+            <ListRow
+              isLast={index === ADD_LINKS.length - 1}
+              key={href}
+              onPress={() => router.push(href)}
+              title={label}
+            />
+          ))}
+        </Card>
       </View>
-      <VaultTextLink href="/vault/add-bank-account" label="Add bank account" />
-      <VaultTextLink href="/vault/add-investment" label="Choose a different category" />
-      <VaultUtilityLinks />
-      <SettingsLink />
+
+      <View style={{ gap: 8 }}>
+        <SectionLabel>Vault</SectionLabel>
+        <Card>
+          <ListRow
+            onPress={() => router.push("/vault/export")}
+            title="Export as PDF"
+          />
+          <ListRow
+            isLast
+            onPress={() => router.push("/vault/recently-deleted")}
+            title="Recently deleted"
+          />
+        </Card>
+      </View>
+
+      <Card>
+        <ListRow
+          isLast
+          onPress={() =>
+            router.push("/settings/emergency-access" as unknown as "/vault/export")
+          }
+          subtitle="A sealed code for the people you trust"
+          title="Emergency access"
+        />
+      </Card>
     </View>
   );
 }
 
-function VaultDashboardHeader({ activeCount }: { activeCount: number }) {
-  return (
-    <View style={{ gap: 6 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Secure records</Text>
-      <Text
-        style={{
-          color: colors.ink,
-          fontSize: 30,
-          fontWeight: "700",
-          lineHeight: 36,
-        }}
-      >
-        {activeCount} active items
-      </Text>
-    </View>
-  );
-}
+function VaultDashboardHeader({ onLock }: { onLock?: () => void }) {
+  const router = useRouter();
 
-function VaultCategoryLinks({
-  categories,
-}: {
-  categories: VaultDashboardCategory[];
-}) {
   return (
-    <View style={{ gap: 10 }}>
-      {categories.map((category) => (
-        <Link
-          key={category.assetType}
-          href={category.routeHref}
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            borderCurve: "continuous",
-            borderRadius: 8,
-            borderWidth: 1,
-            color: colors.ink,
-            fontSize: 17,
-            fontWeight: "700",
-            padding: 16,
-          }}
-        >
-          {category.label} - {category.count}
-        </Link>
-      ))}
-    </View>
-  );
-}
-
-function VaultRecentItemLinks({ items }: { items: VaultDashboardItem[] }) {
-  return (
-    <View style={{ gap: 10 }}>
-      {items.map((item) => (
-        <Link
-          key={item.id}
-          href={{ pathname: "/vault/[id]", params: { id: item.id } }}
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            borderCurve: "continuous",
-            borderRadius: 8,
-            borderWidth: 1,
-            gap: 4,
-            padding: 16,
-          }}
-        >
-          <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "700" }}>
-            {item.title}
-          </Text>
-          <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-            {item.assetTypeLabel}
-          </Text>
-        </Link>
-      ))}
-    </View>
-  );
-}
-
-function VaultAddLinks() {
-  return (
-    <>
-      {ADD_LINKS.map(([href, label]) => (
-        <VaultTextLink href={href} key={href} label={label} />
-      ))}
-    </>
-  );
-}
-
-function VaultUtilityLinks() {
-  return (
-    <>
-      <Link href="/vault/recently-deleted" style={{ color: colors.inkMuted, fontSize: 15 }}>
-        Recently deleted
-      </Link>
-      <Link href="/vault/export" style={{ color: colors.inkMuted, fontSize: 15 }}>
-        Export vault
-      </Link>
-    </>
-  );
-}
-
-function VaultTextLink({
-  href,
-  label,
-}: {
-  href: (typeof ADD_LINKS)[number][0];
-  label: string;
-}) {
-  return (
-    <Link href={href} style={{ color: colors.action, fontSize: 17 }}>
-      {label}
-    </Link>
-  );
-}
-
-function SettingsLink() {
-  return (
-    <Link
-      href={"/settings" as unknown as "/auth/sign-up"}
-      style={{ color: colors.inkMuted, fontSize: 15 }}
+    <View
+      style={{
+        alignItems: "center",
+        flexDirection: "row",
+        justifyContent: "space-between",
+      }}
     >
-      Account settings
-    </Link>
+      <View style={{ gap: 2 }}>
+        <SerifTitle size={26}>Your vault</SerifTitle>
+        <MutedText>Sealed on this device</MutedText>
+      </View>
+      <View style={{ flexDirection: "row", gap: 8 }}>
+        <PillButton
+          label="Settings"
+          onPress={() =>
+            router.push("/settings" as unknown as "/vault/export")
+          }
+        />
+        {onLock ? <PillButton label="Lock" onPress={onLock} /> : null}
+      </View>
+    </View>
+  );
+}
+
+function CategoryRow({
+  category,
+  isLast,
+}: {
+  category: VaultDashboardCategory;
+  isLast: boolean;
+}) {
+  const router = useRouter();
+
+  return (
+    <ListRow
+      isLast={isLast}
+      onPress={() => router.push(category.routeHref as "/vault/export")}
+      subtitle={category.count === 1 ? "1 saved" : `${category.count} saved`}
+      title={category.label}
+    />
+  );
+}
+
+function RecentItems({ items }: { items: VaultDashboardItem[] }) {
+  const router = useRouter();
+
+  return (
+    <View style={{ gap: 8 }}>
+      <SectionLabel>Records</SectionLabel>
+      <Card>
+        {items.map((item, index) => (
+          <ListRow
+            isLast={index === items.length - 1}
+            key={item.id}
+            onPress={() =>
+              router.push({ pathname: "/vault/[id]", params: { id: item.id } })
+            }
+            subtitle={item.assetTypeLabel}
+            title={item.title}
+          />
+        ))}
+      </Card>
+    </View>
   );
 }

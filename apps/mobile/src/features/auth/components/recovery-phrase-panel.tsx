@@ -1,7 +1,16 @@
-import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Animated, Easing, Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
+import {
+  Card,
+  MutedText,
+  PrimaryButton,
+  SerifTitle,
+  StepHeader,
+  Subtitle,
+} from "@/shared/ui";
 
 import {
   generateRecoveryPhraseAndMEK,
@@ -14,8 +23,6 @@ type RecoveryPhrasePanelProps = {
   onContinue: (session: { mek: Uint8Array; words: string[] }) => void;
 };
 
-type RecoveryPhraseViewModel = ReturnType<typeof createRecoveryPhraseViewModel>;
-
 export function RecoveryPhrasePanel({
   generateRandomBytes,
   onContinue,
@@ -24,198 +31,142 @@ export function RecoveryPhrasePanel({
   const [{ mek, words }] = useState(() =>
     generateRecoveryPhraseAndMEK(generateRandomBytes),
   );
-  const [acknowledged, setAcknowledged] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
   return (
-    <View style={{ gap: 20 }}>
-      <RecoveryPhraseHeader viewModel={viewModel} />
-      <RecoveryPhraseWords words={words} />
+    <View style={{ flex: 1, gap: 18 }}>
+      <StepHeader step="recovery-1" />
 
-      <Text
-        selectable
-        style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}
-      >
-        {viewModel.warning}
-      </Text>
+      <View style={{ gap: 10 }}>
+        <SerifTitle>{viewModel.title}</SerifTitle>
+        <Subtitle>{viewModel.body}</Subtitle>
+      </View>
 
-      <RecoveryPhraseAcknowledgment
-        acknowledged={acknowledged}
-        label={viewModel.primaryActionLabel}
-        onToggle={() => setAcknowledged((current) => !current)}
-      />
+      <View>
+        <Card
+          style={{
+            columnGap: 18,
+            flexDirection: "row",
+            flexWrap: "wrap",
+            padding: 18,
+            rowGap: 10,
+          }}
+        >
+          {words.map((word, index) => (
+            <RevealedWord
+              index={index}
+              key={`${index}-${word}`}
+              revealed={revealed}
+              word={word}
+            />
+          ))}
+        </Card>
+        {!revealed ? (
+          <Pressable
+            accessibilityLabel="Reveal recovery phrase"
+            accessibilityRole="button"
+            onPress={() => setRevealed(true)}
+            style={{
+              alignItems: "center",
+              bottom: 0,
+              justifyContent: "center",
+              left: 0,
+              position: "absolute",
+              right: 0,
+              top: 0,
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: colors.ink,
+                borderRadius: 999,
+                paddingHorizontal: 18,
+                paddingVertical: 10,
+              }}
+            >
+              <Text
+                style={{
+                  color: colors.actionText,
+                  fontFamily: fonts.sans.semibold,
+                  fontSize: 14,
+                }}
+              >
+                Tap to reveal
+              </Text>
+            </View>
+          </Pressable>
+        ) : null}
+      </View>
 
-      <RecoveryPhraseContinueAction
-        acknowledged={acknowledged}
-        onContinue={() => onContinue({ mek, words })}
-      />
+      <MutedText>{viewModel.warning}</MutedText>
+
+      <View style={{ marginTop: "auto" }}>
+        <PrimaryButton
+          disabled={!revealed}
+          label={viewModel.primaryActionLabel}
+          onPress={() => onContinue({ mek, words })}
+        />
+      </View>
     </View>
   );
 }
 
-function RecoveryPhraseHeader({
-  viewModel,
+function RevealedWord({
+  index,
+  revealed,
+  word,
 }: {
-  viewModel: RecoveryPhraseViewModel;
+  index: number;
+  revealed: boolean;
+  word: string;
 }) {
+  const [opacity] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    if (!revealed) {
+      return;
+    }
+    Animated.timing(opacity, {
+      delay: index * 60,
+      duration: 500,
+      easing: Easing.out(Easing.ease),
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  }, [index, opacity, revealed]);
+
   return (
-    <View style={{ gap: 8 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-        {viewModel.statusLabel}
-      </Text>
+    <Animated.View
+      style={{
+        alignItems: "baseline",
+        flexBasis: "44%",
+        flexDirection: "row",
+        flexGrow: 1,
+        gap: 10,
+        opacity,
+      }}
+    >
       <Text
         style={{
-          color: colors.ink,
-          fontSize: 30,
-          fontWeight: "700",
-          lineHeight: 36,
+          color: colors.gold,
+          fontFamily: fonts.mono.regular,
+          fontSize: 12,
+          textAlign: "right",
+          width: 18,
         }}
       >
-        {viewModel.title}
-      </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-        {viewModel.body}
-      </Text>
-    </View>
-  );
-}
-
-function RecoveryPhraseWords({ words }: { words: readonly string[] }) {
-  return (
-    <View
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border,
-        borderCurve: "continuous",
-        borderRadius: 12,
-        borderWidth: 1,
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 10,
-        padding: 16,
-      }}
-    >
-      {words.map((word, index) => (
-        <RecoveryPhraseWord index={index} key={index} word={word} />
-      ))}
-    </View>
-  );
-}
-
-function RecoveryPhraseWord({ index, word }: { index: number; word: string }) {
-  return (
-    <View
-      style={{
-        alignItems: "center",
-        backgroundColor: colors.background,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        flexDirection: "row",
-        gap: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-      }}
-    >
-      <Text style={{ color: colors.inkMuted, fontSize: 13, fontWeight: "700" }}>
         {index + 1}
       </Text>
-      <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
-        {word}
-      </Text>
-    </View>
-  );
-}
-
-function RecoveryPhraseAcknowledgment({
-  acknowledged,
-  label,
-  onToggle,
-}: {
-  acknowledged: boolean;
-  label: string;
-  onToggle: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onToggle}
-      style={{
-        alignItems: "center",
-        flexDirection: "row",
-        gap: 12,
-      }}
-    >
-      <RecoveryPhraseCheckbox acknowledged={acknowledged} />
-      <Text style={{ color: colors.ink, flex: 1, fontSize: 15, lineHeight: 22 }}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function RecoveryPhraseCheckbox({ acknowledged }: { acknowledged: boolean }) {
-  return (
-    <View
-      style={{
-        alignItems: "center",
-        backgroundColor: acknowledged ? colors.action : colors.surface,
-        borderColor: acknowledged ? colors.action : colors.border,
-        borderCurve: "continuous",
-        borderRadius: 6,
-        borderWidth: 2,
-        height: 24,
-        justifyContent: "center",
-        width: 24,
-      }}
-    >
-      {acknowledged ? (
-        <Text style={{ color: colors.actionText, fontSize: 14 }}>âœ“</Text>
-      ) : null}
-    </View>
-  );
-}
-
-function RecoveryPhraseContinueAction({
-  acknowledged,
-  onContinue,
-}: {
-  acknowledged: boolean;
-  onContinue: () => void;
-}) {
-  if (acknowledged) {
-    return (
-      <Pressable
-        accessibilityRole="button"
-        onPress={onContinue}
+      <Text
+        selectable={revealed}
         style={{
-          alignItems: "center",
-          backgroundColor: colors.action,
-          borderCurve: "continuous",
-          borderRadius: 8,
-          paddingHorizontal: 18,
-          paddingVertical: 14,
+          color: colors.ink,
+          fontFamily: fonts.serif.regular,
+          fontSize: 18,
         }}
       >
-        <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-          Continue to vault
-        </Text>
-      </Pressable>
-    );
-  }
-
-  return (
-    <View
-      style={{
-        alignItems: "center",
-        backgroundColor: colors.inkMuted,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        paddingHorizontal: 18,
-        paddingVertical: 14,
-      }}
-    >
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-        Continue to vault
+        {word}
       </Text>
-    </View>
+    </Animated.View>
   );
 }

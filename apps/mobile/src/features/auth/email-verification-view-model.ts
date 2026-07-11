@@ -9,7 +9,7 @@ export function createEmailVerificationViewModel(
 ): EmailVerificationViewModel {
   return {
     body:
-      "Once Supabase email settings are ready, this step will confirm your email before two-factor setup.",
+      "It confirms this address is really yours. Open the link we sent, then continue below.",
     destinationLabel: normalizeEmailForDisplay(email) ?? "your email",
     title: "Check your email",
   };

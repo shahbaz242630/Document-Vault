@@ -1,7 +1,14 @@
-import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { View } from "react-native";
 
 import { BiometricPreferencesPanel, SignOutButton } from "@/features/auth";
+import {
+  Card,
+  ListRow,
+  ScreenHeader,
+  SectionLabel,
+  SerifTitle,
+} from "@/shared/ui";
 import { colors } from "@/shared/theme/colors";
 
 type SettingsScreenProps = {
@@ -19,86 +26,58 @@ export function SettingsScreen({
   storage,
   vaultSignOut,
 }: SettingsScreenProps) {
+  const router = useRouter();
+
   return (
-    <View style={{ gap: 20 }}>
+    <View style={{ gap: 18 }}>
+      <ScreenHeader />
+      <SerifTitle size={28}>Settings</SerifTitle>
+
       <View style={{ gap: 8 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Account</Text>
-        <Text
-          style={{
-            color: colors.ink,
-            fontSize: 30,
-            fontWeight: "700",
-            lineHeight: 36,
-          }}
-        >
-          Settings
-        </Text>
-      </View>
-
-      <View style={{ gap: 12 }}>
-        {isPremium === true ? (
-          <>
-            <Text
-              style={{
-                color: colors.action,
-                fontSize: 17,
-                fontWeight: "600",
-                textAlign: "center",
-              }}
-            >
-              ✦ Premium Active
-            </Text>
-            <Link
-              href="/settings/customer-center"
-              style={{
-                color: colors.ink,
-                fontSize: 17,
-                textAlign: "center",
-              }}
-            >
-              Manage subscription
-            </Link>
-          </>
-        ) : isPremium === false ? (
-          <Link
-            href="/settings/paywall"
-            style={{
-              color: colors.action,
-              fontSize: 17,
-              fontWeight: "600",
-              textAlign: "center",
-            }}
-          >
-            Upgrade to Premium
-          </Link>
-        ) : null}
-
+        <SectionLabel>Security</SectionLabel>
         <BiometricPreferencesPanel storage={storage} />
-
-        <SignOutButton storage={storage} vaultSignOut={vaultSignOut} />
-
-        <Link
-          href={"/settings/emergency-access" as unknown as "/auth/sign-up"}
-          style={{
-            color: colors.ink,
-            fontSize: 17,
-            textAlign: "center",
-          }}
-        >
-          Emergency access
-        </Link>
-
-        <Link
-          href="/settings/re-auth"
-          style={{
-            color: colors.danger,
-            fontSize: 17,
-            textAlign: "center",
-          }}
-        >
-          Delete account
-        </Link>
       </View>
+
+      <View style={{ gap: 8 }}>
+        <SectionLabel>Vault</SectionLabel>
+        <Card>
+          <ListRow
+            isLast
+            onPress={() =>
+              router.push("/settings/emergency-access" as unknown as "/settings/re-auth")
+            }
+            title="Emergency access"
+          />
+        </Card>
+      </View>
+
+      <View style={{ gap: 8 }}>
+        <SectionLabel>Account</SectionLabel>
+        <Card>
+          {isPremium === true ? (
+            <ListRow
+              onPress={() => router.push("/settings/customer-center")}
+              title="Sanduqkin Premium"
+              value="Active"
+            />
+          ) : isPremium === false ? (
+            <ListRow
+              onPress={() => router.push("/settings/paywall")}
+              title="Sanduqkin Premium"
+              value="Upgrade"
+            />
+          ) : null}
+          <ListRow
+            isLast
+            onPress={() => router.push("/settings/re-auth")}
+            showChevron={false}
+            title="Delete account"
+            titleColor={colors.danger}
+          />
+        </Card>
+      </View>
+
+      <SignOutButton storage={storage} vaultSignOut={vaultSignOut} />
     </View>
   );
 }

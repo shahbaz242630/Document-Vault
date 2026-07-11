@@ -185,6 +185,19 @@ Current state: complete. `expo-doctor@1.19.10` is pinned as a mobile development
 
 Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, device-runtime, Expo module, or navigation integration failures.
 
+#### Android native compile implementation evidence — 2026-07-11 (remote CI pending)
+
+- Scope: implement the first part of finding 7 as a separate Android debug/native compile job.
+- Workflow: `Android native compile` runs independently from fast unit checks on `ubuntu-latest` with a 45-minute timeout.
+- Toolchain: Node.js 24.3.0, Temurin Java 17 through immutable `actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e`, Android platform/build tools 36, NDK 27.1.12297006, and the repository Gradle wrapper.
+- Compile command: `./gradlew app:assembleDebug -x lint -x test --no-daemon --stacktrace -PreactNativeArchitectures=x86_64` from `apps/mobile/android`.
+- Regression proof: the focused workflow test failed before implementation because no Android native compile job existed, then passed after the job and immutable action allowlist were added.
+- Local result: the equivalent Windows build succeeded through a short `S:` drive mapping with `BUILD SUCCESSFUL in 1m 53s`; the normal long repository path exceeds Ninja's Windows 260-character generated-path limit.
+- Security verification: GitHub Actions security guard passed; 15 workflow tests passed; mobile secret scan passed; 20 combined security/secret/workflow tests passed.
+- Follow-up refactor: split the three pre-existing oversized UI functions into focused hooks/presentation helpers without changing behavior. `npm run check:phase1`, mobile typecheck, and focused biometric/export tests pass.
+- Coverage follow-up: the UI redesign changed the global source denominator, so only the global mobile floors were recalibrated to the measured post-redesign baseline (28% branches, 37% functions, 40% lines, 39% statements). Dedicated auth, vault-security, and cryptography thresholds remain unchanged.
+- Required before checking item 7.1: push through a PR, obtain a green `Android native compile` GitHub job, and record its run URL and exact result here.
+
 ### 8. Configure and enforce linting
 
 - [x] Select an Expo/React Native-compatible ESLint configuration.

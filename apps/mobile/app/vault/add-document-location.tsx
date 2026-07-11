@@ -1,11 +1,10 @@
-import { Stack, useRouter } from "expo-router";
-import { ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
 import { DynamicAssetForm , createDocumentLocationAssetPayload , createDocumentLocationFormViewModel , useVaultSession } from "@/features/vault";
 
 
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const initialValues: Record<string, string> = {
   country: "",
@@ -22,13 +21,7 @@ export default function AddDocumentLocationRoute() {
   const viewModel = createDocumentLocationFormViewModel();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Add document" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.formContent}
-        keyboardShouldPersistTaps="handled"
-      >
+    <Screen>
         <DynamicAssetForm
           categoryLabel="Document location"
           fields={viewModel.fields}
@@ -46,7 +39,6 @@ export default function AddDocumentLocationRoute() {
             router.replace("/vault/document-locations");
           }}
         />
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

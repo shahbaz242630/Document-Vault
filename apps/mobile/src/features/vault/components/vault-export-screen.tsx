@@ -1,8 +1,18 @@
 import { useMemo, useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 
 import { defaultAuditLog } from "@/features/auth";
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
+import {
+  Card,
+  Eyebrow,
+  MutedText,
+  OutlineButton,
+  ScreenHeader,
+  SerifTitle,
+  Subtitle,
+} from "@/shared/ui";
 
 import { createEncryptedStoragePreview } from "../encrypted-storage-preview";
 import { createVaultExportModel } from "../vault-export-model";
@@ -61,11 +71,11 @@ export function VaultExportScreen({
 
   return (
     <View style={{ gap: 18 }}>
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Vault export</Text>
-        <Text style={{ color: colors.ink, fontSize: 28, fontWeight: "700" }}>
-          Save a local copy
-        </Text>
+      <ScreenHeader />
+
+      <View style={{ gap: 4 }}>
+        <Eyebrow>Vault export</Eyebrow>
+        <SerifTitle size={28}>Save a local copy</SerifTitle>
       </View>
 
       <ExportCard
@@ -76,44 +86,47 @@ export function VaultExportScreen({
         title="Readable PDF"
       />
 
-      <View style={{ gap: 10 }}>
-        <Text style={{ color: colors.ink, fontSize: 18, fontWeight: "700" }}>
-          Encrypted storage preview
-        </Text>
-        <Text style={{ color: colors.inkSoft, fontSize: 15, lineHeight: 22 }}>
-          This shows the kind of encrypted data Sanduqkin stores. Without your key,
-          it cannot be read by Sanduqkin or someone with database access.
-        </Text>
-        {previewItems.length > 0 ? (
-          previewItems.map((item) => (
-            <View
-              key={`${item.assetType}-${item.updatedAt}`}
-              style={{
-                borderColor: colors.border,
-                borderRadius: 8,
-                borderWidth: 1,
-                gap: 6,
-                padding: 12,
-              }}
-            >
-              <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
-                {item.assetType}
-              </Text>
-              <Text style={{ color: colors.inkMuted, fontSize: 13 }}>
-                ciphertext: {item.ciphertextPreview}
-              </Text>
-              <Text style={{ color: colors.inkMuted, fontSize: 13 }}>
-                nonce: {item.noncePreview}
-              </Text>
-            </View>
-          ))
-        ) : (
-          <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-            Encrypted records appear here after remote encrypted records are loaded.
-          </Text>
-        )}
-      </View>
+      <EncryptedStoragePreview items={previewItems} />
     </View>
+  );
+}
+
+function EncryptedStoragePreview({
+  items,
+}: {
+  items: ReturnType<typeof createEncryptedStoragePreview>;
+}) {
+  return (
+    <View style={{ gap: 10 }}>
+      <SerifTitle size={19}>Encrypted storage preview</SerifTitle>
+      <Subtitle style={{ fontSize: 14.5, lineHeight: 22 }}>
+        This shows the kind of encrypted data Sanduqkin stores. Without your key,
+        it cannot be read by Sanduqkin or someone with database access.
+      </Subtitle>
+      {items.length > 0 ? (
+        items.map((item) => <EncryptedPreviewCard item={item} key={`${item.assetType}-${item.updatedAt}`} />)
+      ) : (
+        <MutedText style={{ fontSize: 15 }}>
+          Encrypted records appear here after remote encrypted records are loaded.
+        </MutedText>
+      )}
+    </View>
+  );
+}
+
+function EncryptedPreviewCard({
+  item,
+}: {
+  item: ReturnType<typeof createEncryptedStoragePreview>[number];
+}) {
+  return (
+    <Card style={{ gap: 6, padding: 14 }}>
+      <Text style={{ color: colors.ink, fontFamily: fonts.sans.medium, fontSize: 15 }}>
+        {item.assetType}
+      </Text>
+      <Text style={previewValueStyle}>ciphertext: {item.ciphertextPreview}</Text>
+      <Text style={previewValueStyle}>nonce: {item.noncePreview}</Text>
+    </Card>
   );
 }
 
@@ -131,25 +144,24 @@ function ExportCard({
   title: string;
 }) {
   return (
-    <View
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border,
-        borderRadius: 8,
-        borderWidth: 1,
-        gap: 12,
-        padding: 16,
-      }}
-    >
-      <Text style={{ color: colors.ink, fontSize: 18, fontWeight: "700" }}>{title}</Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 15, lineHeight: 22 }}>
-        {description}
+    <Card style={{ gap: 12, padding: 18 }}>
+      <Text
+        style={{
+          color: colors.ink,
+          fontFamily: fonts.serif.medium,
+          fontSize: 19,
+        }}
+      >
+        {title}
       </Text>
-      <Pressable disabled={disabled} onPress={onPress}>
-        <Text style={{ color: disabled ? colors.inkMuted : colors.action, fontSize: 16 }}>
-          {buttonLabel}
-        </Text>
-      </Pressable>
-    </View>
+      <Subtitle style={{ fontSize: 14.5, lineHeight: 22 }}>{description}</Subtitle>
+      <OutlineButton disabled={disabled} label={buttonLabel} onPress={onPress} />
+    </Card>
   );
 }
+
+const previewValueStyle = {
+  color: colors.inkMuted,
+  fontFamily: fonts.mono.regular,
+  fontSize: 12.5,
+};

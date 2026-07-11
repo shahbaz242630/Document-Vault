@@ -1,11 +1,10 @@
-import { Stack, useRouter } from "expo-router";
-import { ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
 import { DynamicAssetForm , createSubscriptionAssetPayload , createSubscriptionFormViewModel , useVaultSession } from "@/features/vault";
 
 
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const initialValues: Record<string, string> = {
   approximateCostRange: "prefer_not_to_say",
@@ -24,13 +23,7 @@ export default function AddSubscriptionRoute() {
   const viewModel = createSubscriptionFormViewModel();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Add subscription" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.formContent}
-        keyboardShouldPersistTaps="handled"
-      >
+    <Screen>
         <DynamicAssetForm
           categoryLabel="Subscription"
           fields={viewModel.fields}
@@ -55,7 +48,6 @@ export default function AddSubscriptionRoute() {
             router.replace("/vault/subscriptions");
           }}
         />
-      </ScrollView>
-    </>
+      </Screen>
   );
 }
