@@ -82,9 +82,10 @@ test("runs a bounded Android emulator onboarding smoke test after native compila
 
   assert.match(workflow, /android-emulator-smoke:\s*\n\s*name: Android emulator smoke/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?needs: android-native-compile/);
-  assert.match(workflow, /android-emulator-smoke:[\s\S]*?timeout-minutes: 20/);
+  assert.match(workflow, /android-emulator-smoke:[\s\S]*?timeout-minutes: 25/);
   assert.match(workflow, /name: android-release-apk/);
   assert.match(workflow, /export PATH="\$ANDROID_HOME\/platform-tools:\$PATH"/);
+  assert.match(workflow, /timeout 180 adb wait-for-device/);
   assert.match(workflow, /node scripts\/android-emulator-smoke\.cjs/);
   assert.match(workflow, /if: failure\(\)[\s\S]*?adb logcat/);
   assert.match(workflow, /retention-days: 7/);
