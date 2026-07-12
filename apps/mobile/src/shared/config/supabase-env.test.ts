@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import { getSupabaseEnv } from "./supabase-env";
 
@@ -30,5 +32,14 @@ describe("getSupabaseEnv", () => {
         EXPO_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
       }),
     ).toThrow("Mobile Supabase config must never include service role keys.");
+  });
+
+  it("uses static Expo public environment references for release inlining", () => {
+    const implementation = readFileSync(resolve(__dirname, "supabase-env.ts"), "utf8");
+
+    expect(implementation).toContain("process.env.EXPO_PUBLIC_SUPABASE_URL");
+    expect(implementation).toContain(
+      "process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    );
   });
 });

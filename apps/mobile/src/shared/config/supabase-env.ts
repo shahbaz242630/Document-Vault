@@ -13,12 +13,14 @@ const runtime = globalThis as typeof globalThis & {
 };
 
 export function getSupabaseEnv(env: Env = runtime.process?.env ?? {}): SupabaseEnvResult {
-  if (hasServiceRoleKey(env)) {
+  const resolvedEnv = resolveEnv(env);
+
+  if (hasServiceRoleKey(resolvedEnv)) {
     throw new Error("Mobile Supabase config must never include service role keys.");
   }
 
-  const url = env.EXPO_PUBLIC_SUPABASE_URL?.trim();
-  const publishableKey = env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
+  const url = resolvedEnv.EXPO_PUBLIC_SUPABASE_URL?.trim();
+  const publishableKey = resolvedEnv.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
 
   if (!url || !publishableKey) {
     return { isConfigured: false };
@@ -28,6 +30,19 @@ export function getSupabaseEnv(env: Env = runtime.process?.env ?? {}): SupabaseE
     isConfigured: true,
     publishableKey,
     url,
+  };
+}
+
+function resolveEnv(env: Env): Env {
+  if (env !== runtime.process?.env) {
+    return env;
+  }
+
+  return {
+    ...env,
+    EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+      process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
   };
 }
 
