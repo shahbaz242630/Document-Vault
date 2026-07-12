@@ -117,6 +117,8 @@ function runReturningUserUnlockSmoke() {
   waitForNode("Welcome back");
   inputText("Sign-in email", email);
   inputText("Sign-in password", password);
+  runAdb(["shell", "input", "keyevent", "KEYCODE_BACK"]);
+  sleep(500);
   tapNode("Continue");
   waitForNode("Your vault", 120_000);
   waitForNode("Sealed on this device");
