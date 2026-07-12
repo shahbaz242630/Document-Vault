@@ -230,6 +230,15 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Completion result: [Security CI run 29209599047](https://github.com/shahbaz242630/Document-Vault/actions/runs/29209599047) passed all four jobs. The 5m15s `Android emulator smoke` job logged onboarding, returning-user vault unlock, and encrypted-record CRUD success.
 - Remaining minimum-flow coverage: recovery reset continuity and emergency-code raw-value hiding.
 
+#### Android emergency-code raw-value hiding evidence — 2026-07-13
+
+- After real password unlock, the release emulator opens emergency access and creates/regenerates the disposable account's sealed emergency code grant.
+- The runner detects but never prints or persists the formatted one-time raw code, confirms it was written, then asserts the active-state copy states Sanduqkin no longer has the raw code and verifies the captured value is absent from UIAutomator output.
+- Failure-log hardening redacts every emergency-code-shaped value before UI XML can enter CI diagnostics; Android screen-capture prevention remains active on the one-time panel.
+- CI also exposed an emulator numeric-keyboard race (`4242` entered as `42`); paced character input plus explicit field-value assertion fixed the automation without weakening production validation.
+- Completion result: [Security CI run 29211310358](https://github.com/shahbaz242630/Document-Vault/actions/runs/29211310358) passed all four jobs. The 5m57s emulator job logged onboarding, returning-user unlock, encrypted CRUD, and emergency-code raw-value hiding success.
+- Sole remaining minimum-flow gap: recovery reset continuity. The shared QA account's external 12-word recovery phrase is required to automate this cryptographic flow and must remain outside repository files and logs.
+
 ### 8. Configure and enforce linting
 
 - [x] Select an Expo/React Native-compatible ESLint configuration.

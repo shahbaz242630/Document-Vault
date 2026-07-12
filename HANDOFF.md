@@ -57,6 +57,15 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Final verification: [Security CI run 29209599047](https://github.com/shahbaz242630/Document-Vault/actions/runs/29209599047) passed all four jobs. The 5m15s emulator job logged onboarding, returning-user unlock, and encrypted-record CRUD success.
 - Remaining Android E2E expansion: recovery reset continuity and emergency-code raw-value hiding.
 
+2026-07-13 Android emergency-code hiding smoke slice:
+
+- The release-emulator flow deep-links from the unlocked vault to emergency access and handles active, interrupted, or not-yet-created test-account state.
+- It creates/regenerates a sealed emergency grant, proves a correctly formatted one-time raw code is visible before confirmation without printing or persisting that value, acknowledges it, and confirms the code is saved.
+- It then waits for `Sealed emergency code is active`, asserts `Sanduqkin no longer has the raw code`, and verifies the captured one-time value is absent from the UI hierarchy.
+- Any emergency-code pattern is redacted from UIAutomator failure diagnostics. The Android form helper also moved to paced character entry after CI caught a numeric-keyboard timing race; production validation remained unchanged.
+- Final verification: [Security CI run 29211310358](https://github.com/shahbaz242630/Document-Vault/actions/runs/29211310358) passed all four jobs. The 5m57s emulator job logged onboarding, returning-user unlock, encrypted CRUD, and emergency-code raw-value hiding success.
+- Sole remaining Android E2E gap: recovery-reset continuity. Running it against the shared QA account requires its externally stored 12-word recovery phrase; the phrase must never be committed or written into this handoff.
+
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
