@@ -39,6 +39,15 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Final verification: [Security CI run 29206109673](https://github.com/shahbaz242630/Document-Vault/actions/runs/29206109673) passed all four jobs, including `Android native compile` and `Android emulator smoke`.
 - This is the Android E2E foundation and onboarding coverage only. Next expand it across sign-in, unlock, encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
 
+2026-07-13 Android returning-user sign-in/unlock smoke slice:
+
+- Added stable accessibility labels for sign-in email/password inputs and extended the release-emulator runner to clear local state, open `I already have an account`, enter protected QA credentials, submit sign-in, and assert `Your vault` plus `Sealed on this device`.
+- The QA credentials are stored only as `Preview` GitHub environment secrets. The Supabase URL and publishable key are repository variables because they are public client configuration; no credential value is committed or printed.
+- The credential-bearing emulator job is push-only. The GitHub Actions security guard now permits secrets in a mixed push/PR workflow only when every secret-bearing job has the explicit `github.event_name == 'push'` boundary; an 18-test regression suite covers this rule.
+- Fixed a real release-only configuration bug: Expo cannot inline dynamic `process.env` enumeration, so Supabase client configuration now includes static `process.env.EXPO_PUBLIC_SUPABASE_*` references while preserving service-role rejection.
+- Final verification: [Security CI run 29208758000](https://github.com/shahbaz242630/Document-Vault/actions/runs/29208758000) passed all four jobs. The emulator job completed in 3m55s and logged both onboarding and returning-user vault-unlock smoke success.
+- Remaining Android E2E expansion: encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
+
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`

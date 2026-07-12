@@ -212,6 +212,15 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Completion result: [Security CI run 29206109673](https://github.com/shahbaz242630/Document-Vault/actions/runs/29206109673) passed `App security gates`, `Supabase live security gates`, `Android native compile`, and `Android emulator smoke`.
 - Residual coverage gap: this establishes reliable Android release/onboarding E2E infrastructure, but the minimum encrypted Phase 1 flow list below remains unchecked and must be implemented next.
 
+#### Android returning-user sign-in/unlock evidence — 2026-07-13
+
+- The release-emulator runner now clears app state, selects returning-user sign-in, enters protected QA credentials through stable accessibility labels, authenticates against the test Supabase project, unwraps persisted MEK material, initializes the encrypted vault session, and asserts `Your vault` plus `Sealed on this device`.
+- Credential handling: email/password exist only as `Preview` GitHub environment secrets; public Supabase client URL/key are repository variables; the secret-bearing job is restricted to push events and is skipped for pull requests.
+- Security-guard hardening: mixed push/PR workflows may reference secrets only inside jobs with the exact push-only condition. Unguarded PR secret use remains rejected. All 18 workflow-security regressions pass.
+- Release fix: Supabase configuration now uses static Expo public-environment references so production bundles receive client configuration; explicit-env tests and mobile service-role rejection remain intact.
+- Completion result: [Security CI run 29208758000](https://github.com/shahbaz242630/Document-Vault/actions/runs/29208758000) passed `App security gates`, `Supabase live security gates`, `Android native compile`, and the 3m55s `Android emulator smoke` job. Its log confirms both onboarding and returning-user vault-unlock smoke tests passed.
+- Remaining minimum-flow coverage: encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
+
 ### 8. Configure and enforce linting
 
 - [x] Select an Expo/React Native-compatible ESLint configuration.
