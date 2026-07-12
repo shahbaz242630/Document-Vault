@@ -81,6 +81,48 @@ function swipeHorizontally(direction) {
   runAdb(["shell", "input", "swipe", String(startX), String(Math.round(height * 0.5)), String(endX), String(Math.round(height * 0.5)), "350"]);
 }
 
+function swipeVertically(direction) {
+  const sizeOutput = runAdb(["shell", "wm", "size"], { quiet: true });
+  const [, widthText, heightText] = sizeOutput.match(/Physical size: (\d+)x(\d+)/) ?? [];
+  if (!widthText || !heightText) throw new Error(`Unable to read emulator size: ${sizeOutput}`);
+  const width = Number(widthText);
+  const height = Number(heightText);
+  const startY = direction === "up" ? Math.round(height * 0.78) : Math.round(height * 0.28);
+  const endY = direction === "up" ? Math.round(height * 0.28) : Math.round(height * 0.78);
+  runAdb(["shell", "input", "swipe", String(Math.round(width * 0.5)), String(startY), String(Math.round(width * 0.5)), String(endY), "350"]);
+}
+
+function scrollToNode(label, maxSwipes = 12) {
+  for (let attempt = 0; attempt <= maxSwipes; attempt += 1) {
+    const bounds = findNode(dumpUi(), label);
+    if (bounds) return bounds;
+    swipeVertically("up");
+    sleep(350);
+  }
+  throw new Error(`Unable to find Android UI text after scrolling: ${label}`);
+}
+
+function tapNodeAfterScroll(label) {
+  const [left, top, right, bottom] = scrollToNode(label);
+  runAdb(["shell", "input", "tap", String((left + right) / 2), String((top + bottom) / 2)]);
+}
+
+function fillField(label, value, clear = false) {
+  tapNodeAfterScroll(label);
+  if (clear) {
+    runAdb(["shell", "input", "keyevent", "KEYCODE_MOVE_END"]);
+    runAdb(["shell", "input", "keyevent", ...Array(48).fill("KEYCODE_DEL")]);
+  }
+  runAdb(["shell", "input", "text", value]);
+  runAdb(["shell", "input", "keyevent", "KEYCODE_BACK"]);
+  sleep(350);
+}
+
+function assertNodeAbsent(label) {
+  sleep(1_000);
+  if (findNode(dumpUi(), label)) throw new Error(`Android UI text should be absent: ${label}`);
+}
+
 function launchApp() {
   runAdb(["shell", "monkey", "-p", appPackage, "-c", "android.intent.category.LAUNCHER", "1"]);
 }
@@ -125,9 +167,49 @@ function runReturningUserUnlockSmoke() {
   console.log("Android emulator returning-user vault unlock smoke test passed.");
 }
 
+function runEncryptedRecordCrudSmoke() {
+  const title = `E2EBank${Date.now()}`;
+  const editedTitle = `${title}Edited`;
+
+  tapNodeAfterScroll("Bank account");
+  sleep(500);
+  if (!findNode(dumpUi(), "Add bank account")) {
+    tapNodeAfterScroll("Add another bank account");
+  }
+  waitForNode("Add bank account");
+  fillField("title field", title);
+  fillField("institutionName field", "TestBank");
+  fillField("country field", "UAE");
+  fillField("currency field", "AED");
+  fillField("lastFourDigits field", "4242");
+  tapNodeAfterScroll("Save to vault");
+
+  waitForNode(title, 120_000);
+  tapNode(title);
+  waitForNode("Stored sealed on this device");
+  waitForNode("TestBank");
+  tapNodeAfterScroll("Edit");
+  waitForNode("Edit bank account");
+  fillField("title field", editedTitle, true);
+  tapNodeAfterScroll("Save to vault");
+
+  waitForNode(editedTitle, 120_000);
+  waitForNode("TestBank");
+  tapNodeAfterScroll("Delete this record");
+  tapNodeAfterScroll("Delete permanently");
+  waitForNode("Your vault", 120_000);
+  if (findNode(dumpUi(), "Bank accounts")) {
+    tapNode("Bank accounts");
+    waitForNode("Bank accounts");
+    assertNodeAbsent(editedTitle);
+  }
+  console.log("Android emulator encrypted-record CRUD smoke test passed.");
+}
+
 function main() {
   runOnboardingSmoke();
   runReturningUserUnlockSmoke();
+  runEncryptedRecordCrudSmoke();
 }
 
 main();

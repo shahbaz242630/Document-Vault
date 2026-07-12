@@ -146,6 +146,7 @@ function DynamicAssetField({
 
   return (
     <Field
+      accessibilityLabel={`${field.name} field`}
       hint={field.helperText}
       keyboardType={field.keyboardType}
       label={field.label}

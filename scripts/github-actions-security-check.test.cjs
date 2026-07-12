@@ -79,6 +79,10 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
     path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
     "utf8",
   );
+  const smokeScript = fs.readFileSync(
+    path.resolve(__dirname, "android-emulator-smoke.cjs"),
+    "utf8",
+  );
 
   assert.match(workflow, /android-emulator-smoke:\s*\n\s*name: Android emulator smoke/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?needs: android-native-compile/);
@@ -95,6 +99,15 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
   assert.match(workflow, /ANDROID_E2E_TEST_PASSWORD: \$\{\{ secrets\.ANDROID_E2E_TEST_PASSWORD \}\}/);
   assert.match(workflow, /if: failure\(\)[\s\S]*?adb logcat/);
   assert.match(workflow, /retention-days: 7/);
+  for (const marker of [
+    "runReturningUserUnlockSmoke",
+    "runEncryptedRecordCrudSmoke",
+    'fillField("title field"',
+    'waitForNode("Stored sealed on this device")',
+    'tapNodeAfterScroll("Delete permanently")',
+  ]) {
+    assert.match(smokeScript, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
 });
 
 test("enforces the Phase 1 Definition-of-Done gate in Security CI", () => {
