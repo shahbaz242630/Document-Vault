@@ -177,7 +177,7 @@ Current state: complete. `expo-doctor@1.19.10` is pinned as a mobile development
 ### 7. Add native build and end-to-end coverage
 
 - [x] Add an Android debug/native compile gate.
-- [ ] Add an Android emulator smoke test for critical Phase 1 flows.
+- [x] Add an Android emulator smoke test foundation for Phase 1 flows.
 - [ ] Add an iOS build gate on macOS when an approved runner/budget is available.
 - [ ] Add an iOS simulator smoke test when the macOS environment is available.
 - [ ] Cover at minimum sign-in, unlock, encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
@@ -201,6 +201,16 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Second remote result: push run `29149713679` passed native generation and Java setup, then exited 127 because `sdkmanager` was not on `PATH`. Follow-up uses its explicit `$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager` location.
 - Third remote result: push run `29149765641` failed workflow validation because the inline quoted SDK command was not valid YAML. The command now uses a block scalar and regression coverage parses all workflow files as YAML.
 - Completion result: [Security CI run 29149797724](https://github.com/shahbaz242630/Document-Vault/actions/runs/29149797724) passed. `Android native compile` completed successfully in 12m06s; `App security gates` and `Supabase live security gates` also passed.
+
+#### Android emulator smoke implementation evidence — 2026-07-12
+
+- The native compile job now produces x86_64 debug and standalone release APKs; the release artifact is consumed by a separate `Android emulator smoke` job with a 25-minute timeout.
+- The smoke job provisions an Android 36 Google APIs x86_64 AVD, installs the release APK, and uses UIAutomator accessibility data for interaction and assertions instead of device-specific tap coordinates.
+- Verified scope: app launch, `Create your vault`, FAQ 1 of 15, left swipe to FAQ 2, right swipe to FAQ 1, all 15 FAQ questions, `I'm ready`, and account `Step 1 of 3`.
+- Failure handling is bounded and diagnostic: device registration has a three-minute timeout, and failure-only screenshot, logcat, and emulator-startup artifacts are retained for seven days.
+- Regression proof: the workflow security suite covers the separate dependency-bounded job, immutable artifact actions, platform-tools path, bounded device wait, explicit AVD directory, and failure artifacts. All 17 workflow tests and the GitHub Actions security guard pass.
+- Completion result: [Security CI run 29206109673](https://github.com/shahbaz242630/Document-Vault/actions/runs/29206109673) passed `App security gates`, `Supabase live security gates`, `Android native compile`, and `Android emulator smoke`.
+- Residual coverage gap: this establishes reliable Android release/onboarding E2E infrastructure, but the minimum encrypted Phase 1 flow list below remains unchecked and must be implemented next.
 
 ### 8. Configure and enforce linting
 

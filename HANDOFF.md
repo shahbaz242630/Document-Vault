@@ -30,6 +30,15 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Third remote push run `29149765641` caught invalid inline YAML quoting before jobs started. The SDK command now uses a YAML block scalar, and the workflow regression suite parses every workflow as YAML to prevent recurrence.
 - Final remote verification: [Security CI run 29149797724](https://github.com/shahbaz242630/Document-Vault/actions/runs/29149797724) passed. `Android native compile` completed in 12m06s, and both `App security gates` and `Supabase live security gates` passed.
 
+2026-07-12 Android emulator onboarding smoke slice:
+
+- The native job now builds both x86_64 debug and standalone release APKs and hands the release artifact to a separate, 25-minute-bounded `Android emulator smoke` job.
+- The smoke runner installs the release APK on an Android 36 Google APIs emulator and drives controls through UIAutomator accessibility data rather than fixed tap coordinates.
+- Verified path: launch app, tap `Create your vault`, reach FAQ 1 of 15, swipe forward to FAQ 2, swipe back to FAQ 1, advance through all 15 questions, tap `I'm ready`, and reach account `Step 1 of 3`.
+- Failure-only evidence includes a screenshot, logcat, and emulator startup log retained for seven days; the release APK is retained for one day.
+- Final verification: [Security CI run 29206109673](https://github.com/shahbaz242630/Document-Vault/actions/runs/29206109673) passed all four jobs, including `Android native compile` and `Android emulator smoke`.
+- This is the Android E2E foundation and onboarding coverage only. Next expand it across sign-in, unlock, encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
+
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
