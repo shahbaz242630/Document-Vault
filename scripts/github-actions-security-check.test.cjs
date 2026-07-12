@@ -102,9 +102,11 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
   for (const marker of [
     "runReturningUserUnlockSmoke",
     "runEncryptedRecordCrudSmoke",
+    "runEmergencyCodeHidingSmoke",
     'fillField("title field"',
     'waitForNode("Stored sealed on this device")',
     'tapNodeAfterScroll("Delete permanently")',
+    'waitForNode("Sanduqkin no longer has the raw code")',
   ]) {
     assert.match(smokeScript, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }

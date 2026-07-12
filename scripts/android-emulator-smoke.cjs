@@ -2,6 +2,7 @@ const { execFileSync } = require("node:child_process");
 
 const appPackage = "com.sanduqkin.mobile";
 const waitTimeoutMs = 45_000;
+const emergencyCodePattern = /\b[A-Z2-9]{4}(?:-[A-Z2-9]{4}){4}\b/g;
 
 function runAdb(args, options = {}) {
   return execFileSync("adb", args, {
@@ -57,7 +58,11 @@ function waitForNode(label, timeoutMs = waitTimeoutMs) {
     sleep(1_000);
   }
 
-  throw new Error(`Timed out waiting for Android UI text: ${label}\n${lastXml.slice(0, 2_000)}`);
+  throw new Error(`Timed out waiting for Android UI text: ${label}\n${sanitizeUiXml(lastXml).slice(0, 2_000)}`);
+}
+
+function sanitizeUiXml(xml) {
+  return xml.replaceAll(emergencyCodePattern, "[REDACTED EMERGENCY CODE]");
 }
 
 function tapNode(label) {
@@ -105,6 +110,19 @@ function scrollToNode(label, maxSwipes = 12) {
 function tapNodeAfterScroll(label) {
   const [left, top, right, bottom] = scrollToNode(label);
   runAdb(["shell", "input", "tap", String((left + right) / 2), String((top + bottom) / 2)]);
+}
+
+function scrollToAnyNode(labels, maxSwipes = 12) {
+  for (let attempt = 0; attempt <= maxSwipes; attempt += 1) {
+    const xml = dumpUi();
+    for (const label of labels) {
+      const bounds = findNode(xml, label);
+      if (bounds) return { bounds, label };
+    }
+    swipeVertically("up");
+    sleep(350);
+  }
+  throw new Error(`Unable to find any expected Android UI state: ${labels.join(", ")}`);
 }
 
 function fillField(label, value, clear = false) {
@@ -206,10 +224,50 @@ function runEncryptedRecordCrudSmoke() {
   console.log("Android emulator encrypted-record CRUD smoke test passed.");
 }
 
+function runEmergencyCodeHidingSmoke() {
+  runAdb([
+    "shell",
+    "am",
+    "start",
+    "-a",
+    "android.intent.action.VIEW",
+    "-d",
+    "sanduqkin://settings/emergency-access",
+    appPackage,
+  ]);
+  waitForNode("Emergency access");
+  sleep(3_000);
+
+  const state = scrollToAnyNode([
+    "Sealed emergency code is active",
+    "Emergency code setup was interrupted",
+    "Before creating a code",
+  ]);
+  if (state.label === "Before creating a code") {
+    tapNodeAfterScroll("I understand and will write it down safely.");
+    tapNodeAfterScroll("Create emergency code");
+  } else {
+    tapNodeAfterScroll("Regenerate code");
+  }
+
+  waitForNode("Write this code down now", 120_000);
+  const rawCode = decodeXml(dumpUi()).match(emergencyCodePattern)?.[0];
+  if (!rawCode) throw new Error("One-time emergency code was not visible before confirmation.");
+  tapNodeAfterScroll("I wrote down and checked this code.");
+  tapNodeAfterScroll("Confirm code is saved");
+  waitForNode("Sealed emergency code is active", 120_000);
+  waitForNode("Sanduqkin no longer has the raw code");
+  if (decodeXml(dumpUi()).includes(rawCode)) {
+    throw new Error("Raw emergency code remained visible after confirmation.");
+  }
+  console.log("Android emulator emergency-code raw-value hiding smoke test passed.");
+}
+
 function main() {
   runOnboardingSmoke();
   runReturningUserUnlockSmoke();
   runEncryptedRecordCrudSmoke();
+  runEmergencyCodeHidingSmoke();
 }
 
 main();
