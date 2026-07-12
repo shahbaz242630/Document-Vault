@@ -48,6 +48,15 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Final verification: [Security CI run 29208758000](https://github.com/shahbaz242630/Document-Vault/actions/runs/29208758000) passed all four jobs. The emulator job completed in 3m55s and logged both onboarding and returning-user vault-unlock smoke success.
 - Remaining Android E2E expansion: encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
 
+2026-07-13 Android encrypted-record CRUD smoke slice:
+
+- Added stable semantic labels to dynamic vault fields and scroll-aware emulator helpers for the small Android CI viewport.
+- After real returning-user unlock, the runner creates a uniquely named bank-account reference with non-sensitive locator data, waits for Supabase-backed save, opens the detail screen, and confirms decrypted content (`TestBank`) plus the sealed-storage notice.
+- The runner edits the unique title, waits for the updated detail to decrypt, performs the two-step `Delete this record` / `Delete permanently` flow, returns to the vault, and confirms the edited title is absent. Successful runs leave no generated QA record behind.
+- Workflow regression coverage now requires the returning-user and encrypted CRUD stages plus create/read/delete markers. Focused vault tests, mobile typecheck, lint, Phase 1 guard, mobile secret scan, and all 18 workflow-security tests passed locally.
+- Final verification: [Security CI run 29209599047](https://github.com/shahbaz242630/Document-Vault/actions/runs/29209599047) passed all four jobs. The 5m15s emulator job logged onboarding, returning-user unlock, and encrypted-record CRUD success.
+- Remaining Android E2E expansion: recovery reset continuity and emergency-code raw-value hiding.
+
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`

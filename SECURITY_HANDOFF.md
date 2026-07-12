@@ -221,6 +221,15 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Completion result: [Security CI run 29208758000](https://github.com/shahbaz242630/Document-Vault/actions/runs/29208758000) passed `App security gates`, `Supabase live security gates`, `Android native compile`, and the 3m55s `Android emulator smoke` job. Its log confirms both onboarding and returning-user vault-unlock smoke tests passed.
 - Remaining minimum-flow coverage: encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
 
+#### Android encrypted-record CRUD evidence — 2026-07-13
+
+- The release-emulator flow now creates a uniquely named bank-account reference after real password unlock, persists it through the encrypted Supabase repository, opens and decrypts its detail, edits and re-encrypts it, then permanently deletes it through the irreversible two-step confirmation.
+- Read verification asserts both the decrypted `TestBank` locator value and `Stored sealed on this device. Decrypted only when you open it.` Edit verification waits for the unique updated title to decrypt on the detail screen.
+- Delete verification returns to the vault/category state and confirms the generated edited title is absent. Unique per-run names prevent collisions, and a passing run leaves no generated QA record behind.
+- Accessibility/automation hardening: dynamic form text fields expose semantic labels derived from stable field names, while the runner uses scroll-aware UIAutomator lookup instead of fixed coordinates.
+- Completion result: [Security CI run 29209599047](https://github.com/shahbaz242630/Document-Vault/actions/runs/29209599047) passed all four jobs. The 5m15s `Android emulator smoke` job logged onboarding, returning-user vault unlock, and encrypted-record CRUD success.
+- Remaining minimum-flow coverage: recovery reset continuity and emergency-code raw-value hiding.
+
 ### 8. Configure and enforce linting
 
 - [x] Select an Expo/React Native-compatible ESLint configuration.
