@@ -75,6 +75,13 @@ function inputText(label, value) {
   runAdb(["shell", "input", "text", value]);
 }
 
+function typeTextReliably(value) {
+  for (const character of value) {
+    runAdb(["shell", "input", "text", character]);
+    sleep(75);
+  }
+}
+
 function swipeHorizontally(direction) {
   const sizeOutput = runAdb(["shell", "wm", "size"], { quiet: true });
   const [, widthText, heightText] = sizeOutput.match(/Physical size: (\d+)x(\d+)/) ?? [];
@@ -131,7 +138,7 @@ function fillField(label, value, clear = false) {
     runAdb(["shell", "input", "keyevent", "KEYCODE_MOVE_END"]);
     runAdb(["shell", "input", "keyevent", ...Array(48).fill("KEYCODE_DEL")]);
   }
-  runAdb(["shell", "input", "text", value]);
+  typeTextReliably(value);
   runAdb(["shell", "input", "keyevent", "KEYCODE_BACK"]);
   sleep(350);
 }
@@ -200,6 +207,7 @@ function runEncryptedRecordCrudSmoke() {
   fillField("country field", "UAE");
   fillField("currency field", "AED");
   fillField("lastFourDigits field", "4242");
+  waitForNode("4242");
   tapNodeAfterScroll("Save to vault");
 
   waitForNode(title, 120_000);
