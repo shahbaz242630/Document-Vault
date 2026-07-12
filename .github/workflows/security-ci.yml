@@ -148,6 +148,7 @@ jobs:
 
       - name: Boot emulator and run onboarding smoke test
         run: |
+          export PATH="$ANDROID_HOME/platform-tools:$PATH"
           if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
           echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd \
             --force --name sanduqkin-ci --package "system-images;android-36;google_apis;x86_64"
