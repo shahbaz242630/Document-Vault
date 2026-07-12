@@ -4,19 +4,25 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 
 ## Current Baseline
 
-- Audit date: 2026-07-10
-- Audited branch: `codex/phase1-function-size-gate`
-- Audited commit: `1d4407f`
-- Working tree at audit time: clean
-- Latest audited GitHub run: [Security CI PR run 29121804737](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121804737)
-- Latest audited GitHub result: `App security gates` and `Supabase live security gates` passed; CodeQL, GitGuardian, OWASP ZAP, and Vercel also passed on [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21)
+- Audit date: 2026-07-13
+- Audited branch: `redesign/sanduqkin-flow`
+- Latest fully verified implementation commit: `2b2360c`
+- Latest audited GitHub run: [Security CI run 29211310358](https://github.com/shahbaz242630/Document-Vault/actions/runs/29211310358)
+- Latest audited GitHub result: `App security gates`, `Supabase live security gates`, `Android native compile`, and `Android emulator smoke` passed. The emulator verified onboarding, returning-user unlock, encrypted CRUD, and emergency-code raw-value hiding.
 - CI runtime: Node.js `24.3.0` on `ubuntu-latest`
 - Important local constraint: Node.js `24.2.0` is below the repository requirement `^22.13.0 || >=24.3.0` and should be upgraded.
+
+### Next-session security opener
+
+- Sole remaining Android minimum-flow E2E gap: recovery-reset encrypted-record continuity.
+- Do not generate a replacement phrase for the existing shared QA vault; its original phrase is unavailable, and a random phrase cannot derive that vault's MEK.
+- Create a separate disposable recovery-QA account through normal signup, securely retain its generated phrase outside repository files/logs, complete email confirmation if required, and automate temporary-password reset -> same-record decrypt -> original disposable-password restoration -> fixture cleanup.
+- Continue to keep recovery phrases, passwords, MEKs, raw emergency codes, ciphertext, and service-role values out of commits, handoffs, screenshots, artifacts, and logs.
 
 ## Security and CI Controls Already Running
 
 - [x] `Security CI` runs for every pull request.
-- [x] `Security CI` runs for pushes to `main`.
+- [x] `Security CI` runs for pushes to every branch.
 - [x] Workflow permissions default to `contents: read`.
 - [x] Concurrent obsolete runs are cancelled for the same Git reference.
 - [x] Dependencies are installed reproducibly with `npm ci`.
@@ -27,9 +33,9 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
   - Audit result: 26 tests passed.
 - [x] Static repository security guard runs with `npm run check:security`.
 - [x] GitHub Actions workflow security guard runs with `npm run check:github-actions-security`.
-  - It rejects `pull_request_target`, broad write permissions, missing action versions, unapproved actions, and pull-request workflows that reference secrets.
+  - It rejects `pull_request_target`, broad write permissions, missing action versions, unapproved actions, and unguarded pull-request secret access; secret-bearing jobs in mixed workflows must be explicitly push-only.
 - [x] Mobile secret scan runs with `npm run check:mobile-secrets`.
-- [x] Twenty-three security-guard regression tests run in CI, including Phase 1 guards, workflow wiring, all-branch push coverage, and immutable action-pin enforcement.
+- [x] Security-guard regression suites run in CI, including 18 workflow-security tests plus Phase 1, repository-security, mobile-secret, database-catalog, and ZAP-report guards.
 - [x] Phase 1 Definition-of-Done guard runs clean locally and is no longer blocked by oversized-function debt.
 - [x] Production dependency audit rejects high and critical advisories.
   - Audit result: no high or critical advisories; 13 low/moderate findings remain accepted by the current threshold.
@@ -180,23 +186,25 @@ Current state: complete. `expo-doctor@1.19.10` is pinned as a mobile development
 - [x] Add an Android emulator smoke test foundation for Phase 1 flows.
 - [ ] Add an iOS build gate on macOS when an approved runner/budget is available.
 - [ ] Add an iOS simulator smoke test when the macOS environment is available.
-- [ ] Cover at minimum sign-in, unlock, encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
-- [ ] Keep native build and E2E jobs separate from fast unit checks so failures are diagnosable.
+- [x] Cover sign-in and password-based MEK unlock on the Android release emulator.
+- [x] Cover encrypted record create/read/edit/hard-delete on the Android release emulator.
+- [ ] Cover recovery-reset encrypted-record continuity on the Android release emulator.
+- [x] Cover emergency-code one-time visibility and raw-value hiding on the Android release emulator.
+- [x] Keep native build and E2E jobs separate from fast unit checks so failures are diagnosable.
 
-Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, device-runtime, Expo module, or navigation integration failures.
+Current state: Android native compilation and the critical release-emulator flows above are automated and green. Recovery continuity is deferred because the existing QA vault's original phrase is unavailable; use a new disposable recovery-QA account rather than replacing the existing vault's phrase. iOS native/simulator coverage still requires an approved macOS runner and budget.
 
-#### Android native compile implementation evidence — 2026-07-11 (remote CI pending)
+#### Android native compile implementation evidence — 2026-07-11 (completed)
 
 - Scope: implement the first part of finding 7 as a separate Android debug/native compile job.
 - Workflow: `Android native compile` runs independently from fast unit checks on `ubuntu-latest` with a 45-minute timeout.
 - Toolchain: Node.js 24.3.0, Expo prebuild to generate the git-ignored native project, Temurin Java 17 through immutable `actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e`, Android platform/build tools 36, NDK 27.1.12297006, and the generated Gradle wrapper.
-- Compile command: `./gradlew app:assembleDebug -x lint -x test --no-daemon --stacktrace -PreactNativeArchitectures=x86_64` from `apps/mobile/android`.
+- Compile command: `./gradlew app:assembleDebug app:assembleRelease -x lint -x test --no-daemon --stacktrace -PreactNativeArchitectures=x86_64` from `apps/mobile/android`.
 - Regression proof: the focused workflow test failed before implementation because no Android native compile job existed, then passed after the job and immutable action allowlist were added.
 - Local result: the equivalent Windows build succeeded through a short `S:` drive mapping with `BUILD SUCCESSFUL in 1m 53s`; the normal long repository path exceeds Ninja's Windows 260-character generated-path limit.
 - Security verification: GitHub Actions security guard passed; 15 workflow tests passed; mobile secret scan passed; 20 combined security/secret/workflow tests passed.
 - Follow-up refactor: split the three pre-existing oversized UI functions into focused hooks/presentation helpers without changing behavior. `npm run check:phase1`, mobile typecheck, and focused biometric/export tests pass.
 - Coverage follow-up: the UI redesign changed the global source denominator, so only the global mobile floors were recalibrated to the measured post-redesign baseline (28% branches, 37% functions, 40% lines, 39% statements). Dedicated auth, vault-security, and cryptography thresholds remain unchanged.
-- Required before checking item 7.1: push through a PR, obtain a green `Android native compile` GitHub job, and record its run URL and exact result here.
 - First remote result: push run `29149675121` failed in `Set up Java` because Gradle caching was initialized before Expo generated the ignored Android project. Follow-up wiring generates Android before Java cache discovery.
 - Second remote result: push run `29149713679` passed native generation and Java setup, then exited 127 because `sdkmanager` was not on `PATH`. Follow-up uses its explicit `$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager` location.
 - Third remote result: push run `29149765641` failed workflow validation because the inline quoted SDK command was not valid YAML. The command now uses a block scalar and regression coverage parses all workflow files as YAML.
@@ -210,7 +218,7 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Failure handling is bounded and diagnostic: device registration has a three-minute timeout, and failure-only screenshot, logcat, and emulator-startup artifacts are retained for seven days.
 - Regression proof: the workflow security suite covers the separate dependency-bounded job, immutable artifact actions, platform-tools path, bounded device wait, explicit AVD directory, and failure artifacts. All 17 workflow tests and the GitHub Actions security guard pass.
 - Completion result: [Security CI run 29206109673](https://github.com/shahbaz242630/Document-Vault/actions/runs/29206109673) passed `App security gates`, `Supabase live security gates`, `Android native compile`, and `Android emulator smoke`.
-- Residual coverage gap: this establishes reliable Android release/onboarding E2E infrastructure, but the minimum encrypted Phase 1 flow list below remains unchecked and must be implemented next.
+- Follow-up status: subsequent slices added returning-user unlock, encrypted CRUD, and emergency-code hiding. Recovery-reset continuity remains the only Android minimum-flow gap.
 
 #### Android returning-user sign-in/unlock evidence — 2026-07-13
 
@@ -219,7 +227,7 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Security-guard hardening: mixed push/PR workflows may reference secrets only inside jobs with the exact push-only condition. Unguarded PR secret use remains rejected. All 18 workflow-security regressions pass.
 - Release fix: Supabase configuration now uses static Expo public-environment references so production bundles receive client configuration; explicit-env tests and mobile service-role rejection remain intact.
 - Completion result: [Security CI run 29208758000](https://github.com/shahbaz242630/Document-Vault/actions/runs/29208758000) passed `App security gates`, `Supabase live security gates`, `Android native compile`, and the 3m55s `Android emulator smoke` job. Its log confirms both onboarding and returning-user vault-unlock smoke tests passed.
-- Remaining minimum-flow coverage: encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
+- Follow-up status: encrypted CRUD and emergency-code hiding were completed in subsequent slices; recovery-reset continuity remains.
 
 #### Android encrypted-record CRUD evidence — 2026-07-13
 
@@ -228,7 +236,7 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Delete verification returns to the vault/category state and confirms the generated edited title is absent. Unique per-run names prevent collisions, and a passing run leaves no generated QA record behind.
 - Accessibility/automation hardening: dynamic form text fields expose semantic labels derived from stable field names, while the runner uses scroll-aware UIAutomator lookup instead of fixed coordinates.
 - Completion result: [Security CI run 29209599047](https://github.com/shahbaz242630/Document-Vault/actions/runs/29209599047) passed all four jobs. The 5m15s `Android emulator smoke` job logged onboarding, returning-user vault unlock, and encrypted-record CRUD success.
-- Remaining minimum-flow coverage: recovery reset continuity and emergency-code raw-value hiding.
+- Follow-up status: emergency-code hiding was completed in the subsequent slice; recovery-reset continuity remains.
 
 #### Android emergency-code raw-value hiding evidence — 2026-07-13
 
@@ -237,7 +245,7 @@ Current state: TypeScript and Vitest checks cannot detect native Gradle/Xcode, d
 - Failure-log hardening redacts every emergency-code-shaped value before UI XML can enter CI diagnostics; Android screen-capture prevention remains active on the one-time panel.
 - CI also exposed an emulator numeric-keyboard race (`4242` entered as `42`); paced character input plus explicit field-value assertion fixed the automation without weakening production validation.
 - Completion result: [Security CI run 29211310358](https://github.com/shahbaz242630/Document-Vault/actions/runs/29211310358) passed all four jobs. The 5m57s emulator job logged onboarding, returning-user unlock, encrypted CRUD, and emergency-code raw-value hiding success.
-- Sole remaining minimum-flow gap: recovery reset continuity. The shared QA account's external 12-word recovery phrase is required to automate this cryptographic flow and must remain outside repository files and logs.
+- Sole remaining minimum-flow gap: recovery reset continuity. The shared QA account's original phrase is unavailable; next session must create a new disposable account through normal signup and keep its generated phrase outside repository files and logs.
 
 ### 8. Configure and enforce linting
 

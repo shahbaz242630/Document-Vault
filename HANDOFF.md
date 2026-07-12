@@ -8,23 +8,22 @@ Archived full prior handoff:
 
 Start here:
 
-> We are in Phase 1 foundation / integration hardening. The last completed slice live-verified Android encrypted-vault-item continuity through recovery reset against Supabase: setup phrase, reset to a temporary password, add encrypted item, restore the shared test password, and confirm the item still decrypts. Next slice should move to one of the remaining external Phase 1 blockers. Keep slice discipline: implement/test/confirm/update this handoff before moving on.
+> We are in Phase 1 integration hardening on branch `redesign/sanduqkin-flow`. Android release CI now covers onboarding/FAQ, returning-user Supabase sign-in and MEK unlock, encrypted bank-record create/read/edit/hard-delete, and sealed emergency-code one-time visibility followed by raw-value hiding. The latest fully verified implementation is commit `2b2360c` in [Security CI run 29211310358](https://github.com/shahbaz242630/Document-Vault/actions/runs/29211310358), where all four jobs passed. The sole remaining Android E2E minimum-flow gap is recovery-reset continuity. Do not generate a replacement phrase for the existing QA vault: its original phrase is unavailable and a random phrase cannot recover its MEK. Next session should create a separate disposable recovery-QA account through the normal signup flow, securely retain its generated 12-word phrase outside the repository, then automate create-record -> reset to temporary password -> decrypt same record -> restore original disposable password -> cleanup. Email confirmation may require the owner. Keep credentials/phrase out of commits, handoffs, screenshots, and logs.
 
 Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 payments work until Phase 1 verification and hardening gaps are closed.
 
 2026-07-11 update: `npm run check:phase1` is now enforced by the branch-protected `App security gates` job with regression coverage. Both push and PR Security CI runs passed on implementation commit `1d4407f`; move to the next remaining Phase 1 blocker.
 
-2026-07-11 Android native compile slice (local implementation, remote CI pending):
+2026-07-11 Android native compile slice (completed and remotely verified):
 
 - Added a separate, 45-minute-bounded `Android native compile` job to Security CI; it generates the git-ignored Android project with Expo prebuild before initializing Gradle caching and compiling.
-- The job uses Node.js 24.3.0, Temurin Java 17, pinned `actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e`, explicit Android 36/build-tools 36/NDK 27.1 components, and `app:assembleDebug` for x86_64.
+- The job uses Node.js 24.3.0, Temurin Java 17, pinned `actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e`, explicit Android 36/build-tools 36/NDK 27.1 components, and x86_64 debug plus standalone release APK assembly.
 - Added workflow regression coverage and allowlisted only the pinned official Java setup action.
 - Local Gradle verification succeeded through a short Windows drive mapping: `BUILD SUCCESSFUL in 1m 53s`, 546 actionable tasks, debug APK assembled.
 - The normal long workspace path fails CMake/Ninja on Windows because a generated gesture-handler object path exceeds 260 characters. This is a local path-length constraint; the Linux CI workspace uses a shorter path.
 - GitHub Actions security guard, its regression suite, the mobile secret scan, and related security tests passed.
 - Refactored the three UI function-size violations in `biometric-preferences-panel.tsx`, `vault-export-screen.tsx`, and `padlock.tsx` into focused hooks/presentation helpers without changing behavior; `npm run check:phase1`, mobile typecheck, and focused biometric/export tests now pass.
 - Recalibrated only the global mobile coverage floors to the measured post-redesign baseline (28% branches, 37% functions, 40% lines, 39% statements). The stricter auth, vault-security, and cryptography thresholds remain unchanged.
-- Do not mark the Android compile checklist item complete until the new GitHub Actions job passes on a pushed commit/PR.
 - First remote push run `29149675121` correctly failed before compilation because Java's Gradle cache setup ran before the git-ignored Android project had been generated. The follow-up moves Expo prebuild ahead of Java/Gradle cache initialization.
 - Second remote push run `29149713679` passed Expo prebuild and Java setup, then showed that `sdkmanager` is installed but not on the Ubuntu runner `PATH`. The follow-up invokes it explicitly from `$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager`.
 - Third remote push run `29149765641` caught invalid inline YAML quoting before jobs started. The SDK command now uses a YAML block scalar, and the workflow regression suite parses every workflow as YAML to prevent recurrence.
@@ -37,7 +36,7 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Verified path: launch app, tap `Create your vault`, reach FAQ 1 of 15, swipe forward to FAQ 2, swipe back to FAQ 1, advance through all 15 questions, tap `I'm ready`, and reach account `Step 1 of 3`.
 - Failure-only evidence includes a screenshot, logcat, and emulator startup log retained for seven days; the release APK is retained for one day.
 - Final verification: [Security CI run 29206109673](https://github.com/shahbaz242630/Document-Vault/actions/runs/29206109673) passed all four jobs, including `Android native compile` and `Android emulator smoke`.
-- This is the Android E2E foundation and onboarding coverage only. Next expand it across sign-in, unlock, encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
+- This established the Android E2E foundation; subsequent 2026-07-13 slices added sign-in/unlock, encrypted CRUD, and emergency-code hiding. Recovery-reset continuity remains deferred.
 
 2026-07-13 Android returning-user sign-in/unlock smoke slice:
 
@@ -46,7 +45,7 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - The credential-bearing emulator job is push-only. The GitHub Actions security guard now permits secrets in a mixed push/PR workflow only when every secret-bearing job has the explicit `github.event_name == 'push'` boundary; an 18-test regression suite covers this rule.
 - Fixed a real release-only configuration bug: Expo cannot inline dynamic `process.env` enumeration, so Supabase client configuration now includes static `process.env.EXPO_PUBLIC_SUPABASE_*` references while preserving service-role rejection.
 - Final verification: [Security CI run 29208758000](https://github.com/shahbaz242630/Document-Vault/actions/runs/29208758000) passed all four jobs. The emulator job completed in 3m55s and logged both onboarding and returning-user vault-unlock smoke success.
-- Remaining Android E2E expansion: encrypted record create/read/edit/hard-delete, recovery reset continuity, and emergency-code raw-value hiding.
+- Subsequent slices completed encrypted CRUD and emergency-code hiding; recovery-reset continuity remains deferred.
 
 2026-07-13 Android encrypted-record CRUD smoke slice:
 
@@ -55,7 +54,7 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - The runner edits the unique title, waits for the updated detail to decrypt, performs the two-step `Delete this record` / `Delete permanently` flow, returns to the vault, and confirms the edited title is absent. Successful runs leave no generated QA record behind.
 - Workflow regression coverage now requires the returning-user and encrypted CRUD stages plus create/read/delete markers. Focused vault tests, mobile typecheck, lint, Phase 1 guard, mobile secret scan, and all 18 workflow-security tests passed locally.
 - Final verification: [Security CI run 29209599047](https://github.com/shahbaz242630/Document-Vault/actions/runs/29209599047) passed all four jobs. The 5m15s emulator job logged onboarding, returning-user unlock, and encrypted-record CRUD success.
-- Remaining Android E2E expansion: recovery reset continuity and emergency-code raw-value hiding.
+- The subsequent emergency-code slice completed raw-value hiding coverage; recovery-reset continuity remains deferred.
 
 2026-07-13 Android emergency-code hiding smoke slice:
 
@@ -64,7 +63,7 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - It then waits for `Sealed emergency code is active`, asserts `Sanduqkin no longer has the raw code`, and verifies the captured one-time value is absent from the UI hierarchy.
 - Any emergency-code pattern is redacted from UIAutomator failure diagnostics. The Android form helper also moved to paced character entry after CI caught a numeric-keyboard timing race; production validation remained unchanged.
 - Final verification: [Security CI run 29211310358](https://github.com/shahbaz242630/Document-Vault/actions/runs/29211310358) passed all four jobs. The 5m57s emulator job logged onboarding, returning-user unlock, encrypted CRUD, and emergency-code raw-value hiding success.
-- Sole remaining Android E2E gap: recovery-reset continuity. Running it against the shared QA account requires its externally stored 12-word recovery phrase; the phrase must never be committed or written into this handoff.
+- Sole remaining Android E2E gap: recovery-reset continuity. The shared QA account's original phrase is unavailable, so next session must use a new disposable account created through normal signup and retain its generated phrase outside the repository.
 
 ## Source Of Truth
 
@@ -72,10 +71,11 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Product/app name: Sanduqkin
 - BRD: `Vault_BRD_v1.0.md`, version shown in file: 1.1
 - Active scope: Phase 1 - Core Single-User Vault
-- Current handoff refresh: 2026-07-11
-- Current branch: `codex/phase1-function-size-gate`
-- Current PR: [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21)
-- Current working tree was clean after pushing PR 21; this handoff update is the current uncommitted documentation slice.
+- Current handoff refresh: 2026-07-13
+- Current branch: `redesign/sanduqkin-flow`
+- Current commit before this documentation refresh: `8f8bf77`
+- Current PR: none open for this branch
+- Expected local-only files: `.playwright-mcp/` and `welcome.png`; keep them untracked unless the owner explicitly scopes them into a future change.
 
 ## Product Guardrails
 
@@ -180,44 +180,12 @@ Completed on 2026-06-08:
   - status/timestamps/ids
 - Supabase table has no `raw_code`, `emergency_code`, or plaintext code column.
 
-## Changes In Current Uncommitted Slice
+## Current Working Tree Guidance
 
-These files are intentionally changed and should be carried forward:
-
-- `HANDOFF.md`
-- `docs/handoff/archive/HANDOFF-2026-06-08-pre-archive.md`
-- `apps/mobile/app/_layout.tsx`
-- `apps/mobile/app/settings/emergency-access.tsx`
-- `apps/mobile/package.json`
-- `apps/mobile/app.json`
-- `apps/mobile/tsconfig.json`
-- `apps/mobile/src/features/auth/components/email-password-auth-form.tsx`
-- `apps/mobile/src/features/auth/components/forgot-password-panel.tsx`
-- `apps/mobile/src/features/auth/components/reset-password-panel.tsx`
-- `apps/mobile/src/features/auth/password-reset-service.ts`
-- `apps/mobile/src/features/auth/password-reset-service.test.ts`
-- `apps/mobile/src/features/vault/supabase-emergency-grant-repository.ts`
-- `apps/mobile/src/features/vault/supabase-emergency-grant-repository.test.ts`
-- `apps/mobile/src/features/vault/vault-session-context.tsx`
-- `apps/mobile/src/features/vault/vault-session-context.test.ts`
-- `apps/mobile/src/shared/api/supabase-schema.test.ts`
-- `apps/mobile/src/shared/api/supabase-client.ts`
-- `apps/mobile/src/shared/api/supabase-client.test.ts`
-- `apps/mobile/src/shared/runtime/buffer-polyfill.ts`
-- `apps/mobile/src/app-route-tests/emergency-access-route.test.ts`
-- `apps/mobile/src/app-route-tests/vault-export-route.test.ts`
-- `package-lock.json`
-- `package.json`
-- `patches/react-native-libsodium+1.7.0.patch`
-- `services/api/package.json`
-- `supabase/migrations/20260608200000_add_sealed_emergency_code_audit_event_types.sql`
-
-Files intentionally removed from the Expo Router app tree:
-
-- `apps/mobile/app/settings/emergency-access.test.ts`
-- `apps/mobile/app/vault/export.test.ts`
-
-Reason: Expo Router bundled `.test.ts` files under `apps/mobile/app`, causing Metro to try loading Node-only imports such as `node:fs`.
+- All implementation and handoff changes through commit `8f8bf77` are pushed on `redesign/sanduqkin-flow`.
+- There is no open PR for this branch at the 2026-07-13 refresh.
+- `.playwright-mcp/` and `welcome.png` are pre-existing local-only untracked items; preserve them and do not include them in commits unless the owner explicitly requests it.
+- Expo Router tests must remain outside `apps/mobile/app`; keep route tests under `apps/mobile/src/app-route-tests` so Metro does not bundle Node-only test imports.
 
 ## Backend / Supabase State
 
@@ -247,7 +215,8 @@ Do not write Supabase passwords or tokens to repo files.
 
 - Current shared Android/Supabase QA account email: `shahbaz.malik@hotmail.co.uk`
 - Do not store the test account password, recovery phrase, raw emergency codes, Supabase tokens, database passwords, or other secrets in this repo or handoff.
-- The project owner should keep the test password and recovery phrase in an external password manager. Codex can use them transiently during a live QA session when provided in chat.
+- The existing shared QA account's original recovery phrase is unavailable. Do not generate a random replacement or use that account for recovery-continuity automation.
+- Create a separate disposable recovery-QA account next session and retain its generated phrase in an external password manager or approved protected environment only.
 
 ## Bugs Found And Fixed In Last Session
 
@@ -344,54 +313,21 @@ adb shell am start -n com.sanduqkin.mobile/com.sanduqkin.mobile.MainActivity
 
 ## Recommended Next Slice
 
-Current product/UX direction agreed on 2026-06-12:
+Primary next slice: Android recovery-reset encrypted-record continuity using a new disposable QA account.
 
-- Add a Phase 1 vault records UX/data hardening track before Phase 2 work.
-- Separate saved-record browsing from record creation:
-  - `Vault` is the saved secure records page.
-  - `Add <asset class>` pages focus on creating one record.
-  - After saving, show the relevant category/list view with the saved card and a clear `+ Add another <asset class>` action.
-- Support multiple records for every asset class, with a maximum of 20 active records per user per asset class.
-- Each saved record card should expose a two-dot/overflow menu with `Edit` and `Delete permanently`.
-- Delete is hard delete only, with an explicit irreversible confirmation. No restore flow for vault records.
-- Bulk actions should be available on saved-record/category views: select records, delete selected, and delete all in category, each with clear confirmation.
-- Keep the database zero-knowledge:
-  - Supabase may store safe metadata such as user id, asset category/type, timestamps, ciphertext, nonce, and audit/event metadata.
-  - Actual asset details stay encrypted in the payload before reaching Supabase.
-  - Do not redesign into plaintext normalized asset-detail tables unless the zero-knowledge requirement is intentionally revisited.
-- Database hardening/verification required:
-  - Verify RLS on every user-owned table.
-  - Verify users can only select/insert/update/delete rows where `user_id = auth.uid()`.
-  - Verify no public/anon access to vault tables.
-  - Verify indexes support the real list/category queries.
-  - Add DB-level enforcement for the 20-active-records-per-category limit if practical.
-  - Use migration files for all DB changes; do not edit remote schema manually without a migration.
-  - Use Supabase backups/platform capabilities where applicable; do not store database passwords or tokens in repo files.
-  - Supabase handles connection pooling for hosted usage; verify configuration before adding custom pooling.
-- UI direction:
-  - Use a restrained glass-inspired design language for cards, menus, and action surfaces.
-  - Because the app is Expo/React Native, do not depend on iOS-only Liquid Glass APIs.
-  - Provide robust fallbacks for old Android/iOS devices and low-end phones; avoid fragile blur-heavy UI that can break or perform poorly.
-  - Inputs must handle real-world names and text safely, including apostrophes and punctuation.
-  - Web/Safari compatibility matters only for future web surfaces; Phase 1 remains mobile-first.
-- Work in small slices: implement one narrow behavior, test it, live-check if needed, update this handoff, then move to the next slice.
+1. Create the account through Sanduqkin's normal signup/recovery-phrase flow; do not modify the existing shared QA vault or invent a replacement phrase for it.
+2. Complete any required email confirmation with the owner.
+3. Store disposable credentials and the generated phrase only in an approved external password manager or protected GitHub `Preview` environment. Never add them to files, commits, handoffs, screenshots, or logs.
+4. Extend the release-emulator flow to create a uniquely named encrypted record, reset to a generated temporary password with the phrase, sign in and decrypt the same record, restore the disposable account's original password, and permanently delete the record/account fixture.
+5. Redact recovery-phrase and password-shaped values from all failure diagnostics, then obtain a green `Android emulator smoke` run and update both handoffs.
 
-Recommended next vault UX/data slices:
+If recovery automation remains deferred, choose one external Phase 1 blocker instead:
 
-1. Write/approve a short design spec and implementation plan for the vault records UX/data hardening track.
-2. Add DB verification tests/scripts for existing RLS, grants, indexes, and zero-knowledge columns.
-3. Add/verify migration for category metadata and 20 active records per user/category, if not already covered by existing `vault_assets`.
-4. Refactor navigation so `Vault` shows saved records and `Add <asset class>` pages are creation-only.
-5. Add saved-record cards with overflow menu, edit, and hard-delete confirmation for one asset class first, likely bank accounts.
-6. Extend the card/list/add-another pattern to remaining asset classes.
-7. Add bulk select/delete selected/delete all in category.
-8. Apply glass-inspired UI polish with old-device fallbacks and run Android QA.
+- macOS/Xcode/iOS build and simulator verification when an approved runner/budget is available.
+- Resend approval and production account-deletion confirmation-email verification.
+- Protected execution of the two opt-in hosted-Supabase integration test files with disposable cleanup.
 
-Remaining external Phase 1 blockers still exist:
-
-- macOS/Xcode/iOS simulator verification.
-- Resend approval / production account-deletion confirmation email verification once available.
-- `npm run check:phase1` known function-size debt.
+Already completed and not a next slice: Phase 1 function-size enforcement, vault category/add/list/edit/hard-delete/bulk UX, RLS/schema guards, Android native debug/release compilation, onboarding/FAQ E2E, returning-user unlock E2E, encrypted CRUD E2E, and emergency-code raw-value hiding E2E.
 
 Code/test progress on 2026-06-09:
 
@@ -703,9 +639,10 @@ npm run typecheck --workspace @vault/mobile
 
 ## Critical Remaining Phase 1 Gaps
 
+- Android recovery-reset E2E continuity remains deferred. The existing QA vault's original phrase is unavailable; use a new disposable account and retain its generated phrase securely rather than attempting to replace the existing phrase.
 - Real Supabase MFA remains launch-deferred because it is paid. Placeholder TOTP/factor-id paths are not production-valid.
 - iOS native verification is blocked in this Windows environment. Needs macOS/Xcode/iOS simulator verification.
-- Password reset/recovery MEK rotation and re-wrapping is implemented, unit-verified, and Android/Supabase live-verified for key material and encrypted-asset continuity.
+- Password reset/recovery MEK rotation and re-wrapping is implemented, unit-verified, and previously Android/Supabase live-verified manually; repeatable release-emulator automation is the remaining gap above.
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified.
 - `npm run check:phase1` is enforced by the branch-protected `App security gates` job and passed in both push and PR Security CI runs.
 - Expo SDK audit blocker is mitigated as far as current SDK 56 packages allow: no critical advisories remain, and the residual moderate advisories are upstream `xcode -> uuid` through Expo config tooling.
@@ -723,15 +660,16 @@ npm run typecheck --workspace @vault/mobile
 
 ## Session Start Checklist
 
-1. Run `git status --short` and preserve the current uncommitted QA slice.
+1. Run `git status --short --branch`; preserve `.playwright-mcp/` and `welcome.png` as local-only untracked items.
 2. Run focused tests before editing:
 
 ```powershell
-npm run test --workspace @vault/mobile -- vault-session-context.test.ts emergency-access-route.test.ts supabase-emergency-grant-repository.test.ts sealed-emergency-code-service.test.ts supabase-schema.test.ts
+npm run test --workspace @vault/mobile -- password-reset-service.test.ts recovery-phrase-flow.test.ts returning-user-unlock-flow.test.ts supabase-key-material-repository.test.ts
 npm run typecheck --workspace @vault/mobile
+npm run check:phase1
+npm run check:mobile-secrets
 ```
 
-3. For Android QA, start emulator and Metro dev client with the startup notes above. If testing recovery reset by deep link, sign in first or use a real Supabase reset link/session.
-4. Continue with one of the remaining external blockers.
-5. Update this handoff after every slice.
-6. For the vault UX/data hardening track, start from the 2026-06-12 agreed direction above and preserve zero-knowledge storage while improving saved-record UX.
+3. Create a new disposable recovery-QA account through normal signup; do not reuse or rotate the existing shared QA vault without its original phrase.
+4. Save the generated phrase outside the repository, complete email confirmation if required, and add only approved disposable values to the protected `Preview` environment.
+5. Implement recovery continuity as described in `Recommended Next Slice`, obtain a green release-emulator run, clean up the fixture, and update both handoffs.
