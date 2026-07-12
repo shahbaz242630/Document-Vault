@@ -102,6 +102,7 @@ export function EmailPasswordAuthForm({ mode }: EmailPasswordAuthFormProps) {
 
       <View style={{ gap: 14 }}>
         <Field
+          accessibilityLabel={`${mode === "sign-in" ? "Sign-in" : "Sign-up"} email`}
           autoCapitalize="none"
           inputMode="email"
           label="Email"
@@ -109,6 +110,7 @@ export function EmailPasswordAuthForm({ mode }: EmailPasswordAuthFormProps) {
           value={values.email}
         />
         <Field
+          accessibilityLabel={`${mode === "sign-in" ? "Sign-in" : "Sign-up"} password`}
           hint={
             mode === "sign-up"
               ? "At least 12 characters. Longer is stronger — a short sentence works well."

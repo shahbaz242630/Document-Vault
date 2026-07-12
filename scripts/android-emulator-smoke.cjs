@@ -65,6 +65,11 @@ function tapNode(label) {
   runAdb(["shell", "input", "tap", String((left + right) / 2), String((top + bottom) / 2)]);
 }
 
+function inputText(label, value) {
+  tapNode(label);
+  runAdb(["shell", "input", "text", value]);
+}
+
 function swipeHorizontally(direction) {
   const sizeOutput = runAdb(["shell", "wm", "size"], { quiet: true });
   const [, widthText, heightText] = sizeOutput.match(/Physical size: (\d+)x(\d+)/) ?? [];
@@ -76,8 +81,12 @@ function swipeHorizontally(direction) {
   runAdb(["shell", "input", "swipe", String(startX), String(Math.round(height * 0.5)), String(endX), String(Math.round(height * 0.5)), "350"]);
 }
 
-function main() {
+function launchApp() {
   runAdb(["shell", "monkey", "-p", appPackage, "-c", "android.intent.category.LAUNCHER", "1"]);
+}
+
+function runOnboardingSmoke() {
+  launchApp();
   waitForNode("Create your vault");
   tapNode("Create your vault");
   waitForNode("Question 1 of 15");
@@ -95,6 +104,28 @@ function main() {
   tapNode("I'm ready");
   waitForNode("Step 1 of 3");
   console.log("Android emulator onboarding smoke test passed.");
+}
+
+function runReturningUserUnlockSmoke() {
+  const email = process.env.ANDROID_E2E_TEST_EMAIL?.trim();
+  const password = process.env.ANDROID_E2E_TEST_PASSWORD;
+  if (!email || !password) throw new Error("Android E2E account credentials are not configured.");
+
+  runAdb(["shell", "pm", "clear", appPackage]);
+  launchApp();
+  tapNode("I already have an account");
+  waitForNode("Welcome back");
+  inputText("Sign-in email", email);
+  inputText("Sign-in password", password);
+  tapNode("Continue");
+  waitForNode("Your vault", 120_000);
+  waitForNode("Sealed on this device");
+  console.log("Android emulator returning-user vault unlock smoke test passed.");
+}
+
+function main() {
+  runOnboardingSmoke();
+  runReturningUserUnlockSmoke();
 }
 
 main();

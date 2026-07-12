@@ -110,6 +110,8 @@ jobs:
       - name: Compile Android debug APK
         working-directory: apps/mobile/android
         env:
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
           NODE_ENV: production
         run: ./gradlew app:assembleDebug app:assembleRelease -x lint -x test --no-daemon --stacktrace -PreactNativeArchitectures=x86_64
 
@@ -124,7 +126,9 @@ jobs:
   android-emulator-smoke:
     name: Android emulator smoke
     runs-on: ubuntu-latest
+    environment: Preview
     needs: android-native-compile
+    if: github.event_name == 'push'
     timeout-minutes: 25
     steps:
       - name: Check out repository
@@ -176,6 +180,9 @@ jobs:
           adb shell settings put global animator_duration_scale 0
           adb install -r android-smoke-apk/app-release.apk
           node scripts/android-emulator-smoke.cjs
+        env:
+          ANDROID_E2E_TEST_EMAIL: ${{ secrets.ANDROID_E2E_TEST_EMAIL }}
+          ANDROID_E2E_TEST_PASSWORD: ${{ secrets.ANDROID_E2E_TEST_PASSWORD }}
 
       - name: Capture emulator failure evidence
         if: failure()

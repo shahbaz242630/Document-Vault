@@ -74,7 +74,7 @@ test("runs Android native compilation as a separate bounded Security CI job", ()
   assert.match(workflow, /\$ANDROID_HOME\/cmdline-tools\/latest\/bin\/sdkmanager/);
 });
 
-test("runs a bounded Android emulator onboarding smoke test after native compilation", () => {
+test("runs bounded Android onboarding and returning-user unlock smoke tests after native compilation", () => {
   const workflow = fs.readFileSync(
     path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
     "utf8",
@@ -82,6 +82,8 @@ test("runs a bounded Android emulator onboarding smoke test after native compila
 
   assert.match(workflow, /android-emulator-smoke:\s*\n\s*name: Android emulator smoke/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?needs: android-native-compile/);
+  assert.match(workflow, /android-emulator-smoke:[\s\S]*?environment: Preview/);
+  assert.match(workflow, /android-emulator-smoke:[\s\S]*?if: github\.event_name == 'push'/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?timeout-minutes: 25/);
   assert.match(workflow, /name: android-release-apk/);
   assert.match(workflow, /export PATH="\$ANDROID_HOME\/platform-tools:\$PATH"/);
@@ -89,6 +91,8 @@ test("runs a bounded Android emulator onboarding smoke test after native compila
   assert.match(workflow, /ANDROID_AVD_HOME="\$RUNNER_TEMP\/android-avd"/);
   assert.match(workflow, /emulator" -list-avds \| grep -Fx sanduqkin-ci/);
   assert.match(workflow, /node scripts\/android-emulator-smoke\.cjs/);
+  assert.match(workflow, /ANDROID_E2E_TEST_EMAIL: \$\{\{ secrets\.ANDROID_E2E_TEST_EMAIL \}\}/);
+  assert.match(workflow, /ANDROID_E2E_TEST_PASSWORD: \$\{\{ secrets\.ANDROID_E2E_TEST_PASSWORD \}\}/);
   assert.match(workflow, /if: failure\(\)[\s\S]*?adb logcat/);
   assert.match(workflow, /retention-days: 7/);
 });
@@ -364,4 +368,37 @@ test("allows scheduled workflows to use secrets with minimal permissions", () =>
     ok: true,
     violations: [],
   });
+});
+
+test("allows pull-request workflows to isolate secrets in push-only jobs", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
+  const workflowDir = path.join(tmp, ".github", "workflows");
+
+  fs.mkdirSync(workflowDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(workflowDir, "push-secret.yml"),
+    [
+      "name: push secret",
+      "on:",
+      "  pull_request:",
+      "  push:",
+      "permissions:",
+      "  contents: read",
+      "jobs:",
+      "  public-check:",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      "      - run: echo public",
+      "  protected-check:",
+      "    if: github.event_name == 'push'",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      "      - run: test -n '${{ secrets.QA_PASSWORD }}'",
+      "",
+    ].join("\n"),
+  );
+
+  const result = runGitHubActionsSecurityCheck({ cwd: tmp });
+
+  assert.deepEqual(result, { ok: true, violations: [] });
 });

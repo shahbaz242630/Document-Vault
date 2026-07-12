@@ -24,4 +24,14 @@ describe("EmailPasswordAuthForm session handoff", () => {
       "const client = createSupabaseClient();",
     );
   });
+
+  it("exposes stable credential field labels for Android E2E automation", () => {
+    const source = readFileSync(
+      resolve(__dirname, "email-password-auth-form.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain('"Sign-in" : "Sign-up"} email`');
+    expect(source).toContain('"Sign-in" : "Sign-up"} password`');
+  });
 });

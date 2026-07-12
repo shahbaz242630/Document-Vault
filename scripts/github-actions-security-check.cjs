@@ -115,6 +115,19 @@ function checkWorkflowSecrets(filePath, contents) {
     return [];
   }
 
+  const jobsStart = contents.search(/^jobs\s*:\s*$/m);
+  const jobBlocks = jobsStart >= 0 ? collectJobBlocks(contents.slice(jobsStart)) : [];
+  const secretsBeforeJobs = jobsStart < 0 || /\$\{\{\s*secrets\./.test(contents.slice(0, jobsStart));
+  const hasUnguardedSecretJob = jobBlocks.some(
+    (block) =>
+      /\$\{\{\s*secrets\./.test(block) &&
+      !/^    if:\s*github\.event_name\s*==\s*['"]push['"]\s*$/m.test(block),
+  );
+
+  if (!secretsBeforeJobs && !hasUnguardedSecretJob) {
+    return [];
+  }
+
   return [
     {
       message: "Workflows triggered by pull_request must not reference GitHub secrets.",
@@ -122,6 +135,14 @@ function checkWorkflowSecrets(filePath, contents) {
       rule: "github-actions-no-secrets-on-pr",
     },
   ];
+}
+
+function collectJobBlocks(jobsSection) {
+  const headers = [...jobsSection.matchAll(/^  [A-Za-z0-9_-]+:\s*$/gm)];
+
+  return headers.map((header, index) =>
+    jobsSection.slice(header.index, headers[index + 1]?.index ?? jobsSection.length),
+  );
 }
 
 function collectWorkflowFiles(workflowDir) {
