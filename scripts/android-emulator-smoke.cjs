@@ -93,7 +93,7 @@ function main() {
   }
 
   tapNode("I'm ready");
-  waitForNode("Your email and password first");
+  waitForNode("Step 1 of 3");
   console.log("Android emulator onboarding smoke test passed.");
 }
 
