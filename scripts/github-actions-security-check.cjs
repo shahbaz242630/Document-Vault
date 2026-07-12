@@ -4,6 +4,7 @@ const path = require("node:path");
 const WORKFLOW_DIR = path.join(".github", "workflows");
 const ALLOWED_ACTIONS = new Set([
   "actions/checkout",
+  "actions/download-artifact",
   "actions/setup-node",
   "actions/setup-java",
   "actions/upload-artifact",
