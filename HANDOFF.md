@@ -8,7 +8,7 @@ Archived full prior handoff:
 
 Start here:
 
-> We are in Phase 1 integration hardening on branch `redesign/sanduqkin-flow`. Android release CI covers onboarding/FAQ, returning-user Supabase sign-in and MEK unlock, encrypted bank-record CRUD/hard-delete, emergency-code one-time visibility/raw-value hiding, and recovery-reset encrypted-record continuity. A separate protected job now also executes both formerly skipped hosted-Supabase integration tests serially against the verified disposable account after Android cleanup. The latest fully verified implementation is commit `b250aa2` in [Security CI run 29233949611](https://github.com/shahbaz242630/Document-Vault/actions/runs/29233949611), where all five jobs passed. Recovery phrases and temporary passwords remain in runner memory only; credentials, MEKs, ciphertext, and raw vault payloads remain absent from logs and artifacts. The hosted tests re-authenticate during cleanup, hard-delete their unique fixtures, verify deletion, and emit safe boolean/length summaries only. The next security slice should select an owner-approved remaining external blocker (iOS/macOS or Resend) or continue the recommended repository/environment hardening backlog.
+> We are in Phase 1 integration hardening on branch `redesign/sanduqkin-flow`. Android release CI covers onboarding/FAQ, returning-user Supabase sign-in and MEK unlock, encrypted bank-record CRUD/hard-delete, emergency-code one-time visibility/raw-value hiding, and recovery-reset encrypted-record continuity. A credential-free macOS job now also generates the iOS project, resolves pods, compiles an unsigned Release app with Xcode 26.2, installs it on an iPhone simulator, and proves it remains alive after launch. The protected hosted-Supabase job still executes both live integration tests after Android cleanup. The latest fully verified implementation is commit `3b19e05` in [Security CI run 29246161478](https://github.com/shahbaz242630/Document-Vault/actions/runs/29246161478), where all six jobs passed. Sensitive recovery and test values remain out of commits, logs, screenshots, and artifacts. The next slice may configure signed archive/TestFlight verification, select Resend, or continue repository/environment hardening.
 
 Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 payments work until Phase 1 verification and hardening gaps are closed.
 
@@ -83,6 +83,17 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Assertions now report only safe booleans, counts, types, column names, and ciphertext/nonce lengths; failures do not print ciphertext or decrypted payload objects.
 - Final verification: [Security CI run 29233949611](https://github.com/shahbaz242630/Document-Vault/actions/runs/29233949611) passed all five jobs on commit `b250aa2`. Each hosted test file ran one live test and passed; durations were 4.69s and 1.67s.
 
+2026-07-13 iOS native compile and simulator launch slice:
+
+- Added a separate 45-minute `iOS simulator smoke` job on GitHub-hosted `macos-15`; it needs no Apple credentials or test-user credentials.
+- Expo prebuild generates the ignored iOS project, CocoaPods runs from the mobile iOS directory for correct monorepo autolinking, and Xcode builds a Release app for `iphonesimulator` with code signing disabled.
+- The job explicitly selects Xcode 26.2 because Expo Modules JSI requires Swift tools 6.2 and the runner's default Xcode 16.4 provides Swift 6.1.
+- After compilation, the job selects and boots an available iPhone simulator, installs `Sanduqkin.app`, launches `com.sanduqkin.mobile`, waits 15 seconds, and terminates it; early app exit fails the job.
+- Failure-only evidence is limited to a simulator screenshot retained for seven days when available. Successful runs upload no app binary or screenshots.
+- Workflow regression coverage now requires the macOS bound, Xcode selection, mobile CocoaPods working directory, unsigned Release build, simulator install/launch/terminate sequence, and absence of secret references.
+- Final verification: [Security CI run 29246161478](https://github.com/shahbaz242630/Document-Vault/actions/runs/29246161478) passed all six jobs on implementation commit `3b19e05`. `iOS simulator smoke` completed in 23m30s.
+- Remaining iOS scope: signed archive, TestFlight delivery, entitlements, and physical-device behavior are not covered by this unsigned simulator slice.
+
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
@@ -91,7 +102,7 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Active scope: Phase 1 - Core Single-User Vault
 - Current handoff refresh: 2026-07-13
 - Current branch: `redesign/sanduqkin-flow`
-- Current commit before this documentation refresh: `b250aa2`
+- Current commit before this documentation refresh: `3b19e05`
 - Current PR: none open for this branch
 - Expected local-only files: `.playwright-mcp/` and `welcome.png`; keep them untracked unless the owner explicitly scopes them into a future change.
 

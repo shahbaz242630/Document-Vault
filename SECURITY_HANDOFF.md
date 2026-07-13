@@ -6,9 +6,9 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 
 - Audit date: 2026-07-13
 - Audited branch: `redesign/sanduqkin-flow`
-- Latest fully verified implementation commit: `b250aa2`
-- Latest audited GitHub run: [Security CI run 29233949611](https://github.com/shahbaz242630/Document-Vault/actions/runs/29233949611)
-- Latest audited GitHub result: `App security gates`, `Supabase live security gates`, `Android native compile`, `Android emulator smoke`, and `Hosted Supabase integration` passed. Android verified all minimum flows, and both formerly skipped hosted-Supabase test files executed successfully.
+- Latest fully verified implementation commit: `3b19e05`
+- Latest audited GitHub run: [Security CI run 29246161478](https://github.com/shahbaz242630/Document-Vault/actions/runs/29246161478)
+- Latest audited GitHub result: all six jobs passed, including the new unsigned `iOS simulator smoke`, the existing Android minimum flows, and both hosted-Supabase integration tests.
 - CI runtime: Node.js `24.3.0` on `ubuntu-latest`
 - Important local constraint: Node.js `24.2.0` is below the repository requirement `^22.13.0 || >=24.3.0` and should be upgraded.
 
@@ -17,7 +17,8 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 - Android minimum-flow release-emulator coverage is complete, including recovery-reset encrypted-record continuity.
 - Recovery uses a separate verified disposable account. CI creates a fresh phrase and wrapped MEK per run, keeps the phrase and derived temporary password only in process memory/environment, restores the original protected test password, and hard-deletes the generated record.
 - Both formerly skipped hosted-Supabase integration tests now execute serially in a push-only protected job after Android cleanup.
-- Next slice: select an owner-approved external blocker (iOS/macOS or Resend) or continue the additional recommended hardening backlog.
+- Unsigned iOS Release compilation and launch-survival verification now run on a GitHub-hosted macOS simulator without Apple credentials. Signed archive, TestFlight, and real-device coverage remain separate release slices.
+- Next slice: configure an owner-approved signed/TestFlight path, select Resend, or continue the additional recommended hardening backlog.
 - Continue to keep recovery phrases, passwords, MEKs, raw emergency codes, ciphertext, and service-role values out of commits, handoffs, screenshots, artifacts, and logs.
 
 ## Security and CI Controls Already Running
@@ -54,6 +55,7 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 - [x] Current security workflows do not expose repository secrets to pull-request code.
 - [x] OWASP ZAP runs a passive baseline scan against an isolated local API on pull requests, `main`, and a weekly schedule.
 - [x] Both hosted-Supabase integration tests run serially in a push-only protected job with verified fixture deletion.
+- [x] An unsigned iOS Release app compiles and survives launch on a GitHub-hosted iPhone simulator without signing credentials.
 
 ## Open Findings — Required Checklist
 
@@ -197,15 +199,26 @@ Current state: complete. `expo-doctor@1.19.10` is pinned as a mobile development
 
 - [x] Add an Android debug/native compile gate.
 - [x] Add an Android emulator smoke test foundation for Phase 1 flows.
-- [ ] Add an iOS build gate on macOS when an approved runner/budget is available.
-- [ ] Add an iOS simulator smoke test when the macOS environment is available.
+- [x] Add an iOS build gate on macOS when an approved runner/budget is available.
+- [x] Add an iOS simulator smoke test when the macOS environment is available.
 - [x] Cover sign-in and password-based MEK unlock on the Android release emulator.
 - [x] Cover encrypted record create/read/edit/hard-delete on the Android release emulator.
 - [x] Cover recovery-reset encrypted-record continuity on the Android release emulator.
 - [x] Cover emergency-code one-time visibility and raw-value hiding on the Android release emulator.
 - [x] Keep native build and E2E jobs separate from fast unit checks so failures are diagnosable.
 
-Current state: Android native compilation and every listed critical release-emulator flow are automated and green. Recovery continuity uses a separate verified disposable account and an in-memory-only phrase bootstrap; the existing shared QA vault remains untouched. iOS native/simulator coverage still requires an approved macOS runner and budget.
+Current state: Android native compilation and every listed critical release-emulator flow are automated and green. Recovery continuity uses a separate verified disposable account and an in-memory-only phrase bootstrap; the existing shared QA vault remains untouched. Unsigned iOS Release compilation and simulator launch-survival coverage are also automated and green. Signed archives, TestFlight delivery, and real-device behavior remain outside this slice.
+
+#### iOS native compile and simulator evidence — 2026-07-13
+
+- Scope: add a separate credential-free iOS native gate that generates the git-ignored native project, resolves CocoaPods, compiles an unsigned Release simulator app, installs it, launches it, waits 15 seconds, and fails if it is no longer running.
+- Workflow: `iOS simulator smoke` runs independently on `macos-15` with a 45-minute timeout, minimal `contents: read` permissions, immutable official action pins, public Supabase client variables only, and no Apple or test-user secrets.
+- Toolchain: Node.js 24.3.0, CocoaPods 1.16.2, and explicitly selected Xcode 26.2. The runner's default Xcode 16.4 supplies Swift 6.1, while Expo Modules JSI requires Swift tools 6.2.
+- Monorepo fix: CocoaPods runs with `apps/mobile/ios` as its actual working directory. Passing only `--project-directory` left Expo autolinking rooted at the monorepo and omitted `reactNativePath`.
+- Regression coverage: the workflow suite verifies the bounded macOS job, Xcode selection, mobile working directory, Release simulator SDK, disabled code signing, install/launch/terminate sequence, and absence of secret references. All 20 workflow-security tests and the static workflow guard passed locally.
+- Failure handling: a failure-only simulator screenshot is retained for seven days when available; no app binary or success screenshot is uploaded.
+- Completion result: [Security CI run 29246161478](https://github.com/shahbaz242630/Document-Vault/actions/runs/29246161478), implementation commit `3b19e05`, passed all six jobs. `iOS simulator smoke` completed in 23m30s and passed native generation, pods, unsigned Release compilation, simulator selection, boot, install, launch, survival, and clean termination.
+- Residual risk: this proves the app builds and remains alive in an iOS simulator. It does not prove signing, App Store entitlements, TestFlight installation, push notifications, biometrics on physical hardware, or real-device behavior.
 
 #### Android native compile implementation evidence — 2026-07-11 (completed)
 
@@ -269,7 +282,7 @@ Current state: Android native compilation and every listed critical release-emul
 - Leakage controls: recovery inputs have stable accessibility labels and screen-capture prevention; UI diagnostics redact sensitive environment values; ADB exceptions suppress arguments/output; the generated phrase and temporary password are never printed, committed, uploaded, or retained.
 - Local verification: Android scripts passed Node syntax checks; 18 workflow-security tests, focused reset tests, mobile typecheck, lint, GitHub Actions security guard, mobile secret scan, static security guard, and `npm run check:phase1` passed.
 - Completion result: [Security CI run 29229315895](https://github.com/shahbaz242630/Document-Vault/actions/runs/29229315895), commit `1f9e8fc`, passed all four jobs. `Android emulator smoke` completed in 9m57s and logged all five stage-success markers, including `Android emulator recovery-reset encrypted-record continuity smoke test passed.`
-- Residual risk: the disposable account remains test-only and must be deleted with its protected configuration before production launch. iOS coverage remains separately blocked on an approved macOS runner/budget.
+- Residual risk: the disposable account remains test-only and must be deleted with its protected configuration before production launch. Signed/TestFlight and real-device iOS coverage remain separate release work.
 
 ### 8. Configure and enforce linting
 
