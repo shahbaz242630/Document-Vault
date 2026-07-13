@@ -123,6 +123,88 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  ios-simulator-smoke:
+    name: iOS simulator smoke
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      NODE_ENV: production
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.3.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Report Apple toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes
+
+      - name: Generate iOS native project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Install iOS pods
+        run: pod install --project-directory=apps/mobile/ios
+
+      - name: Compile unsigned iOS simulator release
+        run: |
+          xcodebuild \
+            -workspace apps/mobile/ios/Sanduqkin.xcworkspace \
+            -scheme Sanduqkin \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath "$RUNNER_TEMP/ios-derived-data" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Select iPhone simulator
+        run: |
+          SIMULATOR_UDID="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ { print $2; exit }')"
+          if [ -z "$SIMULATOR_UDID" ]; then
+            echo "No available iPhone simulator was found."
+            exit 1
+          fi
+          echo "SIMULATOR_UDID=$SIMULATOR_UDID" >> "$GITHUB_ENV"
+          echo "APP_PATH=$RUNNER_TEMP/ios-derived-data/Build/Products/Release-iphonesimulator/Sanduqkin.app" >> "$GITHUB_ENV"
+
+      - name: Boot simulator and verify app remains running
+        run: |
+          test -d "$APP_PATH"
+          xcrun simctl shutdown all || true
+          xcrun simctl boot "$SIMULATOR_UDID"
+          xcrun simctl bootstatus "$SIMULATOR_UDID" -b
+          xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
+          xcrun simctl launch "$SIMULATOR_UDID" com.sanduqkin.mobile
+          sleep 15
+          xcrun simctl terminate "$SIMULATOR_UDID" com.sanduqkin.mobile
+          echo "iOS simulator compile and launch smoke test passed."
+
+      - name: Capture iOS simulator failure screenshot
+        if: failure()
+        run: |
+          mkdir -p ios-simulator-failure
+          xcrun simctl io booted screenshot ios-simulator-failure/screenshot.png || true
+
+      - name: Upload iOS simulator failure evidence
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-simulator-smoke-failure
+          path: ios-simulator-failure
+          if-no-files-found: warn
+          retention-days: 7
+
   android-emulator-smoke:
     name: Android emulator smoke
     runs-on: ubuntu-latest

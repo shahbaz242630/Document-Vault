@@ -74,6 +74,28 @@ test("runs Android native compilation as a separate bounded Security CI job", ()
   assert.match(workflow, /\$ANDROID_HOME\/cmdline-tools\/latest\/bin\/sdkmanager/);
 });
 
+test("builds and launches an unsigned iOS release in a bounded macOS simulator job", () => {
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+  const iosJob = workflow.match(/  ios-simulator-smoke:[\s\S]*?(?=\n  [A-Za-z0-9_-]+:|$)/)?.[0];
+
+  assert.ok(iosJob, "Security CI must contain an iOS simulator smoke job");
+  assert.match(iosJob, /name: iOS simulator smoke/);
+  assert.match(iosJob, /runs-on: macos-15/);
+  assert.match(iosJob, /timeout-minutes: 45/);
+  assert.match(iosJob, /npx expo prebuild --platform ios --no-install/);
+  assert.match(iosJob, /pod install --project-directory=apps\/mobile\/ios/);
+  assert.match(iosJob, /-configuration Release/);
+  assert.match(iosJob, /-sdk iphonesimulator/);
+  assert.match(iosJob, /CODE_SIGNING_ALLOWED=NO/);
+  assert.match(iosJob, /xcrun simctl install "\$SIMULATOR_UDID" "\$APP_PATH"/);
+  assert.match(iosJob, /xcrun simctl launch "\$SIMULATOR_UDID" com\.sanduqkin\.mobile/);
+  assert.match(iosJob, /xcrun simctl terminate "\$SIMULATOR_UDID" com\.sanduqkin\.mobile/);
+  assert.doesNotMatch(iosJob, /secrets\./);
+});
+
 test("runs bounded Android onboarding and returning-user unlock smoke tests after native compilation", () => {
   const workflow = fs.readFileSync(
     path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
