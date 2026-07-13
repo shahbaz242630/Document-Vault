@@ -87,7 +87,7 @@ test("builds and launches an unsigned iOS release in a bounded macOS simulator j
   assert.match(iosJob, /timeout-minutes: 45/);
   assert.match(iosJob, /env:\s*\n\s*NODE_ENV: development/);
   assert.match(iosJob, /npx expo prebuild --platform ios --no-install/);
-  assert.match(iosJob, /pod install --project-directory=apps\/mobile\/ios/);
+  assert.match(iosJob, /Install iOS pods\s*\n\s*working-directory: apps\/mobile\/ios\s*\n\s*run: pod install/);
   assert.match(iosJob, /Compile unsigned iOS simulator release[\s\S]*?NODE_ENV: production[\s\S]*?-configuration Release/);
   assert.match(iosJob, /-sdk iphonesimulator/);
   assert.match(iosJob, /CODE_SIGNING_ALLOWED=NO/);

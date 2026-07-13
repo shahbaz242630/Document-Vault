@@ -154,7 +154,8 @@ jobs:
         run: npx expo prebuild --platform ios --no-install
 
       - name: Install iOS pods
-        run: pod install --project-directory=apps/mobile/ios
+        working-directory: apps/mobile/ios
+        run: pod install
 
       - name: Compile unsigned iOS simulator release
         env:
