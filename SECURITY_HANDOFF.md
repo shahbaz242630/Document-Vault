@@ -6,17 +6,17 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 
 - Audit date: 2026-07-13
 - Audited branch: `redesign/sanduqkin-flow`
-- Latest fully verified implementation commit: `2b2360c`
-- Latest audited GitHub run: [Security CI run 29211310358](https://github.com/shahbaz242630/Document-Vault/actions/runs/29211310358)
-- Latest audited GitHub result: `App security gates`, `Supabase live security gates`, `Android native compile`, and `Android emulator smoke` passed. The emulator verified onboarding, returning-user unlock, encrypted CRUD, and emergency-code raw-value hiding.
+- Latest fully verified implementation commit: `1f9e8fc`
+- Latest audited GitHub run: [Security CI run 29229315895](https://github.com/shahbaz242630/Document-Vault/actions/runs/29229315895)
+- Latest audited GitHub result: `App security gates`, `Supabase live security gates`, `Android native compile`, and `Android emulator smoke` passed. The emulator verified onboarding, returning-user unlock, encrypted CRUD, emergency-code raw-value hiding, and recovery-reset encrypted-record continuity.
 - CI runtime: Node.js `24.3.0` on `ubuntu-latest`
 - Important local constraint: Node.js `24.2.0` is below the repository requirement `^22.13.0 || >=24.3.0` and should be upgraded.
 
 ### Next-session security opener
 
-- Sole remaining Android minimum-flow E2E gap: recovery-reset encrypted-record continuity.
-- Do not generate a replacement phrase for the existing shared QA vault; its original phrase is unavailable, and a random phrase cannot derive that vault's MEK.
-- Create a separate disposable recovery-QA account through normal signup, securely retain its generated phrase outside repository files/logs, complete email confirmation if required, and automate temporary-password reset -> same-record decrypt -> original disposable-password restoration -> fixture cleanup.
+- Android minimum-flow release-emulator coverage is complete, including recovery-reset encrypted-record continuity.
+- Recovery uses a separate verified disposable account. CI creates a fresh phrase and wrapped MEK per run, keeps the phrase and derived temporary password only in process memory/environment, restores the original protected test password, and hard-deletes the generated record.
+- Next required security slice: safely enable the two skipped hosted-Supabase integration tests with the existing push-only protected-environment boundary and disposable cleanup.
 - Continue to keep recovery phrases, passwords, MEKs, raw emergency codes, ciphertext, and service-role values out of commits, handoffs, screenshots, artifacts, and logs.
 
 ## Security and CI Controls Already Running
@@ -188,11 +188,11 @@ Current state: complete. `expo-doctor@1.19.10` is pinned as a mobile development
 - [ ] Add an iOS simulator smoke test when the macOS environment is available.
 - [x] Cover sign-in and password-based MEK unlock on the Android release emulator.
 - [x] Cover encrypted record create/read/edit/hard-delete on the Android release emulator.
-- [ ] Cover recovery-reset encrypted-record continuity on the Android release emulator.
+- [x] Cover recovery-reset encrypted-record continuity on the Android release emulator.
 - [x] Cover emergency-code one-time visibility and raw-value hiding on the Android release emulator.
 - [x] Keep native build and E2E jobs separate from fast unit checks so failures are diagnosable.
 
-Current state: Android native compilation and the critical release-emulator flows above are automated and green. Recovery continuity is deferred because the existing QA vault's original phrase is unavailable; use a new disposable recovery-QA account rather than replacing the existing vault's phrase. iOS native/simulator coverage still requires an approved macOS runner and budget.
+Current state: Android native compilation and every listed critical release-emulator flow are automated and green. Recovery continuity uses a separate verified disposable account and an in-memory-only phrase bootstrap; the existing shared QA vault remains untouched. iOS native/simulator coverage still requires an approved macOS runner and budget.
 
 #### Android native compile implementation evidence — 2026-07-11 (completed)
 
@@ -227,7 +227,7 @@ Current state: Android native compilation and the critical release-emulator flow
 - Security-guard hardening: mixed push/PR workflows may reference secrets only inside jobs with the exact push-only condition. Unguarded PR secret use remains rejected. All 18 workflow-security regressions pass.
 - Release fix: Supabase configuration now uses static Expo public-environment references so production bundles receive client configuration; explicit-env tests and mobile service-role rejection remain intact.
 - Completion result: [Security CI run 29208758000](https://github.com/shahbaz242630/Document-Vault/actions/runs/29208758000) passed `App security gates`, `Supabase live security gates`, `Android native compile`, and the 3m55s `Android emulator smoke` job. Its log confirms both onboarding and returning-user vault-unlock smoke tests passed.
-- Follow-up status: encrypted CRUD and emergency-code hiding were completed in subsequent slices; recovery-reset continuity remains.
+- Follow-up status: encrypted CRUD, emergency-code hiding, and recovery-reset continuity were completed in subsequent slices.
 
 #### Android encrypted-record CRUD evidence — 2026-07-13
 
@@ -236,7 +236,7 @@ Current state: Android native compilation and the critical release-emulator flow
 - Delete verification returns to the vault/category state and confirms the generated edited title is absent. Unique per-run names prevent collisions, and a passing run leaves no generated QA record behind.
 - Accessibility/automation hardening: dynamic form text fields expose semantic labels derived from stable field names, while the runner uses scroll-aware UIAutomator lookup instead of fixed coordinates.
 - Completion result: [Security CI run 29209599047](https://github.com/shahbaz242630/Document-Vault/actions/runs/29209599047) passed all four jobs. The 5m15s `Android emulator smoke` job logged onboarding, returning-user vault unlock, and encrypted-record CRUD success.
-- Follow-up status: emergency-code hiding was completed in the subsequent slice; recovery-reset continuity remains.
+- Follow-up status: emergency-code hiding and recovery-reset continuity were completed in subsequent slices.
 
 #### Android emergency-code raw-value hiding evidence — 2026-07-13
 
@@ -245,7 +245,18 @@ Current state: Android native compilation and the critical release-emulator flow
 - Failure-log hardening redacts every emergency-code-shaped value before UI XML can enter CI diagnostics; Android screen-capture prevention remains active on the one-time panel.
 - CI also exposed an emulator numeric-keyboard race (`4242` entered as `42`); paced character input plus explicit field-value assertion fixed the automation without weakening production validation.
 - Completion result: [Security CI run 29211310358](https://github.com/shahbaz242630/Document-Vault/actions/runs/29211310358) passed all four jobs. The 5m57s emulator job logged onboarding, returning-user unlock, encrypted CRUD, and emergency-code raw-value hiding success.
-- Sole remaining minimum-flow gap: recovery reset continuity. The shared QA account's original phrase is unavailable; next session must create a new disposable account through normal signup and keep its generated phrase outside repository files and logs.
+- Follow-up status: recovery-reset continuity was completed in the subsequent slice.
+
+#### Android recovery-reset continuity evidence — 2026-07-13
+
+- Scope: prove that recovery password rotation preserves access to the same encrypted record across cleared local state and restores the disposable account's original protected password afterward.
+- Protected bootstrap: a separate verified disposable account is authenticated with the public client configuration and user credential. Existing disposable vault rows are hard-deleted through RLS, a fresh BIP-39 phrase/MEK is generated in runner memory, and only Argon2id/XChaCha20-Poly1305 wrapped key material is upserted.
+- Emulator proof: create encrypted bank record -> reset to derived temporary password -> clear app state -> sign in/unlock -> decrypt same record -> reset to original password -> clear app state -> sign in/unlock -> decrypt same record -> permanently delete fixture.
+- Failure recovery: startup and `finally` logic accept either expected password state, restore the original protected password, and remove the uniquely named fixture when possible.
+- Leakage controls: recovery inputs have stable accessibility labels and screen-capture prevention; UI diagnostics redact sensitive environment values; ADB exceptions suppress arguments/output; the generated phrase and temporary password are never printed, committed, uploaded, or retained.
+- Local verification: Android scripts passed Node syntax checks; 18 workflow-security tests, focused reset tests, mobile typecheck, lint, GitHub Actions security guard, mobile secret scan, static security guard, and `npm run check:phase1` passed.
+- Completion result: [Security CI run 29229315895](https://github.com/shahbaz242630/Document-Vault/actions/runs/29229315895), commit `1f9e8fc`, passed all four jobs. `Android emulator smoke` completed in 9m57s and logged all five stage-success markers, including `Android emulator recovery-reset encrypted-record continuity smoke test passed.`
+- Residual risk: the disposable account remains test-only and must be deleted with its protected configuration before production launch. iOS coverage remains separately blocked on an approved macOS runner/budget.
 
 ### 8. Configure and enforce linting
 
