@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
+import { usePreventScreenCapture } from "expo-screen-capture";
 import { View } from "react-native";
 
 import {
@@ -39,6 +40,7 @@ type PasswordResetService = ReturnType<typeof createPasswordResetService>;
 type AccountDeletionService = ReturnType<typeof createAccountDeletionService>;
 
 export function ResetPasswordPanel({ lockVault, mode, storage }: ResetPasswordPanelProps) {
+  usePreventScreenCapture();
   const viewModel = createResetPasswordViewModel();
   const isRecover = mode === "recover";
   const [form, setForm] = useState(createInitialFormState());
@@ -177,6 +179,7 @@ function RecoveryFields({
   return (
     <View style={{ gap: 14 }}>
       <TextAreaField
+        accessibilityLabel="Recovery phrase input"
         autoCapitalize="none"
         label={viewModel.phraseInputLabel}
         onChangeText={(text) => updateFormField(onChange, "phraseText", text)}
@@ -184,6 +187,7 @@ function RecoveryFields({
         value={form.phraseText}
       />
       <Field
+        accessibilityLabel="New password input"
         hint="At least 12 characters."
         label={viewModel.newPasswordLabel}
         onChangeText={(text) => updateFormField(onChange, "newPassword", text)}
@@ -191,6 +195,7 @@ function RecoveryFields({
         value={form.newPassword}
       />
       <Field
+        accessibilityLabel="Confirm new password input"
         label={viewModel.confirmPasswordLabel}
         onChangeText={(text) => updateFormField(onChange, "confirmPassword", text)}
         secureTextEntry

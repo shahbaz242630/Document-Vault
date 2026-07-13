@@ -5,10 +5,14 @@ const waitTimeoutMs = 45_000;
 const emergencyCodePattern = /\b[A-Z2-9]{4}(?:-[A-Z2-9]{4}){4}\b/g;
 
 function runAdb(args, options = {}) {
-  return execFileSync("adb", args, {
-    encoding: "utf8",
-    stdio: options.quiet ? ["ignore", "pipe", "pipe"] : undefined,
-  });
+  try {
+    return execFileSync("adb", args, {
+      encoding: "utf8",
+      stdio: options.quiet ? ["ignore", "pipe", "pipe"] : undefined,
+    });
+  } catch {
+    throw new Error("Android device command failed; sensitive arguments and output were suppressed.");
+  }
 }
 
 function sleep(milliseconds) {
@@ -62,7 +66,22 @@ function waitForNode(label, timeoutMs = waitTimeoutMs) {
 }
 
 function sanitizeUiXml(xml) {
-  return xml.replaceAll(emergencyCodePattern, "[REDACTED EMERGENCY CODE]");
+  let sanitized = xml.replaceAll(emergencyCodePattern, "[REDACTED EMERGENCY CODE]");
+  for (const value of sensitiveEnvironmentValues()) {
+    sanitized = sanitized.replaceAll(value, "[REDACTED SENSITIVE VALUE]");
+  }
+  return sanitized;
+}
+
+function sensitiveEnvironmentValues() {
+  return [
+    process.env.ANDROID_E2E_TEST_EMAIL,
+    process.env.ANDROID_E2E_TEST_PASSWORD,
+    process.env.ANDROID_RECOVERY_E2E_EMAIL,
+    process.env.ANDROID_RECOVERY_E2E_PASSWORD,
+    process.env.ANDROID_RECOVERY_E2E_PHRASE,
+    process.env.ANDROID_RECOVERY_E2E_TEMP_PASSWORD,
+  ].filter((value) => typeof value === "string" && value.length > 0);
 }
 
 function tapNode(label) {
@@ -143,6 +162,17 @@ function fillField(label, value, clear = false) {
   sleep(350);
 }
 
+function fillRecoveryPhrase(label, phrase) {
+  tapNodeAfterScroll(label);
+  const words = phrase.trim().split(/\s+/);
+  for (const [index, word] of words.entries()) {
+    typeTextReliably(word);
+    if (index < words.length - 1) runAdb(["shell", "input", "keyevent", "KEYCODE_SPACE"]);
+  }
+  runAdb(["shell", "input", "keyevent", "KEYCODE_BACK"]);
+  sleep(350);
+}
+
 function assertNodeAbsent(label) {
   sleep(1_000);
   if (findNode(dumpUi(), label)) throw new Error(`Android UI text should be absent: ${label}`);
@@ -178,6 +208,11 @@ function runReturningUserUnlockSmoke() {
   const password = process.env.ANDROID_E2E_TEST_PASSWORD;
   if (!email || !password) throw new Error("Android E2E account credentials are not configured.");
 
+  clearAndSignIn(email, password);
+  console.log("Android emulator returning-user vault unlock smoke test passed.");
+}
+
+function clearAndSignIn(email, password, timeoutMs = 120_000) {
   runAdb(["shell", "pm", "clear", appPackage]);
   launchApp();
   tapNode("I already have an account");
@@ -187,15 +222,11 @@ function runReturningUserUnlockSmoke() {
   runAdb(["shell", "input", "keyevent", "KEYCODE_BACK"]);
   sleep(500);
   tapNode("Continue");
-  waitForNode("Your vault", 120_000);
+  waitForNode("Your vault", timeoutMs);
   waitForNode("Sealed on this device");
-  console.log("Android emulator returning-user vault unlock smoke test passed.");
 }
 
-function runEncryptedRecordCrudSmoke() {
-  const title = `E2EBank${Date.now()}`;
-  const editedTitle = `${title}Edited`;
-
+function createEncryptedBankRecord(title) {
   tapNodeAfterScroll("Bank account");
   sleep(500);
   if (!findNode(dumpUi(), "Add bank account")) {
@@ -209,8 +240,28 @@ function runEncryptedRecordCrudSmoke() {
   fillField("lastFourDigits field", "4242");
   waitForNode("4242");
   tapNodeAfterScroll("Save to vault");
-
   waitForNode(title, 120_000);
+}
+
+function openEncryptedBankRecord(title) {
+  tapNodeAfterScroll("Bank account");
+  waitForNode(title, 120_000);
+  tapNode(title);
+  waitForNode("Stored sealed on this device");
+  waitForNode("TestBank");
+}
+
+function permanentlyDeleteOpenRecord() {
+  tapNodeAfterScroll("Delete this record");
+  tapNodeAfterScroll("Delete permanently");
+  waitForNode("Your vault", 120_000);
+}
+
+function runEncryptedRecordCrudSmoke() {
+  const title = `E2EBank${Date.now()}`;
+  const editedTitle = `${title}Edited`;
+
+  createEncryptedBankRecord(title);
   tapNode(title);
   waitForNode("Stored sealed on this device");
   waitForNode("TestBank");
@@ -221,15 +272,91 @@ function runEncryptedRecordCrudSmoke() {
 
   waitForNode(editedTitle, 120_000);
   waitForNode("TestBank");
-  tapNodeAfterScroll("Delete this record");
-  tapNodeAfterScroll("Delete permanently");
-  waitForNode("Your vault", 120_000);
+  permanentlyDeleteOpenRecord();
   if (findNode(dumpUi(), "Bank accounts")) {
     tapNode("Bank accounts");
     waitForNode("Bank accounts");
     assertNodeAbsent(editedTitle);
   }
   console.log("Android emulator encrypted-record CRUD smoke test passed.");
+}
+
+function readRecoveryCredentials() {
+  const credentials = {
+    email: process.env.ANDROID_RECOVERY_E2E_EMAIL?.trim(),
+    password: process.env.ANDROID_RECOVERY_E2E_PASSWORD,
+    phrase: process.env.ANDROID_RECOVERY_E2E_PHRASE?.trim(),
+    temporaryPassword: process.env.ANDROID_RECOVERY_E2E_TEMP_PASSWORD,
+  };
+  if (Object.values(credentials).some((value) => !value)) {
+    throw new Error("Protected Android recovery E2E credentials are not configured.");
+  }
+  if (credentials.phrase.split(/\s+/).length !== 12) {
+    throw new Error("Protected Android recovery E2E phrase must contain exactly 12 words.");
+  }
+  if (credentials.password === credentials.temporaryPassword) {
+    throw new Error("Android recovery E2E temporary password must differ from the original.");
+  }
+  return credentials;
+}
+
+function resetPasswordWithRecoveryPhrase(phrase, newPassword) {
+  runAdb([
+    "shell",
+    "am",
+    "start",
+    "-a",
+    "android.intent.action.VIEW",
+    "-d",
+    "sanduqkin://auth/reset-password?mode=recover",
+    appPackage,
+  ]);
+  waitForNode("Reset with your phrase");
+  fillRecoveryPhrase("Recovery phrase input", phrase);
+  fillField("New password input", newPassword);
+  fillField("Confirm new password input", newPassword);
+  tapNodeAfterScroll("Reset password");
+  waitForNode("Your vault has a new password.", 180_000);
+}
+
+function ensureOriginalRecoveryPassword(credentials) {
+  try {
+    clearAndSignIn(credentials.email, credentials.password, 30_000);
+    return;
+  } catch {
+    clearAndSignIn(credentials.email, credentials.temporaryPassword, 30_000);
+    resetPasswordWithRecoveryPhrase(credentials.phrase, credentials.password);
+    clearAndSignIn(credentials.email, credentials.password);
+  }
+}
+
+function runRecoveryResetContinuitySmoke() {
+  const credentials = readRecoveryCredentials();
+  const title = `E2ERecovery${Date.now()}`;
+  let fixtureExists = false;
+
+  ensureOriginalRecoveryPassword(credentials);
+  try {
+    createEncryptedBankRecord(title);
+    fixtureExists = true;
+    resetPasswordWithRecoveryPhrase(credentials.phrase, credentials.temporaryPassword);
+
+    clearAndSignIn(credentials.email, credentials.temporaryPassword);
+    openEncryptedBankRecord(title);
+    resetPasswordWithRecoveryPhrase(credentials.phrase, credentials.password);
+
+    clearAndSignIn(credentials.email, credentials.password);
+    openEncryptedBankRecord(title);
+    permanentlyDeleteOpenRecord();
+    fixtureExists = false;
+  } finally {
+    ensureOriginalRecoveryPassword(credentials);
+    if (fixtureExists) {
+      openEncryptedBankRecord(title);
+      permanentlyDeleteOpenRecord();
+    }
+  }
+  console.log("Android emulator recovery-reset encrypted-record continuity smoke test passed.");
 }
 
 function runEmergencyCodeHidingSmoke() {
@@ -276,6 +403,7 @@ function main() {
   runReturningUserUnlockSmoke();
   runEncryptedRecordCrudSmoke();
   runEmergencyCodeHidingSmoke();
+  runRecoveryResetContinuitySmoke();
 }
 
 main();

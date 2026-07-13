@@ -94,21 +94,45 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
   assert.match(workflow, /timeout 180 adb wait-for-device/);
   assert.match(workflow, /ANDROID_AVD_HOME="\$RUNNER_TEMP\/android-avd"/);
   assert.match(workflow, /emulator" -list-avds \| grep -Fx sanduqkin-ci/);
-  assert.match(workflow, /node scripts\/android-emulator-smoke\.cjs/);
+  assert.match(workflow, /node scripts\/android-recovery-e2e-bootstrap\.cjs/);
   assert.match(workflow, /ANDROID_E2E_TEST_EMAIL: \$\{\{ secrets\.ANDROID_E2E_TEST_EMAIL \}\}/);
   assert.match(workflow, /ANDROID_E2E_TEST_PASSWORD: \$\{\{ secrets\.ANDROID_E2E_TEST_PASSWORD \}\}/);
+  assert.match(workflow, /ANDROID_RECOVERY_E2E_EMAIL: \$\{\{ vars\.ANDROID_RECOVERY_E2E_EMAIL \}\}/);
+  assert.match(workflow, /ANDROID_RECOVERY_E2E_PASSWORD: \$\{\{ secrets\.ANDROID_E2E_TEST_PASSWORD \}\}/);
   assert.match(workflow, /if: failure\(\)[\s\S]*?adb logcat/);
   assert.match(workflow, /retention-days: 7/);
   for (const marker of [
     "runReturningUserUnlockSmoke",
     "runEncryptedRecordCrudSmoke",
     "runEmergencyCodeHidingSmoke",
+    "runRecoveryResetContinuitySmoke",
     'fillField("title field"',
     'waitForNode("Stored sealed on this device")',
     'tapNodeAfterScroll("Delete permanently")',
     'waitForNode("Sanduqkin no longer has the raw code")',
+    'fillRecoveryPhrase("Recovery phrase input"',
+    'clearAndSignIn(credentials.email, credentials.temporaryPassword)',
+    'clearAndSignIn(credentials.email, credentials.password)',
+    "ensureOriginalRecoveryPassword(credentials)",
+    "finally",
   ]) {
     assert.match(smokeScript, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+
+  const bootstrapScript = fs.readFileSync(
+    path.resolve(__dirname, "android-recovery-e2e-bootstrap.cjs"),
+    "utf8",
+  );
+  for (const marker of [
+    "entropyToMnemonic",
+    "mnemonicToSeedSync",
+    'from("vault_assets").delete()',
+    'from("vault_key_material")',
+    "ANDROID_RECOVERY_E2E_PHRASE: phrase",
+    "ANDROID_RECOVERY_E2E_TEMP_PASSWORD: temporaryPassword",
+    "sensitive details were suppressed",
+  ]) {
+    assert.match(bootstrapScript, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
 });
 
