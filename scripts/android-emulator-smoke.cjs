@@ -65,6 +65,19 @@ function waitForNode(label, timeoutMs = waitTimeoutMs) {
   throw new Error(`Timed out waiting for Android UI text: ${label}\n${sanitizeUiXml(lastXml).slice(0, 2_000)}`);
 }
 
+function waitForNodeOptional(label, timeoutMs = 5_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      if (findNode(dumpUi(), label)) return true;
+    } catch {
+      // Retry transient UIAutomator failures within the bounded wait.
+    }
+    sleep(500);
+  }
+  return false;
+}
+
 function sanitizeUiXml(xml) {
   let sanitized = xml.replaceAll(emergencyCodePattern, "[REDACTED EMERGENCY CODE]");
   for (const value of sensitiveEnvironmentValues()) {
@@ -110,6 +123,14 @@ function swipeHorizontally(direction) {
   const startX = direction === "left" ? Math.round(width * 0.82) : Math.round(width * 0.18);
   const endX = direction === "left" ? Math.round(width * 0.18) : Math.round(width * 0.82);
   runAdb(["shell", "input", "swipe", String(startX), String(Math.round(height * 0.5)), String(endX), String(Math.round(height * 0.5)), "350"]);
+}
+
+function swipeUntilNode(direction, label, maxAttempts = 3) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    swipeHorizontally(direction);
+    if (waitForNodeOptional(label)) return;
+  }
+  throw new Error(`Android horizontal swipe did not reach expected UI text: ${label}`);
 }
 
 function swipeVertically(direction) {
@@ -188,10 +209,8 @@ function runOnboardingSmoke() {
   tapNode("Create your vault");
   waitForNode("Question 1 of 15");
 
-  swipeHorizontally("left");
-  waitForNode("Question 2 of 15");
-  swipeHorizontally("right");
-  waitForNode("Question 1 of 15");
+  swipeUntilNode("left", "Question 2 of 15");
+  swipeUntilNode("right", "Question 1 of 15");
 
   for (let question = 2; question <= 15; question += 1) {
     tapNode("Next question");

@@ -106,6 +106,7 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
     "runEncryptedRecordCrudSmoke",
     "runEmergencyCodeHidingSmoke",
     "runRecoveryResetContinuitySmoke",
+    "swipeUntilNode",
     'fillField("title field"',
     'waitForNode("Stored sealed on this device")',
     'tapNodeAfterScroll("Delete permanently")',
