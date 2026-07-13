@@ -128,7 +128,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 45
     env:
-      NODE_ENV: production
+      NODE_ENV: development
       EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
       EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
     steps:
@@ -157,6 +157,8 @@ jobs:
         run: pod install --project-directory=apps/mobile/ios
 
       - name: Compile unsigned iOS simulator release
+        env:
+          NODE_ENV: production
         run: |
           xcodebuild \
             -workspace apps/mobile/ios/Sanduqkin.xcworkspace \
