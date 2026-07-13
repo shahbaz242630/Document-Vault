@@ -137,6 +137,24 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
   }
 });
 
+test("runs hosted Supabase integration tests serially behind the protected Android job", () => {
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
+    "utf8",
+  );
+
+  assert.match(workflow, /hosted-supabase-integration:\s*\n\s*name: Hosted Supabase integration/);
+  assert.match(workflow, /hosted-supabase-integration:[\s\S]*?environment: Preview/);
+  assert.match(workflow, /hosted-supabase-integration:[\s\S]*?needs: android-emulator-smoke/);
+  assert.match(workflow, /hosted-supabase-integration:[\s\S]*?if: github\.event_name == 'push'/);
+  assert.match(workflow, /hosted-supabase-integration:[\s\S]*?timeout-minutes: 10/);
+  assert.match(workflow, /RUN_LIVE_SUPABASE_RETURNING_USER: "1"/);
+  assert.match(workflow, /returning-user-live-supabase\.test\.ts/);
+  assert.match(workflow, /RUN_LIVE_SUPABASE_ENCRYPTION_SMOKE: "1"/);
+  assert.match(workflow, /encrypted-vault-live-supabase-smoke\.test\.ts/);
+  assert.match(workflow, /LIVE_SUPABASE_TEST_PASSWORD: \$\{\{ secrets\.ANDROID_E2E_TEST_PASSWORD \}\}/);
+});
+
 test("enforces the Phase 1 Definition-of-Done gate in Security CI", () => {
   const workflow = fs.readFileSync(
     path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),

@@ -72,19 +72,35 @@ describeLive("live Supabase encrypted vault storage smoke", () => {
 
         const [rawRow] = await client.selectVaultAssetRaw(createdAsset.id);
 
-        expect(rawRow).toBeDefined();
-        expect(rawRow.asset_type).toBe("card");
-        expect(rawRow.ciphertext).toMatch(/^[A-Za-z0-9_-]+={0,2}$/);
-        expect(rawRow.nonce).toMatch(/^[A-Za-z0-9_-]+={0,2}$/);
-        expect(rawRow.ciphertext.length).toBeGreaterThan(80);
-        expect(rawRow.nonce.length).toBeGreaterThan(20);
+        expect({
+          assetType: rawRow?.asset_type,
+          ciphertextHasExpectedShape: /^[A-Za-z0-9_-]+={0,2}$/.test(rawRow?.ciphertext ?? ""),
+          ciphertextLengthIsValid: (rawRow?.ciphertext.length ?? 0) > 80,
+          nonceHasExpectedShape: /^[A-Za-z0-9_-]+={0,2}$/.test(rawRow?.nonce ?? ""),
+          nonceLengthIsValid: (rawRow?.nonce.length ?? 0) > 20,
+          rowExists: Boolean(rawRow),
+        }).toEqual({
+          assetType: "card",
+          ciphertextHasExpectedShape: true,
+          ciphertextLengthIsValid: true,
+          nonceHasExpectedShape: true,
+          nonceLengthIsValid: true,
+          rowExists: true,
+        });
 
         const rawJson = JSON.stringify(rawRow);
 
-        expect(rawJson).not.toContain(plaintextSentinels.title);
-        expect(rawJson).not.toContain(plaintextSentinels.issuer);
-        expect(rawJson).not.toContain(plaintextSentinels.accountNumber);
-        expect(rawJson).not.toContain(plaintextSentinels.notes);
+        expect({
+          hasAccountNumberPlaintext: rawJson.includes(plaintextSentinels.accountNumber),
+          hasIssuerPlaintext: rawJson.includes(plaintextSentinels.issuer),
+          hasNotesPlaintext: rawJson.includes(plaintextSentinels.notes),
+          hasTitlePlaintext: rawJson.includes(plaintextSentinels.title),
+        }).toEqual({
+          hasAccountNumberPlaintext: false,
+          hasIssuerPlaintext: false,
+          hasNotesPlaintext: false,
+          hasTitlePlaintext: false,
+        });
 
         console.info("Live encrypted vault smoke row summary", {
           assetType: rawRow.asset_type,
@@ -98,14 +114,23 @@ describeLive("live Supabase encrypted vault storage smoke", () => {
           rawColumns: Object.keys(rawRow),
         });
       } finally {
+        const cleanupSignIn = await client.auth.signInWithPassword({ email, password });
+        if (cleanupSignIn.error || !cleanupSignIn.data.session) {
+          throw new Error("Live encrypted-vault cleanup authentication failed.");
+        }
+
         for (const assetId of savedAssetIds) {
           await client.from("vault_assets").delete().eq("id", assetId).select("id").maybeSingle();
+          const remainingRows = await client.selectVaultAssetRaw(assetId);
+          if (remainingRows.length > 0) {
+            throw new Error("Live encrypted-vault cleanup did not remove its fixture.");
+          }
         }
 
         await client.auth.signOut();
       }
     },
-    60_000,
+    120_000,
   );
 });
 

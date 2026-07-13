@@ -209,6 +209,44 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+  hosted-supabase-integration:
+    name: Hosted Supabase integration
+    runs-on: ubuntu-latest
+    environment: Preview
+    needs: android-emulator-smoke
+    if: github.event_name == 'push'
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.3.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify hosted returning-user unlock
+        run: npm run test --workspace @vault/mobile -- returning-user-live-supabase.test.ts
+        env:
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          LIVE_SUPABASE_TEST_EMAIL: ${{ vars.ANDROID_RECOVERY_E2E_EMAIL }}
+          LIVE_SUPABASE_TEST_PASSWORD: ${{ secrets.ANDROID_E2E_TEST_PASSWORD }}
+          RUN_LIVE_SUPABASE_RETURNING_USER: "1"
+
+      - name: Verify hosted encrypted storage
+        run: npm run test --workspace @vault/mobile -- encrypted-vault-live-supabase-smoke.test.ts
+        env:
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          LIVE_SUPABASE_TEST_EMAIL: ${{ vars.ANDROID_RECOVERY_E2E_EMAIL }}
+          LIVE_SUPABASE_TEST_PASSWORD: ${{ secrets.ANDROID_E2E_TEST_PASSWORD }}
+          RUN_LIVE_SUPABASE_ENCRYPTION_SMOKE: "1"
+
   supabase-live-security:
     name: Supabase live security gates
     runs-on: ubuntu-latest
