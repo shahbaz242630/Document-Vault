@@ -6,9 +6,9 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 
 - Audit date: 2026-07-13
 - Audited branch: `redesign/sanduqkin-flow`
-- Latest fully verified implementation commit: `1f9e8fc`
-- Latest audited GitHub run: [Security CI run 29229315895](https://github.com/shahbaz242630/Document-Vault/actions/runs/29229315895)
-- Latest audited GitHub result: `App security gates`, `Supabase live security gates`, `Android native compile`, and `Android emulator smoke` passed. The emulator verified onboarding, returning-user unlock, encrypted CRUD, emergency-code raw-value hiding, and recovery-reset encrypted-record continuity.
+- Latest fully verified implementation commit: `b250aa2`
+- Latest audited GitHub run: [Security CI run 29233949611](https://github.com/shahbaz242630/Document-Vault/actions/runs/29233949611)
+- Latest audited GitHub result: `App security gates`, `Supabase live security gates`, `Android native compile`, `Android emulator smoke`, and `Hosted Supabase integration` passed. Android verified all minimum flows, and both formerly skipped hosted-Supabase test files executed successfully.
 - CI runtime: Node.js `24.3.0` on `ubuntu-latest`
 - Important local constraint: Node.js `24.2.0` is below the repository requirement `^22.13.0 || >=24.3.0` and should be upgraded.
 
@@ -16,7 +16,8 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 
 - Android minimum-flow release-emulator coverage is complete, including recovery-reset encrypted-record continuity.
 - Recovery uses a separate verified disposable account. CI creates a fresh phrase and wrapped MEK per run, keeps the phrase and derived temporary password only in process memory/environment, restores the original protected test password, and hard-deletes the generated record.
-- Next required security slice: safely enable the two skipped hosted-Supabase integration tests with the existing push-only protected-environment boundary and disposable cleanup.
+- Both formerly skipped hosted-Supabase integration tests now execute serially in a push-only protected job after Android cleanup.
+- Next slice: select an owner-approved external blocker (iOS/macOS or Resend) or continue the additional recommended hardening backlog.
 - Continue to keep recovery phrases, passwords, MEKs, raw emergency codes, ciphertext, and service-role values out of commits, handoffs, screenshots, artifacts, and logs.
 
 ## Security and CI Controls Already Running
@@ -52,6 +53,7 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 - [x] Supabase Phase 1 schema guards cover RLS, owner policies, grants, safe columns, and the 20-active-record category limit.
 - [x] Current security workflows do not expose repository secrets to pull-request code.
 - [x] OWASP ZAP runs a passive baseline scan against an isolated local API on pull requests, `main`, and a weekly schedule.
+- [x] Both hosted-Supabase integration tests run serially in a push-only protected job with verified fixture deletion.
 
 ## Open Findings — Required Checklist
 
@@ -152,14 +154,25 @@ Current state: complete. Security CI runs for pushes to every branch while retai
 
 ### 5. Cover the two skipped live Supabase integration tests
 
-- [ ] Define a safe isolated CI test project/account and credential-rotation policy.
-- [ ] Run `returning-user-live-supabase.test.ts` in an approved protected workflow.
-- [ ] Run `encrypted-vault-live-supabase-smoke.test.ts` in an approved protected workflow.
-- [ ] Prevent secrets from being available to untrusted fork pull requests.
-- [ ] Ensure test data is disposable and cleanup is reliable.
-- [ ] Confirm logs never contain passwords, recovery phrases, MEKs, ciphertext, raw emergency codes, or service-role keys.
+- [x] Define a safe isolated CI test project/account and credential-rotation policy.
+- [x] Run `returning-user-live-supabase.test.ts` in an approved protected workflow.
+- [x] Run `encrypted-vault-live-supabase-smoke.test.ts` in an approved protected workflow.
+- [x] Prevent secrets from being available to untrusted fork pull requests.
+- [x] Ensure test data is disposable and cleanup is reliable.
+- [x] Confirm logs never contain passwords, recovery phrases, MEKs, ciphertext, raw emergency codes, or service-role keys.
 
-Current state: the normal mobile suite skips these two tests unless their explicit environment flags and credentials are provided. The local Supabase RLS job does not replace these end-to-end hosted Supabase flows.
+Current state: complete. The normal mobile suite still skips these tests by default, while the dedicated `Hosted Supabase integration` job explicitly enables and runs them serially after the protected Android job. It uses the verified disposable account, re-authenticates during cleanup, verifies hard deletion, and keeps secrets unavailable to pull-request code.
+
+#### Completion evidence — 2026-07-13
+
+- Workflow: separate 10-minute, push-only `Hosted Supabase integration` job in the protected `Preview` environment; it depends on `Android emulator smoke` to avoid concurrent disposable-account mutation.
+- Credential lifecycle: the repository owner controls the disposable account and protected values; rotate them immediately after suspected disclosure or access changes, and delete the account plus its `Preview` configuration before any production launch candidate. Never reuse these test values for production.
+- Returning-user test: creates and persists wrapped key material plus an encrypted contact, signs out, signs back in, unwraps the MEK, decrypts the expected record, confirms raw storage lacks plaintext, then re-authenticates, hard-deletes, and verifies fixture absence.
+- Encrypted-storage test: writes a uniquely identified encrypted card, validates safe column/type/length and plaintext-absence booleans, then re-authenticates, hard-deletes, and verifies fixture absence.
+- Log hardening: assertions no longer emit ciphertext-bearing rows or decrypted payload objects on failure; the only success diagnostic contains safe types, column names, lengths, deletion state, and boolean plaintext checks.
+- Local verification: 19 workflow-security tests passed; both live files remained skipped without explicit flags; mobile typecheck, lint, GitHub Actions security guard, mobile secret scan, and Phase 1 gate passed.
+- GitHub result: [Security CI run 29233949611](https://github.com/shahbaz242630/Document-Vault/actions/runs/29233949611), commit `b250aa2`, passed all five jobs. The returning-user live test passed in 4.69s and encrypted-storage live test passed in 1.67s.
+- Residual risk: this remains a shared hosted test project/account rather than an isolated production-equivalent tenant. The account and protected configuration must be removed before launch.
 
 ### 6. Add Expo Doctor
 
@@ -496,4 +509,4 @@ npm audit --omit=dev --workspaces --audit-level=high
 npm run check:phase1
 ```
 
-`npm run check:phase1` is required by the branch-protected `App security gates` job and is expected to remain green. The remaining open security findings are the protected live-Supabase integration tests, native build/E2E coverage, and the additional recommended hardening work above.
+`npm run check:phase1` is required by the branch-protected `App security gates` job and is expected to remain green. The remaining open security findings are iOS native/simulator coverage when macOS resources are approved and the additional recommended hardening work above.

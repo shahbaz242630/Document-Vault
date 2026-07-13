@@ -8,7 +8,7 @@ Archived full prior handoff:
 
 Start here:
 
-> We are in Phase 1 integration hardening on branch `redesign/sanduqkin-flow`. Android release CI now covers onboarding/FAQ, returning-user Supabase sign-in and MEK unlock, encrypted bank-record create/read/edit/hard-delete, sealed emergency-code one-time visibility followed by raw-value hiding, and recovery-reset encrypted-record continuity. The latest fully verified implementation is commit `1f9e8fc` in [Security CI run 29229315895](https://github.com/shahbaz242630/Document-Vault/actions/runs/29229315895), where all four jobs passed. Recovery CI uses a separate verified disposable account, generates a fresh 12-word phrase only in runner memory, bootstraps wrapped key material through the authenticated RLS path, creates an encrypted record, resets to a derived temporary password, clears local state, decrypts the same record, restores the original protected test password, clears local state again, decrypts once more, and hard-deletes the fixture. The phrase and temporary password are never committed, printed, persisted as artifacts, or retained after the job. The next security slice should address the two skipped hosted-Supabase integration tests with the same push-only protected-environment and disposable-cleanup discipline.
+> We are in Phase 1 integration hardening on branch `redesign/sanduqkin-flow`. Android release CI covers onboarding/FAQ, returning-user Supabase sign-in and MEK unlock, encrypted bank-record CRUD/hard-delete, emergency-code one-time visibility/raw-value hiding, and recovery-reset encrypted-record continuity. A separate protected job now also executes both formerly skipped hosted-Supabase integration tests serially against the verified disposable account after Android cleanup. The latest fully verified implementation is commit `b250aa2` in [Security CI run 29233949611](https://github.com/shahbaz242630/Document-Vault/actions/runs/29233949611), where all five jobs passed. Recovery phrases and temporary passwords remain in runner memory only; credentials, MEKs, ciphertext, and raw vault payloads remain absent from logs and artifacts. The hosted tests re-authenticate during cleanup, hard-delete their unique fixtures, verify deletion, and emit safe boolean/length summaries only. The next security slice should select an owner-approved remaining external blocker (iOS/macOS or Resend) or continue the recommended repository/environment hardening backlog.
 
 Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 payments work until Phase 1 verification and hardening gaps are closed.
 
@@ -74,6 +74,15 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - The generated phrase and temporary password exist only in the protected job process environment and are never printed, committed, uploaded, or retained.
 - Final verification: [Security CI run 29229315895](https://github.com/shahbaz242630/Document-Vault/actions/runs/29229315895) passed all four jobs on commit `1f9e8fc`. The 9m57s emulator job logged onboarding, returning-user unlock, encrypted CRUD, emergency-code hiding, and recovery-reset continuity success.
 
+2026-07-13 protected hosted-Supabase integration slice:
+
+- Added a separate 10-minute `Hosted Supabase integration` job using the push-only protected `Preview` environment.
+- The job depends on successful Android emulator completion so it cannot race the disposable recovery bootstrap or password restoration.
+- It runs `returning-user-live-supabase.test.ts` and `encrypted-vault-live-supabase-smoke.test.ts` sequentially with explicit opt-in flags.
+- Both tests re-authenticate during `finally` cleanup, hard-delete their unique asset rows, and verify those rows are absent before signing out.
+- Assertions now report only safe booleans, counts, types, column names, and ciphertext/nonce lengths; failures do not print ciphertext or decrypted payload objects.
+- Final verification: [Security CI run 29233949611](https://github.com/shahbaz242630/Document-Vault/actions/runs/29233949611) passed all five jobs on commit `b250aa2`. Each hosted test file ran one live test and passed; durations were 4.69s and 1.67s.
+
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
@@ -82,7 +91,7 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Active scope: Phase 1 - Core Single-User Vault
 - Current handoff refresh: 2026-07-13
 - Current branch: `redesign/sanduqkin-flow`
-- Current commit before this documentation refresh: `1f9e8fc`
+- Current commit before this documentation refresh: `b250aa2`
 - Current PR: none open for this branch
 - Expected local-only files: `.playwright-mcp/` and `welcome.png`; keep them untracked unless the owner explicitly scopes them into a future change.
 
@@ -322,21 +331,21 @@ adb shell am start -n com.sanduqkin.mobile/com.sanduqkin.mobile.MainActivity
 
 ## Recommended Next Slice
 
-Primary next slice: protected execution of the two opt-in hosted-Supabase integration test files with disposable cleanup.
+Primary next slice: choose one owner-approved remaining Phase 1 external blocker or security-hardening item.
 
-1. Reuse the separate verified disposable account and the existing push-only `Preview` environment boundary; do not expose secrets to pull-request code.
-2. Define per-run key material and fixture setup that leaves no plaintext phrase, password, MEK, ciphertext, or raw vault payload in logs or artifacts.
-3. Enable `returning-user-live-supabase.test.ts` and `encrypted-vault-live-supabase-smoke.test.ts` in an approved protected job.
-4. Make cleanup reliable after both success and failure, and restore any changed disposable credential state.
-5. Obtain a green Security CI run and update both handoffs with exact evidence.
+1. Preferred external verification: macOS/Xcode/iOS build and simulator smoke when an approved runner/budget is available.
+2. Alternative external verification: Resend approval and production account-deletion confirmation-email verification.
+3. Actionable repository hardening: protect production GitHub environments and document secret ownership, rotation, and revocation without recording values.
+4. Keep every credential-bearing workflow behind explicit trusted-event/environment boundaries.
+5. Obtain green required checks and update both handoffs with exact evidence.
 
-If hosted integration automation remains deferred, choose one external Phase 1 blocker instead:
+Other suitable hardening slices include:
 
-- macOS/Xcode/iOS build and simulator verification when an approved runner/budget is available.
-- Resend approval and production account-deletion confirmation-email verification.
-- Production GitHub environment protection and approval policy for credential-bearing workflows.
+- Add `CODEOWNERS` for workflows, migrations, cryptography, authentication, recovery, audit, and deletion paths if a viable reviewer model is available.
+- Generate and retain a release SBOM with a dependency/license review policy.
+- Add a release checklist linking commit, green runs, dependency audit, native QA, and migration status.
 
-Already completed and not a next slice: Phase 1 function-size enforcement, vault category/add/list/edit/hard-delete/bulk UX, RLS/schema guards, Android native debug/release compilation, onboarding/FAQ E2E, returning-user unlock E2E, encrypted CRUD E2E, emergency-code raw-value hiding E2E, and recovery-reset encrypted-record continuity E2E.
+Already completed and not a next slice: Phase 1 function-size enforcement, vault category/add/list/edit/hard-delete/bulk UX, RLS/schema guards, Android native debug/release compilation, onboarding/FAQ E2E, returning-user unlock E2E, encrypted CRUD E2E, emergency-code raw-value hiding E2E, recovery-reset continuity E2E, and both hosted-Supabase integration tests.
 
 Code/test progress on 2026-06-09:
 
@@ -649,6 +658,7 @@ npm run typecheck --workspace @vault/mobile
 ## Critical Remaining Phase 1 Gaps
 
 - Android recovery-reset E2E continuity is complete through the protected disposable-account bootstrap and release-emulator flow in run `29229315895`.
+- Both opt-in hosted-Supabase integration tests now run serially in protected push-only CI and passed in run `29233949611`.
 - Real Supabase MFA remains launch-deferred because it is paid. Placeholder TOTP/factor-id paths are not production-valid.
 - iOS native verification is blocked in this Windows environment. Needs macOS/Xcode/iOS simulator verification.
 - Password reset/recovery MEK rotation and re-wrapping is implemented, unit-verified, and repeatably verified on the Android release emulator.
@@ -680,5 +690,5 @@ npm run check:mobile-secrets
 ```
 
 3. Preserve the recovery bootstrap's in-memory-only phrase/temporary-password handling and its original-password restoration/fixture cleanup guarantees.
-4. Address the two skipped hosted-Supabase integration tests using the protected disposable account, push-only secret boundary, safe logs, and reliable cleanup.
+4. Select an owner-approved external blocker or recommended hardening item from `Recommended Next Slice` while preserving the protected disposable-test boundaries.
 5. Obtain a green Security CI run and update both handoffs before marking that next slice complete.
