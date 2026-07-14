@@ -24,6 +24,9 @@ coverage/
 Details/
 *.xlsx
 ~$*.xlsx
+AuthKey_*.p8
+*.mobileprovision
+*.p12
 
 # Logs
 .codex-logs/
