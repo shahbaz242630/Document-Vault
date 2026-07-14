@@ -31,6 +31,7 @@ function runGitHubActionsSecurityCheck(options = {}) {
       ...checkWorkflowPermissions(relativePath, contents),
       ...checkWorkflowActions(relativePath, contents),
       ...checkWorkflowSecrets(relativePath, contents),
+      ...checkSecretEnvironments(relativePath, contents),
     );
   }
 
@@ -135,6 +136,22 @@ function checkWorkflowSecrets(filePath, contents) {
       rule: "github-actions-no-secrets-on-pr",
     },
   ];
+}
+
+function checkSecretEnvironments(filePath, contents) {
+  const jobsStart = contents.search(/^jobs\s*:\s*$/m);
+  if (jobsStart < 0) {
+    return [];
+  }
+
+  return collectJobBlocks(contents.slice(jobsStart))
+    .filter((block) => /\$\{\{\s*secrets\./.test(block))
+    .filter((block) => !/^    environment:\s*(Preview|Production|Release)\s*$/m.test(block))
+    .map(() => ({
+      message: "Jobs that reference GitHub secrets must use the Preview, Production, or Release environment.",
+      path: filePath,
+      rule: "github-actions-secrets-require-environment",
+    }));
 }
 
 function collectJobBlocks(jobsSection) {

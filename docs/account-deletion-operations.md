@@ -45,7 +45,7 @@ npx vercel@latest deploy --prod --yes
 
 ## Scheduler
 
-`.github/workflows/account-deletion-processor.yml` runs daily and can be triggered manually. Configure these repository secrets:
+`.github/workflows/account-deletion-processor.yml` runs daily in the branch-restricted GitHub `Production` environment and can be triggered manually. The current values are repository secrets; migrate them to environment secrets during their next rotation:
 
 - `ACCOUNT_DELETION_PROCESSOR_URL`: deployed API origin, currently `https://sanduqkin-api.vercel.app`.
 - `ACCOUNT_DELETION_PROCESSOR_TOKEN`: the same bearer token configured on the API deployment.
@@ -54,7 +54,7 @@ Do not put Supabase service-role credentials in GitHub Actions for this workflow
 
 ## Audit Retention
 
-`.github/workflows/audit-retention-processor.yml` runs daily and can be triggered manually. Configure these repository secrets:
+`.github/workflows/audit-retention-processor.yml` runs daily in the branch-restricted GitHub `Production` environment and can be triggered manually. The current values are repository secrets; migrate them to environment secrets during their next rotation:
 
 - `AUDIT_RETENTION_PROCESSOR_URL`: deployed API origin, currently `https://sanduqkin-api.vercel.app`.
 - `AUDIT_RETENTION_PROCESSOR_TOKEN`: the same bearer token configured as `AUDIT_RETENTION_PROCESSOR_TOKEN` on the API deployment.
@@ -87,3 +87,5 @@ Do not put `RESEND_API_KEY` or Supabase service-role credentials in the mobile e
 Vault data and wrapped key material are deleted by the server-side processor when the request becomes due. Audit rows are retained for operational history with `user_id = null`; raw user email is not persisted in durable audit rows.
 
 The target retention policy is seven years for anonymized audit rows. The audit retention processor enforces this automatically after the API and scheduler secrets are configured.
+
+Secret ownership, rotation, and revocation procedures are documented in `docs/secret-lifecycle-operations.md`.

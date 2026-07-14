@@ -10,7 +10,9 @@ permissions:
 
 jobs:
   process-due-deletions:
+    environment: Production
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Call protected processor endpoint
         env:
@@ -22,7 +24,7 @@ jobs:
             exit 1
           fi
 
-          curl --fail-with-body \
+          curl --fail-with-body --retry 2 --retry-all-errors --connect-timeout 10 --max-time 60 \
             --request POST \
             --header "Authorization: Bearer ${PROCESSOR_TOKEN}" \
             "$PROCESSOR_URL/internal/account-deletion/process"

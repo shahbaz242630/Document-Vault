@@ -179,6 +179,22 @@ test("runs hosted Supabase integration tests serially behind the protected Andro
   assert.match(workflow, /LIVE_SUPABASE_TEST_PASSWORD: \$\{\{ secrets\.ANDROID_E2E_TEST_PASSWORD \}\}/);
 });
 
+test("runs production processors in bounded protected-environment jobs", () => {
+  const workflowDirectory = path.resolve(__dirname, "..", ".github", "workflows");
+
+  for (const fileName of [
+    "account-deletion-processor.yml",
+    "audit-retention-processor.yml",
+  ]) {
+    const workflow = fs.readFileSync(path.join(workflowDirectory, fileName), "utf8");
+
+    assert.match(workflow, /\n\s{4}environment: Production\s*$/m);
+    assert.match(workflow, /\n\s{4}timeout-minutes: 10\s*$/m);
+    assert.match(workflow, /curl --fail-with-body --retry 2 --retry-all-errors/);
+    assert.match(workflow, /--connect-timeout 10 --max-time 60/);
+  }
+});
+
 test("enforces the Phase 1 Definition-of-Done gate in Security CI", () => {
   const workflow = fs.readFileSync(
     path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
@@ -416,6 +432,7 @@ test("flags dangerous workflow triggers, permissions, actions, and PR secrets", 
       "github-actions-pinned-actions",
       "github-actions-allowed-actions",
       "github-actions-no-secrets-on-pr",
+      "github-actions-secrets-require-environment",
     ],
   );
 });
@@ -437,6 +454,7 @@ test("allows scheduled workflows to use secrets with minimal permissions", () =>
       "  contents: read",
       "jobs:",
       "  call:",
+      "    environment: Production",
       "    runs-on: ubuntu-latest",
       "    steps:",
       "      - run: echo ${{ secrets.PROCESSOR_TOKEN }}",
@@ -450,6 +468,35 @@ test("allows scheduled workflows to use secrets with minimal permissions", () =>
     ok: true,
     violations: [],
   });
+});
+
+test("requires secret-bearing jobs to use an approved environment", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "github-actions-security-"));
+  const workflowDir = path.join(tmp, ".github", "workflows");
+
+  fs.mkdirSync(workflowDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(workflowDir, "unprotected-secret.yml"),
+    [
+      "name: unprotected secret",
+      "on:",
+      "  workflow_dispatch:",
+      "permissions:",
+      "  contents: read",
+      "jobs:",
+      "  call:",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      "      - run: test -n '${{ secrets.PROCESSOR_TOKEN }}'",
+      "",
+    ].join("\n"),
+  );
+
+  const result = runGitHubActionsSecurityCheck({ cwd: tmp });
+
+  assert.deepEqual(result.violations.map((violation) => violation.rule), [
+    "github-actions-secrets-require-environment",
+  ]);
 });
 
 test("allows pull-request workflows to isolate secrets in push-only jobs", () => {
@@ -473,6 +520,7 @@ test("allows pull-request workflows to isolate secrets in push-only jobs", () =>
       "      - run: echo public",
       "  protected-check:",
       "    if: github.event_name == 'push'",
+      "    environment: Preview",
       "    runs-on: ubuntu-latest",
       "    steps:",
       "      - run: test -n '${{ secrets.QA_PASSWORD }}'",

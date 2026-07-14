@@ -344,7 +344,7 @@ adb shell am start -n com.sanduqkin.mobile/com.sanduqkin.mobile.MainActivity
 
 Primary next slice: choose one owner-approved remaining Phase 1 external blocker or security-hardening item.
 
-1. Preferred external verification: macOS/Xcode/iOS build and simulator smoke when an approved runner/budget is available.
+1. Preferred external verification: configure an owner-approved signed iOS archive and TestFlight delivery path, including entitlements and physical-device verification.
 2. Alternative external verification: Resend approval and production account-deletion confirmation-email verification.
 3. Actionable repository hardening: protect production GitHub environments and document secret ownership, rotation, and revocation without recording values.
 4. Keep every credential-bearing workflow behind explicit trusted-event/environment boundaries.
@@ -671,7 +671,7 @@ npm run typecheck --workspace @vault/mobile
 - Android recovery-reset E2E continuity is complete through the protected disposable-account bootstrap and release-emulator flow in run `29229315895`.
 - Both opt-in hosted-Supabase integration tests now run serially in protected push-only CI and passed in run `29233949611`.
 - Real Supabase MFA remains launch-deferred because it is paid. Placeholder TOTP/factor-id paths are not production-valid.
-- iOS native verification is blocked in this Windows environment. Needs macOS/Xcode/iOS simulator verification.
+- Unsigned iOS Release compilation and simulator launch-survival verification are complete in GitHub-hosted macOS CI (run `29246161478`). Signed archive, TestFlight delivery, entitlements, and physical-device behavior remain unverified.
 - Password reset/recovery MEK rotation and re-wrapping is implemented, unit-verified, and repeatably verified on the Android release emulator.
 - Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified.
 - `npm run check:phase1` is enforced by the branch-protected `App security gates` job and passed in both push and PR Security CI runs.
