@@ -4,11 +4,11 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 
 ## Current Baseline
 
-- Audit date: 2026-07-13
+- Audit date: 2026-07-15
 - Audited branch: `redesign/sanduqkin-flow`
-- Latest fully verified implementation commit: `3b19e05`
-- Latest audited GitHub run: [Security CI run 29246161478](https://github.com/shahbaz242630/Document-Vault/actions/runs/29246161478)
-- Latest audited GitHub result: all six jobs passed, including the new unsigned `iOS simulator smoke`, the existing Android minimum flows, and both hosted-Supabase integration tests.
+- Latest fully verified implementation commit: `f4c99be`
+- Latest audited GitHub run: [Security CI run 29367959335](https://github.com/shahbaz242630/Document-Vault/actions/runs/29367959335)
+- Latest audited GitHub result: all six jobs passed with production workflow environment enforcement, the existing Android minimum flows, unsigned iOS simulator smoke, and both hosted-Supabase integration tests.
 - CI runtime: Node.js `24.3.0` on `ubuntu-latest`
 - Important local constraint: Node.js `24.2.0` is below the repository requirement `^22.13.0 || >=24.3.0` and should be upgraded.
 
@@ -18,7 +18,7 @@ This is the go-to checklist for Sanduqkin repository security, CI/CD coverage, a
 - Recovery uses a separate verified disposable account. CI creates a fresh phrase and wrapped MEK per run, keeps the phrase and derived temporary password only in process memory/environment, restores the original protected test password, and hard-deletes the generated record.
 - Both formerly skipped hosted-Supabase integration tests now execute serially in a push-only protected job after Android cleanup.
 - Unsigned iOS Release compilation and launch-survival verification now run on a GitHub-hosted macOS simulator without Apple credentials. Signed archive, TestFlight, and real-device coverage remain separate release slices.
-- Next slice: configure an owner-approved signed/TestFlight path, select Resend, or continue the additional recommended hardening backlog.
+- Next slice: establish an approval-gated `Release` environment and configure an owner-approved signed archive/TestFlight path.
 - Continue to keep recovery phrases, passwords, MEKs, raw emergency codes, ciphertext, and service-role values out of commits, handoffs, screenshots, artifacts, and logs.
 
 ## Security and CI Controls Already Running
@@ -468,10 +468,20 @@ Current state: complete. The workflow starts the Hono API locally without produc
 
 These items were not part of the original 13 findings but should remain visible.
 
+#### Completion evidence - 2026-07-15 production workflow secret boundaries
+
+- Scope: constrain secret-bearing jobs to named environments and document secret lifecycle operations without storing values.
+- Remote configuration: GitHub `Production` permits deployments only from protected branches. Human approval is deferred to the separate `Release` environment because approval on `Production` would block unattended daily deletion and retention processors.
+- Workflow hardening: both processors use `environment: Production`, 10-minute job timeouts, two bounded retries, 10-second connection timeouts, and 60-second request limits.
+- Guard result: any secret-bearing job without `Preview`, `Production`, or `Release` fails the repository workflow-security check; 22 focused regression tests passed.
+- Local verification: workflow tests, lint, Phase 1 gate, repository security guard, GitHub Actions security guard, mobile secret scan, and `git diff --check` passed.
+- GitHub result: [Security CI run 29367959335](https://github.com/shahbaz242630/Document-Vault/actions/runs/29367959335) passed all six jobs on commit `f4c99be`.
+- Residual task: the four processor values predate the environment boundary and remain repository-level secrets. Migrate them into `Production` during the next rotation, verify both workflows, then delete the repository copies.
+
 - [ ] Add a repository `CODEOWNERS` file for security-sensitive paths such as workflows, migrations, cryptography, authentication, recovery, audit, and deletion processors.
 - [ ] Require review from the relevant code owners through the `main` ruleset.
-- [ ] Protect production GitHub environments and require approval for workflows that use production credentials.
-- [ ] Document CI/repository secret ownership, purpose, rotation interval, last rotation, and revocation procedure without recording secret values.
+- [x] Protect automated production workflows with a protected-branch GitHub environment; reserve human approval for the separate `Release` environment so daily processors do not stall.
+- [x] Document CI/repository secret ownership, purpose, rotation interval, and revocation procedure without recording secret values; keep actual rotation dates in a private operational register.
 - [ ] Add scheduled-workflow failure alerting or an operational review process; a green historical run does not guarantee failures will be noticed.
 - [ ] Add explicit timeouts to CI jobs and network calls so hung workflows cannot consume runners indefinitely.
 - [ ] Add retry/idempotency and response-content assertions for scheduled processor workflows where safe; current workflows primarily validate secret presence and a successful HTTP status.

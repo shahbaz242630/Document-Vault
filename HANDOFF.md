@@ -12,6 +12,15 @@ Start here:
 
 Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 payments work until Phase 1 verification and hardening gaps are closed.
 
+2026-07-15 production workflow secret-boundary slice:
+
+- GitHub `Production` is restricted to protected branches. Scheduled account-deletion and audit-retention jobs now declare that environment, have 10-minute job bounds, and use bounded HTTP retries, connection timeouts, and total request timeouts.
+- The GitHub Actions guard rejects every secret-bearing job that omits an approved `Preview`, `Production`, or `Release` environment; 22 workflow regression tests passed.
+- Added `docs/secret-lifecycle-operations.md` with value-free ownership, purpose, rotation, revocation, incident, and quarterly access-review procedures.
+- The four processor values remain repository-level secrets because GitHub does not expose stored values for migration. Move them into `Production` during their next rotation, verify each workflow, then remove the repository copies.
+- Final verification: [Security CI run 29367959335](https://github.com/shahbaz242630/Document-Vault/actions/runs/29367959335) passed all six jobs on implementation commit `f4c99be`.
+- Next slice: establish an approval-gated `Release` environment and configure owner-approved signed iOS archive/TestFlight delivery without exposing Apple credentials in commits, logs, or artifacts.
+
 2026-07-11 update: `npm run check:phase1` is now enforced by the branch-protected `App security gates` job with regression coverage. Both push and PR Security CI runs passed on implementation commit `1d4407f`; move to the next remaining Phase 1 blocker.
 
 2026-07-11 Android native compile slice (completed and remotely verified):
@@ -100,9 +109,9 @@ Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 
 - Product/app name: Sanduqkin
 - BRD: `Vault_BRD_v1.0.md`, version shown in file: 1.1
 - Active scope: Phase 1 - Core Single-User Vault
-- Current handoff refresh: 2026-07-13
+- Current handoff refresh: 2026-07-15
 - Current branch: `redesign/sanduqkin-flow`
-- Current commit before this documentation refresh: `3b19e05`
+- Latest fully verified implementation commit: `f4c99be`
 - Current PR: none open for this branch
 - Expected local-only files: `.playwright-mcp/` and `welcome.png`; keep them untracked unless the owner explicitly scopes them into a future change.
 
