@@ -1,0 +1,33 @@
+{
+  "cli": {
+    "version": ">= 16.0.1",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "ios": {
+        "credentialsSource": "remote"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6790954883",
+        "appleTeamId": "4M5R62ZT22",
+        "ascApiKeyPath": ".eas/secrets/AuthKey_22Q892W9K4.p8",
+        "ascApiKeyIssuerId": "d4f0c59e-10cc-4df7-aae4-8cad75b32fb1",
+        "ascApiKeyId": "22Q892W9K4",
+        "bundleIdentifier": "com.sanduqkin.mobile"
+      }
+    }
+  }
+}

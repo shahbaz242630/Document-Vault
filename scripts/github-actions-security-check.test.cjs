@@ -98,6 +98,26 @@ test("builds and launches an unsigned iOS release in a bounded macOS simulator j
   assert.doesNotMatch(iosJob, /secrets\./);
 });
 
+test("protects the manually triggered iOS TestFlight release", () => {
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, "..", ".github", "workflows", "ios-testflight.yml"),
+    "utf8",
+  );
+
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.doesNotMatch(workflow, /\n\s+(push|pull_request|schedule):/);
+  assert.match(workflow, /if: inputs\.confirmation == 'testflight'/);
+  assert.match(workflow, /environment: Release/);
+  assert.match(workflow, /timeout-minutes: 120/);
+  assert.match(workflow, /eas-cli@21\.0\.0 build/);
+  assert.match(workflow, /--auto-submit-with-profile production/);
+  assert.match(workflow, /--non-interactive/);
+  assert.match(workflow, /--freeze-credentials/);
+  assert.match(workflow, /APP_STORE_CONNECT_PRIVATE_KEY: \$\{\{ secrets\.APP_STORE_CONNECT_PRIVATE_KEY \}\}/);
+  assert.match(workflow, /chmod 600 \.eas\/secrets\/AuthKey_22Q892W9K4\.p8/);
+  assert.match(workflow, /if: always\(\)[\s\S]*?rm -rf apps\/mobile\/\.eas\/secrets/);
+});
+
 test("runs bounded Android onboarding and returning-user unlock smoke tests after native compilation", () => {
   const workflow = fs.readFileSync(
     path.resolve(__dirname, "..", ".github", "workflows", "security-ci.yml"),
