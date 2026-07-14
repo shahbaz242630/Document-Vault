@@ -6,8 +6,8 @@ describe("createReAuthViewModel", () => {
   it("returns re-authentication screen copy", () => {
     const vm = createReAuthViewModel();
 
-    expect(vm.title).toBe("Verify your identity");
-    expect(vm.subtitle).toContain("Re-authentication is required");
+    expect(vm.title).toBe("Confirm it's you");
+    expect(vm.subtitle).toContain("we double-check before opening it");
     expect(vm.primaryActionLabel).toBe("Verify");
     expect(vm.emailLabel).toBe("Email");
     expect(vm.passwordLabel).toBe("Password");

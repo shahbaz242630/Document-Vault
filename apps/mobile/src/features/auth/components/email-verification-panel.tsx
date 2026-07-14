@@ -1,45 +1,53 @@
-import { Link, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
+import {
+  PrimaryButton,
+  SerifTitle,
+  StepHeader,
+  Subtitle,
+} from "@/shared/ui";
 
 import { createEmailVerificationViewModel } from "../email-verification-view-model";
 
 export function EmailVerificationPanel() {
   const params = useLocalSearchParams<{ email?: string }>();
+  const router = useRouter();
   const viewModel = createEmailVerificationViewModel(params.email);
 
   return (
-    <View style={{ gap: 20 }}>
-      <View style={{ gap: 8 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Email verification</Text>
-        <Text
-          style={{
-            color: colors.ink,
-            fontSize: 30,
-            fontWeight: "700",
-            lineHeight: 36,
-          }}
-        >
-          {viewModel.title}
-        </Text>
-        <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-          We sent the next setup step to {viewModel.destinationLabel}.
-        </Text>
-        <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-          {viewModel.body}
-        </Text>
+    <View style={{ flex: 1, gap: 22 }}>
+      <StepHeader step="account-2" />
+
+      <View style={{ gap: 10 }}>
+        <SerifTitle>{viewModel.title}</SerifTitle>
+        <Subtitle>
+          We sent the next setup step to{" "}
+          <Text
+            style={{
+              color: colors.ink,
+              fontFamily: fonts.sans.semibold,
+            }}
+          >
+            {viewModel.destinationLabel}
+          </Text>
+          . {viewModel.body}
+        </Subtitle>
       </View>
 
-      <Link
-        href={{
-          pathname: "/auth/profile-basics",
-          params: { email: params.email ?? "" },
-        }}
-        style={{ color: colors.action, fontSize: 17 }}
-      >
-        Continue to profile setup
-      </Link>
+      <View style={{ marginTop: "auto" }}>
+        <PrimaryButton
+          label="Continue to profile setup"
+          onPress={() =>
+            router.push({
+              pathname: "/auth/profile-basics",
+              params: { email: params.email ?? "" },
+            })
+          }
+        />
+      </View>
     </View>
   );
 }

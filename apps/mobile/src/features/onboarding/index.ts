@@ -3,5 +3,6 @@
  * phrase confirmation screens. It exposes screens/components only through this
  * module boundary.
  */
+export { TrustFaqPanel } from "./components/trust-faq-panel";
 export { VaultReadyPanel } from "./components/vault-ready-panel";
 export { WelcomePanel } from "./components/welcome-panel";

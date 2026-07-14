@@ -1,17 +1,23 @@
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { View } from "react-native";
+import * as ExpoSecureStore from "expo-secure-store";
 
-import { colors } from "@/shared/theme/colors";
+import {
+  ErrorText,
+  Field,
+  PrimaryButton,
+  SerifTitle,
+  StepHeader,
+  Subtitle,
+} from "@/shared/ui";
 
 import { createProfileBasics, type ProfileBasicsFormValues } from "../profile-basics-form";
 import {
   createProfileBasicsViewModel,
   type ProfileBasicsFormField,
-  type ProfileBasicsViewModel,
 } from "../profile-basics-view-model";
 import { createSignupProgressStorage } from "../signup-progress";
-import * as ExpoSecureStore from "expo-secure-store";
 
 type ProfileBasicsPanelProps = {
   email: string;
@@ -33,8 +39,14 @@ export function ProfileBasicsPanel({ email }: ProfileBasicsPanelProps) {
   const router = useRouter();
 
   return (
-    <View style={{ gap: 20 }}>
-      <ProfileBasicsHeader viewModel={viewModel} />
+    <View style={{ flex: 1, gap: 22 }}>
+      <StepHeader step="account-3" />
+
+      <View style={{ gap: 10 }}>
+        <SerifTitle>{viewModel.title}</SerifTitle>
+        <Subtitle>{viewModel.body}</Subtitle>
+      </View>
+
       <ProfileBasicsFields
         fields={viewModel.fields}
         onChange={(fieldName, text) => {
@@ -44,48 +56,23 @@ export function ProfileBasicsPanel({ email }: ProfileBasicsPanelProps) {
         values={values}
       />
 
-      {error ? (
-        <Text selectable style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}>
-          {error}
-        </Text>
-      ) : null}
+      {error ? <ErrorText>{error}</ErrorText> : null}
 
-      <ProfileBasicsSubmitButton
-        isSubmitting={isSubmitting}
-        label={viewModel.primaryActionLabel}
-        onPress={() =>
-          submitProfileBasics({
-            email,
-            onError: setError,
-            onSubmittingChange: setIsSubmitting,
-            router,
-            values,
-          })
-        }
-      />
-    </View>
-  );
-}
-
-function ProfileBasicsHeader({ viewModel }: { viewModel: ProfileBasicsViewModel }) {
-  return (
-    <View style={{ gap: 8 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-        {viewModel.statusLabel}
-      </Text>
-      <Text
-        style={{
-          color: colors.ink,
-          fontSize: 30,
-          fontWeight: "700",
-          lineHeight: 36,
-        }}
-      >
-        {viewModel.title}
-      </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-        {viewModel.body}
-      </Text>
+      <View style={{ marginTop: "auto" }}>
+        <PrimaryButton
+          disabled={isSubmitting}
+          label={isSubmitting ? "Working..." : viewModel.primaryActionLabel}
+          onPress={() =>
+            submitProfileBasics({
+              email,
+              onError: setError,
+              onSubmittingChange: setIsSubmitting,
+              router,
+              values,
+            })
+          }
+        />
+      </View>
     </View>
   );
 }
@@ -102,61 +89,15 @@ function ProfileBasicsFields({
   return (
     <View style={{ gap: 14 }}>
       {fields.map((field) => (
-        <View key={field.name} style={{ gap: 6 }}>
-          <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
-            {field.label}
-          </Text>
-          <TextInput
-            autoCapitalize="words"
-            onChangeText={(text) => onChange(field.name, text)}
-            placeholder="Required"
-            placeholderTextColor={colors.inkMuted}
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              borderCurve: "continuous",
-              borderRadius: 8,
-              borderWidth: 1,
-              color: colors.ink,
-              fontSize: 17,
-              paddingHorizontal: 14,
-              paddingVertical: 12,
-            }}
-            value={values[field.name]}
-          />
-        </View>
+        <Field
+          autoCapitalize="words"
+          key={field.name}
+          label={field.label}
+          onChangeText={(text) => onChange(field.name, text)}
+          value={values[field.name]}
+        />
       ))}
     </View>
-  );
-}
-
-function ProfileBasicsSubmitButton({
-  isSubmitting,
-  label,
-  onPress,
-}: {
-  isSubmitting: boolean;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={isSubmitting}
-      onPress={onPress}
-      style={{
-        alignItems: "center",
-        backgroundColor: isSubmitting ? colors.inkMuted : colors.action,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        paddingHorizontal: 18,
-        paddingVertical: 14,
-      }}
-    >
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-        {isSubmitting ? "Working..." : label}
-      </Text>
-    </Pressable>
   );
 }
 

@@ -6,8 +6,8 @@ describe("createRecoveryPhraseConfirmationViewModel", () => {
   it("returns confirmation placeholder copy", () => {
     const viewModel = createRecoveryPhraseConfirmationViewModel();
 
-    expect(viewModel.title).toBe("Confirm your recovery phrase");
-    expect(viewModel.primaryActionLabel).toBe("Confirm and continue");
+    expect(viewModel.title).toBe("A quick check");
+    expect(viewModel.primaryActionLabel).toBe("Confirm");
     expect(viewModel.successMessage).toContain("Recovery phrase confirmed");
   });
 });

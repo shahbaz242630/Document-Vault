@@ -6,8 +6,8 @@ describe("createBiometricSetupViewModel", () => {
   it("returns biometric setup placeholder copy", () => {
     const viewModel = createBiometricSetupViewModel();
 
-    expect(viewModel.title).toBe("Quick unlock");
+    expect(viewModel.title).toBe("Unlock with your face or fingerprint");
     expect(viewModel.primaryActionLabel).toBe("Enable biometric unlock");
-    expect(viewModel.skipActionLabel).toBe("Skip for now");
+    expect(viewModel.skipActionLabel).toBe("Not now");
   });
 });

@@ -9,11 +9,11 @@ export type RecoveryPhraseConfirmationViewModel = {
 
 export function createRecoveryPhraseConfirmationViewModel(): RecoveryPhraseConfirmationViewModel {
   return {
-    body: "Enter 3 words from your recovery phrase to confirm you saved them correctly.",
+    body: "Pick the right word for each position — just to be sure your copy is correct.",
     inputPlaceholder: "Enter the word",
-    primaryActionLabel: "Confirm and continue",
-    statusLabel: "Required security step",
+    primaryActionLabel: "Confirm",
+    statusLabel: "Recovery · Step 2 of 3",
     successMessage: "Recovery phrase confirmed. Your vault is now secure.",
-    title: "Confirm your recovery phrase",
+    title: "A quick check",
   };
 }

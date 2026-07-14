@@ -1,25 +1,17 @@
-import { Stack } from "expo-router/stack";
-import { ScrollView } from "react-native";
 
 import { VaultExportScreen, useVaultSession } from "@/features/vault";
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 export default function VaultExportRoute() {
   const { assets, encryptedRecords, isReady } = useVaultSession();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Vault export" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
+    <Screen>
         <VaultExportScreen
           assets={assets}
           encryptedRecords={encryptedRecords}
           isReady={isReady}
         />
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

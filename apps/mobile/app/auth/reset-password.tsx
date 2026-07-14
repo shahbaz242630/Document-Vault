@@ -1,9 +1,8 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import { ScrollView } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 
 import { ResetPasswordPanel } from "@/features/auth";
 import { useVaultSession } from "@/features/vault";
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 import * as ExpoSecureStore from "expo-secure-store";
 
 export default function ResetPasswordRoute() {
@@ -11,18 +10,12 @@ export default function ResetPasswordRoute() {
   const { lock } = useVaultSession();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Reset password" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
-        <ResetPasswordPanel
-          lockVault={lock}
-          mode={mode ?? "recover"}
-          storage={ExpoSecureStore}
-        />
-      </ScrollView>
-    </>
+    <Screen>
+      <ResetPasswordPanel
+        lockVault={lock}
+        mode={mode ?? "recover"}
+        storage={ExpoSecureStore}
+      />
+    </Screen>
   );
 }

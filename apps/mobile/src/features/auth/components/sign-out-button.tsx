@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import Purchases from "react-native-purchases";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
 
 import { defaultAuditLog } from "../audit-log";
 import { createBiometricStorage } from "../biometric-storage";
@@ -72,7 +73,7 @@ export function SignOutButton({ storage, vaultSignOut }: SignOutButtonProps) {
 
 function SigningOutMessage() {
   return (
-    <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
+    <Text style={{ color: colors.inkMuted, fontFamily: fonts.sans.regular, fontSize: 15 }}>
       Signing out...
     </Text>
   );
@@ -93,10 +94,10 @@ function SignOutConfirmation({
 }) {
   return (
     <View style={{ gap: 12 }}>
-      <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "700" }}>
+      <Text style={{ color: colors.ink, fontFamily: fonts.sans.semibold, fontSize: 16 }}>
         {title}
       </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 15, lineHeight: 22 }}>
+      <Text style={{ color: colors.inkSoft, fontFamily: fonts.sans.regular, fontSize: 15, lineHeight: 22 }}>
         {body}
       </Text>
       <View style={{ flexDirection: "row", gap: 12 }}>
@@ -124,7 +125,7 @@ function CancelSignOutButton({ onCancel }: { onCancel: () => void }) {
         paddingVertical: 14,
       }}
     >
-      <Text style={{ color: colors.ink, fontSize: 17 }}>Cancel</Text>
+      <Text style={{ color: colors.ink, fontFamily: fonts.sans.regular, fontSize: 16 }}>Cancel</Text>
     </Pressable>
   );
 }
@@ -155,8 +156,8 @@ function ConfirmSignOutButton({
       <Text
         style={{
           color: colors.actionText,
-          fontSize: 17,
-          fontWeight: "700",
+          fontFamily: fonts.sans.semibold,
+          fontSize: 16,
         }}
       >
         {actionLabel}
@@ -183,7 +184,7 @@ function SignOutTrigger({
       }}
     >
       <Text
-        style={{ color: colors.danger, fontSize: 17, textAlign: "center" }}
+        style={{ color: colors.danger, fontFamily: fonts.sans.regular, fontSize: 15, textAlign: "center" }}
       >
         {label}
       </Text>

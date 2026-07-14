@@ -6,8 +6,8 @@ describe("createRecoveryPhraseViewModel", () => {
   it("returns recovery phrase placeholder copy", () => {
     const viewModel = createRecoveryPhraseViewModel();
 
-    expect(viewModel.title).toBe("Save your recovery phrase");
-    expect(viewModel.primaryActionLabel).toBe("I have written it down");
-    expect(viewModel.warning).toContain("Sanduqkin cannot recover your data");
+    expect(viewModel.title).toBe("Your recovery phrase");
+    expect(viewModel.primaryActionLabel).toBe("I've written it down");
+    expect(viewModel.warning).toContain("Sanduqkin never sees these words");
   });
 });

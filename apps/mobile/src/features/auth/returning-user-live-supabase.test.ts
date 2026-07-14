@@ -123,28 +123,30 @@ describeLive("live Supabase returning-user vault unlock", () => {
 
         const activeAssets = await returning.session.listActiveAssets();
 
-        expect(activeAssets).toEqual([
-          {
-            assetType: "contact",
-            fields: {
-              country: "UAE",
-              name: "Live verification contact",
-            },
-            id: createdAsset.id,
-            notes: "This plaintext must not be stored in Supabase.",
-            title: assetTitle,
-          },
-        ]);
+        const [activeAsset] = activeAssets;
+        expect({
+          assetCount: activeAssets.length,
+          decryptedExpectedPayload:
+            activeAsset?.assetType === "contact" &&
+            activeAsset?.fields.country === "UAE" &&
+            activeAsset?.fields.name === "Live verification contact" &&
+            activeAsset?.id === createdAsset.id &&
+            activeAsset?.notes === "This plaintext must not be stored in Supabase." &&
+            activeAsset?.title === assetTitle,
+        }).toEqual({ assetCount: 1, decryptedExpectedPayload: true });
 
         const rawRows = await client.selectVaultAssetCiphertext(createdAsset.id);
 
-        expect(JSON.stringify(rawRows)).not.toContain(assetTitle);
-        expect(JSON.stringify(rawRows)).not.toContain("Live verification contact");
+        const rawJson = JSON.stringify(rawRows);
+        expect({
+          hasContactPlaintext: rawJson.includes("Live verification contact"),
+          hasTitlePlaintext: rawJson.includes(assetTitle),
+        }).toEqual({ hasContactPlaintext: false, hasTitlePlaintext: false });
       } finally {
-        await cleanupLiveRows(client, savedAssetIds);
+        await cleanupLiveRows(client, savedAssetIds, email, password);
       }
     },
-    60_000,
+    120_000,
   );
 });
 
@@ -391,9 +393,23 @@ function createLiveSupabaseRestClient(): LiveSupabaseRestClient {
   return client as LiveSupabaseRestClient;
 }
 
-async function cleanupLiveRows(client: LiveSupabaseRestClient, assetIds: string[]) {
+async function cleanupLiveRows(
+  client: LiveSupabaseRestClient,
+  assetIds: string[],
+  email: string,
+  password: string,
+) {
+  const signInResult = await client.auth.signInWithPassword({ email, password });
+  if (signInResult.error || !signInResult.data.session) {
+    throw new Error("Live returning-user cleanup authentication failed.");
+  }
+
   for (const assetId of assetIds) {
     await client.from("vault_assets").delete().eq("id", assetId).select("id").maybeSingle();
+    const remainingRows = await client.selectVaultAssetCiphertext(assetId);
+    if (remainingRows.length > 0) {
+      throw new Error("Live returning-user cleanup did not remove its fixture.");
+    }
   }
 
   await client.auth.signOut();

@@ -1,8 +1,17 @@
 import { useState } from "react";
 import { usePreventScreenCapture } from "expo-screen-capture";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
+import {
+  CheckboxRow,
+  Eyebrow,
+  OutlineButton,
+  PrimaryButton,
+  ScreenHeader,
+  SerifTitle,
+} from "@/shared/ui";
 
 export type SealedCodeSetupStatus =
   | "none"
@@ -33,18 +42,12 @@ export function EmergencyAccessScreen({
 
   return (
     <View style={{ gap: 20 }}>
+      <ScreenHeader />
       <View style={{ gap: 8 }}>
-        <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Emergency access</Text>
-        <Text
-          style={{
-            color: colors.ink,
-            fontSize: 28,
-            fontWeight: "700",
-            lineHeight: 34,
-          }}
-        >
+        <Eyebrow>Emergency access</Eyebrow>
+        <SerifTitle size={28}>
           Choose how your next of kin can request access
-        </Text>
+        </SerifTitle>
       </View>
 
       <EmergencyOptionCard
@@ -130,16 +133,17 @@ function AcknowledgementPanel({
         Sanduqkin cannot recover this code if lost. Give it to your next of kin
         or keep it with important papers, not in email or chat.
       </Text>
-      <Pressable onPress={onToggleAcknowledgement} style={{ paddingVertical: 4 }}>
-        <Text style={bodyStyle}>
-          {hasAcknowledgedRisk ? "[x]" : "[ ]"} I understand and will write it
-          down safely.
-        </Text>
-      </Pressable>
-      <ActionButton
+      <CheckboxRow
+        checked={hasAcknowledgedRisk}
+        label="I understand and will write it down safely."
+        onToggle={onToggleAcknowledgement}
+      />
+      <PrimaryButton
         disabled={!hasAcknowledgedRisk || isBusy}
         label="Create emergency code"
-        onPress={onCreateSealedCode}
+        onPress={() => {
+          void onCreateSealedCode?.();
+        }}
       />
     </View>
   );
@@ -163,20 +167,33 @@ function OneTimeCodePanel({
       <Text style={sectionTitleStyle}>
         Write this code down now. Sanduqkin cannot show it again after you confirm.
       </Text>
-      <Text style={codeStyle}>{code}</Text>
+      <View
+        style={{
+          alignItems: "center",
+          backgroundColor: colors.surface,
+          borderColor: colors.gold,
+          borderCurve: "continuous",
+          borderRadius: 14,
+          borderWidth: 1,
+          paddingHorizontal: 20,
+          paddingVertical: 18,
+        }}
+      >
+        <Text style={codeStyle}>{code}</Text>
+      </View>
       <Text style={bodyStyle}>
         Check what you wrote before confirming. If this screen is interrupted,
         regenerate the code before relying on it.
       </Text>
-      <Pressable onPress={() => setHasCheckedCode((current) => !current)}>
-        <Text style={bodyStyle}>
-          {hasCheckedCode ? "[x]" : "[ ]"} I wrote down and checked this code.
-        </Text>
-      </Pressable>
-      <ActionButton
+      <CheckboxRow
+        checked={hasCheckedCode}
+        label="I wrote down and checked this code."
+        onToggle={() => setHasCheckedCode((current) => !current)}
+      />
+      <PrimaryButton
         disabled={!hasCheckedCode || isBusy}
         label="Confirm code is saved"
-        onPress={onConfirm}
+        onPress={() => onConfirm?.()}
       />
     </View>
   );
@@ -197,8 +214,14 @@ function ActiveSealedCodePanel({
       <Text style={bodyStyle}>
         Sanduqkin no longer has the raw code. Regenerate if you need a new copy.
       </Text>
-      <ActionButton disabled={isBusy} label="Regenerate code" onPress={onRegenerate} />
-      <ActionButton disabled={isBusy} label="Revoke code" onPress={onRevoke} />
+      <OutlineButton
+        disabled={isBusy}
+        label="Regenerate code"
+        onPress={() => {
+          void onRegenerate?.();
+        }}
+      />
+      <ActionButton disabled={isBusy} label="Revoke code" onPress={onRevoke} tone="danger" />
     </View>
   );
 }
@@ -219,8 +242,14 @@ function InterruptedSealedCodePanel({
         The saved grant cannot be trusted because the one-time code was not
         confirmed. Regenerate it or revoke the unusable code.
       </Text>
-      <ActionButton disabled={isBusy} label="Regenerate code" onPress={onRegenerate} />
-      <ActionButton disabled={isBusy} label="Revoke unusable code" onPress={onRevoke} />
+      <OutlineButton
+        disabled={isBusy}
+        label="Regenerate code"
+        onPress={() => {
+          void onRegenerate?.();
+        }}
+      />
+      <ActionButton disabled={isBusy} label="Revoke unusable code" onPress={onRevoke} tone="danger" />
     </View>
   );
 }
@@ -245,10 +274,24 @@ function EmergencyOptionCard({
   return (
     <View style={cardStyle}>
       <View style={{ gap: 6 }}>
-        <Text style={{ color: colors.action, fontSize: 13, fontWeight: "700" }}>
+        <Text
+          style={{
+            color: colors.gold,
+            fontFamily: fonts.sans.semibold,
+            fontSize: 11.5,
+            letterSpacing: 1.3,
+            textTransform: "uppercase",
+          }}
+        >
           {badge}
         </Text>
-        <Text style={{ color: colors.ink, fontSize: 19, fontWeight: "700" }}>
+        <Text
+          style={{
+            color: colors.ink,
+            fontFamily: fonts.serif.medium,
+            fontSize: 20,
+          }}
+        >
           {title}
         </Text>
       </View>
@@ -272,17 +315,38 @@ function ActionButton({
   disabled,
   label,
   onPress,
+  tone = "action",
 }: {
   disabled: boolean;
   label: string;
   onPress?: () => Promise<void> | void;
+  tone?: "action" | "danger";
 }) {
   return (
-    <Pressable disabled={disabled} onPress={onPress} style={{ paddingVertical: 4 }}>
-      <Text style={{ color: disabled ? colors.inkMuted : colors.action, fontSize: 16 }}>
-        {label}
-      </Text>
-    </Pressable>
+    <Text
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={
+        disabled
+          ? undefined
+          : () => {
+              void onPress?.();
+            }
+      }
+      style={{
+        color: disabled
+          ? colors.inkMuted
+          : tone === "danger"
+            ? colors.danger
+            : colors.action,
+        fontFamily: fonts.sans.semibold,
+        fontSize: 15,
+        paddingVertical: 6,
+        textAlign: "center",
+      }}
+    >
+      {label}
+    </Text>
   );
 }
 
@@ -301,10 +365,11 @@ function getSealedCodeButtonLabel(status: SealedCodeSetupStatus): string {
 const cardStyle = {
   backgroundColor: colors.surface,
   borderColor: colors.border,
-  borderRadius: 8,
+  borderCurve: "continuous" as const,
+  borderRadius: 14,
   borderWidth: 1,
   gap: 12,
-  padding: 16,
+  padding: 18,
 };
 
 const panelStyle = {
@@ -314,25 +379,27 @@ const panelStyle = {
 
 const sectionTitleStyle = {
   color: colors.ink,
+  fontFamily: fonts.serif.medium,
   fontSize: 18,
-  fontWeight: "700" as const,
 };
 
 const bodyStyle = {
-  color: colors.inkSoft,
-  fontSize: 15,
+  color: colors.inkSecondary,
+  fontFamily: fonts.sans.regular,
+  fontSize: 14.5,
   lineHeight: 22,
 };
 
 const detailStyle = {
   color: colors.inkMuted,
-  fontSize: 14,
+  fontFamily: fonts.sans.regular,
+  fontSize: 13.5,
   lineHeight: 20,
 };
 
 const codeStyle = {
   color: colors.ink,
+  fontFamily: fonts.mono.regular,
   fontSize: 22,
-  fontWeight: "700" as const,
-  letterSpacing: 0,
+  letterSpacing: 1.5,
 };

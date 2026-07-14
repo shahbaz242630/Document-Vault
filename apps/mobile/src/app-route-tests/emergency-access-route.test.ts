@@ -8,7 +8,7 @@ describe("Emergency access settings route", () => {
     const source = readFileSync(resolve(__dirname, "../../app/settings/emergency-access.tsx"), "utf8");
 
     expect(source).toContain("EmergencyAccessScreen");
-    expect(source).toContain('title: "Emergency access"');
+    expect(source).toContain("<Screen>");
   });
 
   it("stores only an interruption marker while the one-time code is visible", () => {

@@ -7,7 +7,7 @@ const repoRoot = resolve(__dirname, "../../../../..");
 
 describe("development build configuration", () => {
   it("defines an Android development-client build profile", () => {
-    const easPath = resolve(repoRoot, "eas.json");
+    const easPath = resolve(repoRoot, "apps/mobile/eas.json");
 
     expect(existsSync(easPath)).toBe(true);
 

@@ -1,7 +1,18 @@
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
+import {
+  Card,
+  ErrorText,
+  Eyebrow,
+  MutedText,
+  OutlineButton,
+  ScreenHeader,
+  SerifTitle,
+  TextButton,
+} from "@/shared/ui";
 
 import {
   createPermanentDeleteConfirmationState,
@@ -22,148 +33,102 @@ export function AssetDetailView({ asset, onDelete, onEdit }: AssetDetailViewProp
   const isConfirmingDelete = deleteConfirmation.pendingAssetId === asset.id;
 
   return (
-    <View style={{ gap: 20 }}>
-      <AssetHeader asset={asset} />
-      <AssetFields asset={asset} />
-      <AssetActions
-        isConfirmingDelete={isConfirmingDelete}
-        onDelete={onDelete}
-        onEdit={onEdit}
-        onRequestDelete={() => {
-          const result = requestPermanentDelete({
-            assetId: asset.id,
-            state: deleteConfirmation,
-          });
-          setDeleteConfirmation(result.nextState);
+    <View style={{ flex: 1, gap: 18 }}>
+      <ScreenHeader />
 
-          if (result.confirmedAssetId) {
-            void onDelete?.(result.confirmedAssetId);
-          }
-        }}
-      />
+      <View style={{ gap: 4 }}>
+        <Eyebrow>{getAssetTypeLabel(asset.assetType)}</Eyebrow>
+        <SerifTitle size={28}>{asset.title}</SerifTitle>
+      </View>
+
+      <AssetFieldsCard asset={asset} />
+
+      <MutedText style={{ fontSize: 13 }}>
+        Stored sealed on this device. Decrypted only when you open it.
+      </MutedText>
+
+      <View style={{ gap: 12, marginTop: "auto" }}>
+        {isConfirmingDelete ? (
+          <ErrorText>
+            This record will be removed from Sanduqkin and cannot be recovered.
+            Sanduqkin cannot restore deleted encrypted vault records.
+          </ErrorText>
+        ) : null}
+        {onEdit ? <OutlineButton label="Edit" onPress={onEdit} /> : null}
+        {onDelete ? (
+          <TextButton
+            color={colors.danger}
+            label={isConfirmingDelete ? "Delete permanently" : "Delete this record"}
+            onPress={() => {
+              const result = requestPermanentDelete({
+                assetId: asset.id,
+                state: deleteConfirmation,
+              });
+              setDeleteConfirmation(result.nextState);
+
+              if (result.confirmedAssetId) {
+                void onDelete(result.confirmedAssetId);
+              }
+            }}
+          />
+        ) : null}
+      </View>
     </View>
   );
 }
 
-function AssetHeader({ asset }: { asset: VaultDecryptedAsset }) {
-  return (
-    <View style={{ gap: 6 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-        {getAssetTypeLabel(asset.assetType)}
-      </Text>
-      <Text
-        style={{
-          color: colors.ink,
-          fontSize: 30,
-          fontWeight: "700",
-          lineHeight: 36,
-        }}
-      >
-        {asset.title}
-      </Text>
-    </View>
-  );
-}
+function AssetFieldsCard({ asset }: { asset: VaultDecryptedAsset }) {
+  const entries = Object.entries(asset.fields);
+  const rows: [string, string][] = entries.map(([key, value]) => [
+    key.replace(/([A-Z])/g, " $1").trim(),
+    value,
+  ]);
 
-function AssetFields({ asset }: { asset: VaultDecryptedAsset }) {
+  if (asset.notes) {
+    rows.push(["Notes", asset.notes]);
+  }
+
   return (
-    <View style={{ gap: 12 }}>
-      {Object.entries(asset.fields).map(([key, value]) => (
-        <View key={key} style={{ gap: 4 }}>
-          <Text style={{ color: colors.inkMuted, fontSize: 13, textTransform: "capitalize" }}>
-            {key.replace(/([A-Z])/g, " $1").trim()}
+    <Card>
+      {rows.map(([label, value], index) => (
+        <View
+          key={label}
+          style={{
+            alignItems: "baseline",
+            borderBottomColor: colors.divider,
+            borderBottomWidth: index === rows.length - 1 ? 0 : 1,
+            flexDirection: "row",
+            gap: 16,
+            justifyContent: "space-between",
+            paddingHorizontal: 18,
+            paddingVertical: 14,
+          }}
+        >
+          <Text
+            style={{
+              color: colors.inkMuted,
+              fontFamily: fonts.sans.regular,
+              fontSize: 13.5,
+              textTransform: "capitalize",
+            }}
+          >
+            {label}
           </Text>
-          <Text style={{ color: colors.ink, fontSize: 17 }}>{value}</Text>
+          <Text
+            selectable
+            style={{
+              color: colors.ink,
+              flexShrink: 1,
+              fontFamily: fonts.sans.regular,
+              fontSize: 15.5,
+              textAlign: "right",
+            }}
+          >
+            {value}
+          </Text>
         </View>
       ))}
-      {asset.notes ? (
-        <View key="notes" style={{ gap: 4 }}>
-          <Text style={{ color: colors.inkMuted, fontSize: 13 }}>Notes</Text>
-          <Text style={{ color: colors.ink, fontSize: 17 }}>{asset.notes}</Text>
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
-function AssetActions({
-  isConfirmingDelete,
-  onDelete,
-  onEdit,
-  onRequestDelete,
-}: {
-  isConfirmingDelete: boolean;
-  onDelete?: (id: string) => Promise<void>;
-  onEdit?: () => void;
-  onRequestDelete: () => void;
-}) {
-  return (
-    <View style={{ gap: 10 }}>
-      {onEdit ? <EditReferenceButton onEdit={onEdit} /> : null}
-      {onDelete ? (
-        <DeleteReferenceButton
-          isConfirmingDelete={isConfirmingDelete}
-          onRequestDelete={onRequestDelete}
-        />
-      ) : null}
-    </View>
-  );
-}
-
-function EditReferenceButton({ onEdit }: { onEdit: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onEdit}
-      style={{
-        alignItems: "center",
-        backgroundColor: colors.action,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        paddingHorizontal: 18,
-        paddingVertical: 14,
-      }}
-    >
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-        Edit reference
-      </Text>
-    </Pressable>
-  );
-}
-
-function DeleteReferenceButton({
-  isConfirmingDelete,
-  onRequestDelete,
-}: {
-  isConfirmingDelete: boolean;
-  onRequestDelete: () => void;
-}) {
-  return (
-    <View style={{ gap: 8 }}>
-      {isConfirmingDelete ? (
-        <Text style={{ color: colors.danger, fontSize: 14, lineHeight: 20 }}>
-          This record will be removed from Sanduqkin and cannot be recovered.
-          Sanduqkin cannot restore deleted encrypted vault records.
-        </Text>
-      ) : null}
-      <Pressable
-        accessibilityRole="button"
-        onPress={onRequestDelete}
-        style={{
-          alignItems: "center",
-          borderColor: colors.danger,
-          borderCurve: "continuous",
-          borderRadius: 8,
-          borderWidth: 1,
-          paddingHorizontal: 18,
-          paddingVertical: 14,
-        }}
-      >
-        <Text style={{ color: colors.danger, fontSize: 17, fontWeight: "700" }}>
-          {isConfirmingDelete ? "Delete permanently" : "Delete reference"}
-        </Text>
-      </Pressable>
-    </View>
+    </Card>
   );
 }
 

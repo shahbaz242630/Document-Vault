@@ -1,9 +1,8 @@
-import { Stack, useLocalSearchParams } from "expo-router";
 import { lazy, Suspense } from "react";
-import { ScrollView } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 
 import { useSignupProgressStep } from "@/features/auth";
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 import * as ExpoSecureStore from "expo-secure-store";
 
 const BackupCodesPanel = lazy(() =>
@@ -18,16 +17,10 @@ export default function BackupCodesRoute() {
   const factorId = params.factorId ?? "";
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Backup codes" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
-        <Suspense fallback={null}>
-          <BackupCodesPanel factorId={factorId} />
-        </Suspense>
-      </ScrollView>
-    </>
+    <Screen>
+      <Suspense fallback={null}>
+        <BackupCodesPanel factorId={factorId} />
+      </Suspense>
+    </Screen>
   );
 }

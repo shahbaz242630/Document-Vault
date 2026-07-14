@@ -1,7 +1,6 @@
-import { Stack, useRouter } from "expo-router";
-import { ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 import { DynamicAssetForm } from "./dynamic-asset-form";
 import {
@@ -23,23 +22,16 @@ export function AddExpandedAssetRoute({ assetType }: AddExpandedAssetRouteProps)
   const categoryConfig = getVaultCategoryConfig(assetType);
 
   return (
-    <>
-      <Stack.Screen options={{ title: `Add ${config.categoryLabel.toLowerCase()}` }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.formContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <DynamicAssetForm
-          categoryLabel={config.categoryLabel}
-          fields={config.fields}
-          initialValues={config.initialValues}
-          onSave={async (values) => {
-            await addAsset(createExpandedAssetPayload({ assetType, values }));
-            router.replace(categoryConfig.routeHref);
-          }}
-        />
-      </ScrollView>
-    </>
+    <Screen>
+      <DynamicAssetForm
+        categoryLabel={config.categoryLabel}
+        fields={config.fields}
+        initialValues={config.initialValues}
+        onSave={async (values) => {
+          await addAsset(createExpandedAssetPayload({ assetType, values }));
+          router.replace(categoryConfig.routeHref);
+        }}
+      />
+    </Screen>
   );
 }

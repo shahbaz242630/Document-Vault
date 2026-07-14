@@ -1,9 +1,8 @@
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { ScrollView } from "react-native";
 
 import { createSignupProgressStorage } from "@/features/auth";
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 import * as ExpoSecureStore from "expo-secure-store";
 
 const ReAuthPanel = lazy(() =>
@@ -28,21 +27,15 @@ export default function ReAuthRoute() {
   }, []);
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Verify identity" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
-        <Suspense fallback={null}>
-          <ReAuthPanel
-            email={email}
-            onReAuthSuccess={() => {
-              router.push("/settings/delete-account");
-            }}
-          />
-        </Suspense>
-      </ScrollView>
-    </>
+    <Screen>
+      <Suspense fallback={null}>
+        <ReAuthPanel
+          email={email}
+          onReAuthSuccess={() => {
+            router.push("/settings/delete-account");
+          }}
+        />
+      </Suspense>
+    </Screen>
   );
 }

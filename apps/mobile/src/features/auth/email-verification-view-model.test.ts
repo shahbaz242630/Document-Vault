@@ -6,7 +6,7 @@ describe("createEmailVerificationViewModel", () => {
   it("returns safe placeholder copy when no email is available", () => {
     expect(createEmailVerificationViewModel()).toEqual({
       body:
-        "Once Supabase email settings are ready, this step will confirm your email before two-factor setup.",
+        "It confirms this address is really yours. Open the link we sent, then continue below.",
       destinationLabel: "your email",
       title: "Check your email",
     });
@@ -15,7 +15,7 @@ describe("createEmailVerificationViewModel", () => {
   it("normalizes the destination email for display", () => {
     expect(createEmailVerificationViewModel(" Partner@Example.COM ")).toEqual({
       body:
-        "Once Supabase email settings are ready, this step will confirm your email before two-factor setup.",
+        "It confirms this address is really yours. Open the link we sent, then continue below.",
       destinationLabel: "partner@example.com",
       title: "Check your email",
     });

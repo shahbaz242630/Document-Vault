@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { View } from "react-native";
 
 import {
   createSupabaseKeyMaterialRepository,
@@ -12,7 +12,18 @@ import { createSupabaseClient } from "@/shared/api/supabase-client";
 import { deriveKEK } from "@/shared/crypto/kek-derivation";
 import { unwrapMEK } from "@/shared/crypto/mek-wrapping";
 import { toBase64 } from "@/shared/crypto/vault-crypto";
-import { colors } from "@/shared/theme/colors";
+import {
+  BodyText,
+  ErrorText,
+  Field,
+  NoticeBox,
+  PrimaryButton,
+  ScreenHeader,
+  SerifTitle,
+  StepHeader,
+  Subtitle,
+  TextButton,
+} from "@/shared/ui";
 import * as ExpoSecureStore from "expo-secure-store";
 
 import { defaultAuditLog } from "../audit-log";
@@ -44,12 +55,13 @@ const initialValues: AuthCredentialsInput = {
 const content = {
   "sign-in": {
     action: "Continue",
-    subtitle: "Use your email and password. Two-factor verification comes next.",
-    title: "Sign in",
+    subtitle: "Your email and password first — your second lock comes next.",
+    title: "Welcome back",
   },
   "sign-up": {
-    action: "Create account",
-    subtitle: "Start with email and a strong password. Two-factor setup is required next.",
+    action: "Continue",
+    subtitle:
+      "Start with your email and a strong password. Your password becomes part of the key that seals your vault.",
     title: "Create your vault",
   },
 } as const;
@@ -66,145 +78,89 @@ export function EmailPasswordAuthForm({ mode }: EmailPasswordAuthFormProps) {
   const screenCopy = content[mode];
   const isLocked = mode === "sign-in" && lockoutTracker.isLocked(values.email);
 
-  return (
-    <View style={{ gap: 20 }}>
-      <AuthFormHeader subtitle={screenCopy.subtitle} title={screenCopy.title} />
-      <CredentialsFields onChange={setValues} setResult={setResult} values={values} />
-      <AuthResultMessage result={result} />
-      <ForgotPasswordLink mode={mode} router={router} />
-      <SubmitButton
-        disabled={isSubmitting || isLocked}
-        isSubmitting={isSubmitting}
-        label={screenCopy.action}
-        onPress={() =>
-          submitAuthForm({
-            authService,
-            lockoutTracker,
-            mode,
-            router,
-            setIsSubmitting,
-            setResult,
-            supabaseClient,
-            values,
-            vaultSession,
-          })
-        }
-      />
-    </View>
-  );
-}
+  const submit = () =>
+    submitAuthForm({
+      authService,
+      lockoutTracker,
+      mode,
+      router,
+      setIsSubmitting,
+      setResult,
+      supabaseClient,
+      values,
+      vaultSession,
+    });
 
-function AuthFormHeader({ subtitle, title }: { subtitle: string; title: string }) {
   return (
-    <View style={{ gap: 8 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Account security</Text>
-      <Text style={{ color: colors.ink, fontSize: 30, fontWeight: "700", lineHeight: 36 }}>{title}</Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>{subtitle}</Text>
-    </View>
-  );
-}
+    <View style={{ flex: 1, gap: 22 }}>
+      {mode === "sign-up" ? <StepHeader step="account-1" /> : <ScreenHeader />}
 
-function CredentialsFields({
-  onChange,
-  setResult,
-  values,
-}: {
-  onChange: (updater: (current: AuthCredentialsInput) => AuthCredentialsInput) => void;
-  setResult: (result: AuthServiceResult | null) => void;
-  values: AuthCredentialsInput;
-}) {
-  return (
-    <View style={{ gap: 14 }}>
-      <AuthTextInput
-        autoCapitalize="none"
-        inputMode="email"
-        label="Email"
-        onChangeText={(email) => updateCredentials(onChange, setResult, "email", email)}
-        value={values.email}
-      />
-      <AuthTextInput
-        label="Password"
-        onChangeText={(password) => updateCredentials(onChange, setResult, "password", password)}
-        secureTextEntry
-        value={values.password}
-      />
-      <Text style={{ color: colors.inkMuted, fontSize: 13 }}>Use at least 12 characters.</Text>
+      <View style={{ gap: 10 }}>
+        <SerifTitle>{screenCopy.title}</SerifTitle>
+        <Subtitle>{screenCopy.subtitle}</Subtitle>
+      </View>
+
+      <View style={{ gap: 14 }}>
+        <Field
+          accessibilityLabel={`${mode === "sign-in" ? "Sign-in" : "Sign-up"} email`}
+          autoCapitalize="none"
+          inputMode="email"
+          label="Email"
+          onChangeText={(email) => updateCredentials(setValues, setResult, "email", email)}
+          value={values.email}
+        />
+        <Field
+          accessibilityLabel={`${mode === "sign-in" ? "Sign-in" : "Sign-up"} password`}
+          hint={
+            mode === "sign-up"
+              ? "At least 12 characters. Longer is stronger — a short sentence works well."
+              : undefined
+          }
+          label="Password"
+          onChangeText={(password) => updateCredentials(setValues, setResult, "password", password)}
+          secureTextEntry
+          value={values.password}
+        />
+        <AuthResultMessage result={result} />
+        {isLocked ? (
+          <NoticeBox title="Too many attempts" variant="danger">
+            For your safety, sign-in is paused for a few minutes. This slows
+            anyone trying to guess their way in.
+          </NoticeBox>
+        ) : null}
+        {mode === "sign-in" ? (
+          <TextButton
+            label="Forgot password?"
+            onPress={() => router.push("/auth/forgot-password")}
+          />
+        ) : null}
+      </View>
+
+      <View style={{ gap: 14, marginTop: "auto" }}>
+        <PrimaryButton
+          disabled={isSubmitting || isLocked}
+          label={isSubmitting ? "Working..." : screenCopy.action}
+          onPress={submit}
+        />
+        {mode === "sign-up" ? (
+          <TextButton
+            label="I already have an account"
+            onPress={() => router.replace("/auth/sign-in")}
+          />
+        ) : null}
+      </View>
     </View>
   );
 }
 
 function AuthResultMessage({ result }: { result: AuthServiceResult | null }) {
-  return result ? (
-    <Text
-      selectable
-      style={{
-        color: result.status === "error" ? colors.danger : colors.inkSoft,
-        fontSize: 15,
-        lineHeight: 22,
-      }}
-    >
-      {result.message}
-    </Text>
-  ) : null;
-}
-
-function ForgotPasswordLink({ mode, router }: { mode: EmailPasswordAuthFormProps["mode"]; router: AppRouter }) {
-  return mode === "sign-in" ? (
-    <Pressable accessibilityRole="button" onPress={() => router.push("/auth/forgot-password")}>
-      <Text style={{ color: colors.action, fontSize: 15, textAlign: "center" }}>Forgot password?</Text>
-    </Pressable>
-  ) : null;
-}
-
-function SubmitButton({
-  disabled,
-  isSubmitting,
-  label,
-  onPress,
-}: {
-  disabled: boolean;
-  isSubmitting: boolean;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress} style={buttonStyle(isSubmitting)}>
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-        {isSubmitting ? "Working..." : label}
-      </Text>
-    </Pressable>
-  );
-}
-
-type AuthTextInputProps = {
-  autoCapitalize?: "none";
-  inputMode?: "email";
-  label: string;
-  onChangeText: (value: string) => void;
-  secureTextEntry?: boolean;
-  value: string;
-};
-
-function AuthTextInput({
-  autoCapitalize,
-  inputMode,
-  label,
-  onChangeText,
-  secureTextEntry,
-  value,
-}: AuthTextInputProps) {
-  return (
-    <View style={{ gap: 6 }}>
-      <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>{label}</Text>
-      <TextInput
-        autoCapitalize={autoCapitalize}
-        inputMode={inputMode}
-        onChangeText={onChangeText}
-        secureTextEntry={secureTextEntry}
-        style={textInputStyle}
-        value={value}
-      />
-    </View>
+  if (!result) {
+    return null;
+  }
+  return result.status === "error" ? (
+    <ErrorText>{result.message}</ErrorText>
+  ) : (
+    <BodyText>{result.message}</BodyText>
   );
 }
 
@@ -371,7 +327,10 @@ async function routeAfterAuthSuccess({
   if (nextResult.nextStep === "email-verification") {
     await routeToEmailVerification(router, values.email);
   } else if (nextResult.nextStep === "totp-verification") {
-    router.push({ pathname: "/auth/verify-totp", params: { factorId: "" } });
+    router.push({
+      pathname: "/auth/verify-totp",
+      params: { factorId: "", flow: "returning" },
+    });
   } else if (nextResult.nextStep === "vault-unlock") {
     await routeToUnlockedVault({ router, supabaseClient, values, vaultSession });
   }
@@ -421,29 +380,6 @@ function logAuthEvent(eventType: "sign_in_attempt" | "sign_up_attempt" | "sign_i
     eventType,
     userEmail: email,
   });
-}
-
-const textInputStyle = {
-  backgroundColor: colors.surface,
-  borderColor: colors.border,
-  borderCurve: "continuous" as const,
-  borderRadius: 8,
-  borderWidth: 1,
-  color: colors.ink,
-  fontSize: 17,
-  paddingHorizontal: 14,
-  paddingVertical: 12,
-};
-
-function buttonStyle(isSubmitting: boolean) {
-  return {
-    alignItems: "center" as const,
-    backgroundColor: isSubmitting ? colors.inkMuted : colors.action,
-    borderCurve: "continuous" as const,
-    borderRadius: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-  };
 }
 
 class AuthFlowStoppedError extends Error {}

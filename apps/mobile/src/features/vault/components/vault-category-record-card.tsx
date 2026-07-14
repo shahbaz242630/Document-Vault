@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
 
 import {
   createPermanentDeleteConfirmationState,
@@ -34,17 +35,13 @@ export function VaultCategoryRecordCard({
   return (
     <View
       style={{
-        backgroundColor: "rgba(255,255,255,0.88)",
+        backgroundColor: colors.surface,
         borderColor: colors.border,
         borderCurve: "continuous",
-        borderRadius: 10,
+        borderRadius: 14,
         borderWidth: 1,
         gap: 10,
         padding: 16,
-        shadowColor: "#102820",
-        shadowOffset: { height: 4, width: 0 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
       }}
     >
       {isSelecting ? (
@@ -150,9 +147,20 @@ function RegularRecordContent({
 function RecordText({ item }: { item: VaultCategoryListItem }) {
   return (
     <View style={{ flex: 1 }}>
-      <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "700" }}>{item.title}</Text>
+      <Text style={{ color: colors.ink, fontFamily: fonts.sans.medium, fontSize: 16 }}>
+        {item.title}
+      </Text>
       {item.summary ? (
-        <Text style={{ color: colors.inkMuted, fontSize: 15, marginTop: 4 }}>{item.summary}</Text>
+        <Text
+          style={{
+            color: colors.inkMuted,
+            fontFamily: fonts.mono.regular,
+            fontSize: 13,
+            marginTop: 4,
+          }}
+        >
+          {item.summary}
+        </Text>
       ) : null}
     </View>
   );

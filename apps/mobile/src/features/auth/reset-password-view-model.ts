@@ -23,11 +23,11 @@ export function createResetPasswordViewModel(): ResetPasswordViewModel {
     freshWarning: "This will erase everything. Your vault cannot be recovered.",
     newPasswordLabel: "New password",
     phraseInputLabel: "Recovery phrase",
-    phrasePlaceholder: "word1 word2 word3 ...",
-    primaryActionLabel: "Continue",
+    phrasePlaceholder: "harbor cedar lantern …",
+    primaryActionLabel: "Reset password",
     recoverBody:
-      "Enter your 12-word recovery phrase and a new password. Your vault data will be restored with the new password.",
-    recoverTitle: "Recover your vault",
+      "Enter your 12-word recovery phrase, in order, then choose a new password.",
+    recoverTitle: "Reset with your phrase",
     verifyingLabel: "Working...",
   };
 }

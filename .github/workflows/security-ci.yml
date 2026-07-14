@@ -72,6 +72,267 @@ jobs:
       - name: Production dependency audit for high or critical advisories
         run: npm audit --omit=dev --workspaces --audit-level=high
 
+  android-native-compile:
+    name: Android native compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NODE_ENV: development
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.3.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Android native project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Set up Java
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Install Android SDK components
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006"
+
+      - name: Compile Android debug APK
+        working-directory: apps/mobile/android
+        env:
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          NODE_ENV: production
+        run: ./gradlew app:assembleDebug app:assembleRelease -x lint -x test --no-daemon --stacktrace -PreactNativeArchitectures=x86_64
+
+      - name: Upload standalone Android APK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-release-apk
+          path: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 1
+
+  ios-simulator-smoke:
+    name: iOS simulator smoke
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+      NODE_ENV: development
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.3.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Report Apple toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes
+
+      - name: Generate iOS native project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Install iOS pods
+        working-directory: apps/mobile/ios
+        run: pod install
+
+      - name: Compile unsigned iOS simulator release
+        env:
+          NODE_ENV: production
+        run: |
+          xcodebuild \
+            -workspace apps/mobile/ios/Sanduqkin.xcworkspace \
+            -scheme Sanduqkin \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath "$RUNNER_TEMP/ios-derived-data" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Select iPhone simulator
+        run: |
+          SIMULATOR_UDID="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ { print $2; exit }')"
+          if [ -z "$SIMULATOR_UDID" ]; then
+            echo "No available iPhone simulator was found."
+            exit 1
+          fi
+          echo "SIMULATOR_UDID=$SIMULATOR_UDID" >> "$GITHUB_ENV"
+          echo "APP_PATH=$RUNNER_TEMP/ios-derived-data/Build/Products/Release-iphonesimulator/Sanduqkin.app" >> "$GITHUB_ENV"
+
+      - name: Boot simulator and verify app remains running
+        run: |
+          test -d "$APP_PATH"
+          xcrun simctl shutdown all || true
+          xcrun simctl boot "$SIMULATOR_UDID"
+          xcrun simctl bootstatus "$SIMULATOR_UDID" -b
+          xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
+          xcrun simctl launch "$SIMULATOR_UDID" com.sanduqkin.mobile
+          sleep 15
+          xcrun simctl terminate "$SIMULATOR_UDID" com.sanduqkin.mobile
+          echo "iOS simulator compile and launch smoke test passed."
+
+      - name: Capture iOS simulator failure screenshot
+        if: failure()
+        run: |
+          mkdir -p ios-simulator-failure
+          xcrun simctl io booted screenshot ios-simulator-failure/screenshot.png || true
+
+      - name: Upload iOS simulator failure evidence
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-simulator-smoke-failure
+          path: ios-simulator-failure
+          if-no-files-found: warn
+          retention-days: 7
+
+  android-emulator-smoke:
+    name: Android emulator smoke
+    runs-on: ubuntu-latest
+    environment: Preview
+    needs: android-native-compile
+    if: github.event_name == 'push'
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.3.0
+
+      - name: Install dependencies for protected recovery bootstrap
+        run: npm ci
+
+      - name: Download standalone Android APK
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: android-release-apk
+          path: android-smoke-apk
+
+      - name: Install emulator system image
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" "emulator" "system-images;android-36;google_apis;x86_64"
+
+      - name: Boot emulator and run onboarding smoke test
+        run: |
+          export PATH="$ANDROID_HOME/platform-tools:$PATH"
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/android-avd"
+          mkdir -p "$ANDROID_AVD_HOME"
+          emulator_accel=(-accel off)
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+            emulator_accel=(-accel on)
+          fi
+          echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd \
+            --force --name sanduqkin-ci --path "$ANDROID_AVD_HOME/sanduqkin-ci.avd" \
+            --package "system-images;android-36;google_apis;x86_64"
+          "$ANDROID_HOME/emulator/emulator" -list-avds | grep -Fx sanduqkin-ci
+          nohup "$ANDROID_HOME/emulator/emulator" -avd sanduqkin-ci \
+            "${emulator_accel[@]}" -no-snapshot -no-window -noaudio -no-boot-anim \
+            -gpu swiftshader_indirect -no-metrics \
+            > /tmp/sanduqkin-emulator.log 2>&1 &
+          emulator_pid=$!
+          if ! timeout 180 adb wait-for-device; then
+            cat /tmp/sanduqkin-emulator.log
+            kill "$emulator_pid" 2>/dev/null || true
+            exit 1
+          fi
+          timeout 300 bash -c 'until [ "$(adb shell getprop sys.boot_completed | tr -d "\r")" = "1" ]; do sleep 5; done'
+          adb shell settings put global window_animation_scale 0
+          adb shell settings put global transition_animation_scale 0
+          adb shell settings put global animator_duration_scale 0
+          adb install -r android-smoke-apk/app-release.apk
+          node scripts/android-recovery-e2e-bootstrap.cjs
+        env:
+          ANDROID_E2E_TEST_EMAIL: ${{ secrets.ANDROID_E2E_TEST_EMAIL }}
+          ANDROID_E2E_TEST_PASSWORD: ${{ secrets.ANDROID_E2E_TEST_PASSWORD }}
+          ANDROID_RECOVERY_E2E_EMAIL: ${{ vars.ANDROID_RECOVERY_E2E_EMAIL }}
+          ANDROID_RECOVERY_E2E_PASSWORD: ${{ secrets.ANDROID_E2E_TEST_PASSWORD }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+
+      - name: Capture emulator failure evidence
+        if: failure()
+        run: |
+          export PATH="$ANDROID_HOME/platform-tools:$PATH"
+          mkdir -p android-smoke-failure
+          timeout 10 adb exec-out screencap -p > android-smoke-failure/screenshot.png || true
+          timeout 10 adb logcat -d > android-smoke-failure/logcat.txt || true
+          cp /tmp/sanduqkin-emulator.log android-smoke-failure/emulator.txt || true
+
+      - name: Upload emulator failure evidence
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-emulator-smoke-failure
+          path: android-smoke-failure
+          if-no-files-found: warn
+          retention-days: 7
+
+  hosted-supabase-integration:
+    name: Hosted Supabase integration
+    runs-on: ubuntu-latest
+    environment: Preview
+    needs: android-emulator-smoke
+    if: github.event_name == 'push'
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.3.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify hosted returning-user unlock
+        run: npm run test --workspace @vault/mobile -- returning-user-live-supabase.test.ts
+        env:
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          LIVE_SUPABASE_TEST_EMAIL: ${{ vars.ANDROID_RECOVERY_E2E_EMAIL }}
+          LIVE_SUPABASE_TEST_PASSWORD: ${{ secrets.ANDROID_E2E_TEST_PASSWORD }}
+          RUN_LIVE_SUPABASE_RETURNING_USER: "1"
+
+      - name: Verify hosted encrypted storage
+        run: npm run test --workspace @vault/mobile -- encrypted-vault-live-supabase-smoke.test.ts
+        env:
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          LIVE_SUPABASE_TEST_EMAIL: ${{ vars.ANDROID_RECOVERY_E2E_EMAIL }}
+          LIVE_SUPABASE_TEST_PASSWORD: ${{ secrets.ANDROID_E2E_TEST_PASSWORD }}
+          RUN_LIVE_SUPABASE_ENCRYPTION_SMOKE: "1"
+
   supabase-live-security:
     name: Supabase live security gates
     runs-on: ubuntu-latest

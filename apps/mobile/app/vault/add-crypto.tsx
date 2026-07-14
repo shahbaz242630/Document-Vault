@@ -1,11 +1,10 @@
-import { Stack, useRouter } from "expo-router";
-import { ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 
 import { DynamicAssetForm , createCryptoAssetPayload , createCryptoFormViewModel , useVaultSession } from "@/features/vault";
 
 
 
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 const initialValues: Record<string, string> = {
   approximateValueRange: "prefer_not_to_say",
@@ -24,13 +23,7 @@ export default function AddCryptoRoute() {
   const viewModel = createCryptoFormViewModel();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Add crypto" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.formContent}
-        keyboardShouldPersistTaps="handled"
-      >
+    <Screen>
         <DynamicAssetForm
           categoryLabel="Crypto wallet"
           fields={viewModel.fields}
@@ -56,7 +49,6 @@ export default function AddCryptoRoute() {
             router.replace("/vault/crypto");
           }}
         />
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

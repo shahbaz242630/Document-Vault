@@ -1,23 +1,35 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
-import { Pressable, Text, TextInput, View } from "react-native";
-
-import { createSupabaseClient } from "@/shared/api/supabase-client";
-import { colors } from "@/shared/theme/colors";
+import { View } from "react-native";
 import * as ExpoSecureStore from "expo-secure-store";
 
+import { createSupabaseClient } from "@/shared/api/supabase-client";
+import {
+  BodyText,
+  CodeField,
+  ErrorText,
+  MutedText,
+  PrimaryButton,
+  ScreenHeader,
+  SerifTitle,
+  StepHeader,
+  Subtitle,
+} from "@/shared/ui";
+
 import { createTotpVerifyService, type TotpVerifyServiceResult } from "../totp-verify-service";
-import { createTotpVerifyViewModel } from "../totp-verify-view-model";
+import {
+  createTotpVerifyViewModel,
+  type TotpVerifyVariant,
+} from "../totp-verify-view-model";
 import { createSignupProgressStorage } from "../signup-progress";
 
 type TotpVerifyPanelProps = {
   factorId: string;
+  variant?: TotpVerifyVariant;
 };
 
-type TotpVerifyViewModel = ReturnType<typeof createTotpVerifyViewModel>;
-
-export function TotpVerifyPanel({ factorId }: TotpVerifyPanelProps) {
-  const viewModel = createTotpVerifyViewModel();
+export function TotpVerifyPanel({ factorId, variant = "onboarding" }: TotpVerifyPanelProps) {
+  const viewModel = createTotpVerifyViewModel(variant);
   const [code, setCode] = useState("");
   const [result, setResult] = useState<TotpVerifyServiceResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,114 +37,70 @@ export function TotpVerifyPanel({ factorId }: TotpVerifyPanelProps) {
   const router = useRouter();
 
   return (
-    <View style={{ gap: 20 }}>
-      <TotpVerifyHeader viewModel={viewModel} />
+    <View style={{ flex: 1, gap: 22 }}>
+      {variant === "onboarding" ? (
+        <StepHeader step="security-3" />
+      ) : (
+        <ScreenHeader />
+      )}
 
-      <TotpCodeInput
-        code={code}
-        label={viewModel.codeInputLabel}
-        onChange={(text) => {
-          setCode(text);
-          setResult(null);
-        }}
-      />
+      <View style={{ gap: 10 }}>
+        <SerifTitle>{viewModel.title}</SerifTitle>
+        <Subtitle>{viewModel.body}</Subtitle>
+      </View>
 
-      <TotpResultMessage result={result} />
-
-      <TotpSubmitButton
-        disabled={isSubmitting || code.length < 6}
-        isSubmitting={isSubmitting}
-        label={viewModel.primaryActionLabel}
-        onSubmit={async () => {
-          setIsSubmitting(true);
-
-          try {
-            const nextResult = await verifyService.verify(factorId, code);
-            setResult(nextResult);
-
-            if (nextResult.status === "ok") {
-              const progressStorage = createSignupProgressStorage(ExpoSecureStore);
-              const existing = await progressStorage.load();
-              if (existing) {
-                await progressStorage.save({ ...existing, step: "recovery-phrase" });
-              }
-              router.replace("/auth/recovery-phrase");
-            }
-          } catch (error) {
-            setResult({
-              message: error instanceof Error ? error.message : "This request could not be completed.",
-              status: "error",
-            });
-          } finally {
-            setIsSubmitting(false);
-          }
-        }}
-      />
-    </View>
-  );
-}
-
-function TotpVerifyHeader({ viewModel }: { viewModel: TotpVerifyViewModel }) {
-  return (
-    <View style={{ gap: 8 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-        {viewModel.statusLabel}
-      </Text>
-      <Text
-        style={{
-          color: colors.ink,
-          fontSize: 30,
-          fontWeight: "700",
-          lineHeight: 36,
-        }}
-      >
-        {viewModel.title}
-      </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-        {viewModel.body}
-      </Text>
-    </View>
-  );
-}
-
-function TotpCodeInput({
-  code,
-  label,
-  onChange,
-}: {
-  code: string;
-  label: string;
-  onChange: (text: string) => void;
-}) {
-  return (
-    <View style={{ gap: 14 }}>
-      <View style={{ gap: 6 }}>
-        <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
-          {label}
-        </Text>
-        <TextInput
-          keyboardType="number-pad"
-          maxLength={6}
-          onChangeText={onChange}
-          placeholder="000000"
-          placeholderTextColor={colors.inkMuted}
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            borderCurve: "continuous",
-            borderRadius: 8,
-            borderWidth: 1,
-            color: colors.ink,
-            fontSize: 17,
-            letterSpacing: 4,
-            paddingHorizontal: 14,
-            paddingVertical: 12,
+      <View style={{ gap: 12 }}>
+        <CodeField
+          onChangeText={(text) => {
+            setCode(text);
+            setResult(null);
           }}
           value={code}
+        />
+        <TotpResultMessage result={result} />
+        {variant === "returning" ? (
+          <MutedText style={{ textAlign: "center" }}>
+            Lost your app? Use a backup code instead.
+          </MutedText>
+        ) : null}
+      </View>
+
+      <View style={{ marginTop: "auto" }}>
+        <PrimaryButton
+          disabled={isSubmitting || code.length < 6}
+          label={isSubmitting ? "Verifying..." : viewModel.primaryActionLabel}
+          onPress={() => {
+            void submitTotpCode();
+          }}
         />
       </View>
     </View>
   );
+
+  async function submitTotpCode() {
+    setIsSubmitting(true);
+
+    try {
+      const nextResult = await verifyService.verify(factorId, code);
+      setResult(nextResult);
+
+      if (nextResult.status === "ok") {
+        const progressStorage = createSignupProgressStorage(ExpoSecureStore);
+        const existing = await progressStorage.load();
+        if (existing) {
+          await progressStorage.save({ ...existing, step: "recovery-phrase" });
+        }
+        router.replace("/auth/recovery-phrase");
+      }
+    } catch (error) {
+      setResult({
+        message: error instanceof Error ? error.message : "This request could not be completed.",
+        status: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 }
 
 function TotpResultMessage({
@@ -142,50 +110,9 @@ function TotpResultMessage({
 }) {
   if (!result) return null;
 
-  return (
-    <Text
-      selectable
-      style={{
-        color: result.status === "error" ? colors.danger : colors.inkSoft,
-        fontSize: 15,
-        lineHeight: 22,
-      }}
-    >
-      {result.message}
-    </Text>
-  );
-}
-
-function TotpSubmitButton({
-  disabled,
-  isSubmitting,
-  label,
-  onSubmit,
-}: {
-  disabled: boolean;
-  isSubmitting: boolean;
-  label: string;
-  onSubmit: () => Promise<void>;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={disabled}
-      onPress={() => {
-        void onSubmit();
-      }}
-      style={{
-        alignItems: "center",
-        backgroundColor: disabled ? colors.inkMuted : colors.action,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        paddingHorizontal: 18,
-        paddingVertical: 14,
-      }}
-    >
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-        {isSubmitting ? "Verifying..." : label}
-      </Text>
-    </Pressable>
+  return result.status === "error" ? (
+    <ErrorText>{result.message}</ErrorText>
+  ) : (
+    <BodyText>{result.message}</BodyText>
   );
 }

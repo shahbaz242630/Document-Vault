@@ -1,13 +1,24 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { usePreventScreenCapture } from "expo-screen-capture";
+import { View } from "react-native";
 
 import {
   createSupabaseKeyMaterialRepository,
   type SupabaseKeyMaterialClient,
 } from "@/features/vault";
 import { createSupabaseClient } from "@/shared/api/supabase-client";
-import { colors } from "@/shared/theme/colors";
+import {
+  ErrorText,
+  Eyebrow,
+  Field,
+  GoldHairline,
+  PrimaryButton,
+  ScreenHeader,
+  SerifTitle,
+  Subtitle,
+  TextAreaField,
+} from "@/shared/ui";
 
 import { createPasswordResetService } from "../password-reset-service";
 import { createResetPasswordViewModel, type ResetPasswordMode } from "../reset-password-view-model";
@@ -29,6 +40,7 @@ type PasswordResetService = ReturnType<typeof createPasswordResetService>;
 type AccountDeletionService = ReturnType<typeof createAccountDeletionService>;
 
 export function ResetPasswordPanel({ lockVault, mode, storage }: ResetPasswordPanelProps) {
+  usePreventScreenCapture();
   const viewModel = createResetPasswordViewModel();
   const isRecover = mode === "recover";
   const [form, setForm] = useState(createInitialFormState());
@@ -65,30 +77,46 @@ export function ResetPasswordPanel({ lockVault, mode, storage }: ResetPasswordPa
   }
 
   return (
-    <View style={{ gap: 20 }}>
-      <ResetPasswordHeader isRecover={isRecover} viewModel={viewModel} />
+    <View style={{ flex: 1, gap: 20 }}>
+      <ScreenHeader />
+
+      <View style={{ gap: 10 }}>
+        <SerifTitle>{isRecover ? viewModel.recoverTitle : viewModel.freshTitle}</SerifTitle>
+        <Subtitle>{isRecover ? viewModel.recoverBody : viewModel.freshBody}</Subtitle>
+        {!isRecover ? <ErrorText>{viewModel.freshWarning}</ErrorText> : null}
+      </View>
+
       {isRecover ? (
         <RecoveryFields form={form} onChange={setForm} passwordsMatch={passwordsMatch} viewModel={viewModel} />
       ) : (
-        <FreshResetField confirmation={form.confirmation} onChange={setForm} />
+        <Field
+          autoCapitalize="characters"
+          label="Type DELETE to confirm"
+          onChangeText={(text) => updateFormField(setForm, "confirmation", text)}
+          placeholder="DELETE"
+          value={form.confirmation}
+        />
       )}
-      <ErrorMessage error={form.error} />
-      <PrimaryButton
-        canSubmit={canSubmit}
-        isSubmitting={form.isSubmitting}
-        label={form.isSubmitting ? viewModel.verifyingLabel : viewModel.primaryActionLabel}
-        onPress={() =>
-          submitResetPasswordForm({
-            deletionService,
-            form,
-            isRecover,
-            lockVault,
-            service,
-            setForm,
-            storage,
-          })
-        }
-      />
+
+      {form.error ? <ErrorText>{form.error}</ErrorText> : null}
+
+      <View style={{ marginTop: "auto" }}>
+        <PrimaryButton
+          disabled={form.isSubmitting || !canSubmit}
+          label={form.isSubmitting ? viewModel.verifyingLabel : viewModel.primaryActionLabel}
+          onPress={() =>
+            submitResetPasswordForm({
+              deletionService,
+              form,
+              isRecover,
+              lockVault,
+              service,
+              setForm,
+              storage,
+            })
+          }
+        />
+      </View>
     </View>
   );
 }
@@ -117,27 +145,22 @@ function createInitialFormState(): FormState {
 
 function ResetPasswordSuccess({ isRecover, onContinue }: { isRecover: boolean; onContinue: () => void }) {
   return (
-    <View style={{ gap: 20 }}>
-      <ScreenTitle>{isRecover ? "Sanduqkin recovered" : "Account reset"}</ScreenTitle>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
+    <View style={{ flex: 1, gap: 20, justifyContent: "center" }}>
+      <Eyebrow>Done</Eyebrow>
+      <SerifTitle size={34}>
+        {isRecover ? "Your vault has a new password." : "Your account has been reset."}
+      </SerifTitle>
+      <GoldHairline animated delayMs={400} />
+      <Subtitle style={{ lineHeight: 25 }}>
         {isRecover
-          ? "Your vault has been recovered with the new password. Sign in to continue."
-          : "Your account has been reset. You can now create a new vault."}
-      </Text>
-      <ActionButton color={colors.action} disabled={false} label={isRecover ? "Sign in" : "Create new vault"} onPress={onContinue} />
-    </View>
-  );
-}
-
-function ResetPasswordHeader({ isRecover, viewModel }: { isRecover: boolean; viewModel: ResetPasswordViewModel }) {
-  return (
-    <View style={{ gap: 8 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Account recovery</Text>
-      <ScreenTitle>{isRecover ? viewModel.recoverTitle : viewModel.freshTitle}</ScreenTitle>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-        {isRecover ? viewModel.recoverBody : viewModel.freshBody}
-      </Text>
-      {!isRecover ? <WarningText>{viewModel.freshWarning}</WarningText> : null}
+          ? "Everything inside is untouched and still sealed. Sign in with your new password to continue."
+          : "You can now create a new vault and start fresh."}
+      </Subtitle>
+      <PrimaryButton
+        label={isRecover ? "Sign in" : "Create new vault"}
+        onPress={onContinue}
+        style={{ marginTop: 8 }}
+      />
     </View>
   );
 }
@@ -155,141 +178,34 @@ function RecoveryFields({
 }) {
   return (
     <View style={{ gap: 14 }}>
-      <PhraseInput form={form} onChange={onChange} viewModel={viewModel} />
-      <PasswordInput
+      <TextAreaField
+        accessibilityLabel="Recovery phrase input"
+        autoCapitalize="none"
+        label={viewModel.phraseInputLabel}
+        onChangeText={(text) => updateFormField(onChange, "phraseText", text)}
+        placeholder={viewModel.phrasePlaceholder}
+        value={form.phraseText}
+      />
+      <Field
+        accessibilityLabel="New password input"
+        hint="At least 12 characters."
         label={viewModel.newPasswordLabel}
         onChangeText={(text) => updateFormField(onChange, "newPassword", text)}
+        secureTextEntry
         value={form.newPassword}
       />
-      <PasswordInput
+      <Field
+        accessibilityLabel="Confirm new password input"
         label={viewModel.confirmPasswordLabel}
         onChangeText={(text) => updateFormField(onChange, "confirmPassword", text)}
+        secureTextEntry
         value={form.confirmPassword}
       />
       {form.confirmPassword.length > 0 && !passwordsMatch ? (
-        <Text style={{ color: colors.danger, fontSize: 15 }}>Passwords do not match.</Text>
+        <ErrorText>Passwords do not match.</ErrorText>
       ) : null}
     </View>
   );
-}
-
-function PhraseInput({
-  form,
-  onChange,
-  viewModel,
-}: {
-  form: FormState;
-  onChange: (updater: (previous: FormState) => FormState) => void;
-  viewModel: ResetPasswordViewModel;
-}) {
-  return (
-    <View style={{ gap: 6 }}>
-      <InputLabel>{viewModel.phraseInputLabel}</InputLabel>
-      <TextInput
-        autoCapitalize="none"
-        multiline
-        onChangeText={(text) => updateFormField(onChange, "phraseText", text)}
-        placeholder={viewModel.phrasePlaceholder}
-        placeholderTextColor={colors.inkMuted}
-        style={{ ...textInputStyle, minHeight: 80 }}
-        value={form.phraseText}
-      />
-    </View>
-  );
-}
-
-function FreshResetField({
-  confirmation,
-  onChange,
-}: {
-  confirmation: string;
-  onChange: (updater: (previous: FormState) => FormState) => void;
-}) {
-  return (
-    <View style={{ gap: 6 }}>
-      <InputLabel>Type DELETE to confirm</InputLabel>
-      <TextInput
-        autoCapitalize="characters"
-        onChangeText={(text) => updateFormField(onChange, "confirmation", text)}
-        placeholder="DELETE"
-        placeholderTextColor={colors.inkMuted}
-        style={textInputStyle}
-        value={confirmation}
-      />
-    </View>
-  );
-}
-
-type PasswordInputProps = {
-  label: string;
-  onChangeText: (value: string) => void;
-  value: string;
-};
-
-function PasswordInput({ label, onChangeText, value }: PasswordInputProps) {
-  return (
-    <View style={{ gap: 6 }}>
-      <InputLabel>{label}</InputLabel>
-      <TextInput onChangeText={onChangeText} secureTextEntry style={textInputStyle} value={value} />
-    </View>
-  );
-}
-
-function PrimaryButton({
-  canSubmit,
-  isSubmitting,
-  label,
-  onPress,
-}: {
-  canSubmit: boolean;
-  isSubmitting: boolean;
-  label: string;
-  onPress: () => void;
-}) {
-  const disabled = isSubmitting || !canSubmit;
-  return <ActionButton color={disabled ? colors.inkMuted : colors.danger} disabled={disabled} label={label} onPress={onPress} />;
-}
-
-function ActionButton({
-  color,
-  disabled,
-  label,
-  onPress,
-}: {
-  color: string;
-  disabled: boolean;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress} style={buttonStyle(color)}>
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>{label}</Text>
-    </Pressable>
-  );
-}
-
-function ErrorMessage({ error }: { error: string | null }) {
-  return error ? (
-    <Text selectable style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}>
-      {error}
-    </Text>
-  ) : null;
-}
-
-function ScreenTitle({ children }: { children: string }) {
-  return <Text style={{ color: colors.ink, fontSize: 30, fontWeight: "700", lineHeight: 36 }}>{children}</Text>;
-}
-
-function WarningText({ children }: { children: string }) {
-  return (
-    <Text style={{ color: colors.danger, fontSize: 17, fontWeight: "700", lineHeight: 25 }}>
-      {children}
-    </Text>
-  );
-}
-
-function InputLabel({ children }: { children: string }) {
-  return <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>{children}</Text>;
 }
 
 function updateFormField<K extends keyof FormState>(
@@ -378,27 +294,4 @@ async function resetAccount({
 
 function normalizeRecoveryPhrase(phraseText: string) {
   return phraseText.trim().toLowerCase().split(/\s+/).filter(Boolean);
-}
-
-const textInputStyle = {
-  backgroundColor: colors.surface,
-  borderColor: colors.border,
-  borderCurve: "continuous" as const,
-  borderRadius: 8,
-  borderWidth: 1,
-  color: colors.ink,
-  fontSize: 17,
-  paddingHorizontal: 14,
-  paddingVertical: 12,
-};
-
-function buttonStyle(backgroundColor: string) {
-  return {
-    alignItems: "center" as const,
-    backgroundColor,
-    borderCurve: "continuous" as const,
-    borderRadius: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-  };
 }

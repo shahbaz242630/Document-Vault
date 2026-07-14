@@ -1,8 +1,18 @@
 import { useMemo, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { View } from "react-native";
 
 import { createSupabaseClient } from "@/shared/api/supabase-client";
-import { colors } from "@/shared/theme/colors";
+import {
+  BodyText,
+  CodeField,
+  ErrorText,
+  Field,
+  OutlineButton,
+  PrimaryButton,
+  ScreenHeader,
+  SerifTitle,
+  Subtitle,
+} from "@/shared/ui";
 
 import { createAuthService, type AuthServiceResult } from "../auth-service";
 import { createReAuthViewModel } from "../re-auth-view-model";
@@ -30,33 +40,40 @@ export function ReAuthPanel({ email, onReAuthSuccess }: ReAuthPanelProps) {
     : form.totpCode.length === 6;
 
   return (
-    <View style={{ gap: 20 }}>
-      <ReAuthHeader viewModel={viewModel} />
+    <View style={{ flex: 1, gap: 22 }}>
+      <ScreenHeader />
+
+      <View style={{ gap: 10 }}>
+        <SerifTitle>{viewModel.title}</SerifTitle>
+        <Subtitle>{viewModel.subtitle}</Subtitle>
+      </View>
+
       {isPasswordStep ? (
         <PasswordStepFields form={form} setForm={setForm} viewModel={viewModel} />
       ) : (
         <TotpStepField form={form} setForm={setForm} viewModel={viewModel} />
       )}
       <ResultMessage result={form.result} />
-      <SubmitButton
-        canSubmit={canSubmit}
-        isSubmitting={form.isSubmitting}
-        label={form.isSubmitting ? viewModel.verifyingLabel : viewModel.primaryActionLabel}
-        onPress={() =>
-          submitReAuth({
-            authService,
-            form,
-            onReAuthSuccess,
-            setForm,
-            totpService,
-          })
-        }
-      />
       <BypassButton onPress={onReAuthSuccess} result={form.result} viewModel={viewModel} />
+
+      <View style={{ marginTop: "auto" }}>
+        <PrimaryButton
+          disabled={form.isSubmitting || !canSubmit}
+          label={form.isSubmitting ? viewModel.verifyingLabel : viewModel.primaryActionLabel}
+          onPress={() =>
+            submitReAuth({
+              authService,
+              form,
+              onReAuthSuccess,
+              setForm,
+              totpService,
+            })
+          }
+        />
+      </View>
     </View>
   );
 }
-
 type ReAuthFormState = {
   emailValue: string;
   isSubmitting: boolean;
@@ -77,18 +94,6 @@ function createInitialFormState(email: string | null): ReAuthFormState {
   };
 }
 
-function ReAuthHeader({ viewModel }: { viewModel: ReAuthViewModel }) {
-  return (
-    <View style={{ gap: 8 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Account security</Text>
-      <Text style={{ color: colors.ink, fontSize: 30, fontWeight: "700", lineHeight: 36 }}>
-        {viewModel.title}
-      </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>{viewModel.subtitle}</Text>
-    </View>
-  );
-}
-
 function PasswordStepFields({
   form,
   setForm,
@@ -100,14 +105,14 @@ function PasswordStepFields({
 }) {
   return (
     <View style={{ gap: 14 }}>
-      <AuthTextInput
+      <Field
         autoCapitalize="none"
         inputMode="email"
         label={viewModel.emailLabel}
         onChangeText={(text) => updateFormField(setForm, "emailValue", text)}
         value={form.emailValue}
       />
-      <AuthTextInput
+      <Field
         label={viewModel.passwordLabel}
         onChangeText={(text) => updateFormField(setForm, "password", text)}
         secureTextEntry
@@ -127,53 +132,24 @@ function TotpStepField({
   viewModel: ReAuthViewModel;
 }) {
   return (
-    <View style={{ gap: 14 }}>
-      <View style={{ gap: 6 }}>
-        <InputLabel>{viewModel.totpLabel}</InputLabel>
-        <TextInput
-          keyboardType="number-pad"
-          maxLength={6}
-          onChangeText={(text) => updateFormField(setForm, "totpCode", text)}
-          placeholder={viewModel.totpPlaceholder}
-          placeholderTextColor={colors.inkMuted}
-          style={totpInputStyle}
-          value={form.totpCode}
-        />
-      </View>
+    <View style={{ gap: 6 }}>
+      <Subtitle>{viewModel.totpLabel}</Subtitle>
+      <CodeField
+        onChangeText={(text) => updateFormField(setForm, "totpCode", text)}
+        value={form.totpCode}
+      />
     </View>
   );
 }
 
 function ResultMessage({ result }: { result: ReAuthResult | null }) {
-  return result ? (
-    <Text
-      selectable
-      style={{
-        color: result.status === "error" ? colors.danger : colors.inkSoft,
-        fontSize: 15,
-        lineHeight: 22,
-      }}
-    >
-      {result.message}
-    </Text>
-  ) : null;
-}
-
-function SubmitButton({
-  canSubmit,
-  isSubmitting,
-  label,
-  onPress,
-}: {
-  canSubmit: boolean;
-  isSubmitting: boolean;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable accessibilityRole="button" disabled={isSubmitting || !canSubmit} onPress={onPress} style={primaryButtonStyle(isSubmitting || !canSubmit)}>
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>{label}</Text>
-    </Pressable>
+  if (!result) {
+    return null;
+  }
+  return result.status === "error" ? (
+    <ErrorText>{result.message}</ErrorText>
+  ) : (
+    <BodyText>{result.message}</BodyText>
   );
 }
 
@@ -187,46 +163,8 @@ function BypassButton({
   viewModel: ReAuthViewModel;
 }) {
   return result?.status === "unavailable" ? (
-    <Pressable accessibilityRole="button" onPress={onPress} style={secondaryButtonStyle}>
-      <Text style={{ color: colors.inkSoft, fontSize: 15, fontWeight: "600" }}>{viewModel.bypassLabel}</Text>
-    </Pressable>
+    <OutlineButton label={viewModel.bypassLabel} onPress={onPress} />
   ) : null;
-}
-
-type AuthTextInputProps = {
-  autoCapitalize?: "none";
-  inputMode?: "email";
-  label: string;
-  onChangeText: (value: string) => void;
-  secureTextEntry?: boolean;
-  value: string;
-};
-
-function AuthTextInput({
-  autoCapitalize,
-  inputMode,
-  label,
-  onChangeText,
-  secureTextEntry,
-  value,
-}: AuthTextInputProps) {
-  return (
-    <View style={{ gap: 6 }}>
-      <InputLabel>{label}</InputLabel>
-      <TextInput
-        autoCapitalize={autoCapitalize}
-        inputMode={inputMode}
-        onChangeText={onChangeText}
-        secureTextEntry={secureTextEntry}
-        style={textInputStyle}
-        value={value}
-      />
-    </View>
-  );
-}
-
-function InputLabel({ children }: { children: string }) {
-  return <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>{children}</Text>;
 }
 
 function updateFormField<K extends keyof ReAuthFormState>(
@@ -316,42 +254,3 @@ async function submitTotpStep({
     onReAuthSuccess();
   }
 }
-
-const textInputStyle = {
-  backgroundColor: colors.surface,
-  borderColor: colors.border,
-  borderCurve: "continuous" as const,
-  borderRadius: 8,
-  borderWidth: 1,
-  color: colors.ink,
-  fontSize: 17,
-  paddingHorizontal: 14,
-  paddingVertical: 12,
-};
-
-const totpInputStyle = {
-  ...textInputStyle,
-  letterSpacing: 4,
-};
-
-function primaryButtonStyle(disabled: boolean) {
-  return {
-    alignItems: "center" as const,
-    backgroundColor: disabled ? colors.inkMuted : colors.action,
-    borderCurve: "continuous" as const,
-    borderRadius: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-  };
-}
-
-const secondaryButtonStyle = {
-  alignItems: "center" as const,
-  backgroundColor: colors.surface,
-  borderColor: colors.border,
-  borderCurve: "continuous" as const,
-  borderRadius: 8,
-  borderWidth: 1,
-  paddingHorizontal: 18,
-  paddingVertical: 14,
-};

@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import {
+  ErrorText,
+  PrimaryButton,
+  SerifTitle,
+  StepHeader,
+  Subtitle,
+  TextButton,
+} from "@/shared/ui";
 
 import { createBiometricAuthService } from "../biometric-auth-service";
 import { createBiometricStorage } from "../biometric-storage";
@@ -38,6 +46,7 @@ export function BiometricSetupPanel({ hardware, storage }: BiometricSetupPanelPr
   const viewModel = createBiometricSetupViewModel();
   const [support, setSupport] = useState<BiometricSupport | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [enabled, setEnabled] = useState(false);
   const biometricAuth = useMemo(() => createBiometricAuthService(hardware), [hardware]);
   const biometricStorage = useMemo(() => createBiometricStorage(storage), [storage]);
   const router = useRouter();
@@ -53,72 +62,98 @@ export function BiometricSetupPanel({ hardware, storage }: BiometricSetupPanelPr
   const canEnable = support.available && support.enrolled;
 
   return (
-    <View style={{ gap: 20 }}>
-      <BiometricSetupHeader support={support} viewModel={viewModel} />
+    <View style={{ flex: 1, gap: 22 }}>
+      <StepHeader step="recovery-3" />
 
-      {error ? (
-        <Text selectable style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}>
-          {error}
-        </Text>
-      ) : null}
-
-      {canEnable ? (
-        <BiometricEnableButton
-          label={viewModel.primaryActionLabel}
-          onEnable={async () => {
-            setError(null);
-            const result = await biometricAuth.authenticate();
-
-            if (result.status === "success") {
-              await biometricStorage.setEnabled(true);
-              const progressStorage = createSignupProgressStorage(storage);
-              await progressStorage.clear();
-              router.replace("/vault/welcome");
-              return;
-            } else if (result.status === "error") {
-              setError(result.message);
-            }
-          }}
-        />
-      ) : null}
-
-      <BiometricSkipButton
-        label={viewModel.skipActionLabel}
-        onSkip={async () => {
-          const progressStorage = createSignupProgressStorage(storage);
-          await progressStorage.clear();
-          router.replace("/vault/welcome");
-        }}
-      />
-    </View>
-  );
-}
-
-function BiometricSetupHeader({
-  support,
-  viewModel,
-}: {
-  support: BiometricSupport;
-  viewModel: BiometricSetupViewModel;
-}) {
-  return (
-    <View style={{ gap: 8 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-        {viewModel.statusLabel}
-      </Text>
-      <Text
+      <View
         style={{
-          color: colors.ink,
-          fontSize: 30,
-          fontWeight: "700",
-          lineHeight: 36,
+          alignItems: "center",
+          flex: 1,
+          gap: 24,
+          justifyContent: "center",
         }}
       >
-        {viewModel.title}
-      </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-        {getBiometricSetupBody(support, viewModel)}
-      </Text>
+        <BiometricGlyph active={enabled} />
+        <View style={{ alignItems: "center", gap: 10, maxWidth: 300 }}>
+          <SerifTitle size={28} style={{ textAlign: "center" }}>
+            {enabled ? "Biometric unlock is on" : viewModel.title}
+          </SerifTitle>
+          <Subtitle style={{ textAlign: "center" }}>
+            {enabled
+              ? "From now on, this is the fastest key to your vault."
+              : getBiometricSetupBody(support, viewModel)}
+          </Subtitle>
+          {error ? <ErrorText>{error}</ErrorText> : null}
+        </View>
+      </View>
+
+      <View style={{ gap: 14 }}>
+        {canEnable ? (
+          <PrimaryButton
+            label={viewModel.primaryActionLabel}
+            onPress={() => {
+              void enableBiometrics();
+            }}
+          />
+        ) : null}
+        <TextButton
+          color={colors.inkMuted}
+          label={viewModel.skipActionLabel}
+          onPress={() => {
+            void finishSetup();
+          }}
+        />
+      </View>
+    </View>
+  );
+
+  async function enableBiometrics() {
+    setError(null);
+    const result = await biometricAuth.authenticate();
+
+    if (result.status === "success") {
+      await biometricStorage.setEnabled(true);
+      setEnabled(true);
+      setTimeout(() => {
+        void finishSetup();
+      }, 900);
+    } else if (result.status === "error") {
+      setError(result.message);
+    }
+  }
+
+  async function finishSetup() {
+    const progressStorage = createSignupProgressStorage(storage);
+    await progressStorage.clear();
+    router.replace("/vault/welcome");
+  }
+}
+
+function BiometricGlyph({ active }: { active: boolean }) {
+  const borderColor = active ? colors.action : colors.gold;
+
+  return (
+    <View
+      style={{
+        alignItems: "center",
+        borderColor,
+        borderCurve: "continuous",
+        borderRadius: 24,
+        borderWidth: 2,
+        height: 84,
+        justifyContent: "center",
+        width: 84,
+      }}
+    >
+      <View
+        style={{
+          borderColor,
+          borderRadius: 99,
+          borderWidth: 2,
+          height: 34,
+          width: 34,
+        }}
+      />
     </View>
   );
 }
@@ -130,55 +165,4 @@ function getBiometricSetupBody(
   if (!support.available) return viewModel.notAvailableBody;
   if (!support.enrolled) return viewModel.notEnrolledBody;
   return viewModel.body;
-}
-
-function BiometricEnableButton({
-  label,
-  onEnable,
-}: {
-  label: string;
-  onEnable: () => Promise<void>;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => {
-        void onEnable();
-      }}
-      style={{
-        alignItems: "center",
-        backgroundColor: colors.action,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        paddingHorizontal: 18,
-        paddingVertical: 14,
-      }}
-    >
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function BiometricSkipButton({
-  label,
-  onSkip,
-}: {
-  label: string;
-  onSkip: () => Promise<void>;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => {
-        void onSkip();
-      }}
-      style={{ alignItems: "center", paddingHorizontal: 18, paddingVertical: 14 }}
-    >
-      <Text style={{ color: colors.inkMuted, fontSize: 17, textAlign: "center" }}>
-        {label}
-      </Text>
-    </Pressable>
-  );
 }

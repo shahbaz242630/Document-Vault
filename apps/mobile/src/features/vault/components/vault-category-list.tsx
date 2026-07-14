@@ -1,8 +1,17 @@
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
+import {
+  BackChevron,
+  EmptyStateCard,
+  ErrorText,
+  MutedText,
+  PrimaryButton,
+  SerifTitle,
+} from "@/shared/ui";
 
 import {
   cancelVaultBulkSelection,
@@ -72,7 +81,7 @@ export function VaultCategoryList({
   });
 
   return (
-    <View style={{ gap: 18 }}>
+    <View style={{ flex: 1, gap: 18 }}>
       <VaultCategoryHeader
         bulkDeleteError={bulkDeleteError}
         bulkSelection={bulkSelection}
@@ -173,11 +182,11 @@ function VaultCategoryHeader({
         onToggleMenu={onToggleMenu}
         viewModel={viewModel}
       />
-      <Text style={{ color: colors.inkSoft, fontSize: 16 }}>
+      <MutedText>
         {bulkSelection.isSelecting
           ? `${bulkSelection.selectedIds.length} selected`
           : `${viewModel.count} of ${viewModel.limit} saved`}
-      </Text>
+      </MutedText>
       {isPageMenuOpen ? (
         <VaultCategoryPageMenu onDeleteAll={onDeleteAll} onSelectRecords={onSelectRecords} />
       ) : null}
@@ -191,9 +200,7 @@ function VaultCategoryHeader({
           title={viewModel.title}
         />
       ) : null}
-      {bulkDeleteError ? (
-        <Text style={{ color: colors.danger, fontSize: 14 }}>{bulkDeleteError}</Text>
-      ) : null}
+      {bulkDeleteError ? <ErrorText>{bulkDeleteError}</ErrorText> : null}
     </View>
   );
 }
@@ -211,7 +218,9 @@ function VaultCategoryTitleRow({
 }) {
   return (
     <>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>Vault</Text>
+      <View style={{ marginBottom: 12 }}>
+        <BackChevron />
+      </View>
       <View
         style={{
           alignItems: "center",
@@ -220,17 +229,9 @@ function VaultCategoryTitleRow({
           justifyContent: "space-between",
         }}
       >
-        <Text
-          style={{
-            color: colors.ink,
-            flex: 1,
-            fontSize: 30,
-            fontWeight: "700",
-            lineHeight: 36,
-          }}
-        >
+        <SerifTitle size={28} style={{ flex: 1 }}>
           {viewModel.title}
-        </Text>
+        </SerifTitle>
         <VaultCategoryHeaderAction
           bulkSelection={bulkSelection}
           hasItems={viewModel.items.length > 0}
@@ -385,9 +386,10 @@ function VaultCategoryRecords({
 }) {
   if (items.length === 0) {
     return (
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-        {viewModel.emptyTitle}
-      </Text>
+      <EmptyStateCard
+        description="Add where it lives — not the thing itself. Your family only needs to know where to look."
+        title={viewModel.emptyTitle}
+      />
     );
   }
 
@@ -424,17 +426,20 @@ function VaultCategoryFooter({
         accessibilityRole="button"
         disabled={isBulkDeleting}
         onPress={onDeleteSelected}
-        style={{
+        style={({ pressed }) => ({
           backgroundColor: colors.danger,
+          borderCurve: "continuous",
           borderRadius: 10,
+          marginTop: "auto",
+          opacity: pressed ? 0.85 : 1,
           padding: 16,
-        }}
+        })}
       >
         <Text
           style={{
-            color: colors.surface,
+            color: colors.actionText,
+            fontFamily: fonts.sans.semibold,
             fontSize: 17,
-            fontWeight: "700",
             textAlign: "center",
           }}
         >
@@ -445,37 +450,28 @@ function VaultCategoryFooter({
   }
 
   if (bulkSelection.isSelecting) return null;
-  if (viewModel.canAddMore) return <VaultCategoryAddLink viewModel={viewModel} />;
+  if (viewModel.canAddMore) return <VaultCategoryAddButton viewModel={viewModel} />;
 
   return (
-    <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
+    <MutedText style={{ fontSize: 15 }}>
       This category has reached the 20-record limit.
-    </Text>
+    </MutedText>
   );
 }
 
-function VaultCategoryAddLink({
+function VaultCategoryAddButton({
   viewModel,
 }: {
   viewModel: VaultCategoryListViewModel;
 }) {
+  const router = useRouter();
+
   return (
-    <Link
-      href={viewModel.addHref}
-      style={{
-        borderColor: colors.action,
-        borderCurve: "continuous",
-        borderRadius: 10,
-        borderStyle: "dashed",
-        borderWidth: 1,
-        color: colors.action,
-        fontSize: 17,
-        fontWeight: "700",
-        padding: 16,
-        textAlign: "center",
-      }}
-    >
-      + {viewModel.addLabel}
-    </Link>
+    <View style={{ marginTop: "auto" }}>
+      <PrimaryButton
+        label={viewModel.addLabel}
+        onPress={() => router.push(viewModel.addHref)}
+      />
+    </View>
   );
 }

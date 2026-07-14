@@ -1,7 +1,18 @@
 import { useState } from "react";
-import { Pressable, Text, TextInput, View, type KeyboardTypeOptions } from "react-native";
+import { View, type KeyboardTypeOptions } from "react-native";
 
-import { colors } from "@/shared/theme/colors";
+import {
+  BodyText,
+  Chip,
+  ErrorText,
+  Eyebrow,
+  Field,
+  FieldLabel,
+  PrimaryButton,
+  ScreenHeader,
+  SerifTitle,
+  Subtitle,
+} from "@/shared/ui";
 
 type SelectField = {
   label: string;
@@ -48,81 +59,62 @@ export function DynamicAssetForm({
   };
 
   return (
-    <View style={{ gap: 20 }}>
-      <DynamicAssetFormHeader categoryLabel={categoryLabel} mode={mode} />
-      <DynamicAssetFields fields={fields} onChange={updateValue} values={values} />
+    <View style={{ flex: 1, gap: 16 }}>
+      <ScreenHeader />
+
+      <View style={{ gap: 8 }}>
+        <Eyebrow>{categoryLabel}</Eyebrow>
+        <SerifTitle size={28}>
+          {mode === "add"
+            ? `Add ${categoryLabel.toLowerCase()}`
+            : `Edit ${categoryLabel.toLowerCase()}`}
+        </SerifTitle>
+        <Subtitle style={{ fontSize: 14.5, lineHeight: 22 }}>
+          Only what your family would need to find it — no passwords, no full
+          numbers.
+        </Subtitle>
+      </View>
+
+      <View style={{ gap: 14 }}>
+        {fields.map((field) => (
+          <DynamicAssetField
+            field={field}
+            key={field.name}
+            onChange={updateValue}
+            value={values[field.name] ?? ""}
+          />
+        ))}
+      </View>
+
       <DynamicAssetFormMessage error={error} mode={mode} savedTitle={savedTitle} />
-      <DynamicAssetSaveButton
-        isSaving={isSaving}
-        mode={mode}
-        onSave={async () => {
-          try {
-            setIsSaving(true);
-            await onSave?.(values);
-            setSavedTitle(values.title ?? "Reference");
-          } catch (caughtError) {
-            setError(
-              caughtError instanceof Error
-                ? caughtError.message
-                : "This reference could not be saved.",
-            );
-          } finally {
-            setIsSaving(false);
-          }
-        }}
-      />
-    </View>
-  );
-}
 
-function DynamicAssetFormHeader({
-  categoryLabel,
-  mode,
-}: {
-  categoryLabel: string;
-  mode: "add" | "edit";
-}) {
-  return (
-    <View style={{ gap: 8 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>{categoryLabel}</Text>
-      <Text
-        style={{
-          color: colors.ink,
-          fontSize: 30,
-          fontWeight: "700",
-          lineHeight: 36,
-        }}
-      >
-        {mode === "add" ? "Add a reference" : "Edit reference"}
-      </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
-        Store only the information your family needs to find and contact the right place.
-      </Text>
-    </View>
-  );
-}
-
-function DynamicAssetFields({
-  fields,
-  onChange,
-  values,
-}: {
-  fields: DynamicFormField[];
-  onChange: (name: string, value: string) => void;
-  values: Record<string, string>;
-}) {
-  return (
-    <View style={{ gap: 14 }}>
-      {fields.map((field) => (
-        <DynamicAssetField
-          field={field}
-          key={field.name}
-          onChange={onChange}
-          value={values[field.name] ?? ""}
+      <View style={{ marginTop: "auto", paddingTop: 8 }}>
+        <PrimaryButton
+          disabled={isSaving}
+          label={isSaving ? "Saving..." : "Save to vault"}
+          onPress={() => {
+            void saveAsset();
+          }}
         />
-      ))}
+      </View>
     </View>
   );
+
+  async function saveAsset() {
+    try {
+      setIsSaving(true);
+      await onSave?.(values);
+      setSavedTitle(values.title ?? "Reference");
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "This reference could not be saved.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
 }
 
 function DynamicAssetField({
@@ -134,110 +126,32 @@ function DynamicAssetField({
   onChange: (name: string, value: string) => void;
   value: string;
 }) {
-  return (
-    <View style={{ gap: 6 }}>
-      <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }}>
-        {field.label}
-      </Text>
-      {field.type === "select" ? (
-        <DynamicSelectField field={field} onChange={onChange} value={value} />
-      ) : (
-        <DynamicTextField field={field} onChange={onChange} value={value} />
-      )}
-      {field.type === "text" && field.helperText ? (
-        <Text selectable style={{ color: colors.inkMuted, fontSize: 13 }}>
-          {field.helperText}
-        </Text>
-      ) : null}
-    </View>
-  );
-}
+  if (field.type === "select") {
+    return (
+      <View style={{ gap: 8 }}>
+        <FieldLabel>{field.label}</FieldLabel>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {field.options.map((option) => (
+            <Chip
+              key={option.value}
+              label={option.label}
+              onPress={() => onChange(field.name, option.value)}
+              selected={value === option.value}
+            />
+          ))}
+        </View>
+      </View>
+    );
+  }
 
-function DynamicSelectField({
-  field,
-  onChange,
-  value,
-}: {
-  field: SelectField;
-  onChange: (name: string, value: string) => void;
-  value: string;
-}) {
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-      {field.options.map((option) => (
-        <DynamicSelectOption
-          isSelected={value === option.value}
-          key={option.value}
-          label={option.label}
-          onPress={() => onChange(field.name, option.value)}
-        />
-      ))}
-    </View>
-  );
-}
-
-function DynamicSelectOption({
-  isSelected,
-  label,
-  onPress,
-}: {
-  isSelected: boolean;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={{
-        backgroundColor: isSelected ? colors.action : colors.surface,
-        borderColor: isSelected ? colors.action : colors.border,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        borderWidth: 1,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-      }}
-    >
-      <Text
-        style={{
-          color: isSelected ? colors.actionText : colors.ink,
-          fontSize: 15,
-          fontWeight: "700",
-        }}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function DynamicTextField({
-  field,
-  onChange,
-  value,
-}: {
-  field: TextField;
-  onChange: (name: string, value: string) => void;
-  value: string;
-}) {
-  return (
-    <TextInput
+    <Field
+      accessibilityLabel={`${field.name} field`}
+      hint={field.helperText}
       keyboardType={field.keyboardType}
+      label={field.label}
       onChangeText={(text) => onChange(field.name, text)}
       placeholder={field.required ? "Required" : "Optional"}
-      placeholderTextColor={colors.inkMuted}
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        borderWidth: 1,
-        color: colors.ink,
-        fontSize: 17,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-      }}
       value={value}
     />
   );
@@ -253,51 +167,15 @@ function DynamicAssetFormMessage({
   savedTitle: string | null;
 }) {
   if (error) {
-    return (
-      <Text selectable style={{ color: colors.danger, fontSize: 15 }}>
-        {error}
-      </Text>
-    );
+    return <ErrorText>{error}</ErrorText>;
   }
 
   if (!savedTitle) return null;
 
   return (
-    <Text selectable style={{ color: colors.action, fontSize: 15 }}>
+    <BodyText>
       {mode === "add" ? "Added locally: " : "Updated: "}
       {savedTitle}
-    </Text>
-  );
-}
-
-function DynamicAssetSaveButton({
-  isSaving,
-  mode,
-  onSave,
-}: {
-  isSaving: boolean;
-  mode: "add" | "edit";
-  onSave: () => Promise<void>;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={isSaving}
-      onPress={() => {
-        void onSave();
-      }}
-      style={{
-        alignItems: "center",
-        backgroundColor: isSaving ? colors.inkMuted : colors.action,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        paddingHorizontal: 18,
-        paddingVertical: 14,
-      }}
-    >
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-        {isSaving ? "Saving..." : mode === "add" ? "Save reference" : "Update reference"}
-      </Text>
-    </Pressable>
+    </BodyText>
   );
 }

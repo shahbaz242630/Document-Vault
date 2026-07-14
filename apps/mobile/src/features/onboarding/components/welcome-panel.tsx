@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Text, View } from "react-native";
+import * as ExpoSecureStore from "expo-secure-store";
 
 import {
   createSignupProgressStorage,
@@ -9,7 +10,8 @@ import {
 } from "@/features/auth";
 import { copy } from "@/shared/i18n/en";
 import { colors } from "@/shared/theme/colors";
-import * as ExpoSecureStore from "expo-secure-store";
+import { fonts } from "@/shared/theme/fonts";
+import { GoldHairline, PrimaryButton, Subtitle, TextButton } from "@/shared/ui";
 
 export function WelcomePanel() {
   const [progress, setProgress] = useState<SignupProgress | null>(null);
@@ -32,51 +34,77 @@ export function WelcomePanel() {
   }
 
   return (
-    <View style={{ gap: 24 }}>
-      <WelcomeHero />
+    <View style={{ flex: 1, justifyContent: "space-between" }}>
+      <Wordmark />
 
-      {progress ? (
-        <ResumeSetupActions
-          onContinue={() => {
-            const route = getResumeRoute(progress);
-            router.replace(route as unknown as "/auth/sign-up");
-          }}
-          onStartOver={async () => {
-            const storage = createSignupProgressStorage(ExpoSecureStore);
-            await storage.clear();
-            setProgress(null);
-          }}
-        />
-      ) : (
-        <CreateAccountAction />
-      )}
+      <View style={{ gap: 28 }}>
+        <WelcomeHero />
 
-      <Link href="/auth/sign-in" style={{ color: colors.inkMuted, fontSize: 15 }}>
-        I already have an account
-      </Link>
+        <View style={{ gap: 14 }}>
+          {progress ? (
+            <ResumeSetupActions
+              onContinue={() => {
+                const route = getResumeRoute(progress);
+                router.replace(route as unknown as "/auth/sign-up");
+              }}
+              onStartOver={async () => {
+                const storage = createSignupProgressStorage(ExpoSecureStore);
+                await storage.clear();
+                setProgress(null);
+              }}
+            />
+          ) : (
+            <PrimaryButton
+              label={copy.onboarding.primaryAction}
+              onPress={() =>
+                router.push("/auth/trust-faq" as unknown as "/auth/sign-up")
+              }
+            />
+          )}
+
+          <TextButton
+            label={copy.onboarding.signInLink}
+            onPress={() => router.push("/auth/sign-in")}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function Wordmark() {
+  return (
+    <View style={{ gap: 6, paddingTop: 44 }}>
+      <Text
+        style={{
+          color: colors.action,
+          fontFamily: fonts.serif.medium,
+          fontSize: 22,
+        }}
+      >
+        {copy.onboarding.wordmark}
+      </Text>
+      <GoldHairline />
     </View>
   );
 }
 
 function WelcomeHero() {
   return (
-    <View style={{ gap: 10 }}>
-      <Text style={{ color: colors.inkMuted, fontSize: 15 }}>
-        {copy.onboarding.eyebrow}
-      </Text>
+    <View style={{ gap: 14 }}>
       <Text
         style={{
           color: colors.ink,
-          fontSize: 34,
-          fontWeight: "700",
-          lineHeight: 40,
+          fontFamily: fonts.serif.medium,
+          fontSize: 40,
+          lineHeight: 45,
         }}
       >
         {copy.onboarding.title}
       </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 17, lineHeight: 25 }}>
+      <Subtitle style={{ fontSize: 16, lineHeight: 25 }}>
         {copy.onboarding.subtitle}
-      </Text>
+      </Subtitle>
     </View>
   );
 }
@@ -90,59 +118,14 @@ function ResumeSetupActions({
 }) {
   return (
     <>
-      <PrimaryActionButton label="Continue setup" onPress={onContinue} />
-      <Pressable
-        accessibilityRole="button"
+      <PrimaryButton label="Continue setup" onPress={onContinue} />
+      <TextButton
+        color={colors.danger}
+        label="Start over"
         onPress={() => {
           void onStartOver();
         }}
-        style={{ alignItems: "center", paddingVertical: 8 }}
-      >
-        <Text style={{ color: colors.danger, fontSize: 15, textAlign: "center" }}>
-          Start over
-        </Text>
-      </Pressable>
+      />
     </>
-  );
-}
-
-function CreateAccountAction() {
-  return (
-    <Link href="/auth/sign-up" asChild>
-      <PrimaryActionButton label={copy.onboarding.primaryAction} />
-    </Link>
-  );
-}
-
-function PrimaryActionButton({
-  label,
-  onPress,
-}: {
-  label: string;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={{
-        alignItems: "center",
-        backgroundColor: colors.action,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        paddingHorizontal: 18,
-        paddingVertical: 14,
-      }}
-    >
-      <Text
-        style={{
-          color: colors.actionText,
-          fontSize: 17,
-          fontWeight: "700",
-        }}
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }

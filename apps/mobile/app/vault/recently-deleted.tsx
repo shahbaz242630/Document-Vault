@@ -1,20 +1,14 @@
-import { Stack } from "expo-router/stack";
-import { ScrollView, Text } from "react-native";
+import { Text } from "react-native";
 
 import { RecentlyDeletedList , useVaultSession } from "@/features/vault";
 import { colors } from "@/shared/theme/colors";
-import { screenStyles } from "@/shared/ui/screen";
+import { Screen } from "@/shared/ui";
 
 export default function RecentlyDeletedRoute() {
   const { deletedAssets, isReady, permanentlyDeleteAsset, restoreAsset } = useVaultSession();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Recently deleted" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
+    <Screen>
         {isReady ? (
           <RecentlyDeletedList
             assets={deletedAssets}
@@ -24,7 +18,6 @@ export default function RecentlyDeletedRoute() {
         ) : (
           <Text style={{ color: colors.inkMuted, fontSize: 17 }}>Opening vault...</Text>
         )}
-      </ScrollView>
-    </>
+      </Screen>
   );
 }

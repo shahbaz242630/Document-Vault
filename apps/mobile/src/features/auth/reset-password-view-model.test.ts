@@ -6,7 +6,7 @@ describe("createResetPasswordViewModel", () => {
   it("returns reset password screen copy", () => {
     const vm = createResetPasswordViewModel();
 
-    expect(vm.recoverTitle).toBe("Recover your vault");
+    expect(vm.recoverTitle).toBe("Reset with your phrase");
     expect(vm.freshTitle).toBe("Reset account");
     expect(vm.phraseInputLabel).toBe("Recovery phrase");
     expect(vm.newPasswordLabel).toBe("New password");

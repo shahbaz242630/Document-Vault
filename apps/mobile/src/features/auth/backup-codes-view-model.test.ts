@@ -9,11 +9,9 @@ describe("createBackupCodesViewModel", () => {
     expect(viewModel.codes).toHaveLength(6);
     expect(viewModel.codes[0]).toBe("ABCD-1234-EFGH");
     expect(viewModel.acknowledgmentLabel).toBe(
-      "I have saved these codes in a safe place.",
+      "I've saved these somewhere safe",
     );
-    expect(viewModel.primaryActionLabel).toBe(
-      "Continue to code verification",
-    );
-    expect(viewModel.title).toBe("Save your backup codes");
+    expect(viewModel.primaryActionLabel).toBe("Continue");
+    expect(viewModel.title).toBe("Your backup codes");
   });
 });

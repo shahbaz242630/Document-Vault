@@ -41,13 +41,23 @@
         {}
       ],
       "expo-splash-screen",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "router": {
+        "root": "./app"
+      },
+      "eas": {
+        "projectId": "34fd69a5-169f-45bb-a0b5-9edaf515b12f"
+      }
+    },
+    "owner": "shahbaz242630"
   }
 }

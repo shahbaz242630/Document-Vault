@@ -3,6 +3,7 @@ import * as ExpoLocalAuthentication from "expo-local-authentication";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
+import { fonts } from "@/shared/theme/fonts";
 
 import { defaultAuditLog } from "../audit-log";
 import { createBiometricAuthService } from "../biometric-auth-service";
@@ -21,6 +22,38 @@ type BiometricPreferencesPanelProps = {
 };
 
 export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanelProps) {
+  const preferences = useBiometricPreferences(storage);
+
+  return (
+    <View style={biometricPanelStyle}>
+      <BiometricPreferenceStatus
+        available={preferences.available}
+        canEnable={preferences.canEnable}
+        enabled={preferences.enabled}
+      />
+
+      {preferences.error ? (
+        <Text selectable style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}>
+          {preferences.error}
+        </Text>
+      ) : null}
+
+      {preferences.enabled ? (
+        <DisableBiometricButton
+          disabled={preferences.isBusy}
+          onDisable={preferences.disable}
+        />
+      ) : preferences.canEnable ? (
+        <EnableBiometricButton
+          disabled={preferences.isBusy}
+          onEnable={preferences.enable}
+        />
+      ) : null}
+    </View>
+  );
+}
+
+function useBiometricPreferences(storage: SecureStorage | null) {
   const [available, setAvailable] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
@@ -52,66 +85,49 @@ export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanel
     };
   }, [biometricAuth, biometricStorage]);
 
-  const canEnable = available && enrolled;
+  async function disable() {
+    setError(null);
+    setIsBusy(true);
+    try {
+      await service.disable();
+      defaultAuditLog.log({
+        deviceInfo: "React Native",
+        eventType: "biometric_unlock_disabled",
+      });
+      setEnabled(false);
+    } finally {
+      setIsBusy(false);
+    }
+  }
 
-  return (
-    <View style={{ gap: 10 }}>
-      <BiometricPreferenceStatus
-        available={available}
-        canEnable={canEnable}
-        enabled={enabled}
-      />
+  async function enable() {
+    setError(null);
+    setIsBusy(true);
+    try {
+      const result = await service.enable();
+      if (result.status === "enabled") {
+        defaultAuditLog.log({
+          deviceInfo: "React Native",
+          eventType: "biometric_unlock_enabled",
+        });
+        setEnabled(true);
+      } else {
+        setError(result.message);
+      }
+    } finally {
+      setIsBusy(false);
+    }
+  }
 
-      {error ? (
-        <Text selectable style={{ color: colors.danger, fontSize: 15, lineHeight: 22 }}>
-          {error}
-        </Text>
-      ) : null}
-
-      {enabled ? (
-        <DisableBiometricButton
-          disabled={isBusy}
-          onDisable={async () => {
-            setError(null);
-            setIsBusy(true);
-            try {
-              await service.disable();
-              defaultAuditLog.log({
-                deviceInfo: "React Native",
-                eventType: "biometric_unlock_disabled",
-              });
-              setEnabled(false);
-            } finally {
-              setIsBusy(false);
-            }
-          }}
-        />
-      ) : canEnable ? (
-        <EnableBiometricButton
-          disabled={isBusy}
-          onEnable={async () => {
-            setError(null);
-            setIsBusy(true);
-            try {
-              const result = await service.enable();
-
-              if (result.status === "enabled") {
-                defaultAuditLog.log({
-                  deviceInfo: "React Native",
-                  eventType: "biometric_unlock_enabled",
-                });
-                setEnabled(true);
-              } else {
-                setError(result.message);
-              }
-            } finally {
-              setIsBusy(false);
-            }
-          }}
-        />
-      ) : null}
-    </View>
-  );
+  return {
+    available,
+    canEnable: available && enrolled,
+    disable,
+    enable,
+    enabled,
+    error,
+    isBusy,
+  };
 }
 
 function useBiometricPreferenceServices(storage: SecureStorage | null) {
@@ -144,10 +160,17 @@ function BiometricPreferenceStatus({
 }) {
   return (
     <>
-      <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "700" }}>
+      <Text style={{ color: colors.ink, fontFamily: fonts.sans.medium, fontSize: 16 }}>
         Biometric unlock
       </Text>
-      <Text style={{ color: colors.inkSoft, fontSize: 15, lineHeight: 22 }}>
+      <Text
+        style={{
+          color: colors.inkSecondary,
+          fontFamily: fonts.sans.regular,
+          fontSize: 14.5,
+          lineHeight: 21,
+        }}
+      >
         {getBiometricPreferenceBody({ available, canEnable, enabled })}
       </Text>
     </>
@@ -221,3 +244,13 @@ function EnableBiometricButton({
     </Pressable>
   );
 }
+
+const biometricPanelStyle = {
+  backgroundColor: colors.surface,
+  borderColor: colors.border,
+  borderCurve: "continuous" as const,
+  borderRadius: 14,
+  borderWidth: 1,
+  gap: 10,
+  padding: 18,
+};

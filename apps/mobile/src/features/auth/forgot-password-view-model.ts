@@ -11,9 +11,9 @@ export type ForgotPasswordViewModel = {
 export function createForgotPasswordViewModel(): ForgotPasswordViewModel {
   return {
     body:
-      "You have two options. If you saved your 12-word recovery phrase, you can recover your vault with a new password. If not, you can reset your account and start fresh.",
+      "We can't reset it for you — by design, we hold nothing that opens your vault. But your recovery phrase can. We'll email you a link to start.",
     emailLabel: "Email",
-    primaryActionLabel: "Send reset email",
+    primaryActionLabel: "Email me a reset link",
     recoverWithPhraseLabel: "I have my recovery phrase",
     resetWithoutDataLabel: "I don't have my recovery phrase",
     title: "Forgot your password?",

@@ -10,8 +10,8 @@ export type BackupCodesViewModel = {
 
 export function createBackupCodesViewModel(): BackupCodesViewModel {
   return {
-    acknowledgmentLabel: "I have saved these codes in a safe place.",
-    body: "If you lose access to your authenticator app, these codes let you sign in. Each code can only be used once. Store them somewhere secure — not on this device.",
+    acknowledgmentLabel: "I've saved these somewhere safe",
+    body: "If you ever lose your authenticator app, any one of these gets you in. Keep them somewhere safe — each works once.",
     codes: [
       "ABCD-1234-EFGH",
       "IJKL-5678-MNOP",
@@ -20,9 +20,9 @@ export function createBackupCodesViewModel(): BackupCodesViewModel {
       "GHIJ-7890-KLMN",
       "OPQR-1234-STUV",
     ],
-    primaryActionLabel: "Continue to code verification",
-    statusLabel: "Required security step",
-    title: "Save your backup codes",
+    primaryActionLabel: "Continue",
+    statusLabel: "Security · Step 2 of 3",
+    title: "Your backup codes",
     warning:
       "Sanduqkin cannot reset your two-factor authentication without these codes or your recovery phrase.",
   };

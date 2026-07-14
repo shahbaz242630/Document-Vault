@@ -1,9 +1,7 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import { ScrollView } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 
-import { ProfileBasicsPanel , useSignupProgressStep } from "@/features/auth";
-
-import { screenStyles } from "@/shared/ui/screen";
+import { ProfileBasicsPanel, useSignupProgressStep } from "@/features/auth";
+import { Screen } from "@/shared/ui";
 import * as ExpoSecureStore from "expo-secure-store";
 
 export default function ProfileBasicsRoute() {
@@ -11,14 +9,8 @@ export default function ProfileBasicsRoute() {
   const params = useLocalSearchParams<{ email?: string }>();
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Profile basics" }} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={screenStyles.content}
-      >
-        <ProfileBasicsPanel email={params.email ?? ""} />
-      </ScrollView>
-    </>
+    <Screen>
+      <ProfileBasicsPanel email={params.email ?? ""} />
+    </Screen>
   );
 }
