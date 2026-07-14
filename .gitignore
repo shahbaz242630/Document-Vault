@@ -27,6 +27,7 @@ Details/
 AuthKey_*.p8
 *.mobileprovision
 *.p12
+credentials.json
 
 # Logs
 .codex-logs/

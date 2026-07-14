@@ -112,10 +112,14 @@ test("protects the manually triggered iOS TestFlight release", () => {
   assert.match(workflow, /eas-cli@21\.0\.0 build/);
   assert.match(workflow, /--auto-submit-with-profile production/);
   assert.match(workflow, /--non-interactive/);
-  assert.match(workflow, /--freeze-credentials/);
   assert.match(workflow, /APP_STORE_CONNECT_PRIVATE_KEY: \$\{\{ secrets\.APP_STORE_CONNECT_PRIVATE_KEY \}\}/);
+  assert.match(workflow, /IOS_DISTRIBUTION_P12_BASE64: \$\{\{ secrets\.IOS_DISTRIBUTION_P12_BASE64 \}\}/);
+  assert.match(workflow, /IOS_DISTRIBUTION_P12_PASSWORD: \$\{\{ secrets\.IOS_DISTRIBUTION_P12_PASSWORD \}\}/);
+  assert.match(workflow, /IOS_PROVISIONING_PROFILE_BASE64: \$\{\{ secrets\.IOS_PROVISIONING_PROFILE_BASE64 \}\}/);
+  assert.match(workflow, /base64 --decode > \.eas\/secrets\/ios-distribution\.p12/);
+  assert.match(workflow, /writeFileSync\("credentials\.json"/);
   assert.match(workflow, /chmod 600 \.eas\/secrets\/AuthKey_22Q892W9K4\.p8/);
-  assert.match(workflow, /if: always\(\)[\s\S]*?rm -rf apps\/mobile\/\.eas\/secrets/);
+  assert.match(workflow, /if: always\(\)[\s\S]*?rm -rf apps\/mobile\/\.eas\/secrets apps\/mobile\/credentials\.json/);
 });
 
 test("runs bounded Android onboarding and returning-user unlock smoke tests after native compilation", () => {
