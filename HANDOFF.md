@@ -96,10 +96,12 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - Added `.github/CODEOWNERS` coverage for workflows, cryptography, authentication, vault/recovery, deletion, retention, webhooks, migrations, scripts, and dependency manifests.
 - Added `docs/release-checklist.md` for commit, CI, dependency, SBOM, migration, compliance, native-QA, submission, and go/no-go evidence.
 - Added value-free GitHub issue monitoring for scheduled account-deletion and audit-retention processor failures, with automatic recovery closure and no processor secrets in the reporting jobs.
+- Production verification passed on merge commit `0ce0d6e`: manual account-deletion run `29412699342` and audit-retention run `29412700611` completed both their protected processor and secretless reporter jobs successfully, with no operational incident opened.
 - Added dependency-free CycloneDX SBOM generation through the repository's pinned npm toolchain.
 - The protected TestFlight workflow now generates and uploads a production-dependency SBOM before the credential-bearing build job can start.
 - SBOM artifacts are named with the release commit SHA and retained in GitHub Actions for 90 days; durable archival ownership still needs to be defined.
 - Local release-hardening verification passed: typecheck, lint, workspace tests, mobile coverage, Expo Doctor, Phase 1/security/workflow/secret guards, release-tool tests, and the high-severity production dependency-audit threshold.
+- After PR #30 CI detected newly published Expo SDK 56 patch expectations, aligned `expo`, `expo-build-properties`, `expo-constants`, `expo-dev-client`, `expo-router`, `expo-sharing`, and `expo-splash-screen` to the compatible patch set. Local Expo Doctor returned 21/21 and the full typecheck, lint, test, coverage, security, and production-audit gates passed.
 
 ## Current Product And Security Guardrails
 
@@ -152,10 +154,9 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - Complete the French ANSSI declaration before any later France distribution expansion.
 - Select and integrate the production transactional-email provider; Resend remains the leading candidate but is not approved or implemented.
 - Migrate four legacy repository-level processor secrets into the protected `Production` environment during their next rotation, verify both processor workflows, then remove the repository copies.
-- Verify the new scheduled-workflow incident monitoring on `main` with successful manual processor dispatches; future failures will open value-free GitHub issues and later recovery runs will close them.
 - Add a second qualified security reviewer before enforcing required code-owner approval; the current sole owner cannot approve their own pull request.
 - Define durable SBOM/dependency-license review ownership and complete the broader artifact/log retention review.
-- Address the remaining compatible dependency/tooling updates without forcing an Expo-incompatible downgrade.
+- Address the remaining compatible dependency/tooling updates without forcing an Expo-incompatible downgrade, including GitHub's Node 20 action-runtime deprecation annotations for the currently pinned checkout/setup actions.
 
 ## Standard Verification
 
