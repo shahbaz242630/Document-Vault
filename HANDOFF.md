@@ -175,6 +175,10 @@ npm audit --omit=dev --workspaces --audit-level=high
 
 Release builds must additionally pass the protected `iOS TestFlight release` workflow from `main` with explicit `Release` approval.
 
+## Next Session Opener
+
+Partner, read `HANDOFF.md` and `SECURITY_HANDOFF.md` first. PR #30 is merged on `main` at `88f578a`: production processor monitoring is live-verified, the compatible Expo SDK 56 patch set is aligned, Expo Doctor is 21/21, and all protected native/security checks passed. Start the next narrow slice: **Export Compliance And App Store Metadata Readiness**. Treat Sanduqkin as a global encrypted app with an initial GCC rollout, not as a France-specific product. Use current official Apple and U.S. BIS sources to inventory every shipped encryption use, document a supportable export-classification rationale, determine the correct App Store Connect answers, and decide whether a persistent `ios.infoPlist.ITSAppUsesNonExemptEncryption` value is justified. Do not claim the app contains no encryption, do not set compliance metadata before the evidence supports it, and do not enable France until the separate ANSSI declaration is approved. Produce a cited, value-free compliance record and add a narrow automated metadata guard only after the classification is supportable. Keep Phase 2 and payments paused, preserve the zero-knowledge boundary, and leave the GitHub Actions Node-runtime migration as a separate tooling slice. Physical-device QA on TestFlight build `1.0.0` (`2`) continues in parallel; triage any reported failure before declaring Phase 1 release-ready.
+
 ## Historical Material
 
 Detailed pre-refresh history is preserved in `docs/handoff/archive/`. This document intentionally contains only the current operational state, current evidence, remaining risks, and next work.
