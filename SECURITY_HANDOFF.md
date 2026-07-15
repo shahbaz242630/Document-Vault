@@ -121,6 +121,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 - Explicit code ownership for workflows, cryptography, authentication, vault/recovery, deletion, retention, webhooks, migrations, scripts, and dependency manifests.
 - A value-free release checklist covering exact source, CI, dependencies, migrations, compliance, device QA, submission, and go/no-go evidence.
 - Secretless, value-free GitHub issue monitoring for account-deletion and audit-retention scheduler failures, isolated from the protected processor credentials and closed automatically after recovery.
+- Production monitoring verification passed on merge commit `0ce0d6e`: manual account-deletion run `29412699342` and audit-retention run `29412700611` completed their protected processor and reporter jobs successfully, and no operational incident was opened.
 - Dependency-free CycloneDX production SBOM generation and 90-day release-run artifact retention before release credentials are materialized.
 - Value-free secret lifecycle and incident procedures in `docs/secret-lifecycle-operations.md`.
 
@@ -138,7 +139,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 ### Operational Gaps
 
 - Four legacy scheduled-processor values remain repository-level secrets because GitHub cannot expose stored values for migration. During the next rotation, create replacements directly in `Production`, verify both processors, then delete the repository copies.
-- Verify scheduled-workflow incident monitoring on `main` through successful manual processor dispatches; any later open processor incident requires owner triage before release.
+- Treat any future open processor incident as requiring owner triage before release.
 - Add a second qualified security reviewer before enabling required code-owner approval; the sole repository owner cannot self-approve.
 - Define dependency/license review ownership and move release SBOMs into a durable owner-controlled archive before the 90-day GitHub artifact expires.
 - Review artifact/log retention and minimize it without losing necessary audit evidence.
@@ -148,6 +149,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 ### Dependency Risk
 
 - GitHub reports one existing moderate Dependabot item on the default branch.
+- The successful production-monitoring runs emitted a non-blocking GitHub annotation that the pinned checkout/setup actions still target the deprecated Node 20 action runtime and are currently forced onto Node 24; migrate to compatible newer immutable action pins in a separate tooling slice.
 - The known Expo tooling path includes an upstream `uuid` advisory and moderate development-tooling audit entries.
 - npm's SBOM inventory requires scoped legacy-peer resolution because Expo's current lockfile resolves `react-native-worklets` outside an older `expo-modules-core` peer range; normal install, Expo Doctor, tests, and native CI remain green.
 - There are no accepted high or critical production dependency findings.

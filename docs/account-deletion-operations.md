@@ -74,6 +74,8 @@ Both scheduled workflows run a separate secretless status-reporting job after th
 
 The reporting job has only `contents: read` and `issues: write`; it does not use the `Production` environment or receive processor credentials. Incident text contains workflow name, result, run URL, and timestamp only. It must never include endpoint response bodies, credentials, user identifiers, or vault data. An open processor incident is a release-review item and requires owner triage before go/no-go.
 
+Production verification on 2026-07-15 used merge commit `0ce0d6e`. Manual account-deletion run `29412699342` and audit-retention run `29412700611` completed both their protected processor and secretless reporting jobs successfully. No operational incident was opened. GitHub emitted a non-blocking action-runtime deprecation annotation; migration to newer immutable checkout/setup action pins is tracked as separate dependency/tooling work.
+
 ## Confirmation Email
 
 Phase 1 queues the deletion request after explicit in-app confirmation through `POST /account-deletion/request`. The API verifies the Supabase bearer session, creates the server-side deletion request, and sends a transactional confirmation email with the scheduled deletion date.
