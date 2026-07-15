@@ -101,6 +101,7 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - The protected TestFlight workflow now generates and uploads a production-dependency SBOM before the credential-bearing build job can start.
 - SBOM artifacts are named with the release commit SHA and retained in GitHub Actions for 90 days; durable archival ownership still needs to be defined.
 - Local release-hardening verification passed: typecheck, lint, workspace tests, mobile coverage, Expo Doctor, Phase 1/security/workflow/secret guards, release-tool tests, and the high-severity production dependency-audit threshold.
+- After PR #30 CI detected newly published Expo SDK 56 patch expectations, aligned `expo`, `expo-build-properties`, `expo-constants`, `expo-dev-client`, `expo-router`, `expo-sharing`, and `expo-splash-screen` to the compatible patch set. Local Expo Doctor returned 21/21 and the full typecheck, lint, test, coverage, security, and production-audit gates passed.
 
 ## Current Product And Security Guardrails
 

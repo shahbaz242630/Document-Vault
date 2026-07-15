@@ -150,6 +150,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 
 - GitHub reports one existing moderate Dependabot item on the default branch.
 - The successful production-monitoring runs emitted a non-blocking GitHub annotation that the pinned checkout/setup actions still target the deprecated Node 20 action runtime and are currently forced onto Node 24; migrate to compatible newer immutable action pins in a separate tooling slice.
+- PR #30 CI detected newer Expo SDK 56 patch expectations after the earlier green release-hardening run. The seven directly affected Expo packages and resolved lockfile graph were aligned to the compatible patch set; local Expo Doctor returned 21/21 and all full local safety gates passed.
 - The known Expo tooling path includes an upstream `uuid` advisory and moderate development-tooling audit entries.
 - npm's SBOM inventory requires scoped legacy-peer resolution because Expo's current lockfile resolves `react-native-worklets` outside an older `expo-modules-core` peer range; normal install, Expo Doctor, tests, and native CI remain green.
 - There are no accepted high or critical production dependency findings.
