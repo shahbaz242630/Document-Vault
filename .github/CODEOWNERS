@@ -1,0 +1,16 @@
+# The repository owner reviews all changes. Keep the specific entries below so
+# security-sensitive paths remain visible if broader ownership changes later.
+* @shahbaz242630
+
+/.github/ @shahbaz242630
+/apps/mobile/src/shared/crypto/ @shahbaz242630
+/apps/mobile/src/features/auth/ @shahbaz242630
+/apps/mobile/src/features/vault/ @shahbaz242630
+/services/api/src/account-deletion/ @shahbaz242630
+/services/api/src/audit-retention/ @shahbaz242630
+/services/api/src/security/ @shahbaz242630
+/services/api/src/webhooks/ @shahbaz242630
+/supabase/migrations/ @shahbaz242630
+/scripts/ @shahbaz242630
+/package.json @shahbaz242630
+/package-lock.json @shahbaz242630

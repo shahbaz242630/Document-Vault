@@ -26,6 +26,7 @@
     "check:mobile-secrets": "node scripts/mobile-secret-scan.cjs",
     "check:supabase-db-security": "node scripts/supabase-db-security-check.cjs",
     "check:supabase-rls": "node scripts/supabase-rls-attack-test.cjs",
+    "sbom:release": "node scripts/generate-release-sbom.cjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint . --max-warnings=0"
   },

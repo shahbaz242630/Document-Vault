@@ -118,6 +118,9 @@ The prior required names `Android native debug compile` and `Supabase live secur
 - Immutable GitHub Action SHA pins.
 - Bounded Android native, Android emulator, iOS simulator, processor, and release jobs.
 - Protected `Preview`, `Production`, and `Release` environment boundaries.
+- Explicit code ownership for workflows, cryptography, authentication, vault/recovery, deletion, retention, webhooks, migrations, scripts, and dependency manifests.
+- A value-free release checklist covering exact source, CI, dependencies, migrations, compliance, device QA, submission, and go/no-go evidence.
+- Dependency-free CycloneDX production SBOM generation and 90-day release-run artifact retention before release credentials are materialized.
 - Value-free secret lifecycle and incident procedures in `docs/secret-lifecycle-operations.md`.
 
 ## Current Findings And Residual Risks
@@ -135,9 +138,8 @@ The prior required names `Android native debug compile` and `Supabase live secur
 
 - Four legacy scheduled-processor values remain repository-level secrets because GitHub cannot expose stored values for migration. During the next rotation, create replacements directly in `Production`, verify both processors, then delete the repository copies.
 - Add scheduled-workflow failure alerting or an explicit operational review process.
-- Add `CODEOWNERS` for workflows, migrations, cryptography, authentication, recovery, audit, and deletion paths; enforce appropriate review.
-- Add a release checklist linking the exact commit, required runs, dependency audit, native QA evidence, App Store metadata, and migration state.
-- Generate and retain an SBOM for release builds and define dependency/license review ownership.
+- Add a second qualified security reviewer before enabling required code-owner approval; the sole repository owner cannot self-approve.
+- Define dependency/license review ownership and move release SBOMs into a durable owner-controlled archive before the 90-day GitHub artifact expires.
 - Review artifact/log retention and minimize it without losing necessary audit evidence.
 - Periodically audit persisted audit metadata to prove it contains safe identifiers only.
 - Review whether non-provider secret patterns and validity checks should be enabled.
@@ -146,6 +148,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 
 - GitHub reports one existing moderate Dependabot item on the default branch.
 - The known Expo tooling path includes an upstream `uuid` advisory and moderate development-tooling audit entries.
+- npm's SBOM inventory requires scoped legacy-peer resolution because Expo's current lockfile resolves `react-native-worklets` outside an older `expo-modules-core` peer range; normal install, Expo Doctor, tests, and native CI remain green.
 - There are no accepted high or critical production dependency findings.
 - Do not force an Expo-incompatible downgrade; apply a compatible upstream update when available and rerun all native/security gates.
 

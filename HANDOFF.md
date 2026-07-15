@@ -91,6 +91,15 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - Confirmed the TestFlight build installs and launches on the owner's physical iPhone.
 - Re-ran local verification after the TestFlight setup: 94 files passed, 2 skipped; 343 tests passed, 2 protected live tests skipped; mobile typecheck, Phase 1 DoD guard, and mobile secret scan passed.
 
+### Release Hardening
+
+- Added `.github/CODEOWNERS` coverage for workflows, cryptography, authentication, vault/recovery, deletion, retention, webhooks, migrations, scripts, and dependency manifests.
+- Added `docs/release-checklist.md` for commit, CI, dependency, SBOM, migration, compliance, native-QA, submission, and go/no-go evidence.
+- Added dependency-free CycloneDX SBOM generation through the repository's pinned npm toolchain.
+- The protected TestFlight workflow now generates and uploads a production-dependency SBOM before the credential-bearing build job can start.
+- SBOM artifacts are named with the release commit SHA and retained in GitHub Actions for 90 days; durable archival ownership still needs to be defined.
+- Local release-hardening verification passed: typecheck, lint, workspace tests, mobile coverage, Expo Doctor, Phase 1/security/workflow/secret guards, release-tool tests, and the high-severity production dependency-audit threshold.
+
 ## Current Product And Security Guardrails
 
 - Sanduqkin is a secure information organizer, not a financial, legal, investment, estate-planning, or executor service.
@@ -143,8 +152,8 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - Select and integrate the production transactional-email provider; Resend remains the leading candidate but is not approved or implemented.
 - Migrate four legacy repository-level processor secrets into the protected `Production` environment during their next rotation, verify both processor workflows, then remove the repository copies.
 - Add scheduled-workflow failure alerting/operational review.
-- Add `CODEOWNERS` and require appropriate review for security-sensitive paths.
-- Add a release checklist/SBOM and review artifact/log retention.
+- Add a second qualified security reviewer before enforcing required code-owner approval; the current sole owner cannot approve their own pull request.
+- Define durable SBOM/dependency-license review ownership and complete the broader artifact/log retention review.
 - Address the remaining compatible dependency/tooling updates without forcing an Expo-incompatible downgrade.
 
 ## Standard Verification

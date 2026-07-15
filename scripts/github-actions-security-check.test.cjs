@@ -106,6 +106,13 @@ test("protects the manually triggered iOS TestFlight release", () => {
 
   assert.match(workflow, /workflow_dispatch:/);
   assert.doesNotMatch(workflow, /\n\s+(push|pull_request|schedule):/);
+  assert.match(workflow, /release-sbom:[\s\S]*?name: Generate release SBOM/);
+  assert.match(workflow, /release-sbom:[\s\S]*?timeout-minutes: 10/);
+  assert.match(workflow, /run: npm run sbom:release/);
+  assert.match(workflow, /name: sanduqkin-release-sbom-\$\{\{ github\.sha \}\}/);
+  assert.match(workflow, /path: artifacts\/sanduqkin\.cdx\.json/);
+  assert.match(workflow, /retention-days: 90/);
+  assert.match(workflow, /build-and-submit:[\s\S]*?needs: release-sbom/);
   assert.match(workflow, /if: inputs\.confirmation == 'testflight'/);
   assert.match(workflow, /environment: Release/);
   assert.match(workflow, /timeout-minutes: 120/);
