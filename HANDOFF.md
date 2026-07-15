@@ -1,714 +1,169 @@
-# Sanduqkin Current Handoff
+# Sanduqkin Project Handoff
 
-Archived full prior handoff:
+Last updated: 2026-07-15 (Asia/Dubai)
 
-- `docs/handoff/archive/HANDOFF-2026-06-08-pre-archive.md`
+## Session Opener
 
-## Next Session Opener
-
-Start here:
-
-> We are in Phase 1 integration hardening on branch `redesign/sanduqkin-flow`. Android release CI covers onboarding/FAQ, returning-user Supabase sign-in and MEK unlock, encrypted bank-record CRUD/hard-delete, emergency-code one-time visibility/raw-value hiding, and recovery-reset encrypted-record continuity. A credential-free macOS job now also generates the iOS project, resolves pods, compiles an unsigned Release app with Xcode 26.2, installs it on an iPhone simulator, and proves it remains alive after launch. The protected hosted-Supabase job still executes both live integration tests after Android cleanup. The latest fully verified implementation is commit `3b19e05` in [Security CI run 29246161478](https://github.com/shahbaz242630/Document-Vault/actions/runs/29246161478), where all six jobs passed. Sensitive recovery and test values remain out of commits, logs, screenshots, and artifacts. The next slice may configure signed archive/TestFlight verification, select Resend, or continue repository/environment hardening.
-
-Do not move to Phase 2 beneficiary/activation work yet. Do not continue Phase 3 payments work until Phase 1 verification and hardening gaps are closed.
-
-2026-07-15 production workflow secret-boundary slice:
-
-- GitHub `Production` is restricted to protected branches. Scheduled account-deletion and audit-retention jobs now declare that environment, have 10-minute job bounds, and use bounded HTTP retries, connection timeouts, and total request timeouts.
-- The GitHub Actions guard rejects every secret-bearing job that omits an approved `Preview`, `Production`, or `Release` environment; 22 workflow regression tests passed.
-- Added `docs/secret-lifecycle-operations.md` with value-free ownership, purpose, rotation, revocation, incident, and quarterly access-review procedures.
-- The four processor values remain repository-level secrets because GitHub does not expose stored values for migration. Move them into `Production` during their next rotation, verify each workflow, then remove the repository copies.
-- Final verification: [Security CI run 29367959335](https://github.com/shahbaz242630/Document-Vault/actions/runs/29367959335) passed all six jobs on implementation commit `f4c99be`.
-- Next slice: establish an approval-gated `Release` environment and configure owner-approved signed iOS archive/TestFlight delivery without exposing Apple credentials in commits, logs, or artifacts.
-
-2026-07-11 update: `npm run check:phase1` is now enforced by the branch-protected `App security gates` job with regression coverage. Both push and PR Security CI runs passed on implementation commit `1d4407f`; move to the next remaining Phase 1 blocker.
-
-2026-07-11 Android native compile slice (completed and remotely verified):
-
-- Added a separate, 45-minute-bounded `Android native compile` job to Security CI; it generates the git-ignored Android project with Expo prebuild before initializing Gradle caching and compiling.
-- The job uses Node.js 24.3.0, Temurin Java 17, pinned `actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e`, explicit Android 36/build-tools 36/NDK 27.1 components, and x86_64 debug plus standalone release APK assembly.
-- Added workflow regression coverage and allowlisted only the pinned official Java setup action.
-- Local Gradle verification succeeded through a short Windows drive mapping: `BUILD SUCCESSFUL in 1m 53s`, 546 actionable tasks, debug APK assembled.
-- The normal long workspace path fails CMake/Ninja on Windows because a generated gesture-handler object path exceeds 260 characters. This is a local path-length constraint; the Linux CI workspace uses a shorter path.
-- GitHub Actions security guard, its regression suite, the mobile secret scan, and related security tests passed.
-- Refactored the three UI function-size violations in `biometric-preferences-panel.tsx`, `vault-export-screen.tsx`, and `padlock.tsx` into focused hooks/presentation helpers without changing behavior; `npm run check:phase1`, mobile typecheck, and focused biometric/export tests now pass.
-- Recalibrated only the global mobile coverage floors to the measured post-redesign baseline (28% branches, 37% functions, 40% lines, 39% statements). The stricter auth, vault-security, and cryptography thresholds remain unchanged.
-- First remote push run `29149675121` correctly failed before compilation because Java's Gradle cache setup ran before the git-ignored Android project had been generated. The follow-up moves Expo prebuild ahead of Java/Gradle cache initialization.
-- Second remote push run `29149713679` passed Expo prebuild and Java setup, then showed that `sdkmanager` is installed but not on the Ubuntu runner `PATH`. The follow-up invokes it explicitly from `$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager`.
-- Third remote push run `29149765641` caught invalid inline YAML quoting before jobs started. The SDK command now uses a YAML block scalar, and the workflow regression suite parses every workflow as YAML to prevent recurrence.
-- Final remote verification: [Security CI run 29149797724](https://github.com/shahbaz242630/Document-Vault/actions/runs/29149797724) passed. `Android native compile` completed in 12m06s, and both `App security gates` and `Supabase live security gates` passed.
-
-2026-07-12 Android emulator onboarding smoke slice:
-
-- The native job now builds both x86_64 debug and standalone release APKs and hands the release artifact to a separate, 25-minute-bounded `Android emulator smoke` job.
-- The smoke runner installs the release APK on an Android 36 Google APIs emulator and drives controls through UIAutomator accessibility data rather than fixed tap coordinates.
-- Verified path: launch app, tap `Create your vault`, reach FAQ 1 of 15, swipe forward to FAQ 2, swipe back to FAQ 1, advance through all 15 questions, tap `I'm ready`, and reach account `Step 1 of 3`.
-- Failure-only evidence includes a screenshot, logcat, and emulator startup log retained for seven days; the release APK is retained for one day.
-- Final verification: [Security CI run 29206109673](https://github.com/shahbaz242630/Document-Vault/actions/runs/29206109673) passed all four jobs, including `Android native compile` and `Android emulator smoke`.
-- This established the Android E2E foundation; subsequent 2026-07-13 slices added sign-in/unlock, encrypted CRUD, and emergency-code hiding. Recovery-reset continuity remains deferred.
-
-2026-07-13 Android returning-user sign-in/unlock smoke slice:
-
-- Added stable accessibility labels for sign-in email/password inputs and extended the release-emulator runner to clear local state, open `I already have an account`, enter protected QA credentials, submit sign-in, and assert `Your vault` plus `Sealed on this device`.
-- The QA credentials are stored only as `Preview` GitHub environment secrets. The Supabase URL and publishable key are repository variables because they are public client configuration; no credential value is committed or printed.
-- The credential-bearing emulator job is push-only. The GitHub Actions security guard now permits secrets in a mixed push/PR workflow only when every secret-bearing job has the explicit `github.event_name == 'push'` boundary; an 18-test regression suite covers this rule.
-- Fixed a real release-only configuration bug: Expo cannot inline dynamic `process.env` enumeration, so Supabase client configuration now includes static `process.env.EXPO_PUBLIC_SUPABASE_*` references while preserving service-role rejection.
-- Final verification: [Security CI run 29208758000](https://github.com/shahbaz242630/Document-Vault/actions/runs/29208758000) passed all four jobs. The emulator job completed in 3m55s and logged both onboarding and returning-user vault-unlock smoke success.
-- Subsequent slices completed encrypted CRUD, emergency-code hiding, and recovery-reset continuity.
-
-2026-07-13 Android encrypted-record CRUD smoke slice:
-
-- Added stable semantic labels to dynamic vault fields and scroll-aware emulator helpers for the small Android CI viewport.
-- After real returning-user unlock, the runner creates a uniquely named bank-account reference with non-sensitive locator data, waits for Supabase-backed save, opens the detail screen, and confirms decrypted content (`TestBank`) plus the sealed-storage notice.
-- The runner edits the unique title, waits for the updated detail to decrypt, performs the two-step `Delete this record` / `Delete permanently` flow, returns to the vault, and confirms the edited title is absent. Successful runs leave no generated QA record behind.
-- Workflow regression coverage now requires the returning-user and encrypted CRUD stages plus create/read/delete markers. Focused vault tests, mobile typecheck, lint, Phase 1 guard, mobile secret scan, and all 18 workflow-security tests passed locally.
-- Final verification: [Security CI run 29209599047](https://github.com/shahbaz242630/Document-Vault/actions/runs/29209599047) passed all four jobs. The 5m15s emulator job logged onboarding, returning-user unlock, and encrypted-record CRUD success.
-- Subsequent slices completed emergency-code raw-value hiding and recovery-reset continuity.
-
-2026-07-13 Android emergency-code hiding smoke slice:
-
-- The release-emulator flow deep-links from the unlocked vault to emergency access and handles active, interrupted, or not-yet-created test-account state.
-- It creates/regenerates a sealed emergency grant, proves a correctly formatted one-time raw code is visible before confirmation without printing or persisting that value, acknowledges it, and confirms the code is saved.
-- It then waits for `Sealed emergency code is active`, asserts `Sanduqkin no longer has the raw code`, and verifies the captured one-time value is absent from the UI hierarchy.
-- Any emergency-code pattern is redacted from UIAutomator failure diagnostics. The Android form helper also moved to paced character entry after CI caught a numeric-keyboard timing race; production validation remained unchanged.
-- Final verification: [Security CI run 29211310358](https://github.com/shahbaz242630/Document-Vault/actions/runs/29211310358) passed all four jobs. The 5m57s emulator job logged onboarding, returning-user unlock, encrypted CRUD, and emergency-code raw-value hiding success.
-- The subsequent recovery-reset slice completed the Android minimum-flow E2E set.
-
-2026-07-13 Android recovery-reset continuity slice:
-
-- Added a protected backend bootstrap for a separate verified disposable account. It authenticates with public client configuration and the user credential, clears disposable vault rows through RLS, generates a fresh BIP-39 phrase in runner memory, derives its MEK, wraps it with the normal Argon2id/XChaCha20-Poly1305 parameters, and upserts only wrapped key material.
-- The release emulator creates an encrypted bank record, resets to a derived temporary password, clears app state, signs in with that password, and decrypts the same record.
-- It resets back to the original protected disposable password, clears app state again, signs in, decrypts the record a second time, and permanently deletes the fixture.
-- Startup/finally recovery restores the original password after an interrupted attempt. Recovery screens use screenshot prevention; UI diagnostics redact sensitive values; ADB failures suppress command arguments/output.
-- The generated phrase and temporary password exist only in the protected job process environment and are never printed, committed, uploaded, or retained.
-- Final verification: [Security CI run 29229315895](https://github.com/shahbaz242630/Document-Vault/actions/runs/29229315895) passed all four jobs on commit `1f9e8fc`. The 9m57s emulator job logged onboarding, returning-user unlock, encrypted CRUD, emergency-code hiding, and recovery-reset continuity success.
-
-2026-07-13 protected hosted-Supabase integration slice:
-
-- Added a separate 10-minute `Hosted Supabase integration` job using the push-only protected `Preview` environment.
-- The job depends on successful Android emulator completion so it cannot race the disposable recovery bootstrap or password restoration.
-- It runs `returning-user-live-supabase.test.ts` and `encrypted-vault-live-supabase-smoke.test.ts` sequentially with explicit opt-in flags.
-- Both tests re-authenticate during `finally` cleanup, hard-delete their unique asset rows, and verify those rows are absent before signing out.
-- Assertions now report only safe booleans, counts, types, column names, and ciphertext/nonce lengths; failures do not print ciphertext or decrypted payload objects.
-- Final verification: [Security CI run 29233949611](https://github.com/shahbaz242630/Document-Vault/actions/runs/29233949611) passed all five jobs on commit `b250aa2`. Each hosted test file ran one live test and passed; durations were 4.69s and 1.67s.
-
-2026-07-13 iOS native compile and simulator launch slice:
-
-- Added a separate 45-minute `iOS simulator smoke` job on GitHub-hosted `macos-15`; it needs no Apple credentials or test-user credentials.
-- Expo prebuild generates the ignored iOS project, CocoaPods runs from the mobile iOS directory for correct monorepo autolinking, and Xcode builds a Release app for `iphonesimulator` with code signing disabled.
-- The job explicitly selects Xcode 26.2 because Expo Modules JSI requires Swift tools 6.2 and the runner's default Xcode 16.4 provides Swift 6.1.
-- After compilation, the job selects and boots an available iPhone simulator, installs `Sanduqkin.app`, launches `com.sanduqkin.mobile`, waits 15 seconds, and terminates it; early app exit fails the job.
-- Failure-only evidence is limited to a simulator screenshot retained for seven days when available. Successful runs upload no app binary or screenshots.
-- Workflow regression coverage now requires the macOS bound, Xcode selection, mobile CocoaPods working directory, unsigned Release build, simulator install/launch/terminate sequence, and absence of secret references.
-- Final verification: [Security CI run 29246161478](https://github.com/shahbaz242630/Document-Vault/actions/runs/29246161478) passed all six jobs on implementation commit `3b19e05`. `iOS simulator smoke` completed in 23m30s.
-- Remaining iOS scope: signed archive, TestFlight delivery, entitlements, and physical-device behavior are not covered by this unsigned simulator slice.
+> Sanduqkin Phase 1 is integrated on `main`. PR #25 merged the redesigned mobile flow, native CI, protected production boundaries, and the approval-gated iOS TestFlight workflow. Signed iOS version `1.0.0`, build `2`, is processed, export-compliance-cleared for the initial GCC-only distribution scope, assigned to the manually controlled `GCC Internal Testers` group, and installed and launched successfully on the owner's physical iPhone. The owner will continue real-device security and functional testing during travel over the next several days and report any issues. Do not start Phase 2 beneficiary/activation work or continue Phase 3 payments work until Phase 1 release readiness and the remaining security/operations gaps are closed.
 
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
-- Product/app name: Sanduqkin
-- BRD: `Vault_BRD_v1.0.md`, version shown in file: 1.1
+- GitHub repository: `shahbaz242630/Document-Vault`
+- Default/release branch: `main`
+- Product name: Sanduqkin
 - Active scope: Phase 1 - Core Single-User Vault
-- Current handoff refresh: 2026-07-15
-- Current branch: `redesign/sanduqkin-flow`
-- Latest fully verified implementation commit: `f4c99be`
-- Current PR: none open for this branch
-- Expected local-only files: `.playwright-mcp/` and `welcome.png`; keep them untracked unless the owner explicitly scopes them into a future change.
+- BRD: `Vault_BRD_v1.0.md` (document version 1.1)
+- PR #25: merged 2026-07-15
+- Merge commit: `75907c3d1103a12619f6a1b0ccacd971a280fd70`
+- Release-fix commit included in PR #25: `852f2f2`
+- Expected unrelated local-only files: `.playwright-mcp/` and `welcome.png`; leave them untracked unless explicitly scoped.
 
-## Product Guardrails
+## Current Release State
 
-- Sanduqkin is a secure information organizer, not a financial service, estate-planning product, legal service, investment product, or estate executor.
-- Phase 1 is single-user only.
-- Phase 1 excludes beneficiaries, activation flow, witnesses, document upload, production notifications, web app, and payments.
-- User-facing copy must avoid forbidden financial/legal positioning from the BRD.
-- Normal vault storage must remain zero-knowledge: Sanduqkin/Supabase must not store or expose plaintext vault content, raw emergency codes, passwords, seed phrases, private keys, or raw MEK.
-- Emergency access direction is key release, not server-side plaintext export.
-- Vault UX/data redesign must preserve zero-knowledge storage. Normalize safe metadata only; do not add plaintext asset-detail columns such as bank names, account digits, contact details, document locations, notes, or family instructions to Supabase tables.
-- Delete means hard delete for vault records. User-facing copy must clearly state that deleted encrypted records cannot be recovered and Sanduqkin cannot restore them.
+- Apple bundle identifier: `com.sanduqkin.mobile`
+- App Store Connect app: Sanduqkin
+- App Store Connect Apple ID: `6790954883`
+- Expo owner/project: `@shahbaz242630/sanduqkin`
+- EAS project ID: `34fd69a5-169f-45bb-a0b5-9edaf515b12f`
+- App version: `1.0.0`
+- First successful signed archive: build `2`
+- EAS build ID: `96d15169-4f5b-47a0-adcc-402a5c42b9dd`
+- GitHub TestFlight run: [29376883158](https://github.com/shahbaz242630/Document-Vault/actions/runs/29376883158)
+- GitHub result: `Build and submit iOS` completed successfully at 2026-07-15 01:39 UTC.
+- Submission result: EAS completed the App Store Connect submission after an Expo iOS submission-queue incident.
+- App Store Connect processing: complete.
+- Export-compliance result: Apple accepted standard third-party encryption with France excluded from the initial distribution scope; no French approval document is required for this scope.
+- Initial market scope: GCC expatriate community, starting with Bahrain, Kuwait, Oman, Qatar, Saudi Arabia, and the United Arab Emirates. France and wider expansion are deferred.
+- TestFlight status: build `2` is `Ready to Test` and expires 90 days after processing.
+- Internal group: `GCC Internal Testers`, with automatic distribution disabled so builds are assigned deliberately.
+- Internal tester: owner account invited; TestFlight installation and launch on a physical iPhone confirmed.
+- Remaining device confirmation: complete the multi-day real-device functional and security smoke and record device/iOS details and value-free results.
 
-## Stack Snapshot
+## Completed This Session
 
-- Monorepo with npm workspaces.
-- `apps/mobile`: Expo React Native app, Expo Router, TypeScript.
-- `packages/shared-types`: shared asset types.
-- `packages/shared-validation`: shared Zod validation.
-- `services/api`: Hono API scaffold.
-- Mobile dependencies include Supabase, libsodium, SecureStore, Local Authentication, RevenueCat, Zod, and `expo-screen-capture`.
-- Supabase CLI is installed and linked to project ref `pxwtexjjttpgtairpepz`.
-- Docker Desktop is installed and running; Docker was used with `postgres:16-alpine` to send PostgREST schema reload notifications.
+### Apple and App Store Connect
 
-## Built And Verified
+- Confirmed active Apple Developer membership and Team ID.
+- Registered explicit App ID `com.sanduqkin.mobile`.
+- Created the Sanduqkin App Store Connect application record.
+- Enabled App Store Connect API access.
+- Created a least-privilege Developer API key for CI submission.
+- Created a new Apple Distribution certificate, valid through 2027-07-14.
+- Generated `Sanduqkin App Store 2026`, an App Store provisioning profile valid through 2027-07-15.
+- Kept private keys, certificate archives, provisioning profiles, API private keys, and passwords out of Git.
 
-- Phase 1 Supabase persistence foundation exists for encrypted vault assets, wrapped MEK key material, audit events, account deletion requests, and emergency access foundations.
-- Returning-user unlock with wrapped MEK has passed live Supabase verification.
-- Android native-dev-client unlock and vault access has been manually verified.
-- Durable audit persistence and account deletion/retention foundations exist.
-- Vault supports MVP categories including expanded category set.
-- Local readable PDF export exists and must stay on-device; generated PDFs are not uploaded or emailed.
-- Password reset recovery now re-wraps the phrase-derived MEK with the new password and saves updated wrapped key material.
+### Expo and TestFlight Automation
 
-## Latest Completed Slice: Phase 1 Function-Size Gate
+- Created and linked EAS project `@shahbaz242630/sanduqkin`.
+- Moved EAS configuration to `apps/mobile/eas.json`.
+- Created a dedicated Expo CI access token.
+- Added `.github/workflows/ios-testflight.yml`.
+- The workflow is manual-only and requires the exact `testflight` confirmation input.
+- The workflow uses GitHub's approval-gated `Release` environment.
+- Apple signing assets and the App Store Connect key are materialized only inside the runner and removed in an unconditional cleanup step.
+- EAS uses local iOS credentials assembled from protected GitHub environment secrets.
+- The first PKCS#12 export used an OpenSSL 3 format that macOS Keychain could not import. It was replaced with a legacy-compatible PKCS#12 archive and a rotated random archive password.
+- The corrected signed build and App Store Connect submission succeeded.
 
-Completed on 2026-07-10 in [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21):
+### Integration And CI
 
-- Refactored the 19 oversized functions tracked by `npm run check:phase1`.
-- Preserved batch discipline: oversized functions were reviewed first, then refactored in small batches with verification between batches.
-- `npm run check:phase1` now passes locally.
-- Follow-up CI fixes:
-  - aligned Expo SDK 56 patch versions so Expo Doctor passes;
-  - locked Rolldown Linux/Windows native bindings so Vitest starts after `npm ci` in CI;
-  - aligned mobile coverage thresholds to the measured post-refactor baseline because helper extraction changed the function-count denominator.
-- PR 21 checks passed:
+- Merged PR #25 into `main` after required checks passed.
+- Corrected the stale EAS regression-test path after `eas.json` moved into `apps/mobile`.
+- Local mobile verification after the fix: 94 files passed, 2 skipped; 343 tests passed, 2 protected live tests skipped.
+- PR checks passed for application security, CodeQL, OWASP ZAP, Android native compilation, iOS simulator smoke, Supabase security, Android emulator smoke, and hosted Supabase integration.
+- The PR-associated iOS simulator job compiled and launched the unsigned Release app successfully.
+- Updated `main` branch protection to require the current check names:
   - `App security gates`
-  - `Supabase live security gates`
-  - `CodeQL JavaScript/TypeScript`
-  - `GitGuardian Security Checks`
+  - `CodeQL JavaScript/TypeScript (javascript-typescript)`
   - `OWASP ZAP baseline`
-  - `Vercel`
-- Local verification passed before push:
+  - `Android native compile`
+  - `iOS simulator smoke`
+
+### TestFlight Readiness
+
+- Confirmed build `2` completed App Store Connect processing.
+- Reviewed the implemented libsodium encryption path and answered Apple's build questionnaire as standard encryption outside Apple's operating-system-only cryptography.
+- Limited the initial release scope to the GCC and excluded France; French ANSSI documentation is deferred until France is added to distribution.
+- Cleared the build-level `Missing Compliance` status.
+- Created `GCC Internal Testers` with automatic distribution disabled.
+- Assigned build `1.0.0` (`2`) and added the owner as the sole intended internal tester.
+- Confirmed the TestFlight build installs and launches on the owner's physical iPhone.
+- Re-ran local verification after the TestFlight setup: 94 files passed, 2 skipped; 343 tests passed, 2 protected live tests skipped; mobile typecheck, Phase 1 DoD guard, and mobile secret scan passed.
+
+## Current Product And Security Guardrails
+
+- Sanduqkin is a secure information organizer, not a financial, legal, investment, estate-planning, or executor service.
+- Phase 1 is single-user only.
+- Phase 1 excludes beneficiaries, activation, witnesses, document upload, production notifications, web application work, and payments.
+- Normal vault storage must remain zero-knowledge. Do not store plaintext vault content, passwords, seed phrases, private keys, raw MEKs, or raw emergency codes in Sanduqkin infrastructure.
+- Vault detail fields must remain inside authenticated encryption; only safe metadata may be normalized.
+- Emergency access is a key-release design, not server-side plaintext export.
+- Vault deletion is permanent hard deletion and the UI must state that Sanduqkin cannot restore deleted encrypted records.
+- Generated readable PDF exports remain local to the device and are not uploaded or emailed by the service.
+
+## Verified Phase 1 Coverage
+
+- Email/password authentication and returning-user wrapped-MEK unlock.
+- Recovery-phrase password reset with encrypted-record continuity.
+- Biometric preference and app-lock foundations.
+- Encrypted Supabase-backed vault CRUD and permanent deletion.
+- Expanded Phase 1 vault categories.
+- One-time emergency-code display and proof that the raw code is not retained.
+- Durable audit, account-deletion, and audit-retention foundations.
+- Android release emulator coverage for onboarding, returning-user unlock, encrypted CRUD, emergency-code hiding, and recovery-reset continuity.
+- Hosted Supabase integration coverage after Android cleanup.
+- Credential-free iOS Release compilation, simulator installation, launch, liveness check, and termination.
+- Signed iOS EAS archive and App Store Connect/TestFlight submission.
+- App Store Connect processing, build-level compliance clearance for the initial GCC scope, controlled internal-group assignment, and physical-iPhone installation and launch.
+
+## Next Slice: Multi-Day Physical QA And Release Metadata
+
+1. Complete TestFlight test information and contact details.
+2. Configure App Store availability for the intended initial GCC territories; do not enable France until the French encryption declaration is approved.
+3. Continue testing build `2` on the physical iPhone over the next several days.
+4. Run the minimum real-device smoke:
+   - cold launch and onboarding navigation;
+   - sign in and wrapped-MEK unlock;
+   - create/read/edit/permanently delete an encrypted record;
+   - background/foreground and app-lock behavior;
+   - biometric behavior on supported hardware;
+   - screenshot protection and sensitive-screen behavior;
+   - recovery and emergency-access screens;
+   - sign out and returning-user sign in.
+5. Record device model, iOS version, build number, results, and any failure evidence without capturing secrets or decrypted vault values.
+6. Review the U.S. export classification rationale before adding a persistent `ITSAppUsesNonExemptEncryption` value to `apps/mobile/app.json`; do not encode the misleading claim that the app contains no encryption.
+7. Triage and fix any travel-testing findings before declaring Phase 1 release-ready.
+
+## Remaining Phase 1 Work
+
+- Finish TestFlight metadata, GCC territory configuration, and multi-day real-device QA.
+- Confirm production entitlements and physical-device behavior.
+- Complete the French ANSSI declaration before any later France distribution expansion.
+- Select and integrate the production transactional-email provider; Resend remains the leading candidate but is not approved or implemented.
+- Migrate four legacy repository-level processor secrets into the protected `Production` environment during their next rotation, verify both processor workflows, then remove the repository copies.
+- Add scheduled-workflow failure alerting/operational review.
+- Add `CODEOWNERS` and require appropriate review for security-sensitive paths.
+- Add a release checklist/SBOM and review artifact/log retention.
+- Address the remaining compatible dependency/tooling updates without forcing an Expo-incompatible downgrade.
+
+## Standard Verification
 
 ```powershell
-npm run check:phase1
 npm run typecheck
 npm run lint
 npm test --workspaces --if-present
 npm run test:coverage --workspace @vault/mobile
 npm run doctor --workspace @vault/mobile
+npm run check:phase1
 npm run check:security
 npm run check:github-actions-security
 npm run check:mobile-secrets
 npm audit --omit=dev --workspaces --audit-level=high
 ```
 
-- Known local environment note: local Node.js is still `v24.2.0`, below the repository engine range `^22.13.0 || >=24.3.0`. Commands run, but npm prints EBADENGINE warnings. CI uses Node.js `24.3.0`.
-- GitHub noted one existing moderate Dependabot item on the default branch. It is separate from PR 21 and remains tracked in `SECURITY_HANDOFF.md`.
+Release builds must additionally pass the protected `iOS TestFlight release` workflow from `main` with explicit `Release` approval.
 
-## Completed Slice: Enforce Phase 1 Gate In Security CI
+## Historical Material
 
-Completed on 2026-07-11 in [PR 21](https://github.com/shahbaz242630/Document-Vault/pull/21):
-
-- Added `npm run check:phase1` to the required `App security gates` job in `.github/workflows/security-ci.yml`.
-- Added workflow regression coverage in `scripts/github-actions-security-check.test.cjs`.
-- Demonstrated the new regression test fails before the workflow step and passes after it.
-- Local verification passed: focused workflow tests (14), `npm run check:phase1`, both static security checks, mobile secret scanning, the full security-guard suite (30), and the high/critical dependency-audit threshold.
-- The audit retains the known 12 moderate Expo tooling findings through `xcode -> uuid`; no forced incompatible downgrade was applied.
-- [push Security CI run 29121802507](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121802507) and [PR Security CI run 29121804737](https://github.com/shahbaz242630/Document-Vault/actions/runs/29121804737) passed both `App security gates` and `Supabase live security gates`.
-- CodeQL, OWASP ZAP, GitGuardian, and Vercel also passed on implementation commit `1d4407f`.
-- GitHub emitted a Node.js action-runtime deprecation annotation for the pinned checkout/setup-node versions. Keep immutable SHA pins and take reviewed upgrades through Dependabot.
-
-## Last Completed Slice: Android Sealed Emergency Code Setup
-
-Completed on 2026-06-08:
-
-- Android emulator launched fresh.
-- Sign-in and vault unlock succeeded.
-- Settings > Emergency access loaded.
-- One-time sealed emergency code creation succeeded.
-- The screen showed: `Write this code down now. Sanduqkin cannot show it again after you confirm.`
-- After confirmation, the screen showed `Emergency code active`.
-- After confirmation, the screen showed: `Sanduqkin no longer has the raw code. Regenerate if you need a new copy.`
-- Android UI tree after confirmation no longer contained the raw one-time code.
-- Direct Supabase verification showed one active `sealed_emergency_code` row with encrypted/wrapped metadata only:
-  - `wrapped_mek_ciphertext`
-  - `wrapped_mek_nonce`
-  - `wrapping_algorithm`
-  - `kdf_algorithm`
-  - `kdf_salt`
-  - `kdf_params`
-  - status/timestamps/ids
-- Supabase table has no `raw_code`, `emergency_code`, or plaintext code column.
-
-## Current Working Tree Guidance
-
-- All implementation and handoff changes through commit `8f8bf77` are pushed on `redesign/sanduqkin-flow`.
-- There is no open PR for this branch at the 2026-07-13 refresh.
-- `.playwright-mcp/` and `welcome.png` are pre-existing local-only untracked items; preserve them and do not include them in commits unless the owner explicitly requests it.
-- Expo Router tests must remain outside `apps/mobile/app`; keep route tests under `apps/mobile/src/app-route-tests` so Metro does not bundle Node-only test imports.
-
-## Backend / Supabase State
-
-Remote Supabase migrations are aligned through:
-
-- `20260612121500_enforce_vault_asset_active_record_limit.sql`
-
-Migrations applied during the final slice:
-
-- `20260603190000_add_pdf_export_audit_event_type.sql`
-- `20260603210500_emergency_access_foundation.sql`
-- `20260608200000_add_sealed_emergency_code_audit_event_types.sql`
-- `20260612120000_harden_emergency_access_table_grants.sql`
-- `20260612121500_enforce_vault_asset_active_record_limit.sql`
-
-PostgREST schema reload was notified after migration pushes with:
-
-```powershell
-docker run --rm -e PGPASSWORD='<db-password>' postgres:16-alpine psql "host=aws-1-eu-central-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.pxwtexjjttpgtairpepz sslmode=require" -c "NOTIFY pgrst, 'reload schema';"
-```
-
-Connection verification on 2026-06-19: the current database password authenticated successfully through the session pooler on port `5432`. The transaction-pooler endpoint on port `6543` rejected the same credential, and the direct database host was unavailable from this environment. Keep credentials outside the repository and use the session-pooler endpoint for database administration from this machine.
-
-Do not write Supabase passwords or tokens to repo files.
-
-## Testing Credentials
-
-- Current shared Android/Supabase QA account email: `shahbaz.malik@hotmail.co.uk`
-- Do not store the test account password, recovery phrase, raw emergency codes, Supabase tokens, database passwords, or other secrets in this repo or handoff.
-- The existing shared QA account's original recovery phrase is unavailable. Do not generate a random replacement or use that account for recovery-continuity automation.
-- Create a separate disposable recovery-QA account next session and retain its generated phrase in an external password manager or approved protected environment only.
-
-## Bugs Found And Fixed In Last Session
-
-- Metro bundling blocker: `.test.ts` files under `apps/mobile/app` were treated as Expo Router input. Fixed by moving route tests to `apps/mobile/src/app-route-tests`.
-- Native render crash: `Cannot read property 'from' of undefined`. Root cause was detaching Supabase client's `from` method, losing `this` binding. Fixed repository to call `client.from(...)` directly and added regression coverage.
-- Live backend missing table/schema cache: `public.emergency_key_grants` was missing remotely or stale in PostgREST schema cache. Fixed by applying emergency access migration and notifying schema reload.
-- Audit constraint mismatch: sealed-code audit events were not allowed by `audit_events_event_type_check`. Fixed with `20260608200000_add_sealed_emergency_code_audit_event_types.sql`.
-- RLS insert failure on `emergency_key_grants`: emergency route created a fresh unauthenticated Supabase client. Fixed vault context to retain the authenticated Supabase client from sign-in and use it for emergency grant repository creation.
-- Native recovery phrase crash: `bip39` needed global `Buffer` in React Native. Fixed by adding the `buffer` dependency and importing `@/shared/runtime/buffer-polyfill` before recovery phrase code can run.
-- RLS insert failure on `vault_key_material` during recovery phrase setup: auth state was lost when route components created fresh Supabase clients. Fixed `createSupabaseClient()` to reuse the default app client so the session survives route changes while preserving injectable test clients.
-
-## Verification Commands Already Run
-
-Focused test sets passed:
-
-```powershell
-npm run test --workspace @vault/mobile -- emergency-access-route.test.ts vault-export-route.test.ts
-npm run test --workspace @vault/mobile -- supabase-emergency-grant-repository.test.ts emergency-access-route.test.ts vault-export-route.test.ts
-npm run test --workspace @vault/mobile -- supabase-schema.test.ts supabase-emergency-grant-repository.test.ts sealed-emergency-code-service.test.ts emergency-access-route.test.ts vault-export-route.test.ts
-npm run test --workspace @vault/mobile -- vault-session-context.test.ts emergency-access-route.test.ts supabase-emergency-grant-repository.test.ts sealed-emergency-code-service.test.ts supabase-schema.test.ts
-```
-
-Typecheck passed repeatedly:
-
-```powershell
-npm run typecheck --workspace @vault/mobile
-```
-
-Supabase migration status verified:
-
-```powershell
-supabase migration list --linked
-```
-
-Android manual QA passed on emulator for sealed-code creation and post-confirmation hiding of raw code.
-
-## Android QA Startup Notes
-
-Working local Android QA path on Windows:
-
-1. Clear stale repo-owned Metro/test worker processes if needed, but leave Codex/MCP processes alone:
-
-```powershell
-$targets = Get-CimInstance Win32_Process -Filter "name = 'node.exe'" |
-  Where-Object {
-    $_.CommandLine -like '*expo\bin\cli* start --dev-client*' -or
-    $_.CommandLine -like '*npm-cli.js*run start:dev-client*' -or
-    $_.CommandLine -like '*jest-worker*processChild.js*'
-  }
-$targets | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-```
-
-2. Start the emulator with the SDK emulator binary because `emulator.exe` may not be on PATH:
-
-```powershell
-Start-Process -FilePath "$env:ANDROID_HOME\emulator\emulator.exe" -ArgumentList @("-avd", "Pixel_7", "-no-snapshot-load") -WindowStyle Hidden
-adb wait-for-device
-while ((adb shell getprop sys.boot_completed).Trim() -ne "1") { Start-Sleep -Seconds 2 }
-adb devices -l
-```
-
-3. Start Metro from the repository root with root `.env` loaded into the process. This matters because the Expo app is under `apps/mobile`, while the configured Supabase/RevenueCat env file currently lives at the monorepo root:
-
-```powershell
-Get-Content ".env" | ForEach-Object {
-  if ($_ -match '^\s*([^#][^=]+)=(.*)$') {
-    [Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim(), "Process")
-  }
-}
-Set-Location "C:\Projects\GitHub\Sandoq Kin\apps\mobile"
-npx expo start --dev-client --port 8081
-```
-
-With local npm 11, forwarding Expo CLI flags through `npm run ... -- --port 8081` is not reliable: npm consumes `--port` and passes `8081` as a positional project root. Invoke Expo directly as shown above. Add `--clear` only when cache invalidation is actually needed.
-
-4. Build the current Android debug APK with the valid Android Studio JBR path. `C:\Program Files\Android\Android Studio\jbr` exists locally but does not contain `bin\java.exe`; use `Android Studio1`:
-
-```powershell
-$env:JAVA_HOME = "C:\Program Files\Android\Android Studio1\jbr"
-$env:Path = "$env:JAVA_HOME\bin;$env:Path"
-Set-Location "C:\Projects\GitHub\Sandoq Kin\apps\mobile\android"
-.\gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeDevServerPort=8081 '-PreactNativeArchitectures=x86_64,arm64-v8a' --console=plain
-```
-
-5. Install and launch:
-
-```powershell
-Set-Location "C:\Projects\GitHub\Sandoq Kin"
-adb install -r "apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk"
-adb shell am start -n com.sanduqkin.mobile/com.sanduqkin.mobile.MainActivity
-```
-
-6. In the Expo dev launcher, select `http://10.0.2.2:8081`. If the app says `Supabase is not configured yet`, Metro was started without the root `.env`; restart Metro with step 3.
-
-## Recommended Next Slice
-
-Primary next slice: choose one owner-approved remaining Phase 1 external blocker or security-hardening item.
-
-1. Preferred external verification: configure an owner-approved signed iOS archive and TestFlight delivery path, including entitlements and physical-device verification.
-2. Alternative external verification: Resend approval and production account-deletion confirmation-email verification.
-3. Actionable repository hardening: protect production GitHub environments and document secret ownership, rotation, and revocation without recording values.
-4. Keep every credential-bearing workflow behind explicit trusted-event/environment boundaries.
-5. Obtain green required checks and update both handoffs with exact evidence.
-
-Other suitable hardening slices include:
-
-- Add `CODEOWNERS` for workflows, migrations, cryptography, authentication, recovery, audit, and deletion paths if a viable reviewer model is available.
-- Generate and retain a release SBOM with a dependency/license review policy.
-- Add a release checklist linking commit, green runs, dependency audit, native QA, and migration status.
-
-Already completed and not a next slice: Phase 1 function-size enforcement, vault category/add/list/edit/hard-delete/bulk UX, RLS/schema guards, Android native debug/release compilation, onboarding/FAQ E2E, returning-user unlock E2E, encrypted CRUD E2E, emergency-code raw-value hiding E2E, recovery-reset continuity E2E, and both hosted-Supabase integration tests.
-
-Code/test progress on 2026-06-09:
-
-- Route recovery now loads the active sealed-code grant on settings entry.
-- If an active grant exists with the pending-confirmation marker, the route shows `interrupted`.
-- If an active grant exists without the pending-confirmation marker, the route shows `active`.
-- Route regression tests assert that SecureStore stores only the interruption marker, not the raw one-time code.
-- Focused tests passed:
-
-```powershell
-npm run test --workspace @vault/mobile -- emergency-access-route.test.ts
-npm run test --workspace @vault/mobile -- supabase-emergency-grant-repository.test.ts sealed-emergency-code-service.test.ts emergency-access-route.test.ts
-npm run test --workspace @vault/mobile -- vault-session-context.test.ts emergency-access-route.test.ts supabase-emergency-grant-repository.test.ts sealed-emergency-code-service.test.ts supabase-schema.test.ts
-npm run typecheck --workspace @vault/mobile
-```
-
-Android manual QA on 2026-06-09:
-
-- Started Android emulator `Pixel_7` and Metro dev client with root `.env` loaded.
-- Signed in and opened `sanduqkin://settings/emergency-access`.
-- Verified starting state showed `Emergency code active` plus `Sanduqkin no longer has the raw code. Regenerate if you need a new copy.`
-- Regenerated from active state and verified a one-time code panel appeared.
-- Left the one-time code page before confirmation, reopened emergency access, and verified the screen showed `Setup interrupted`.
-- Verified the interrupted screen did not show the raw one-time code and offered `Regenerate code` / `Revoke unusable code`.
-- Regenerated from interrupted state and verified a different one-time code panel appeared.
-- Confirmed the regenerated code and verified the screen returned to `Emergency code active` with raw-code hiding copy.
-- Revoked the active code and verified the setup panel returned with no raw code visible.
-- Created and confirmed a fresh code so the test account ended in active state.
-
-Direct Supabase verification after Android QA:
-
-- Test user has one active `sealed_emergency_code` grant and three revoked sealed-code grants.
-- Latest grant rows contain encrypted/wrapped metadata only: wrapped MEK ciphertext/nonce lengths, wrapping algorithm, Argon2id KDF salt/params, status, ids, and timestamps.
-- `information_schema.columns` check found no suspicious plaintext columns on `public.emergency_key_grants` matching raw/code/secret/password/plain.
-
-Password reset/recovery code progress on 2026-06-09:
-
-- `createPasswordResetService(...).resetWithRecoveryPhrase` now derives the MEK from the recovery phrase, derives a new KEK from the new password and fresh salt, wraps the MEK, increments the stored recovery version when existing key material is available, and saves updated `vault_key_material`.
-- `ResetPasswordPanel` now wires the authenticated Supabase client into `createSupabaseKeyMaterialRepository`, so the recovery reset path persists the new wrapped MEK instead of only caching the recovered MEK locally.
-- `createSupabaseClient()` now reuses the default app Supabase client, preserving auth session continuity across route-created repositories.
-- Added a React Native `Buffer` polyfill for `bip39` recovery phrase generation.
-- Regression coverage asserts recovered key material is saved without plaintext MEK/password fields in the payload.
-- Focused tests and typecheck passed:
-
-```powershell
-npm run test --workspace @vault/mobile -- password-reset-service.test.ts
-npm run test --workspace @vault/mobile -- password-reset-service.test.ts recovery-phrase-flow.test.ts returning-user-unlock-flow.test.ts supabase-key-material-repository.test.ts
-npm run typecheck --workspace @vault/mobile
-```
-
-Android/Supabase live reset verification on 2026-06-09:
-
-- Disposable test account sign-in succeeded.
-- Initial state correctly reported missing vault key material.
-- Recovery phrase setup initially exposed two native/live issues: missing global `Buffer`, then unauthenticated `vault_key_material` insert from a route-created client.
-- After fixes, recovery phrase setup completed on Android and reached biometric setup.
-- Biometric setup was skipped on the emulator, and the app reached the vault welcome screen.
-- Direct Supabase verification confirmed `vault_key_material` exists for the test account with wrapped ciphertext/nonce/salt metadata only; no plaintext password, recovery phrase, or MEK was queried or written.
-- Recovery reset completed on Android and showed `Sanduqkin recovered`.
-- Direct Supabase verification showed `recovery_version` incremented from `1` to `2`.
-- Sign-in with the temporary reset password succeeded and unlocked the vault.
-- A second recovery reset restored the shared test password and incremented `recovery_version` to `3`.
-- Final sign-in with the restored shared password succeeded and landed in the vault.
-
-Android encrypted-vault-item continuity QA progress on 2026-06-10:
-
-- Restarted `Pixel_7`, rebuilt the current Android debug APK, installed `com.sanduqkin.mobile`, and launched the Expo dev client.
-- Found and fixed the local QA startup issue: Metro must be started with the monorepo root `.env` loaded, otherwise sign-in reports `Supabase is not configured yet`.
-- Signed in to the shared test account on Android with Supabase configured.
-- Added a bank-account test reference titled `QAResetItem0610`.
-- Verified the vault screen showed `1 active items` and displayed `QAResetItem0610` as a `Bank account`.
-- Direct Supabase verification showed one `public.vault_assets` row for the test account with `asset_type = bank_account`, ciphertext length `282`, nonce length `32`, and no suspicious plaintext columns matching plain/raw/secret/password/phrase/MEK.
-- Direct Supabase verification before recovery reset showed `public.vault_key_material.recovery_version = 3`, wrapped MEK ciphertext/nonce metadata only, Argon2id KDF metadata, and no plaintext password/recovery phrase/raw MEK columns.
-- The previous shared test account was blocked because its recovery phrase was not available. A new shared test account was created and is recorded above by email only; do not store its password or phrase in repo files.
-- Recovery phrase setup completed on Android for the new test account. The phrase was used transiently for QA and must be stored externally by the project owner.
-- Directly launching `sanduqkin://auth/reset-password?mode=recover` without an active in-app Supabase session showed `Could not recover vault. Check your recovery phrase.` The phrase was valid; signing in through the app first and then opening the reset route succeeded. For manual QA, reset through a real Supabase reset link/session or sign in first before opening the local recover route.
-- Recovery reset to a temporary password succeeded and showed `Sanduqkin recovered`.
-- Sign-in with the temporary password opened the vault.
-- Added a bank-account test reference titled `QAResetItem0610C` while signed in with the temporary password.
-- Direct Supabase verification showed one `public.vault_assets` row for the new test account with `asset_type = bank_account`, ciphertext length `272`, nonce length `32`, and no suspicious plaintext columns matching plain/raw/secret/password/phrase/MEK.
-- Recovery reset restored the shared test password and showed `Sanduqkin recovered`.
-- Final sign-in with the restored shared test password succeeded. The vault showed `1 active items` and displayed `QAResetItem0610C` as a `Bank account`, confirming encrypted item continuity through reset/restore.
-- Direct Supabase verification after restore showed `public.vault_key_material.recovery_version = 3`, wrapped MEK ciphertext length `79`, wrapped MEK nonce length `32`, KEK salt length `22`, and Argon2id metadata only.
-
-Additional focused tests passed during live-fix work:
-
-```powershell
-npm run test --workspace @vault/mobile -- recovery-phrase-service.test.ts password-reset-service.test.ts recovery-phrase-flow.test.ts
-npm run test --workspace @vault/mobile -- supabase-client.test.ts recovery-phrase-flow.test.ts password-reset-service.test.ts
-npm run typecheck --workspace @vault/mobile
-```
-
-Expo SDK audit hardening on 2026-06-11:
-
-- Checked current Expo docs before changing versions. SDK 56 is the latest docs track and maps this app to Expo `~56.0.11`, React Native `0.85.3`, React `19.2.3`, and TypeScript `~6.0.3`.
-- Updated the mobile Expo dependency set to SDK 56-compatible packages with `npx expo install` / `npx expo install --fix`.
-- Updated root peer overrides to the SDK 56 React / React DOM / safe-area versions.
-- Updated root Node engine to `^22.13.0 || >=24.3.0`; local Node `v24.2.0` still runs commands but produces EBADENGINE warnings because React Native/Metro SDK 56 packages require `^20.19.4 || ^22.13.0 || ^24.3.0 || >=25.0.0`.
-- Removed SDK 56-invalid app config keys from `apps/mobile/app.json`: top-level `newArchEnabled`, top-level `splash`, and `android.edgeToEdgeEnabled`.
-- Moved iOS deployment target to built-in `ios.deploymentTarget: "16.4"` and removed the deprecated `expo-build-properties.ios.deploymentTarget` setting.
-- Removed direct app dependency on `@expo/config-plugins`; patched `react-native-libsodium` to import config plugins from `expo/config-plugins`, matching Expo package guidance.
-- Added TypeScript 6 `ignoreDeprecations: "6.0"` because `expo/tsconfig.base` still relies on `baseUrl`.
-- Replaced direct `expo-router` `Router` type imports with local `ReturnType<typeof useRouter>` types because the SDK 56 router package no longer exports that type.
-- Updated `services/api` Hono from `4.12.18` to `4.12.25`, clearing the Hono audit advisory.
-- Cleared the previous critical `shell-quote` advisory by overriding `react-devtools-core` to `shell-quote@1.8.4`.
-- `npm audit --workspaces --json` now reports 11 moderate vulnerabilities and 0 critical vulnerabilities. The remaining advisories are the upstream Expo config chain through `@expo/config-plugins -> xcode@3.0.1 -> uuid@7.0.3`; npm suggests downgrading to Expo 46-era packages, which is not an acceptable fix path for this SDK 56 app.
-- Do not run `npm audit fix --force` for this blocker; it proposes unsafe/breaking Expo downgrades.
-
-Validation after Expo SDK audit hardening:
-
-```powershell
-npm run typecheck --workspace @vault/mobile
-npx expo-doctor
-npm run test --workspace @vault/mobile -- vault-session-context.test.ts emergency-access-route.test.ts supabase-emergency-grant-repository.test.ts sealed-emergency-code-service.test.ts supabase-schema.test.ts
-npm audit --workspaces --json
-```
-
-Results:
-
-- Mobile typecheck passed.
-- Expo Doctor passed 18/18 checks.
-- Focused mobile tests passed: 5 files, 24 tests.
-- Audit status improved from 19 advisories with 1 critical to 11 moderate advisories with 0 critical.
-
-Vault records UX/data hardening planning and first DB guard slice on 2026-06-12:
-
-- Agreed Phase 1 vault records UX/data direction:
-  - `Vault` becomes the saved secure records page.
-  - `Add <asset class>` pages become creation-only.
-  - After saving, show the relevant category/list view with saved cards and `+ Add another <asset class>`.
-  - Each saved record card should expose `Edit` and `Delete permanently`.
-  - Delete is hard delete only, with irreversible confirmation copy.
-  - Support up to 20 active records per user per asset class.
-  - Bulk delete selected/delete all in category should be added later with explicit confirmation.
-- Added design spec:
-  - `docs/superpowers/specs/2026-06-12-vault-records-ux-data-hardening-design.md`
-- Added implementation plan:
-  - `docs/superpowers/plans/2026-06-12-vault-records-ux-data-hardening.md`
-- Added schema guard coverage to assert every user-owned Phase 1 table:
-  - has RLS enabled,
-  - grants service-role access,
-  - explicitly revokes `anon` and `public`,
-  - uses owner policies based on `auth.uid() = user_id`.
-- The new guard exposed that emergency access tables had RLS and owner policies but lacked explicit `anon`/`public` revoke statements.
-- Added and pushed remote migration:
-  - `supabase/migrations/20260612120000_harden_emergency_access_table_grants.sql`
-  - revokes `anon` and `public` from `emergency_contacts`, `emergency_key_grants`, and `emergency_release_requests`.
-- Remote migration status verified aligned through `20260612120000`.
-- Verification passed:
-
-```powershell
-npm run test --workspace @vault/mobile -- supabase-schema.test.ts
-npm run typecheck --workspace @vault/mobile
-supabase migration list --linked
-```
-
-Vault hard-delete domain slice on 2026-06-12:
-
-- Updated vault domain behavior so `permanentlyDeleteAsset(id)` can delete an active record directly.
-- The in-memory vault store no longer requires a record to be soft-deleted before permanent deletion.
-- Session persistence now calls repository hard delete directly for active records.
-- Existing asset detail route now calls `permanentlyDeleteAsset` instead of `softDeleteAsset`.
-- Existing asset detail delete button now uses a two-step irreversible confirmation:
-  - first tap shows permanent-delete warning copy,
-  - second tap confirms `Delete permanently`.
-- User-facing confirmation copy states the encrypted record cannot be recovered and Sanduqkin cannot restore deleted encrypted vault records.
-- Focused verification passed:
-
-```powershell
-npm run test --workspace @vault/mobile -- vault-store.test.ts vault-session.test.ts vault-session-context.test.ts permanent-delete-confirmation.test.ts
-npm run typecheck --workspace @vault/mobile
-```
-
-Bank-account saved-record list slice on 2026-06-12:
-
-- Added bank-account category list view model:
-  - filters active assets to `assetType = "bank_account"`,
-  - sorts records by title,
-  - formats safe decrypted summaries locally after unlock,
-  - exposes `count`, `limit = 20`, and `canAddMore`.
-- Added bank-account saved-record route:
-  - `apps/mobile/app/vault/bank-accounts.tsx`
-  - shows `Bank accounts`, `N of 20 saved`, empty state, and `+ Add another bank account`.
-- Updated `add-bank-account` to route to `/vault/bank-accounts` after save instead of returning to the mixed Vault dashboard.
-- Added saved-record category list component:
-  - fallback-safe glass-inspired card surfaces,
-  - ASCII `...` overflow action trigger,
-  - `Edit`,
-  - two-step `Delete permanently` confirmation with irreversible copy,
-  - no blur dependency.
-- Added main Vault dashboard entry point for implemented bank-account category list.
-- Android emulator sanity check passed by deep-linking to `sanduqkin://vault/bank-accounts`:
-  - screen showed `Bank accounts`,
-  - screen showed `0 of 20 saved`,
-  - screen showed `No bank accounts saved yet.`,
-  - screen showed `+ Add another bank account`.
-- Live Android add/save/delete QA exposed a separate form/startup issue:
-  - first form attempts showed the bank-account add screen could be hard to complete on Android because the shared centered screen layout did not give long forms reliable bottom scroll room to reach `Save reference`;
-  - added `screenStyles.formContent` and applied it to `add-bank-account` with `keyboardShouldPersistTaps="handled"`;
-  - focused typecheck and route/view-model tests still pass after the layout fix;
-  - full live add/save/card/menu/delete QA remains blocked because the Expo dev client fell back to the launcher after force-stop and the restarted Expo CLI process stayed alive but did not bind to port `8081` after more than one minute.
-- Focused verification passed:
-
-```powershell
-npm run test --workspace @vault/mobile -- vault-category-list-view-model.test.ts bank-account-category-route.test.ts vault-dashboard-view-model.test.ts vault-store.test.ts vault-session.test.ts permanent-delete-confirmation.test.ts
-npm run typecheck --workspace @vault/mobile
-```
-- Remaining for this slice family:
-  - add bulk delete selected/delete all in category.
-- Added and pushed remote migration:
-  - `supabase/migrations/20260612121500_enforce_vault_asset_active_record_limit.sql`
-  - adds `public.enforce_vault_assets_active_record_limit()`
-  - adds `vault_assets_active_record_limit_trigger`
-  - enforces max 20 active `vault_assets` rows per `user_id` and `asset_type`
-  - counts only rows where `deleted_at is null`
-  - does not inspect or decrypt `ciphertext`
-- Added schema guard coverage for the 20-active-record limit migration.
-- Remote migration status verified aligned through `20260612121500`.
-- Verification passed after the limit migration:
-
-```powershell
-npm run test --workspace @vault/mobile -- supabase-schema.test.ts
-npm run typecheck --workspace @vault/mobile
-supabase migration list --linked
-```
-
-All-asset category route slice on 2026-06-12:
-
-- Added shared category configuration:
-  - `apps/mobile/src/features/vault/vault-category-config.ts`
-  - centralizes asset type, saved-list route, add route, title, empty copy, add label, and item label for every current vault asset class.
-- Added reusable saved-category route wrapper:
-  - `apps/mobile/src/features/vault/components/vault-category-route.tsx`
-  - builds `VaultCategoryList` from the shared config and uses direct permanent delete.
-- Added saved-record category routes for all current asset classes:
-  - bank accounts, cards, investments, properties, vehicles, insurance, crypto, pensions, loans/debts, subscriptions, document locations, contacts, medical care, dependents/pets, business interests, digital accounts, and other records.
-- Updated the Vault dashboard category section to link every populated category to its saved-record category page instead of only bank accounts.
-- Updated post-save navigation:
-  - standard add forms now route to their matching category page;
-  - expanded add forms now use `getVaultCategoryConfig(assetType).routeHref`.
-- Applied `screenStyles.formContent` and `keyboardShouldPersistTaps="handled"` to standard add forms and the expanded add-form wrapper to improve long-form scrolling on older Android/iOS screens.
-- Generalized category summaries and replaced the mojibake delimiter with ASCII `" - "`.
-- Added route/config tests:
-  - every configured category has a saved route file;
-  - every configured add route exists and either routes directly to the saved page or uses the expanded route wrapper.
-- Verification passed:
-
-```powershell
-npm run test --workspace @vault/mobile -- vault-category-list-view-model.test.ts vault-dashboard-view-model.test.ts vault-category-routes.test.ts
-npm run typecheck --workspace @vault/mobile
-```
-
-Android saved-record QA restart attempt on 2026-06-19:
-
-- Preserved the existing uncommitted QA slice.
-- Reproduced the Metro startup command issue under local Node `v24.2.0` / npm `11.5.2`.
-- Confirmed `npx expo start --dev-client --port 8081` from `apps/mobile` binds successfully to port `8081`.
-- Confirmed the failure through `npm run ... -- --port 8081` is npm argument forwarding: Expo receives `8081` as a project path and reports `Invalid project root: ...\\apps\\mobile\\8081`.
-- Restored the missing Android toolchain from Google's official SDK repository: command-line tools 21.0, platform/build tools 36, platform-tools 37.0.0, emulator 36.6.11, the Android 36 Google APIs x86_64 system image, and NDK 27.1.12297006.
-- Corrected the user-level `JAVA_HOME` to `C:\Program Files\Android\Android Studio1\jbr`, preserved `ANDROID_HOME=C:\Users\shahb\AppData\Local\Android\Sdk`, and added SDK command paths to the user PATH.
-- Recreated the `Pixel_7` AVD and verified it completed first boot as an Android 16 `sdk_gphone64_x86_64` device with `adb` status `device` and `sys.boot_completed=1`.
-- Installed the existing Expo SDK 56 debug dev-client APK, started Metro on port `8081`, bundled the current JavaScript successfully, and reached the Sanduqkin welcome screen on the emulator.
-- Live add/save/card-menu/edit/delete QA used the shared QA account; keep its password transient and outside the repository/handoff.
-- Completed live Android bank-account saved-record QA on 2026-06-19:
-  - signed in to the shared QA account on the recreated `Pixel_7` emulator;
-  - created `QALive0619` and verified the category list changed from `1 of 20 saved` to `2 of 20 saved`;
-  - authenticated Supabase API verification showed the newest `bank_account` row stored a 276-character ciphertext value and 32-character nonce with `deleted_at = null`; no plaintext vault fields were selected or exposed;
-  - opened the card overflow menu and verified `Edit` and `Delete` actions;
-  - edited the title to `QALive0619Edited` and verified the detail screen showed the updated decrypted value locally;
-  - verified the first delete action displayed irreversible copy stating that Sanduqkin cannot restore the deleted encrypted record;
-  - confirmed `Delete permanently`, after which the list returned to `1 of 20 saved`;
-  - final authenticated Supabase API verification returned zero rows for the deleted record id and one remaining active bank-account row, confirming a database hard delete rather than soft hiding.
-- The Android 16 Google APIs emulator showed a persistent Gboard physical-keyboard toolbar even with Gboard's `Show toolbar` preference disabled. Disabled the Gboard package for emulator user 0 with `adb shell pm disable-user --user 0 com.google.android.inputmethod.latin`; the toolbar disappeared and hardware/ADB text input continued to work. Re-enable with `adb shell pm enable com.google.android.inputmethod.latin` if the software keyboard is needed later.
-- Fresh automated verification passed:
-
-```powershell
-npm run test --workspace @vault/mobile -- vault-category-list-view-model.test.ts vault-dashboard-view-model.test.ts vault-category-routes.test.ts vault-store.test.ts vault-session.test.ts permanent-delete-confirmation.test.ts
-npm run typecheck --workspace @vault/mobile
-```
-
-- Result: 6 test files passed, 28 tests passed, and mobile typecheck exited successfully.
-
-## Vault Bulk Actions Slice Completed 2026-06-21
-
-- Added a page-level three-dot category menu with `Select records` and `Delete all` while preserving each card's existing Edit/Delete menu.
-- Selection mode shows the selected count, `Cancel`, accessible record selection controls, and `Delete selected` only when at least one record is selected.
-- Card-level menus and add-record actions are hidden during selection mode so record taps only toggle selection.
-- `Delete selected` and `Delete all` require a second explicit `Delete permanently` action and state the exact record count, category where applicable, irreversibility, and that Sanduqkin cannot restore the encrypted records.
-- Added safe partial-failure handling: successful and failed ids are collected without error text or vault payloads; failed ids remain selected and the UI does not claim full success.
-- Added pure test coverage in `apps/mobile/src/features/vault/vault-bulk-selection.test.ts` for selection transitions, deterministic unique ids, confirmation copy, partial failures, and shared UI wiring.
-- Split record-card rendering into `apps/mobile/src/features/vault/components/vault-category-record-card.tsx` so the bulk slice did not add a second function-size violation to the Phase 1 guard.
-- Android `Pixel_7` QA with the shared test account passed:
-  - created two disposable bank records;
-  - entered selection mode, selected both, canceled, and verified normal card navigation/actions returned;
-  - selected both again, verified `2 selected` and exact irreversible confirmation, then permanently deleted only those two records;
-  - confirmed the retained bank record remained and the list returned to `1 of 20 saved`;
-  - created two disposable Other records, verified `Delete all 2 records in Other permanently?`, confirmed, and reached the `0 of 20 saved` empty state.
-- Authenticated Supabase API verification queried safe metadata only and confirmed one retained `bank_account` row with ciphertext/nonce metadata and zero `other` rows. The disposable rows were hard-deleted; no plaintext vault fields, credentials, tokens, or ciphertext were recorded in this handoff.
-- Direct Supabase session-pooler verification on 2026-06-21 confirmed the complete bulk QA audit sequence: four `asset_created` events and four matching `asset_permanently_deleted` events for the same disposable record ids. All four tested ids had zero rows remaining in `vault_assets`. Audit metadata keys were limited to `assetId` and `assetType`; selection/cancel UI state was intentionally not persisted as an audit event.
-- Fresh verification passed:
-
-```powershell
-npm run test --workspace @vault/mobile -- vault-bulk-selection.test.ts permanent-delete-confirmation.test.ts vault-category-list-view-model.test.ts vault-category-routes.test.ts vault-session-context.test.ts
-npm run typecheck --workspace @vault/mobile
-```
-
-- Result: 5 test files passed, 15 tests passed, and mobile typecheck exited successfully.
-- `npm run check:phase1` still fails only on tracked function-size debt. After extracting the record-card functions it reports 19 functions over the 100-line limit, including the pre-existing shared `VaultCategoryList` violation; no new second violation remains in that file.
-
-## Critical Remaining Phase 1 Gaps
-
-- Android recovery-reset E2E continuity is complete through the protected disposable-account bootstrap and release-emulator flow in run `29229315895`.
-- Both opt-in hosted-Supabase integration tests now run serially in protected push-only CI and passed in run `29233949611`.
-- Real Supabase MFA remains launch-deferred because it is paid. Placeholder TOTP/factor-id paths are not production-valid.
-- Unsigned iOS Release compilation and simulator launch-survival verification are complete in GitHub-hosted macOS CI (run `29246161478`). Signed archive, TestFlight delivery, entitlements, and physical-device behavior remain unverified.
-- Password reset/recovery MEK rotation and re-wrapping is implemented, unit-verified, and repeatably verified on the Android release emulator.
-- Resend account approval is pending, so production account-deletion confirmation email cannot be live-verified.
-- `npm run check:phase1` is enforced by the branch-protected `App security gates` job and passed in both push and PR Security CI runs.
-- Expo SDK audit blocker is mitigated as far as current SDK 56 packages allow: no critical advisories remain, and the residual moderate advisories are upstream `xcode -> uuid` through Expo config tooling.
-
-## Known Technical Debt / Risks
-
-- Emergency access is still Phase 1 foundation UI and storage only. Full beneficiary/claim/release workflow is future Phase 2 and must preserve zero-knowledge design.
-- Biometric cached-key startup intentionally does not create unauthenticated Supabase repositories; remote operations require authenticated client handoff from sign-in.
-- Route tests must not live under `apps/mobile/app`.
-- Avoid logging raw emergency codes, MEK, ciphertext, credentials, Supabase secrets, or raw vault payloads.
-- Keep audit metadata free of plaintext vault fields.
-- Do not add server-side plaintext vault export/email jobs.
-- Do not add plaintext normalized asset-detail tables for vault records while zero-knowledge storage is a product guardrail.
-- Metro/Android launch after Expo SDK 56 can be slow when started with `--clear`; avoid clearing cache unless needed. Local Node `v24.2.0` is below the repo engine range `^22.13.0 || >=24.3.0` and should be upgraded for more reliable tooling.
-
-## Session Start Checklist
-
-1. Run `git status --short --branch`; preserve `.playwright-mcp/` and `welcome.png` as local-only untracked items.
-2. Run focused tests before editing:
-
-```powershell
-npm run test --workspace @vault/mobile -- password-reset-service.test.ts recovery-phrase-flow.test.ts returning-user-unlock-flow.test.ts supabase-key-material-repository.test.ts
-npm run typecheck --workspace @vault/mobile
-npm run check:phase1
-npm run check:mobile-secrets
-```
-
-3. Preserve the recovery bootstrap's in-memory-only phrase/temporary-password handling and its original-password restoration/fixture cleanup guarantees.
-4. Select an owner-approved external blocker or recommended hardening item from `Recommended Next Slice` while preserving the protected disposable-test boundaries.
-5. Obtain a green Security CI run and update both handoffs before marking that next slice complete.
+Detailed pre-refresh history is preserved in `docs/handoff/archive/`. This document intentionally contains only the current operational state, current evidence, remaining risks, and next work.
