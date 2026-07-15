@@ -4,17 +4,21 @@ Last updated: 2026-07-15 (Asia/Dubai)
 
 ## Security Session Opener
 
-> Phase 1 security controls are integrated on `main` at merge commit `75907c3`. PR #25 passed the required application-security, CodeQL, OWASP ZAP, Android native, and iOS simulator gates. The first protected signed iOS release, Sanduqkin `1.0.0` build `2`, successfully completed EAS Build and App Store Connect submission in GitHub run 29376883158. Apple signing and submission credentials remain outside Git and are injected only through the approval-gated `Release` environment. The next security slice is TestFlight/physical-device validation plus export-compliance classification. Do not start Phase 2 until release readiness and the residual operational controls below are closed or explicitly accepted.
+> Phase 1 security controls are integrated on `main` at merge commit `75907c3`. PR #25 passed the required application-security, CodeQL, OWASP ZAP, Android native, and iOS simulator gates. Protected signed iOS release `1.0.0` build `2` completed EAS Build, App Store Connect processing, and build-level export-compliance clearance for the initial GCC-only scope. It is assigned manually to `GCC Internal Testers`, and installation and launch succeeded on the owner's physical iPhone. Apple signing and submission credentials remain outside Git and are injected only through the approval-gated `Release` environment. The next security slice is multi-day physical-device validation and value-free issue triage. Do not start Phase 2 until release readiness and the residual operational controls below are closed or explicitly accepted.
 
 ## Current Security Baseline
 
-- Default/current branch: `main`
+- Default/release branch: `main`
 - Current merged release commit: `75907c3d1103a12619f6a1b0ccacd971a280fd70`
 - PR #25: merged
 - Successful protected TestFlight run: [29376883158](https://github.com/shahbaz242630/Document-Vault/actions/runs/29376883158)
 - Successful EAS build: `96d15169-4f5b-47a0-adcc-402a5c42b9dd`
 - App version/build: `1.0.0` (`2`)
 - Bundle identifier: `com.sanduqkin.mobile`
+- App Store Connect/TestFlight status: processed and `Ready to Test`; build expires 90 days after processing.
+- Export-compliance scope: standard third-party encryption, initial GCC distribution, France excluded. French ANSSI approval is deferred until France is added.
+- Internal testing: `GCC Internal Testers`, automatic distribution disabled, owner account invited, physical-iPhone installation and launch confirmed.
+- Physical security QA: in progress over the next several days; launch is confirmed but biometrics, Keychain/Secure Enclave behavior, background locking, screenshot protection, recovery, and complete encrypted CRUD remain to be recorded.
 - No Apple private key, Expo token, certificate archive, provisioning profile, archive password, test-user password, service-role key, recovery phrase, raw MEK, or raw emergency code is committed.
 - Expected unrelated untracked files: `.playwright-mcp/` and `welcome.png`.
 
@@ -74,6 +78,13 @@ PR #25 evidence:
 - Local mobile suite after the path fix: 343 tests passed, 2 protected live tests skipped.
 - Supabase live security gates and hosted integration tests passed.
 
+Post-TestFlight local re-verification:
+
+- Mobile suite: 94 files passed, 2 skipped; 343 tests passed, 2 protected live tests skipped.
+- Mobile TypeScript validation passed.
+- Phase 1 Definition-of-Done guard passed.
+- Mobile secret scan passed.
+
 The prior required names `Android native debug compile` and `Supabase live security gates` were stale merge blockers. They were replaced with the current native job names; `Supabase live security gates` remains active CI coverage but is no longer a required PR context because its protected push-only execution cannot be satisfied by every pull request.
 
 ## Zero-Knowledge And Sensitive-Data Rules
@@ -113,11 +124,12 @@ The prior required names `Android native debug compile` and `Supabase live secur
 
 ### Immediate Release Work
 
-- Confirm App Store Connect has processed build `2` and exposes it in TestFlight.
-- Complete export-compliance classification. EAS warned that `ios.infoPlist.ITSAppUsesNonExemptEncryption` is not configured. Determine the correct answer for the app's encryption usage before committing this flag or answering App Store Connect.
-- Complete TestFlight test information and internal tester configuration.
+- Complete TestFlight test information and contact details.
+- Configure the initial GCC App Store territories; keep France unavailable until French ANSSI approval is obtained.
 - Run physical-device security QA for Secure Enclave/Keychain behavior, biometrics, app backgrounding, screenshot protection, deep links, recovery, and encrypted CRUD.
 - Record only device/build/result metadata; never capture decrypted vault content or recovery material.
+- Review the U.S. export-classification rationale before setting `ios.infoPlist.ITSAppUsesNonExemptEncryption`; do not claim that the app contains no encryption.
+- Triage and remediate any findings reported during the owner's multi-day travel testing.
 
 ### Operational Gaps
 
@@ -148,12 +160,13 @@ The findings were reviewed and did not expose credential values. GitGuardian was
 
 ## Next Security Slice
 
-1. Confirm build `2` processing in App Store Connect.
-2. Review the app's encryption implementation against Apple's export-compliance questions and record the rationale without sensitive implementation material.
-3. Set the correct compliance metadata in App Store Connect and, if appropriate, `apps/mobile/app.json`.
-4. Create the internal TestFlight group and add only intended testers.
-5. Execute and document the physical-device security smoke test.
-6. Open a narrowly scoped PR for any compliance/configuration changes and require all protected checks.
+1. Complete TestFlight test information and initial GCC territory configuration.
+2. Execute and document the multi-day physical-device security smoke test.
+3. Record the iPhone model, iOS version, build number, and value-free pass/fail evidence.
+4. Triage and fix any reported failures without capturing vault plaintext, credentials, recovery phrases, or emergency codes.
+5. Document the U.S. export-classification rationale and set `apps/mobile/app.json` compliance metadata only if the result is supportable.
+6. Complete the French ANSSI declaration before enabling France in a later distribution expansion.
+7. Open narrowly scoped PRs for any code or configuration changes and require all protected checks.
 
 ## Standard Security Verification
 

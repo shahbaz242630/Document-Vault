@@ -4,13 +4,13 @@ Last updated: 2026-07-15 (Asia/Dubai)
 
 ## Session Opener
 
-> Sanduqkin Phase 1 is integrated on `main`. PR #25 merged the redesigned mobile flow, native CI, protected production boundaries, and the approval-gated iOS TestFlight workflow. The first signed iOS archive succeeded as version `1.0.0`, build `2`, and the GitHub release workflow completed after submitting it to App Store Connect. The next slice is TestFlight readiness: confirm Apple processing, complete export-compliance metadata, create an internal testing group, add the owner as an internal tester, and perform a real-device smoke test. Do not start Phase 2 beneficiary/activation work or continue Phase 3 payments work until Phase 1 release readiness and the remaining security/operations gaps are closed.
+> Sanduqkin Phase 1 is integrated on `main`. PR #25 merged the redesigned mobile flow, native CI, protected production boundaries, and the approval-gated iOS TestFlight workflow. Signed iOS version `1.0.0`, build `2`, is processed, export-compliance-cleared for the initial GCC-only distribution scope, assigned to the manually controlled `GCC Internal Testers` group, and installed and launched successfully on the owner's physical iPhone. The owner will continue real-device security and functional testing during travel over the next several days and report any issues. Do not start Phase 2 beneficiary/activation work or continue Phase 3 payments work until Phase 1 release readiness and the remaining security/operations gaps are closed.
 
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
 - GitHub repository: `shahbaz242630/Document-Vault`
-- Default/current branch: `main`
+- Default/release branch: `main`
 - Product name: Sanduqkin
 - Active scope: Phase 1 - Core Single-User Vault
 - BRD: `Vault_BRD_v1.0.md` (document version 1.1)
@@ -32,7 +32,13 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - GitHub TestFlight run: [29376883158](https://github.com/shahbaz242630/Document-Vault/actions/runs/29376883158)
 - GitHub result: `Build and submit iOS` completed successfully at 2026-07-15 01:39 UTC.
 - Submission result: EAS completed the App Store Connect submission after an Expo iOS submission-queue incident.
-- Remaining release confirmation: verify build `2` is processed and selectable in App Store Connect/TestFlight.
+- App Store Connect processing: complete.
+- Export-compliance result: Apple accepted standard third-party encryption with France excluded from the initial distribution scope; no French approval document is required for this scope.
+- Initial market scope: GCC expatriate community, starting with Bahrain, Kuwait, Oman, Qatar, Saudi Arabia, and the United Arab Emirates. France and wider expansion are deferred.
+- TestFlight status: build `2` is `Ready to Test` and expires 90 days after processing.
+- Internal group: `GCC Internal Testers`, with automatic distribution disabled so builds are assigned deliberately.
+- Internal tester: owner account invited; TestFlight installation and launch on a physical iPhone confirmed.
+- Remaining device confirmation: complete the multi-day real-device functional and security smoke and record device/iOS details and value-free results.
 
 ## Completed This Session
 
@@ -74,6 +80,17 @@ Last updated: 2026-07-15 (Asia/Dubai)
   - `Android native compile`
   - `iOS simulator smoke`
 
+### TestFlight Readiness
+
+- Confirmed build `2` completed App Store Connect processing.
+- Reviewed the implemented libsodium encryption path and answered Apple's build questionnaire as standard encryption outside Apple's operating-system-only cryptography.
+- Limited the initial release scope to the GCC and excluded France; French ANSSI documentation is deferred until France is added to distribution.
+- Cleared the build-level `Missing Compliance` status.
+- Created `GCC Internal Testers` with automatic distribution disabled.
+- Assigned build `1.0.0` (`2`) and added the owner as the sole intended internal tester.
+- Confirmed the TestFlight build installs and launches on the owner's physical iPhone.
+- Re-ran local verification after the TestFlight setup: 94 files passed, 2 skipped; 343 tests passed, 2 protected live tests skipped; mobile typecheck, Phase 1 DoD guard, and mobile secret scan passed.
+
 ## Current Product And Security Guardrails
 
 - Sanduqkin is a secure information organizer, not a financial, legal, investment, estate-planning, or executor service.
@@ -98,28 +115,31 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - Hosted Supabase integration coverage after Android cleanup.
 - Credential-free iOS Release compilation, simulator installation, launch, liveness check, and termination.
 - Signed iOS EAS archive and App Store Connect/TestFlight submission.
+- App Store Connect processing, build-level compliance clearance for the initial GCC scope, controlled internal-group assignment, and physical-iPhone installation and launch.
 
-## Next Slice: TestFlight Readiness
+## Next Slice: Multi-Day Physical QA And Release Metadata
 
-1. Open App Store Connect and confirm Sanduqkin `1.0.0` build `2` has finished processing.
-2. Resolve the export-compliance prompt. The app uses encryption; confirm the correct exemption classification before setting `ITSAppUsesNonExemptEncryption` in app configuration.
-3. Complete TestFlight test information and contact details.
-4. Create an internal testing group and add the owner account as an internal tester.
-5. Install build `2` on a physical iPhone through TestFlight.
-6. Run the minimum real-device smoke:
+1. Complete TestFlight test information and contact details.
+2. Configure App Store availability for the intended initial GCC territories; do not enable France until the French encryption declaration is approved.
+3. Continue testing build `2` on the physical iPhone over the next several days.
+4. Run the minimum real-device smoke:
    - cold launch and onboarding navigation;
    - sign in and wrapped-MEK unlock;
    - create/read/edit/permanently delete an encrypted record;
    - background/foreground and app-lock behavior;
    - biometric behavior on supported hardware;
+   - screenshot protection and sensitive-screen behavior;
    - recovery and emergency-access screens;
    - sign out and returning-user sign in.
-7. Record device model, iOS version, build number, results, and any failure evidence without capturing secrets or decrypted vault values.
+5. Record device model, iOS version, build number, results, and any failure evidence without capturing secrets or decrypted vault values.
+6. Review the U.S. export classification rationale before adding a persistent `ITSAppUsesNonExemptEncryption` value to `apps/mobile/app.json`; do not encode the misleading claim that the app contains no encryption.
+7. Triage and fix any travel-testing findings before declaring Phase 1 release-ready.
 
 ## Remaining Phase 1 Work
 
-- Finish TestFlight metadata, compliance, internal testing, and real-device QA.
+- Finish TestFlight metadata, GCC territory configuration, and multi-day real-device QA.
 - Confirm production entitlements and physical-device behavior.
+- Complete the French ANSSI declaration before any later France distribution expansion.
 - Select and integrate the production transactional-email provider; Resend remains the leading candidate but is not approved or implemented.
 - Migrate four legacy repository-level processor secrets into the protected `Production` environment during their next rotation, verify both processor workflows, then remove the repository copies.
 - Add scheduled-workflow failure alerting/operational review.
