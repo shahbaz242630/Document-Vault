@@ -13,6 +13,7 @@ android/
 
 # Build output
 coverage/
+artifacts/
 *.tsbuildinfo
 
 # Environment files

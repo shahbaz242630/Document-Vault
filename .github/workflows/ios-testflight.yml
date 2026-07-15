@@ -16,9 +16,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  release-sbom:
+    name: Generate release SBOM
+    if: inputs.confirmation == 'testflight'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.3.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate production dependency SBOM
+        run: npm run sbom:release
+
+      - name: Upload release SBOM
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sanduqkin-release-sbom-${{ github.sha }}
+          path: artifacts/sanduqkin.cdx.json
+          if-no-files-found: error
+          retention-days: 90
+
   build-and-submit:
     name: Build and submit iOS
     if: inputs.confirmation == 'testflight'
+    needs: release-sbom
     runs-on: ubuntu-latest
     environment: Release
     timeout-minutes: 120
