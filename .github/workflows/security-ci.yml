@@ -67,7 +67,7 @@ jobs:
         run: npm run check:phase1
 
       - name: Security guard tests
-        run: node --test scripts/security-check.test.cjs scripts/mobile-secret-scan.test.cjs scripts/supabase-db-security-check.test.cjs scripts/github-actions-security-check.test.cjs scripts/phase1-dod-check.test.cjs scripts/zap-report-check.test.cjs scripts/generate-release-sbom.test.cjs
+        run: node --test scripts/security-check.test.cjs scripts/mobile-secret-scan.test.cjs scripts/supabase-db-security-check.test.cjs scripts/github-actions-security-check.test.cjs scripts/phase1-dod-check.test.cjs scripts/zap-report-check.test.cjs scripts/generate-release-sbom.test.cjs scripts/report-processor-status.test.cjs
 
       - name: Production dependency audit for high or critical advisories
         run: npm audit --omit=dev --workspaces --audit-level=high

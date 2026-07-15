@@ -68,6 +68,12 @@ Authorization: Bearer <AUDIT_RETENTION_PROCESSOR_TOKEN>
 
 The retention processor deletes only anonymized durable audit rows where `user_id` is null and `occurred_at` is older than seven years. User-linked audit rows and newer anonymized rows are not eligible for deletion.
 
+### Scheduled processor incident monitoring
+
+Both scheduled workflows run a separate secretless status-reporting job after the protected processor job. A failed, cancelled, or skipped processor run on `main` opens a single GitHub issue titled for that processor. Later failures add value-free run links to the existing issue instead of creating duplicate issues. The next successful run records recovery and closes the issue automatically.
+
+The reporting job has only `contents: read` and `issues: write`; it does not use the `Production` environment or receive processor credentials. Incident text contains workflow name, result, run URL, and timestamp only. It must never include endpoint response bodies, credentials, user identifiers, or vault data. An open processor incident is a release-review item and requires owner triage before go/no-go.
+
 ## Confirmation Email
 
 Phase 1 queues the deletion request after explicit in-app confirmation through `POST /account-deletion/request`. The API verifies the Supabase bearer session, creates the server-side deletion request, and sends a transactional confirmation email with the scheduled deletion date.

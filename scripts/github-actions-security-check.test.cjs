@@ -223,6 +223,13 @@ test("runs production processors in bounded protected-environment jobs", () => {
     assert.match(workflow, /\n\s{4}timeout-minutes: 10\s*$/m);
     assert.match(workflow, /curl --fail-with-body --retry 2 --retry-all-errors/);
     assert.match(workflow, /--connect-timeout 10 --max-time 60/);
+    assert.match(workflow, /report-processor-status:/);
+    assert.match(workflow, /if: \$\{\{ always\(\) && github\.ref == 'refs\/heads\/main' \}\}/);
+    assert.match(workflow, /report-processor-status:[\s\S]*?permissions:\s*\n\s*contents: read\s*\n\s*issues: write/);
+    assert.match(workflow, /PROCESSOR_RESULT: \$\{\{ needs\.[a-z-]+\.result \}\}/);
+    assert.match(workflow, /run: node scripts\/report-processor-status\.cjs/);
+    assert.match(workflow, /actions\/checkout@[a-f0-9]{40}/);
+    assert.match(workflow, /actions\/setup-node@[a-f0-9]{40}/);
   }
 });
 
