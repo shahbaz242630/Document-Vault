@@ -28,3 +28,28 @@ jobs:
             --request POST \
             --header "Authorization: Bearer ${PROCESSOR_TOKEN}" \
             "$PROCESSOR_URL/internal/account-deletion/process"
+
+  report-processor-status:
+    name: Report account deletion processor status
+    needs: process-due-deletions
+    if: ${{ always() && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Check out trusted status reporter
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: Open, update, or resolve operational incident
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PROCESSOR_NAME: Account deletion processor
+          PROCESSOR_RESULT: ${{ needs.process-due-deletions.result }}
+        run: node scripts/report-processor-status.cjs
