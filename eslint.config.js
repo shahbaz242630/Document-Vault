@@ -1,4 +1,5 @@
 const { defineConfig, globalIgnores } = require("eslint/config");
+const nextPlugin = require("@next/eslint-plugin-next");
 const expoConfig = require("eslint-config-expo/flat");
 
 module.exports = defineConfig([
@@ -9,11 +10,27 @@ module.exports = defineConfig([
         typescript: {
           project: [
             "apps/mobile/tsconfig.json",
+            "apps/web/tsconfig.json",
             "packages/*/tsconfig.json",
             "services/*/tsconfig.json",
           ],
         },
       },
+    },
+  },
+  {
+    files: ["apps/web/**/*.{js,jsx,ts,tsx}"],
+    plugins: {
+      "@next/next": nextPlugin,
+    },
+    settings: {
+      next: {
+        rootDir: "apps/web",
+      },
+    },
+    rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs["core-web-vitals"].rules,
     },
   },
   {
@@ -27,5 +44,11 @@ module.exports = defineConfig([
       },
     },
   },
-  globalIgnores(["**/.expo/**", "coverage/**", "dist/**"]),
+  globalIgnores([
+    "**/.expo/**",
+    "**/.next/**",
+    "apps/web/next-env.d.ts",
+    "coverage/**",
+    "dist/**",
+  ]),
 ]);

@@ -1,10 +1,10 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-07-15 (Asia/Dubai)
+Last updated: 2026-07-19 (Asia/Dubai)
 
 ## Security Session Opener
 
-> Phase 1 security controls are integrated on `main` at merge commit `75907c3`. PR #25 passed the required application-security, CodeQL, OWASP ZAP, Android native, and iOS simulator gates. Protected signed iOS release `1.0.0` build `2` completed EAS Build, App Store Connect processing, and build-level export-compliance clearance for the initial GCC-only scope. It is assigned manually to `GCC Internal Testers`, and installation and launch succeeded on the owner's physical iPhone. Apple signing and submission credentials remain outside Git and are injected only through the approval-gated `Release` environment. The next security slice is multi-day physical-device validation and value-free issue triage. Do not start Phase 2 until release readiness and the residual operational controls below are closed or explicitly accepted.
+> Phase 1 security controls are integrated on `main` at merge commit `75907c3`. PR #25 passed the required application-security, CodeQL, OWASP ZAP, Android native, and iOS simulator gates. Protected signed iOS release `1.0.0` build `2` completed EAS Build, App Store Connect processing, and build-level export-compliance clearance for the initial GCC-only scope. It is assigned manually to `GCC Internal Testers`, and installation and launch succeeded on the owner's physical iPhone. Apple signing and submission credentials remain outside Git and are injected only through the approval-gated `Release` environment. The separate MVP website Phase 2 scaffold is implemented and protected-preview-verified on branch `codex/mvp-web-scaffold`; its narrow security boundary is recorded below and in `MVP_HANDOFF.md`. The next mobile security slice remains multi-day physical-device validation and value-free issue triage. Do not start the main product Phase 2 until release readiness and the residual operational controls below are closed or explicitly accepted.
 
 ## Current Security Baseline
 
@@ -20,7 +20,19 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - Internal testing: `GCC Internal Testers`, automatic distribution disabled, owner account invited, physical-iPhone installation and launch confirmed.
 - Physical security QA: in progress over the next several days; launch is confirmed but biometrics, Keychain/Secure Enclave behavior, background locking, screenshot protection, recovery, and complete encrypted CRUD remain to be recorded.
 - No Apple private key, Expo token, certificate archive, provisioning profile, archive password, test-user password, service-role key, recovery phrase, raw MEK, or raw emergency code is committed.
+- Web preview project: `sanduqkin-web` (`prj_79jnCawgYkg4Fey9wFuiwYw0DpOk`), Git root `apps/web`, SSO-protected, no custom domain, and no project environment variables.
 - Expected unrelated untracked files: `.playwright-mcp/` and `welcome.png`.
+
+## Web Preview Security Boundary
+
+- `apps/web` is an inert Next.js scaffold only. It contains no form, claim route, authentication, Supabase integration, API/data request, analytics, browser persistence, browser cryptography, or production claimant data path.
+- Metadata sets `noindex, nofollow`; Vercel deployment protection adds `X-Robots-Tag: noindex`, `Cache-Control: no-store`, and `X-Frame-Options: DENY` before authentication.
+- Vercel SSO protection applies to all deployments except future custom domains, and Git-fork protection is enabled. No custom domain is attached in this phase.
+- Unauthenticated checks against `/` and `/health.json` redirected to Vercel SSO. Authorized checks returned the prerendered shell, value-free static health JSON, and a true `404` for an unknown path.
+- Source and built-client scans found no service-role material, private-key marker, payment-secret marker, Supabase configuration, or application environment-variable use.
+- Temporary automation bypasses created by the Vercel CLI for protected verification were revoked; the one platform-required automation credential was rotated after use. The CLI-generated local `.env.local` OIDC file was deleted without reading or committing its value.
+- `poweredByHeader: false` prevents the standard framework disclosure header. Strict production-domain headers, CSP, caching policy separation, and monitoring remain Phase 4 work; do not mistake this protected preview baseline for completed production hardening.
+- Do not weaken preview protection, attach a production domain, add data credentials, or introduce claim/authentication behavior during MVP Phase 3. Any such change requires a separately reviewed security slice.
 
 ## Release Credential Boundary
 
@@ -124,6 +136,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 - Production monitoring verification passed on merge commit `0ce0d6e`: manual account-deletion run `29412699342` and audit-retention run `29412700611` completed their protected processor and reporter jobs successfully, and no operational incident was opened.
 - Dependency-free CycloneDX production SBOM generation and 90-day release-run artifact retention before release credentials are materialized.
 - Value-free secret lifecycle and incident procedures in `docs/secret-lifecycle-operations.md`.
+- SSO-protected, no-data Vercel web preview with Git-fork protection, `noindex`, a value-free health signal, scoped Next linting, and source/client secret scans.
 
 ## Current Findings And Residual Risks
 
@@ -152,6 +165,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 - The successful production-monitoring runs emitted a non-blocking GitHub annotation that the pinned checkout/setup actions still target the deprecated Node 20 action runtime and are currently forced onto Node 24; migrate to compatible newer immutable action pins in a separate tooling slice.
 - PR #30 CI detected newer Expo SDK 56 patch expectations after the earlier green release-hardening run. The seven directly affected Expo packages and resolved lockfile graph were aligned to the compatible patch set; local Expo Doctor returned 21/21 and all full local safety gates passed.
 - The known Expo tooling path includes an upstream `uuid` advisory and moderate development-tooling audit entries.
+- The Phase 2 web dependency graph adds a moderate advisory in PostCSS bundled by current Next.js `16.2.10`. npm offers an invalid breaking downgrade; recheck supported Next.js/PostCSS releases before Phase 3 and do not force the suggested downgrade.
 - npm's SBOM inventory requires scoped legacy-peer resolution because Expo's current lockfile resolves `react-native-worklets` outside an older `expo-modules-core` peer range; normal install, Expo Doctor, tests, and native CI remain green.
 - There are no accepted high or critical production dependency findings.
 - Do not force an Expo-incompatible downgrade; apply a compatible upstream update when available and rerun all native/security gates.
@@ -181,6 +195,7 @@ The findings were reviewed and did not expose credential values. GitGuardian was
 npm run typecheck
 npm run lint
 npm test --workspaces --if-present
+npm run build --workspace @vault/web
 npm run test:coverage --workspace @vault/mobile
 npm run doctor --workspace @vault/mobile
 npm run check:phase1

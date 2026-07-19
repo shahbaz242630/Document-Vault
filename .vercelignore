@@ -3,7 +3,7 @@
 .vscode
 Details
 node_modules
-apps
+apps/mobile
 packages
 patches
 supabase
