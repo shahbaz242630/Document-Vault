@@ -14,6 +14,8 @@ android/
 # Build output
 coverage/
 artifacts/
+.next/
+output/playwright/
 *.tsbuildinfo
 
 # Environment files

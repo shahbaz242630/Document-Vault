@@ -4,7 +4,7 @@ Last updated: 2026-07-19 (Asia/Dubai)
 
 ## Session Opener
 
-> Read `HANDOFF.md`, `SECURITY_HANDOFF.md`, and this document before starting MVP website work. The approved direction is a separate Next.js web application in the existing monorepo, deployed as its own Vercel project, with `sanduqkin.com` for the public site, `app.sanduqkin.com` for the isolated claimant portal, and `api.sanduqkin.com` for the canonical Hono API shared with the mobile app. Hostinger remains the registrar/DNS provider and Supabase remains the identity and encrypted-data platform. Begin with **MVP Phase 1: API Region Alignment** only. Build the stated slice, run its verification, record evidence, stop for review, and do not begin the next phase automatically. Public and legal website work may proceed as a bounded parallel track; live trusted-recipient, claimant, activation, or release functionality remains gated by the main Phase 1 release/security requirements and by the unresolved release-authority decision in this handoff.
+> Read `HANDOFF.md`, `SECURITY_HANDOFF.md`, and this document before starting MVP website work. The approved direction is a separate Next.js web application in the existing monorepo, deployed as its own Vercel project, with `sanduqkin.com` for the public site, `app.sanduqkin.com` for the isolated claimant portal, and `api.sanduqkin.com` for the canonical Hono API shared with the mobile app. Hostinger remains the registrar/DNS provider and Supabase remains the identity and encrypted-data platform. MVP Phase 1 is merged and production-verified. MVP Phase 2 is implemented and preview-verified on branch `codex/mvp-web-scaffold`; stop for owner review and durable repository integration before beginning **MVP Phase 3: Landing And Legal Information**. Live trusted-recipient, claimant, activation, or release functionality remains gated by the main release/security requirements and by the unresolved release-authority decision in this handoff.
 
 ## Purpose And Authority
 
@@ -40,9 +40,10 @@ Do not combine multiple phases merely because context remains available. A phase
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
 - GitHub repository: `shahbaz242630/Document-Vault`
 - Default/release branch: `main`
-- `main` and `origin/main` verified at `88f578a` on 2026-07-19.
+- `main` and `origin/main` verified at `affaef1` on 2026-07-19 after Phase 1 PR #32 merged.
 - Documentation branch at the time of this handoff: `codex/export-compliance-handoff` at `3e0c99f`, one documentation commit above `main`.
 - Clean MVP publication branch: `codex/mvp-api-frankfurt`, created directly from `main` so the unrelated export-compliance commit is excluded.
+- Phase 2 implementation branch: `codex/mvp-web-scaffold`, created directly from updated `main`; owner review and repository integration are pending.
 - Expected unrelated local-only files: `.playwright-mcp/` and `welcome.png`; leave them untracked unless explicitly scoped.
 - Monorepo workspaces: `apps/*`, `packages/*`, and `services/*`.
 - Existing applications/services:
@@ -50,8 +51,7 @@ Do not combine multiple phases merely because context remains available. A phase
   - `services/api`: Hono API deployed on Vercel;
   - `packages/shared-types`: currently limited shared types;
   - `packages/shared-validation`: currently limited shared validation.
-- No `apps/web` application exists yet.
-- No website or claimant flow was implemented by the work that produced this document.
+- `apps/web` now contains the Phase 2 Next.js scaffold; no claimant flow, account flow, Supabase integration, or production domain is implemented.
 
 ## Verified Live Infrastructure Baseline
 
@@ -387,7 +387,7 @@ The future linking slice must:
 
 ### MVP Phase 1: API Region Alignment
 
-**Status:** Implemented and production-verified on 2026-07-19; owner review and durable repository integration are pending. See `Phase Completion Evidence` below.
+**Status:** Implemented, production-verified, and merged through PR #32 on 2026-07-19. See `Phase Completion Evidence` below.
 
 **Objective:** remove the verified Washington-to-Frankfurt dynamic-data path before adding web traffic.
 
@@ -409,6 +409,8 @@ The future linking slice must:
 **Exit gate:** production or approved target deployment is healthy in `fra1`, existing API checks pass, and rollback is documented. Stop for review.
 
 ### MVP Phase 2: Web Workspace Scaffold
+
+**Status:** Implemented and protected-preview-verified on 2026-07-19; owner review and durable repository integration are pending. See `Phase Completion Evidence` below.
 
 **Objective:** create a production-quality but content-minimal `apps/web` foundation.
 
@@ -629,18 +631,57 @@ The future linking slice must:
 
 **Residual tooling note:** update the globally installed Vercel CLI in a separate tooling slice; this phase used `npx --yes vercel@56.3.2` to avoid an unrelated global installation change.
 
-**Repository integration gate:** publish the Phase 1 files from clean branch `codex/mvp-api-frankfurt` through focused PR #32 to `main`. The live production deployment was built from the local workspace, so a later Git-driven deployment from unchanged `main` could return the API to `iad1`. Verify PR #32 is merged before beginning MVP Phase 2.
+**Repository integration:** PR #32 merged the Phase 1 files to `main` as squash commit `affaef16e91e17d47df1dfc5a053598f61f66573`. The subsequent main-driven deployment `dpl_HTf8o8AU2uibJVWtCuVX5WMqwanQ` reached `READY` in `fra1`, so Git-driven deployments no longer risk silently reverting the API to `iad1`.
 
-**Next allowed MVP slice after review and repository integration:** MVP Phase 2, Web Workspace Scaffold. Do not combine it with domain publication, legal-content publication, authentication, Supabase integration, or claimant functionality.
+**Phase 1 gate satisfied:** MVP Phase 2 was allowed to begin after the merge and main-driven deployment verification.
+
+### MVP Phase 2: Web Workspace Scaffold - Implemented And Preview-Verified 2026-07-19
+
+**Implemented:**
+
+- Added `apps/web` as a pinned Next.js `16.2.10`, React `19.2.3`, App Router, and strict TypeScript workspace.
+- Added a content-minimal responsive shell, semantic landmarks, keyboard skip link, metadata, `noindex, nofollow`, error recovery page, true not-found page, static favicon, and value-free static `/health.json`.
+- Added web lint, typecheck, Vitest, build, root workspace scripts, Next-specific lint rules scoped so they coexist with Expo, and seven focused regression tests.
+- Disabled the `X-Powered-By` framework header.
+- Added no form, claim endpoint, authentication, Supabase client or credential, API call, analytics, browser storage, browser cryptography, production domain, or claimant data path.
+
+**Local and repository verification:**
+
+- Web focused checks passed: seven tests, typecheck, lint with zero warnings, and a production build with `/` and `/_not-found` prerendered as static content.
+- Playwright CLI smoke-tested the production build at desktop and 390 by 844 mobile viewports; the accessible shell rendered correctly, `/not-a-real-page` returned a custom `404`, and `/health.json` returned only `{ "ok": true, "service": "sanduqkin-web", "mode": "static" }`.
+- Repository typecheck and lint passed.
+- Workspace tests passed: mobile 343 passed/2 protected live tests skipped, web 7 passed, shared validation 10 passed, and API 28 passed; 388 tests passed in total.
+- Phase 1 DoD, repository security, GitHub Actions security, and mobile-secret guards passed.
+- Source and built-client scans found no service-role material, private key marker, payment secret marker, Supabase public configuration, or application `process.env` use. Source inspection also found no network, authentication, browser-storage, or form primitives.
+- The production dependency audit passed at the configured high-severity threshold with no high or critical finding. Fourteen moderate findings remain: the accepted Expo `uuid` chain plus Next's bundled PostCSS advisory. The offered force fixes are breaking or invalid downgrades; recheck supported upstream releases before Phase 3 rather than forcing them.
+- The local machine remains on Node `24.2.0`, one patch below the repository's deliberate `>=24.3.0` range. The same build passed on Vercel Node `24.x`; update the local runtime separately rather than weakening the repository engine requirement.
+
+**Vercel preview verification:**
+
+- Created separate project `sanduqkin-web` (`prj_79jnCawgYkg4Fey9wFuiwYw0DpOk`) under `shahbaz-ali-maliks-projects`.
+- Connected it to GitHub repository `shahbaz242630/Document-Vault`, set the final root directory to `apps/web`, selected the Next.js preset, and retained Node `24.x`.
+- No Vercel environment variables exist for the project. No custom or production domain was attached.
+- SSO deployment protection is `all_except_custom_domains`, Git-fork protection is enabled, and unauthenticated requests to both `/` and `/health.json` returned a `302` to Vercel SSO with `Cache-Control: no-store`, `X-Frame-Options: DENY`, and `X-Robots-Tag: noindex`.
+- Preview deployment `dpl_BBG8apRS6yyruJcn7fgRvJ29QJ85` is `READY` with target `preview` at `https://sanduqkin-8cfsc1ptp-shahbaz-ali-maliks-projects.vercel.app`.
+- Authorized, value-free checks returned `200` for `/`, `200` for the static health JSON, and `404` for an unknown path. The page response reported `X-Nextjs-Prerender: 1` and Vercel prerender caching.
+- The CLI created temporary automation bypasses during protected checks. The two disposable bypasses were revoked and the required platform automation credential was rotated after verification. The generated local `.env.local` OIDC credential file was deleted without reading or committing its value.
+- For this local-only preview upload, the remote root was temporarily cleared because the CLI otherwise applied `apps/web` twice; it was restored immediately after deployment. Future durable deployments should be Git-driven from the connected monorepo with the verified final root `apps/web`.
+
+**Residual boundary:** Vercel inspection lists the Next output handler in `iad1`, but this scaffold has no environment variables, API/database calls, user input, or data access and its pages are prerendered. Dynamic claimant compute remains a later design slice and must be placed with the Frankfurt data plane when introduced.
+
+**Repository integration gate:** review and publish branch `codex/mvp-web-scaffold` through a focused pull request before Phase 3. Until that merge, Git-triggered web deployments do not contain this scaffold.
+
+**Next allowed MVP slice after owner review and repository integration:** MVP Phase 3, Landing And Legal Information. Do not combine it with production-domain attachment, authentication, Supabase integration, browser cryptography, claim schemas, or live claimant functionality.
 
 ## Standard Verification Baseline
 
-Until `apps/web` introduces its own scripts, retain the existing repository checks:
+Retain the repository checks and add the focused web build before each web handoff:
 
 ```powershell
 npm run typecheck
 npm run lint
 npm test --workspaces --if-present
+npm run build --workspace @vault/web
 npm run check:phase1
 npm run check:security
 npm run check:github-actions-security
@@ -693,8 +734,8 @@ These primary sources were reviewed on 2026-07-19. Recheck them when a later pha
 
 ## Security Handoff Decision For This Documentation Slice
 
-`SECURITY_HANDOFF.md` was intentionally not changed. This slice made no production security control, credential, policy, schema, or release-boundary change. Planned MVP security requirements are recorded here. Update `SECURITY_HANDOFF.md` when an MVP phase actually changes the security baseline, introduces a verified control, accepts a residual risk, or changes operational security ownership.
+`SECURITY_HANDOFF.md` was updated for MVP Phase 2 because the new web workspace and protected Vercel preview establish a real external security boundary. It records the inert scaffold, deployment protection, absence of data credentials and browser data paths, secret-scan result, temporary-bypass cleanup, and the prohibition on relaxing those controls in Phase 3. The claimant protocol and production-domain security baseline remain unchanged.
 
 ## Next Session Opener
 
-Partner, read `HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` first. MVP Phase 1 is implemented and production-verified: `services/api/vercel.json` pins the API to `fra1`, the regression guard passes, and production deployment `dpl_7dVi7pRcxw6EbcxgbLviSsJrS4Jj` is `READY` with `api/index` verified in Frankfurt beside the Supabase `eu-central-1` primary. Verify that PR #32 from `codex/mvp-api-frankfurt` is merged into `main` so a later Git deployment cannot revert the placement. After that gate, start **MVP Phase 2: Web Workspace Scaffold** only. Create the minimal Next.js App Router and TypeScript workspace under `apps/web`, integrate typecheck/lint/tests/build, add only an accessible static shell and error/health foundations, create an isolated protected Vercel preview project rooted at `apps/web`, verify no secrets or production claimant data are present, record evidence, and stop for owner review. Do not attach production domains, publish unresolved legal copy, add authentication or Supabase, add analytics or browser cryptography, change claim schemas, or activate any claimant route in the same slice.
+Partner, read `HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` first. MVP Phase 1 is merged and production-verified in `fra1`. MVP Phase 2 is implemented and protected-preview-verified on branch `codex/mvp-web-scaffold`: `apps/web` is an inert, strictly typed Next.js foundation; project `sanduqkin-web` is connected to the monorepo at root `apps/web`; preview `dpl_BBG8apRS6yyruJcn7fgRvJ29QJ85` is `READY`, SSO-protected, `noindex`, and has no project environment variables or data connection. Review the Phase 2 diff and publish it through a focused pull request before beginning **MVP Phase 3: Landing And Legal Information**. In Phase 3 add only approved public information and versioned legal/support content, keep `/claim` informational and inactive, retain preview protection and the no-data boundary, run the documented checks, record evidence, and stop. Do not attach production domains, add authentication or Supabase, add analytics or browser cryptography, change claim schemas, or activate any claimant route in the same slice.

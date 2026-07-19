@@ -19,6 +19,8 @@
     "mobile": "npm run start --workspace @vault/mobile",
     "mobile:android": "npm run android --workspace @vault/mobile",
     "mobile:ios": "npm run ios --workspace @vault/mobile",
+    "web": "npm run dev --workspace @vault/web",
+    "web:build": "npm run build --workspace @vault/web",
     "check:phase1": "node scripts/phase1-dod-check.cjs",
     "postinstall": "node scripts/run-patch-package-if-available.cjs",
     "check:github-actions-security": "node scripts/github-actions-security-check.cjs",
