@@ -14,6 +14,7 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - Product name: Sanduqkin
 - Active scope: Phase 1 - Core Single-User Vault
 - BRD: `Vault_BRD_v1.0.md` (document version 1.1)
+- Website/claimant MVP plan: [`MVP_HANDOFF.md`](MVP_HANDOFF.md) - verified architecture, security boundaries, phased slices, and build/test gates for the public site and future claim flows.
 - PR #25: merged 2026-07-15
 - Merge commit: `75907c3d1103a12619f6a1b0ccacd971a280fd70`
 - Release-fix commit included in PR #25: `852f2f2`
