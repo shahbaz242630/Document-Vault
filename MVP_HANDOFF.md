@@ -9,7 +9,7 @@ Continue protected core-flow validation before public website publication or cla
 - API region alignment and the web workspace scaffold are merged on `main`.
 - Static landing/legal content is implemented and protected-preview-verified, but publication is parked pending owner/design/legal approval.
 - The current branch implements the protected owner web vault and shared mobile/web 17-category engine. It is committed but not deployed.
-- The next slice is the protected synthetic authenticated browser/native smoke matrix.
+- The repeatable local browser/mobile-repository smoke passed; the next slice is the remaining TestFlight build 3 native-UI confirmation and branch PR-readiness review.
 - `/claim` remains informational and inactive. No real claimant data, evidence intake, entitlement decision, release, or claimant decryption is authorized.
 
 Detailed pre-consolidation phase evidence is preserved in Git at commit `96e89c1` and indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
@@ -150,7 +150,8 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - Exhaustive schema-driven registry and encrypted CRUD parity for all 17 current asset types.
 - Mobile unknown-field preservation and failed-mutation reconciliation.
 - Protected-route nonce CSP and security headers.
-- Last recorded full local result: 510 tests passed, 2 protected live tests skipped; typecheck, lint, web build, Phase 1/security/workflow/secret/database guards, Expo Doctor, mobile coverage, and the high-severity production dependency threshold passed.
+- Repeatable local protected smoke across card, contact, medical-care, and business-interest records, including bidirectional edit/decrypt, forward-field preservation, ciphertext-only rows, browser deletion lifecycle, offline failure reconciliation, browser storage/key cleanup, protected headers, and full synthetic cleanup.
+- Current regression result: 510 tests passed, 3 protected live tests skipped by default; typecheck, lint, web build, Phase 1/security/workflow/secret guards, and the high-severity production dependency threshold passed. Expo Doctor, mobile coverage, and database guards also passed in the preceding full branch verification.
 
 ### Hosted state
 
@@ -160,17 +161,15 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 
 ## Execution Plan
 
-### 1. Protected cross-client smoke — next
+### 1. Complete protected cross-client smoke and PR review — next
 
-Use dedicated test identities and synthetic/tagged rows.
+The repeatable local leg passed with a dedicated identity and synthetic/tagged rows across four representative categories. It covered bidirectional browser/mobile-repository decrypt and edit, optional and multiline fields, forward-field preservation, ciphertext-only rows, browser create/update/delete/restore/permanent-delete, offline failure without a ghost record, protected headers, empty local/session storage, worker relock, and full tagged cleanup.
 
-- Cover representative short, optional, select, multiline, and sensitive fields across several categories.
-- Test mobile-to-web and web-to-mobile decrypt/edit compatibility on TestFlight build 3.
-- Test create, update, soft delete, restore, permanent delete, and response/network-failure reconciliation.
-- Verify ciphertext-only persistence, forward-field preservation, worker/key cleanup, security headers, empty sensitive browser storage, and tagged-row cleanup.
-- Record value-free evidence and review the committed branch for PR readiness.
+- Repeat the cross-client display/edit path through the physical TestFlight build 3 UI with a dedicated synthetic identity; local repository execution is not physical-device evidence.
+- Record only value-free device/build/pass-fail evidence and remove all tagged data and the identity.
+- Run the standard verification and inspect the complete branch diff for PR readiness.
 
-Exit gate: the matrix passes without plaintext leakage, cross-client field loss, ghost/local-divergent state, or uncleaned test data. Stop for owner review.
+Exit gate: physical native UI evidence and branch review pass without plaintext leakage, cross-client field loss, ghost/local-divergent state, uncleaned test data, or unresolved high-severity finding. Stop for owner review.
 
 ### 2. Public website publication — parked
 

@@ -21,7 +21,7 @@ Detailed history removed during the 2026-07-20 consolidation remains available i
 - GitHub: `shahbaz242630/Document-Vault`
 - Default/release branch: `main`
 - Current feature branch: `codex/mvp-landing-legal`
-- Feature-branch commit at consolidation: `96e89c1` (`Add secure cross-client owner vault`)
+- Latest pushed feature-branch commit: `152a207` (`Fix Vercel web build filtering`); the protected cross-client smoke test and handoff updates are the current local slice.
 - `main` at consolidation: `c4f1f91` (MVP web scaffold merged through PR #33)
 - Product requirements: `Vault_BRD_v1.0.md` (document version 1.1)
 - Expected unrelated local-only items: `.playwright-mcp/` and `welcome.png`; do not commit or delete them unless explicitly requested.
@@ -78,6 +78,7 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - API Frankfurt placement, separate protected Vercel web project, and static public/legal preview.
 - Cross-client crypto vector, browser Web Worker key boundary, live mobile-to-web and web-to-mobile encrypted bank-account proof, and shared 17-category owner-vault parity.
 - Forward-compatible encrypted-field preservation and failure reconciliation across mobile persistence operations.
+- Local authenticated browser/mobile-repository smoke across card, contact, medical-care, and business-interest records: bidirectional decrypt/edit, unknown-field preservation, ciphertext-only rows, deletion lifecycle, offline-save reconciliation, empty browser storage, worker relock, protected headers, and complete tagged-row/account cleanup.
 
 ## Current Blockers And Technical Debt
 
@@ -116,16 +117,15 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 
 ## Active Next Slice
 
-Run the protected synthetic authenticated browser/native smoke matrix on `codex/mvp-landing-legal` before deploying the owner web vault.
+Finish device-backed validation and review `codex/mvp-landing-legal` for PR readiness.
 
-Required evidence:
+The repeatable local portion is complete and lives in `apps/mobile/src/features/vault/mobile-web-live-supabase-smoke.test.ts`. It passed bidirectional browser/mobile-repository decrypt and edit for four representative categories, optional and multiline fields, unknown-field preservation, ciphertext-only persistence, the browser deletion lifecycle, offline-save reconciliation, protected headers, empty local/session storage, worker relock, and tagged identity/row cleanup.
 
-1. Use dedicated test identities and synthetic or uniquely tagged encrypted records; do not use the owner's normal account for displacement testing.
-2. Exercise representative short, optional, select, multiline, and sensitive field shapes across several registry categories.
-3. Prove mobile-created records decrypt and edit safely on web, and web-created records decrypt and edit safely in TestFlight build 3.
-4. Exercise create, update, soft delete, restore, permanent delete, and simulated response/network-failure reconciliation without leaving ghost or divergent local state.
-5. Confirm ciphertext-only persistence, unknown-field preservation, protected-route headers, no browser key persistence, worker relock, and tagged-row cleanup.
-6. Record value-free results, update the active handoffs, then review the branch for PR readiness.
+Remaining evidence:
+
+1. On TestFlight build 3, use a dedicated synthetic identity to confirm web-created records display and edit through the native UI and that the web reads the native edit.
+2. Record only value-free device/build/pass-fail evidence; remove every tagged row and test identity.
+3. Run the standard verification, inspect the complete branch diff, and resolve any PR-readiness finding before owner review.
 
 Do not deploy the protected vault, attach production domains, publish draft legal content, change Supabase Auth globally, or resume claimant implementation in this slice.
 

@@ -10,7 +10,7 @@ Current security reference points:
 
 - Mobile TestFlight build: app `1.0.0`, build `3`, EAS build `9055529c-508a-415d-872a-08708e533613`.
 - Protected release run: `29695865266`.
-- Current feature branch/commit: `codex/mvp-landing-legal` at `96e89c1`.
+- Current pushed feature branch/commit: `codex/mvp-landing-legal` at `152a207`; the protected cross-client smoke test and handoff updates are the current local slice.
 - Supabase: existing Free project in `eu-central-1`; local stack is used for migrations and attack tests.
 - Web preview: `sanduqkin-web`, SSO protected, no custom domain, no hosted environment variables, and still serving the earlier static Phase 3 preview.
 
@@ -62,6 +62,7 @@ Current security reference points:
 - GitHub branch protection, CODEOWNERS coverage, immutable action pins, CodeQL, OWASP ZAP, dependency audit, secret scans, native build/smoke jobs, Supabase tests, release checklist, SBOM generation, and approval-gated environments.
 - Release signing and submission credentials are materialized only in the protected runner and removed in unconditional cleanup.
 - Account-deletion and audit-retention processors have value-free secretless failure monitoring.
+- A local authenticated browser/mobile-repository smoke now covers representative encrypted shapes, bidirectional edits, forward-field preservation, ciphertext-only persistence, delete/restore/permanent-delete, offline failure without a ghost record, protected headers, empty local/session storage, worker relock, and tagged identity/row cleanup.
 
 ## Development And Release Boundaries
 
@@ -97,7 +98,7 @@ Current security reference points:
 ### Immediate
 
 - Complete multi-day physical-device security QA on TestFlight build 3, including Keychain/Secure Enclave behavior, biometrics, background locking, screenshot protection, recovery, emergency access, encrypted CRUD, and sign-out/return.
-- Run the protected authenticated browser/native synthetic smoke matrix before deploying the owner web vault.
+- Complete the remaining TestFlight build 3 native-UI leg of the protected browser/native synthetic smoke before deploying the owner web vault; the repeatable local browser/mobile-repository leg is complete.
 - Complete TestFlight metadata and initial GCC territory configuration; keep France disabled until French ANSSI approval.
 - Finalize the U.S. export-classification rationale before setting persistent iOS compliance metadata.
 
@@ -118,7 +119,7 @@ Current security reference points:
 
 ## Next Security Gate
 
-The immediate web security gate is the protected synthetic browser/native smoke matrix described in `HANDOFF.md` and `MVP_HANDOFF.md`. It must prove cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup before any protected deployment review.
+The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. The immediate remaining web gate is a dedicated-identity TestFlight build 3 native-UI confirmation followed by branch/PR review; local repository execution is not a substitute for physical native UI evidence.
 
 The immediate mobile release gate is separate: complete and record physical QA on build 3. Neither gate authorizes public claimant functionality.
 
