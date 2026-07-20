@@ -26,7 +26,7 @@ describe("web deployment configuration", () => {
     });
   });
 
-  it("keeps the web workspace available to Git-driven Vercel builds", () => {
+  it("keeps the complete web build graph available to Git-driven Vercel builds", () => {
     const ignorePath = fileURLToPath(new URL("../../../.vercelignore", import.meta.url));
     const ignoredPaths = readFileSync(ignorePath, "utf8")
       .split(/\r?\n/u)
@@ -35,5 +35,9 @@ describe("web deployment configuration", () => {
 
     expect(ignoredPaths).not.toContain("apps");
     expect(ignoredPaths).not.toContain("apps/web");
+    expect(ignoredPaths).not.toContain("packages");
+    expect(ignoredPaths).not.toContain("supabase");
+    expect(ignoredPaths).not.toContain("apps/web/lib/supabase");
+    expect(ignoredPaths).toContain("/supabase");
   });
 });
