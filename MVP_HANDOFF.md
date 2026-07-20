@@ -14,6 +14,8 @@ Continue protected core-flow validation before public website publication or cla
 
 Detailed pre-consolidation phase evidence is preserved in Git at commit `96e89c1` and indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
 
+The authoritative claimant and encrypted-release playbook is `CLAIM_HANDOFF.md`; use its linear slice plan and stop gates for all claimant work.
+
 ## MVP Scope
 
 ### Included
@@ -151,7 +153,7 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - Mobile unknown-field preservation and failed-mutation reconciliation.
 - Protected-route nonce CSP and security headers.
 - Repeatable local protected smoke across card, contact, medical-care, and business-interest records, including bidirectional edit/decrypt, forward-field preservation, ciphertext-only rows, browser deletion lifecycle, offline failure reconciliation, browser storage/key cleanup, protected headers, and full synthetic cleanup.
-- Current regression result: 510 tests passed, 3 protected live tests skipped by default; typecheck, lint, web build, Phase 1/security/workflow/secret guards, and the high-severity production dependency threshold passed. Expo Doctor, mobile coverage, and database guards also passed in the preceding full branch verification.
+- Current regression result: 515 tests passed, 3 protected live tests skipped by default; typecheck, lint, web build, Phase 1/security/workflow/secret guards, and the high-severity production dependency threshold passed. Expo Doctor, mobile coverage, and database guards also passed in the preceding full branch verification.
 
 ### Hosted state
 

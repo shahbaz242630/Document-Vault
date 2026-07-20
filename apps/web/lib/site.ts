@@ -15,9 +15,15 @@ export const legalNavigation = [
   { href: "/accessibility", label: "Accessibility" },
 ] as const;
 
+export const claimInformationRoutes = [
+  "/claim/registered-recipient",
+  "/claim/emergency-code",
+] as const;
+
 export const publicRoutes = [
   "/",
   ...primaryNavigation.map(({ href }) => href),
+  ...claimInformationRoutes,
   ...legalNavigation.map(({ href }) => href),
   "/support",
 ] as const;

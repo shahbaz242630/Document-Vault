@@ -15,6 +15,8 @@ Read these active documents before changing the project:
 
 Detailed history removed during the 2026-07-20 consolidation remains available in Git at commit `96e89c1` and is indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
 
+Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its slice gates before changing any claimant surface, protocol, schema, API, evidence path, or release control.
+
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`

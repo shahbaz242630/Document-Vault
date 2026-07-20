@@ -6,6 +6,8 @@ Last updated: 2026-07-20 (Asia/Dubai)
 
 The mobile vault is in controlled TestFlight testing. The current feature branch adds a protected owner web vault with cross-client encryption compatibility and all 17 owner-vault categories, but that implementation is not deployed. The hosted web preview is the earlier static SSO-protected build. Public legal publication and all claimant functionality remain disabled.
 
+Claimant security, protocol, evidence, review, and encrypted-release slices are governed by `CLAIM_HANDOFF.md`; its stop gates apply before any claimant implementation.
+
 Current security reference points:
 
 - Mobile TestFlight build: app `1.0.0`, build `3`, EAS build `9055529c-508a-415d-872a-08708e533613`.

@@ -6,6 +6,8 @@ import { describe, expect, it } from "vitest";
 import AccessibilityPage from "./accessibility/page";
 import AccountDeletionPage from "./account-deletion/page";
 import ClaimPage, { metadata as claimMetadata } from "./claim/page";
+import EmergencyCodeClaimPage from "./claim/emergency-code/page";
+import RegisteredRecipientClaimPage from "./claim/registered-recipient/page";
 import FeaturesPage from "./features/page";
 import HowItWorksPage from "./how-it-works/page";
 import HomePage from "./page";
@@ -28,6 +30,8 @@ const pages = [
   SupportPage,
   AccessibilityPage,
   ClaimPage,
+  RegisteredRecipientClaimPage,
+  EmergencyCodeClaimPage,
 ];
 
 const combinedMarkup = pages.map((Page) => renderToStaticMarkup(<Page />)).join("\n");
@@ -67,6 +71,9 @@ describe("Phase 3 public content", () => {
 
     expect(markup).toContain("Claim applications are not active");
     expect(markup).toContain("Do not enter or send the code");
+    expect(markup).toContain("Registered recipient");
+    expect(markup).toContain("Emergency code");
+    expect(markup).toContain("Release is the final controlled state");
     expect(markup).not.toMatch(/<(form|input|textarea|select|button)\b/iu);
     expect(claimMetadata.robots).toEqual({ index: false, follow: false });
   });

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageIntro } from "@/components/page-intro";
+import { claimantInformationRoutes, claimantPortalStages } from "@/lib/claimant-portal";
 
 export const metadata: Metadata = {
   title: "Claim access — not active",
@@ -23,9 +24,22 @@ export default function ClaimPage() {
       <section className="content-section">
         <header><p className="eyebrow">Two planned routes</p><h2>Different preparation, one controlled review</h2><p>Both routes remain subject to future security, legal, and release-authority approval.</p></header>
         <div className="content-grid">
-          <article className="content-card"><p className="eyebrow">Route 01 · Future</p><h3>Pre-registered trusted recipient</h3><p>The account owner selects a person, who may eventually verify a separate account in advance. Being registered will not itself prove legal entitlement or trigger release.</p></article>
-          <article className="content-card"><p className="eyebrow">Route 02 · Future</p><h3>Private emergency code</h3><p>The account owner gives a private code directly to a chosen person. Holding it may eventually support proof of possession, but will not itself prove identity, relationship, or release authority.</p></article>
+          {claimantInformationRoutes.map((route) => (
+            <article className="content-card" key={route.key}>
+              <p className="eyebrow">{route.eyebrow}</p>
+              <h3>{route.title}</h3>
+              <p>{route.summary}</p>
+              <p><Link className="text-link" href={route.href}>Review the inactive route boundary <span aria-hidden="true">→</span></Link></p>
+            </article>
+          ))}
         </div>
+      </section>
+
+      <section className="content-section">
+        <header><p className="eyebrow">Planned portal structure</p><h2>Release is the final controlled state.</h2><p>The portal will separate account control, identity, evidence, review, owner protection, and cryptographic release.</p></header>
+        <ol className="steps">
+          {claimantPortalStages.map((stage) => <li key={stage.title}><h3>{stage.title}</h3><p>{stage.description}</p></li>)}
+        </ol>
       </section>
 
       <section className="content-section">
