@@ -1,164 +1,133 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-07-19 (Asia/Dubai)
+Last updated: 2026-07-20 (Asia/Dubai)
 
-## Session Opener
+## Start Here
 
-> Sanduqkin Phase 1 is integrated on `main`. PR #25 merged the redesigned mobile flow, native CI, protected production boundaries, and the approval-gated iOS TestFlight workflow. Signed iOS version `1.0.0`, build `2`, is processed, export-compliance-cleared for the initial GCC-only distribution scope, assigned to the manually controlled `GCC Internal Testers` group, and installed and launched successfully on the owner's physical iPhone. The owner will continue real-device security and functional testing during travel over the next several days and report any issues. Do not start Phase 2 beneficiary/activation work or continue Phase 3 payments work until Phase 1 release readiness and the remaining security/operations gaps are closed.
+Sanduqkin is a zero-knowledge personal-information vault. The mobile Phase 1 vault is in controlled TestFlight testing. A protected owner web vault is implemented on the current feature branch but is not deployed. The public website is still a protected draft, and all claimant submission and release functionality is disabled.
+
+Read these active documents before changing the project:
+
+1. `HANDOFF.md` — product state, repository structure, completed work, and cross-project priorities.
+2. `SECURITY_HANDOFF.md` — mandatory security boundaries, release gates, and security debt.
+3. `MVP_HANDOFF.md` — website, owner web vault, and future claimant execution plan.
+4. `apps/web/LEGAL_CONTENT_REVIEW.md` — publication blockers for the public/legal website.
+
+Detailed history removed during the 2026-07-20 consolidation remains available in Git at commit `96e89c1` and is indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
 
 ## Source Of Truth
 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
-- GitHub repository: `shahbaz242630/Document-Vault`
+- GitHub: `shahbaz242630/Document-Vault`
 - Default/release branch: `main`
-- Product name: Sanduqkin
-- Active scope: Phase 1 - Core Single-User Vault
-- BRD: `Vault_BRD_v1.0.md` (document version 1.1)
-- Website/claimant MVP plan: [`MVP_HANDOFF.md`](MVP_HANDOFF.md) - Phase 3 static landing/legal preview is implemented and protected; use this handoff for its architecture, security boundaries, review blockers, phased slices, and future claim-flow gates.
-- PR #25: merged 2026-07-15
-- Merge commit: `75907c3d1103a12619f6a1b0ccacd971a280fd70`
-- Release-fix commit included in PR #25: `852f2f2`
-- Expected unrelated local-only files: `.playwright-mcp/` and `welcome.png`; leave them untracked unless explicitly scoped.
+- Current feature branch: `codex/mvp-landing-legal`
+- Feature-branch commit at consolidation: `96e89c1` (`Add secure cross-client owner vault`)
+- `main` at consolidation: `c4f1f91` (MVP web scaffold merged through PR #33)
+- Product requirements: `Vault_BRD_v1.0.md` (document version 1.1)
+- Expected unrelated local-only items: `.playwright-mcp/` and `welcome.png`; do not commit or delete them unless explicitly requested.
 
-## Current Release State
+## Current Product State
 
-- Apple bundle identifier: `com.sanduqkin.mobile`
-- App Store Connect app: Sanduqkin
-- App Store Connect Apple ID: `6790954883`
-- Expo owner/project: `@shahbaz242630/sanduqkin`
-- EAS project ID: `34fd69a5-169f-45bb-a0b5-9edaf515b12f`
-- App version: `1.0.0`
-- First successful signed archive: build `2`
-- EAS build ID: `96d15169-4f5b-47a0-adcc-402a5c42b9dd`
-- GitHub TestFlight run: [29376883158](https://github.com/shahbaz242630/Document-Vault/actions/runs/29376883158)
-- GitHub result: `Build and submit iOS` completed successfully at 2026-07-15 01:39 UTC.
-- Submission result: EAS completed the App Store Connect submission after an Expo iOS submission-queue incident.
-- App Store Connect processing: complete.
-- Export-compliance result: Apple accepted standard third-party encryption with France excluded from the initial distribution scope; no French approval document is required for this scope.
-- Initial market scope: GCC expatriate community, starting with Bahrain, Kuwait, Oman, Qatar, Saudi Arabia, and the United Arab Emirates. France and wider expansion are deferred.
-- TestFlight status: build `2` is `Ready to Test` and expires 90 days after processing.
-- Internal group: `GCC Internal Testers`, with automatic distribution disabled so builds are assigned deliberately.
-- Internal tester: owner account invited; TestFlight installation and launch on a physical iPhone confirmed.
-- Replacement connectivity build: app `1.0.0` build `3`, EAS build `9055529c-508a-415d-872a-08708e533613`, produced by protected GitHub run [29695865266](https://github.com/shahbaz242630/Document-Vault/actions/runs/29695865266) after the EAS production and GitHub `Release` environments were given the existing Supabase project's browser-safe URL and publishable key. The signed archive, App Store Connect upload/processing, existing-scope export-compliance clearance, deliberate assignment to `GCC Internal Testers`, physical installation, password authentication, vault unlock, and web-to-mobile encrypted-record visibility all succeeded on 2026-07-19. The uniquely tagged synchronization row was permanently removed after verification.
-- Remaining device confirmation: complete the multi-day real-device functional and security smoke and record device/iOS details and value-free results.
+### Mobile owner vault
 
-## Completed This Session
+- App version `1.0.0`, TestFlight build `3`, is the current Supabase-enabled test build.
+- Build 3 was produced by protected GitHub run `29695865266`, processed by App Store Connect, cleared for the current encryption/distribution scope, assigned manually to `GCC Internal Testers`, installed on the owner's iPhone, and verified for password sign-in, local vault unlock, and web-to-mobile encrypted-record visibility.
+- Phase 1 remains a controlled internal test, not a production-readiness declaration. Multi-day physical-device functional and security QA is still open.
 
-### Apple and App Store Connect
+### Owner web vault
 
-- Confirmed active Apple Developer membership and Team ID.
-- Registered explicit App ID `com.sanduqkin.mobile`.
-- Created the Sanduqkin App Store Connect application record.
-- Enabled App Store Connect API access.
-- Created a least-privilege Developer API key for CI submission.
-- Created a new Apple Distribution certificate, valid through 2027-07-14.
-- Generated `Sanduqkin App Store 2026`, an App Store provisioning profile valid through 2027-07-15.
-- Kept private keys, certificate archives, provisioning profiles, API private keys, and passwords out of Git.
+- The current branch implements Supabase authentication, local browser-worker cryptography, and encrypted owner-vault CRUD for all 17 current asset types.
+- Mobile and web share the same Supabase identity, `vault_key_material`, `vault_assets`, envelope format, and schema-driven category registry. There is no parallel web vault.
+- The branch includes mobile forward-field preservation, failed-persistence reconciliation, and nonce-based protected-route security headers.
+- The owner web vault is committed but not deployed. The hosted web preview is still the earlier static protected build and has no Supabase environment variables.
 
-### Expo and TestFlight Automation
+### Public website and claimant flow
 
-- Created and linked EAS project `@shahbaz242630/sanduqkin`.
-- Moved EAS configuration to `apps/mobile/eas.json`.
-- Created a dedicated Expo CI access token.
-- Added `.github/workflows/ios-testflight.yml`.
-- The workflow is manual-only and requires the exact `testflight` confirmation input.
-- The workflow uses GitHub's approval-gated `Release` environment.
-- Apple signing assets and the App Store Connect key are materialized only inside the runner and removed in an unconditional cleanup step.
-- EAS uses local iOS credentials assembled from protected GitHub environment secrets.
-- The first PKCS#12 export used an OpenSSL 3 format that macOS Keychain could not import. It was replaced with a legacy-compatible PKCS#12 archive and a rotated random archive password.
-- The corrected signed build and App Store Connect submission succeeded.
+- Static landing, product, support, accessibility, security, privacy, terms, deletion, and inactive claim-information routes are implemented and protected-preview-verified.
+- Legal content remains `Preview draft 0.1` and is not approved for publication. `apps/web/LEGAL_CONTENT_REVIEW.md` remains blocking.
+- `/claim` is informational only. There is no claimant intake, evidence upload, claimant schema, release state machine, or claimant data release.
 
-### Integration And CI
+## Product Guardrails
 
-- Merged PR #25 into `main` after required checks passed.
-- Corrected the stale EAS regression-test path after `eas.json` moved into `apps/mobile`.
-- Local mobile verification after the fix: 94 files passed, 2 skipped; 343 tests passed, 2 protected live tests skipped.
-- PR checks passed for application security, CodeQL, OWASP ZAP, Android native compilation, iOS simulator smoke, Supabase security, Android emulator smoke, and hosted Supabase integration.
-- The PR-associated iOS simulator job compiled and launched the unsigned Release app successfully.
-- Updated `main` branch protection to require the current check names:
-  - `App security gates`
-  - `CodeQL JavaScript/TypeScript (javascript-typescript)`
-  - `OWASP ZAP baseline`
-  - `Android native compile`
-  - `iOS simulator smoke`
+- Sanduqkin is a secure information organizer, not a bank, financial adviser, investment product, legal service, estate planner, executor, or legal entitlement authority.
+- Normal vault operation must remain zero knowledge: Sanduqkin infrastructure receives ciphertext and approved metadata, never plaintext vault fields, passwords, recovery phrases, raw MEKs, private keys, or raw emergency secrets.
+- Encryption and decryption occur only in the active client. Readable PDF export remains local to the user's device.
+- Permanent deletion is irreversible and must be described accurately.
+- A claimant account, MFA, evidence, relationship, or emergency code does not by itself authorize release.
+- Do not begin live claimant work until release authority, protocol, threat model, privacy/legal responsibilities, schema, RLS, and operating procedures are approved.
+- Payments remain out of the active workstream.
 
-### TestFlight Readiness
+## Repository Structure
 
-- Confirmed build `2` completed App Store Connect processing.
-- Reviewed the implemented libsodium encryption path and answered Apple's build questionnaire as standard encryption outside Apple's operating-system-only cryptography.
-- Limited the initial release scope to the GCC and excluded France; French ANSSI documentation is deferred until France is added to distribution.
-- Cleared the build-level `Missing Compliance` status.
-- Created `GCC Internal Testers` with automatic distribution disabled.
-- Assigned build `1.0.0` (`2`) and added the owner as the sole intended internal tester.
-- Confirmed the TestFlight build installs and launches on the owner's physical iPhone.
-- Re-ran local verification after the TestFlight setup: 94 files passed, 2 skipped; 343 tests passed, 2 protected live tests skipped; mobile typecheck, Phase 1 DoD guard, and mobile secret scan passed.
+- `apps/mobile` — Expo/React Native owner application.
+- `apps/web` — Next.js public site and protected web proof-of-concept.
+- `services/api` — canonical Hono API deployed separately on Vercel.
+- `packages/shared-types` — cross-client asset and cryptographic-envelope types.
+- `packages/shared-validation` — exhaustive 17-category schemas, field definitions, normalization, summaries, and registry invariants.
+- `supabase/migrations` — append-only database changes and RLS foundations.
+- `docs` — release, security-test, deletion, secret-lifecycle, RevenueCat, and design/implementation records.
 
-### Release Hardening
+Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` primary. Public static pages are intended to remain independent of API or Supabase availability.
 
-- Added `.github/CODEOWNERS` coverage for workflows, cryptography, authentication, vault/recovery, deletion, retention, webhooks, migrations, scripts, and dependency manifests.
-- Added `docs/release-checklist.md` for commit, CI, dependency, SBOM, migration, compliance, native-QA, submission, and go/no-go evidence.
-- Added value-free GitHub issue monitoring for scheduled account-deletion and audit-retention processor failures, with automatic recovery closure and no processor secrets in the reporting jobs.
-- Production verification passed on merge commit `0ce0d6e`: manual account-deletion run `29412699342` and audit-retention run `29412700611` completed both their protected processor and secretless reporter jobs successfully, with no operational incident opened.
-- Added dependency-free CycloneDX SBOM generation through the repository's pinned npm toolchain.
-- The protected TestFlight workflow now generates and uploads a production-dependency SBOM before the credential-bearing build job can start.
-- SBOM artifacts are named with the release commit SHA and retained in GitHub Actions for 90 days; durable archival ownership still needs to be defined.
-- Local release-hardening verification passed: typecheck, lint, workspace tests, mobile coverage, Expo Doctor, Phase 1/security/workflow/secret guards, release-tool tests, and the high-severity production dependency-audit threshold.
-- After PR #30 CI detected newly published Expo SDK 56 patch expectations, aligned `expo`, `expo-build-properties`, `expo-constants`, `expo-dev-client`, `expo-router`, `expo-sharing`, and `expo-splash-screen` to the compatible patch set. Local Expo Doctor returned 21/21 and the full typecheck, lint, test, coverage, security, and production-audit gates passed.
+## Verified Delivered Work
 
-## Current Product And Security Guardrails
+- Mobile email/password authentication, wrapped-MEK returning-user unlock, recovery continuity, encrypted Supabase-backed CRUD, soft delete/restore/permanent delete, local PDF export, and sealed emergency-code foundation.
+- Client-side XChaCha20-Poly1305 encryption and Argon2id KEK derivation with versioned envelopes and associated data.
+- Account-deletion and audit-retention processors, protected workflows, value-free monitoring, release checklist, SBOM generation, secret guards, CodeQL, ZAP, native CI, and Supabase security tests.
+- Signed TestFlight builds and controlled GCC-only internal distribution with France excluded.
+- API Frankfurt placement, separate protected Vercel web project, and static public/legal preview.
+- Cross-client crypto vector, browser Web Worker key boundary, live mobile-to-web and web-to-mobile encrypted bank-account proof, and shared 17-category owner-vault parity.
+- Forward-compatible encrypted-field preservation and failure reconciliation across mobile persistence operations.
 
-- Sanduqkin is a secure information organizer, not a financial, legal, investment, estate-planning, or executor service.
-- Phase 1 is single-user only.
-- Phase 1 excludes beneficiaries, activation, witnesses, document upload, production notifications, web application work, and payments.
-- Normal vault storage must remain zero-knowledge. Do not store plaintext vault content, passwords, seed phrases, private keys, raw MEKs, or raw emergency codes in Sanduqkin infrastructure.
-- Vault detail fields must remain inside authenticated encryption; only safe metadata may be normalized.
-- Emergency access is a key-release design, not server-side plaintext export.
-- Vault deletion is permanent hard deletion and the UI must state that Sanduqkin cannot restore deleted encrypted records.
-- Generated readable PDF exports remain local to the device and are not uploaded or emailed by the service.
+## Current Blockers And Technical Debt
 
-## Verified Phase 1 Coverage
+### Before completing mobile Phase 1 readiness
 
-- Email/password authentication and returning-user wrapped-MEK unlock.
-- Recovery-phrase password reset with encrypted-record continuity.
-- Biometric preference and app-lock foundations.
-- Encrypted Supabase-backed vault CRUD and permanent deletion.
-- Expanded Phase 1 vault categories.
-- One-time emergency-code display and proof that the raw code is not retained.
-- Durable audit, account-deletion, and audit-retention foundations.
-- Android release emulator coverage for onboarding, returning-user unlock, encrypted CRUD, emergency-code hiding, and recovery-reset continuity.
-- Hosted Supabase integration coverage after Android cleanup.
-- Credential-free iOS Release compilation, simulator installation, launch, liveness check, and termination.
-- Signed iOS EAS archive and App Store Connect/TestFlight submission.
-- App Store Connect processing, build-level compliance clearance for the initial GCC scope, controlled internal-group assignment, and physical-iPhone installation and launch.
+- Complete TestFlight contact/test information and intended initial GCC territory configuration.
+- Run and record multi-day physical-device QA against build 3: cold start, authentication/unlock, encrypted CRUD, background/foreground locking, biometrics, screenshot/sensitive-screen behavior, recovery, emergency access, sign-out, and returning-user flow.
+- Record only device model, iOS version, build number, and value-free pass/fail evidence.
+- Finalize the supportable U.S. export-classification rationale before setting persistent iOS compliance metadata.
+- Complete the French ANSSI declaration before enabling France.
+- Select and integrate a production transactional-email provider; Resend is only a candidate.
 
-## Next Slice: Multi-Day Physical QA And Release Metadata
+### Before any external protected web user or production-readiness claim
 
-1. Complete TestFlight test information and contact details.
-2. Configure App Store availability for the intended initial GCC territories; do not enable France until the French encryption declaration is approved.
-3. Continue testing build `2` on the physical iPhone over the next several days.
-4. Run the minimum real-device smoke:
-   - cold launch and onboarding navigation;
-   - sign in and wrapped-MEK unlock;
-   - create/read/edit/permanently delete an encrypted record;
-   - background/foreground and app-lock behavior;
-   - biometric behavior on supported hardware;
-   - screenshot protection and sensitive-screen behavior;
-   - recovery and emergency-access screens;
-   - sign out and returning-user sign in.
-5. Record device model, iOS version, build number, results, and any failure evidence without capturing secrets or decrypted vault values.
-6. Review the U.S. export classification rationale before adding a persistent `ITSAppUsesNonExemptEncryption` value to `apps/mobile/app.json`; do not encode the misleading claim that the app contains no encryption.
-7. Triage and fix any travel-testing findings before declaring Phase 1 release-ready.
+- Upgrade the existing Supabase project from Free to Pro.
+- Confirm managed backup retention and perform the required recovery review/drill.
+- Enable managed single-session-per-user behavior, select a supportable JWT lifetime, and verify mobile-to-web and web-to-mobile displacement including the bounded old-JWT window and decrypted-state cleanup.
+- Decide and enforce the production hostname/origin boundary for the owner vault versus claimant portal; see `MVP_HANDOFF.md`.
+- Deploy and review the protected web configuration only after the synthetic authenticated smoke matrix passes.
 
-## Remaining Phase 1 Work
+### Repository and operations debt
 
-- Finish TestFlight metadata, GCC territory configuration, and multi-day real-device QA.
-- Confirm production entitlements and physical-device behavior.
-- Complete the French ANSSI declaration before any later France distribution expansion.
-- Select and integrate the production transactional-email provider; Resend remains the leading candidate but is not approved or implemented.
-- Migrate four legacy repository-level processor secrets into the protected `Production` environment during their next rotation, verify both processor workflows, then remove the repository copies.
-- Add a second qualified security reviewer before enforcing required code-owner approval; the current sole owner cannot approve their own pull request.
-- Define durable SBOM/dependency-license review ownership and complete the broader artifact/log retention review.
-- Address the remaining compatible dependency/tooling updates without forcing an Expo-incompatible downgrade, including GitHub's Node 20 action-runtime deprecation annotations for the currently pinned checkout/setup actions.
+- Rotate four legacy scheduled-processor values into the protected `Production` environment, verify both processors, and remove the repository-level copies.
+- Add a second qualified security reviewer before requiring code-owner approval; the sole owner cannot approve their own PR.
+- Define durable SBOM/dependency-license ownership before 90-day GitHub artifacts expire.
+- Review artifact and log retention and periodically audit that audit metadata remains value-free.
+- Replace immutable action pins that still trigger GitHub's deprecated Node 20 action-runtime annotation when compatible upstream revisions are available.
+- Revisit accepted moderate Expo-tooling and Next/PostCSS advisories through compatible upstream releases; do not force breaking downgrades. No accepted high or critical production dependency finding was present at the last full audit.
+- Update the local Node runtime: this machine reports `24.2.0`, below the repository's deliberate `>=24.3.0` Node 24 range. Do not weaken the engine requirement.
+
+### Public and claimant blockers
+
+- Resolve `apps/web/LEGAL_CONTENT_REVIEW.md` and obtain owner/counsel approval before public legal publication.
+- Decide who can authorize release when the owner cannot respond, what evidence is accepted, applicable jurisdictions, challenge/cooldown rules, operator responsibilities, retention, disputes, and governing law.
+- Design and review the V2 split emergency-code protocol before any code-based claim lookup. Existing V1 codes have no safe public locator.
+
+## Active Next Slice
+
+Run the protected synthetic authenticated browser/native smoke matrix on `codex/mvp-landing-legal` before deploying the owner web vault.
+
+Required evidence:
+
+1. Use dedicated test identities and synthetic or uniquely tagged encrypted records; do not use the owner's normal account for displacement testing.
+2. Exercise representative short, optional, select, multiline, and sensitive field shapes across several registry categories.
+3. Prove mobile-created records decrypt and edit safely on web, and web-created records decrypt and edit safely in TestFlight build 3.
+4. Exercise create, update, soft delete, restore, permanent delete, and simulated response/network-failure reconciliation without leaving ghost or divergent local state.
+5. Confirm ciphertext-only persistence, unknown-field preservation, protected-route headers, no browser key persistence, worker relock, and tagged-row cleanup.
+6. Record value-free results, update the active handoffs, then review the branch for PR readiness.
+
+Do not deploy the protected vault, attach production domains, publish draft legal content, change Supabase Auth globally, or resume claimant implementation in this slice.
 
 ## Standard Verification
 
@@ -166,17 +135,25 @@ Last updated: 2026-07-19 (Asia/Dubai)
 npm run typecheck
 npm run lint
 npm test --workspaces --if-present
+npm run build --workspace @vault/web
 npm run test:coverage --workspace @vault/mobile
 npm run doctor --workspace @vault/mobile
 npm run check:phase1
 npm run check:security
 npm run check:github-actions-security
 npm run check:mobile-secrets
+npm run check:supabase-db-security
+npm run check:supabase-rls
 npm audit --omit=dev --workspaces --audit-level=high
 ```
 
-Release builds must additionally pass the protected `iOS TestFlight release` workflow from `main` with explicit `Release` approval.
+Run database security checks before and after any migration or RLS change. Release candidates also require the protected `iOS TestFlight release` workflow from `main`, explicit `Release` approval, App Store processing confirmation, and recorded physical-device QA.
 
-## Historical Material
+## Session Startup Checklist
 
-Detailed pre-refresh history is preserved in `docs/handoff/archive/`. This document intentionally contains only the current operational state, current evidence, remaining risks, and next work.
+1. Read the four documents listed under `Start Here`.
+2. Run `git status --short --branch` and `git log --oneline --decorate -5`.
+3. Preserve unrelated user changes and expected local-only files.
+4. Confirm that the active slice above is still current and that the environment remains protected development.
+5. Recheck time-sensitive provider or security guidance only when the slice depends on it.
+6. State the slice scope and non-goals, implement or verify only that slice, record evidence, update the handoffs, and stop for owner review.
