@@ -5,7 +5,7 @@
 
 // Components
 export { AssetDetailView } from "./components/asset-detail-view";
-export { AddExpandedAssetRoute } from "./components/add-expanded-asset-route";
+export { AddSchemaDrivenAssetRoute } from "./components/add-schema-driven-asset-route";
 export { DynamicAssetForm } from "./components/dynamic-asset-form";
 export { RecentlyDeletedList } from "./components/recently-deleted-list";
 export { VaultCategoryList } from "./components/vault-category-list";

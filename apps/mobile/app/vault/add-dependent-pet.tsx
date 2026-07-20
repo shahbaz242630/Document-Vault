@@ -1,5 +1,5 @@
-import { AddExpandedAssetRoute } from "@/features/vault";
+import { AddSchemaDrivenAssetRoute } from "@/features/vault";
 
 export default function AddDependentPetRoute() {
-  return <AddExpandedAssetRoute assetType="dependent_pet" />;
+  return <AddSchemaDrivenAssetRoute assetType="dependent_pet" />;
 }

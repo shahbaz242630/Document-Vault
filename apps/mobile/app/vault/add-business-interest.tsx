@@ -1,5 +1,5 @@
-import { AddExpandedAssetRoute } from "@/features/vault";
+import { AddSchemaDrivenAssetRoute } from "@/features/vault";
 
 export default function AddBusinessInterestRoute() {
-  return <AddExpandedAssetRoute assetType="business_interest" />;
+  return <AddSchemaDrivenAssetRoute assetType="business_interest" />;
 }

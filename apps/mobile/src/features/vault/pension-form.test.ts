@@ -22,6 +22,7 @@ describe("createPensionAssetPayload", () => {
         country: "UK",
         documentLocation: "Home safe",
         lastFourDigits: "1234",
+        pensionContact: "HR department",
         pensionProvider: "Example Pension",
       },
       notes: "Company matched contributions.",

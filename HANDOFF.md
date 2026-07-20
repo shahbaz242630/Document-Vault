@@ -1,6 +1,6 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-07-15 (Asia/Dubai)
+Last updated: 2026-07-19 (Asia/Dubai)
 
 ## Session Opener
 
@@ -14,7 +14,7 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - Product name: Sanduqkin
 - Active scope: Phase 1 - Core Single-User Vault
 - BRD: `Vault_BRD_v1.0.md` (document version 1.1)
-- Website/claimant MVP plan: [`MVP_HANDOFF.md`](MVP_HANDOFF.md) - verified architecture, security boundaries, phased slices, and build/test gates for the public site and future claim flows.
+- Website/claimant MVP plan: [`MVP_HANDOFF.md`](MVP_HANDOFF.md) - Phase 3 static landing/legal preview is implemented and protected; use this handoff for its architecture, security boundaries, review blockers, phased slices, and future claim-flow gates.
 - PR #25: merged 2026-07-15
 - Merge commit: `75907c3d1103a12619f6a1b0ccacd971a280fd70`
 - Release-fix commit included in PR #25: `852f2f2`
@@ -39,6 +39,7 @@ Last updated: 2026-07-15 (Asia/Dubai)
 - TestFlight status: build `2` is `Ready to Test` and expires 90 days after processing.
 - Internal group: `GCC Internal Testers`, with automatic distribution disabled so builds are assigned deliberately.
 - Internal tester: owner account invited; TestFlight installation and launch on a physical iPhone confirmed.
+- Replacement connectivity build: app `1.0.0` build `3`, EAS build `9055529c-508a-415d-872a-08708e533613`, produced by protected GitHub run [29695865266](https://github.com/shahbaz242630/Document-Vault/actions/runs/29695865266) after the EAS production and GitHub `Release` environments were given the existing Supabase project's browser-safe URL and publishable key. The signed archive, App Store Connect upload/processing, existing-scope export-compliance clearance, deliberate assignment to `GCC Internal Testers`, physical installation, password authentication, vault unlock, and web-to-mobile encrypted-record visibility all succeeded on 2026-07-19. The uniquely tagged synchronization row was permanently removed after verification.
 - Remaining device confirmation: complete the multi-day real-device functional and security smoke and record device/iOS details and value-free results.
 
 ## Completed This Session

@@ -1,18 +1,34 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { ReactNode } from "react";
+
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { siteName, siteUrl } from "@/lib/site";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "Sanduqkin",
-    template: "%s | Sanduqkin",
+    default: "Sanduqkin — Private records, thoughtfully protected",
+    template: `%s | ${siteName}`,
   },
   description:
-    "A private foundation for organizing the information that matters to you and the people you trust.",
+    "Organize important records in an encrypted mobile vault and prepare for thoughtful, controlled continuity.",
   icons: {
     icon: "/favicon.svg",
+  },
+  openGraph: {
+    type: "website",
+    siteName,
+    title: "Sanduqkin — Private records, thoughtfully protected",
+    description: "An encrypted mobile vault for the records that matter.",
+    url: siteUrl,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sanduqkin — Private records, thoughtfully protected",
+    description: "An encrypted mobile vault for the records that matter.",
   },
   robots: {
     index: false,
@@ -28,17 +44,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           Skip to content
         </a>
         <div className="site-frame">
-          <header className="site-header">
-            <Link className="wordmark" href="/" aria-label="Sanduqkin home">
-              Sanduqkin
-            </Link>
-            <span className="preview-label">Private preview</span>
-          </header>
+          <SiteHeader />
           {children}
-          <footer className="site-footer">
-            <p>Encrypted on your device. Controlled by you.</p>
-            <a href="/health.json">Service status</a>
-          </footer>
+          <SiteFooter />
         </div>
       </body>
     </html>

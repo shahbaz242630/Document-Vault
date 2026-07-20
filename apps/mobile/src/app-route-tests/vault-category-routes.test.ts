@@ -1,11 +1,18 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { assetTypes } from "@vault/shared-types";
 import { describe, expect, it } from "vitest";
 
 import { vaultCategoryConfigs } from "../features/vault/vault-category-config";
 
 describe("Vault category routes", () => {
+  it("registers every shared asset type exactly once", () => {
+    const configuredTypes = vaultCategoryConfigs.map(({ assetType }) => assetType);
+    expect(new Set(configuredTypes)).toEqual(new Set(assetTypes));
+    expect(configuredTypes).toHaveLength(assetTypes.length);
+  });
+
   it("renders each saved-record category through the shared category route", () => {
     for (const config of vaultCategoryConfigs) {
       const routeFile = resolve(
@@ -19,7 +26,7 @@ describe("Vault category routes", () => {
     }
   });
 
-  it("sends each add route to its matching category list after save", () => {
+  it("renders every add route through the shared schema-driven component", () => {
     for (const config of vaultCategoryConfigs) {
       const addRouteFile = resolve(
         __dirname,
@@ -30,11 +37,8 @@ describe("Vault category routes", () => {
       expect(existsSync(addRouteFile), `${config.addHref} route exists`).toBe(true);
       const source = readFileSync(addRouteFile, "utf8");
 
-      if (source.includes("AddExpandedAssetRoute")) {
-        expect(source).toContain(`assetType="${config.assetType}"`);
-      } else {
-        expect(source).toContain(config.routeHref);
-      }
+      expect(source).toContain("AddSchemaDrivenAssetRoute");
+      expect(source).toContain(`assetType="${config.assetType}"`);
     }
   });
 });

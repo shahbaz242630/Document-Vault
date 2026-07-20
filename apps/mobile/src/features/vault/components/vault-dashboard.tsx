@@ -12,6 +12,7 @@ import {
 } from "@/shared/ui";
 
 import { createVaultDashboardViewModel } from "../vault-dashboard-view-model";
+import { vaultCategoryConfigs } from "../vault-category-config";
 import type { VaultDecryptedAsset } from "../vault-store";
 
 type VaultDashboardProps = {
@@ -23,25 +24,7 @@ type VaultDashboardViewModel = ReturnType<typeof createVaultDashboardViewModel>;
 type VaultDashboardCategory = VaultDashboardViewModel["categories"][number];
 type VaultDashboardItem = VaultDashboardViewModel["items"][number];
 
-const ADD_LINKS = [
-  ["/vault/add-bank-account", "Bank account"],
-  ["/vault/add-card", "Card"],
-  ["/vault/add-investment", "Investment"],
-  ["/vault/add-property", "Property"],
-  ["/vault/add-vehicle", "Vehicle"],
-  ["/vault/add-insurance", "Insurance"],
-  ["/vault/add-crypto", "Crypto wallet"],
-  ["/vault/add-pension", "Pension"],
-  ["/vault/add-loan-debt", "Loan or debt"],
-  ["/vault/add-subscription", "Subscription"],
-  ["/vault/add-document-location", "Where documents live"],
-  ["/vault/add-contact", "Key contact"],
-  ["/vault/add-medical-care", "Medical care"],
-  ["/vault/add-dependent-pet", "Dependent or pet"],
-  ["/vault/add-business-interest", "Business interest"],
-  ["/vault/add-digital-account", "Digital account"],
-  ["/vault/add-other", "Something else"],
-] as const;
+const ADD_LINKS = vaultCategoryConfigs.map(({ addHref, itemLabel }) => [addHref, itemLabel] as const);
 
 export function VaultDashboard({ assets, onLock }: VaultDashboardProps) {
   const viewModel = createVaultDashboardViewModel(assets);

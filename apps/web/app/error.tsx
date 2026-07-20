@@ -2,7 +2,7 @@
 
 export default function ErrorPage({ reset }: Readonly<{ reset: () => void }>) {
   return (
-    <main id="main-content" className="message-page" role="alert">
+    <main id="main-content" className="message-page" role="alert" tabIndex={-1}>
       <p className="eyebrow">Something went wrong</p>
       <h1>We could not load this page.</h1>
       <p>No vault or account data was affected. You can safely try again.</p>

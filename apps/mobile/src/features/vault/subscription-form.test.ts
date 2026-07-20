@@ -22,6 +22,7 @@ describe("createSubscriptionAssetPayload", () => {
         country: "UAE",
         documentLocation: "Email inbox",
         serviceName: "Example Streaming",
+        subscriptionContact: "Support",
         subscriptionType: "streaming",
       },
       notes: "Annual billing cycle.",

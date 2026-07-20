@@ -325,6 +325,81 @@ describe("vault session", () => {
     expect(repository.restoredAssets).toEqual([]);
     expect(repository.permanentlyDeletedAssetIds).toEqual(["asset-1"]);
   });
+
+  it("removes a locally staged record when its remote create fails", async () => {
+    const key = await generateMasterEncryptionKey();
+    const repository = createRepositoryDouble();
+    repository.saveAsset = async () => {
+      throw new Error("Synthetic remote create failure");
+    };
+    const session = createVaultSession({ key, repository });
+
+    await expect(session.addAsset({
+      assetType: "other",
+      fields: { country: "UAE" },
+      title: "Synthetic record",
+    })).rejects.toThrow("Synthetic remote create failure");
+    await expect(session.listActiveAssets()).resolves.toEqual([]);
+  });
+
+  it("restores the persisted record when its remote update fails", async () => {
+    const key = await generateMasterEncryptionKey();
+    const repository = createRepositoryDouble();
+    const session = createVaultSession({ key, repository });
+    const created = await session.addAsset({ assetType: "other", fields: { country: "UAE" }, title: "Original" });
+    repository.saveAsset = async () => {
+      throw new Error("Synthetic remote update failure");
+    };
+
+    await expect(session.updateAsset(created.id, {
+      assetType: "other",
+      fields: { country: "UK" },
+      title: "Changed locally",
+    })).rejects.toThrow("Synthetic remote update failure");
+    await expect(session.listActiveAssets()).resolves.toMatchObject([{ fields: { country: "UAE" }, title: "Original" }]);
+  });
+
+  it("restores active state when a remote soft delete fails", async () => {
+    const key = await generateMasterEncryptionKey();
+    const repository = createRepositoryDouble();
+    const session = createVaultSession({ key, repository });
+    const created = await session.addAsset({ assetType: "other", fields: { country: "UAE" }, title: "Keep active" });
+    repository.softDeleteAsset = async () => {
+      throw new Error("Synthetic remote soft-delete failure");
+    };
+
+    await expect(session.softDeleteAsset(created.id)).rejects.toThrow("Synthetic remote soft-delete failure");
+    await expect(session.listActiveAssets()).resolves.toMatchObject([{ id: created.id, title: "Keep active" }]);
+    await expect(session.listDeletedAssets()).resolves.toEqual([]);
+  });
+
+  it("keeps a remotely deleted record deleted when restore fails", async () => {
+    const key = await generateMasterEncryptionKey();
+    const repository = createRepositoryDouble();
+    const session = createVaultSession({ key, repository });
+    const created = await session.addAsset({ assetType: "other", fields: { country: "UAE" }, title: "Keep deleted" });
+    await session.softDeleteAsset(created.id);
+    repository.restoreAsset = async () => {
+      throw new Error("Synthetic remote restore failure");
+    };
+
+    await expect(session.restoreAsset(created.id)).rejects.toThrow("Synthetic remote restore failure");
+    await expect(session.listActiveAssets()).resolves.toEqual([]);
+    await expect(session.listDeletedAssets()).resolves.toMatchObject([{ id: created.id, title: "Keep deleted" }]);
+  });
+
+  it("restores a local record when remote permanent deletion fails", async () => {
+    const key = await generateMasterEncryptionKey();
+    const repository = createRepositoryDouble();
+    const session = createVaultSession({ key, repository });
+    const created = await session.addAsset({ assetType: "other", fields: { country: "UAE" }, title: "Do not lose" });
+    repository.permanentlyDeleteAsset = async () => {
+      throw new Error("Synthetic remote permanent-delete failure");
+    };
+
+    await expect(session.permanentlyDeleteAsset(created.id)).rejects.toThrow("Synthetic remote permanent-delete failure");
+    await expect(session.listActiveAssets()).resolves.toMatchObject([{ id: created.id, title: "Do not lose" }]);
+  });
 });
 
 function createRepositoryDouble(initialRecords: VaultEncryptedAssetRecord[] = []) {

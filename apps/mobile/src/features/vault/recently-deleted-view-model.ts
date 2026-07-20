@@ -1,3 +1,5 @@
+import { getSchemaDrivenVaultCategory } from "@vault/shared-validation";
+
 import type { VaultDeletedAsset } from "./vault-store";
 
 type RecentlyDeletedItem = {
@@ -13,26 +15,6 @@ export type RecentlyDeletedViewModel = {
   totalCount: number;
 };
 
-const assetTypeLabels: Record<VaultDeletedAsset["assetType"], string> = {
-  bank_account: "Bank account",
-  business_interest: "Business interest",
-  card: "Card",
-  contact: "Contact",
-  crypto: "Crypto reference",
-  dependent_pet: "Dependent or pet",
-  digital_account: "Digital account",
-  document_location: "Document location",
-  insurance: "Insurance",
-  investment: "Investment",
-  loan_debt: "Loan or debt",
-  medical_care: "Medical care",
-  other: "Other",
-  pension: "Pension",
-  property: "Property",
-  subscription: "Subscription",
-  vehicle: "Vehicle",
-};
-
 const deletedDateFormatter = new Intl.DateTimeFormat("en", {
   day: "numeric",
   month: "short",
@@ -45,7 +27,7 @@ export function createRecentlyDeletedViewModel(
   const items = [...assets]
     .sort((left, right) => right.deletedAt.localeCompare(left.deletedAt))
     .map((asset) => ({
-      assetTypeLabel: assetTypeLabels[asset.assetType],
+      assetTypeLabel: getSchemaDrivenVaultCategory(asset.assetType)?.categoryLabel ?? "Reference",
       deletedAtLabel: `Deleted ${deletedDateFormatter.format(new Date(asset.deletedAt))}`,
       id: asset.id,
       title: asset.title,

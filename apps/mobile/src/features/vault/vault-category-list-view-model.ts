@@ -1,3 +1,8 @@
+import {
+  formatSchemaDrivenVaultSummary,
+  getSchemaDrivenVaultCategory,
+} from "@vault/shared-validation";
+
 import type { VaultDecryptedAsset } from "./vault-store";
 
 type AssetType = VaultDecryptedAsset["assetType"];
@@ -63,65 +68,6 @@ export function createVaultCategoryListViewModel({
 }
 
 function createAssetSummary(asset: VaultDecryptedAsset): string {
-  if (asset.assetType === "bank_account") {
-    return [
-      asset.fields.currency,
-      formatLastFour(asset.fields.lastFourDigits),
-      formatApproximateValueRange(asset.fields.approximateValueRange),
-    ]
-      .filter((value): value is string => Boolean(value))
-      .join(" - ");
-  }
-
-  return [
-    firstPresentField(asset.fields, [
-      "institutionName",
-      "providerName",
-      "pensionProvider",
-      "serviceName",
-      "address",
-      "country",
-      "companyName",
-      "issuerName",
-      "lenderName",
-      "makeModel",
-      "name",
-      "location",
-      "exchangeName",
-    ]),
-    formatLastFour(asset.fields.lastFourDigits),
-    formatApproximateValueRange(
-      asset.fields.approximateValueRange ?? asset.fields.approximateCostRange,
-    ),
-  ]
-    .filter((value): value is string => Boolean(value))
-    .join(" - ");
-}
-
-function firstPresentField(
-  fields: Record<string, string>,
-  fieldNames: string[],
-): string | undefined {
-  return fieldNames.map((fieldName) => fields[fieldName]).find(Boolean);
-}
-
-function formatLastFour(lastFourDigits: string | undefined): string | undefined {
-  return lastFourDigits ? `ending ${lastFourDigits}` : undefined;
-}
-
-function formatApproximateValueRange(value: string | undefined): string | undefined {
-  const labels: Record<string, string> = {
-    "50_200": "50 to 200",
-    "50_200k": "50k to 200k",
-    "200_500": "200 to 500",
-    "200_500k": "200k to 500k",
-    "500k_1m": "500k to 1m",
-    over_1m: "Over 1m",
-    over_500: "Over 500",
-    prefer_not_to_say: "Prefer not to say",
-    under_50: "Under 50",
-    under_50k: "Under 50k",
-  };
-
-  return value ? labels[value] : undefined;
+  const definition = getSchemaDrivenVaultCategory(asset.assetType);
+  return definition ? formatSchemaDrivenVaultSummary(definition, asset.fields, " - ") : "";
 }

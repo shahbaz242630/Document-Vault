@@ -1,10 +1,10 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-07-19 (Asia/Dubai)
+Last updated: 2026-07-20 (Asia/Dubai)
 
 ## Security Session Opener
 
-> Phase 1 security controls are integrated on `main` at merge commit `75907c3`. PR #25 passed the required application-security, CodeQL, OWASP ZAP, Android native, and iOS simulator gates. Protected signed iOS release `1.0.0` build `2` completed EAS Build, App Store Connect processing, and build-level export-compliance clearance for the initial GCC-only scope. It is assigned manually to `GCC Internal Testers`, and installation and launch succeeded on the owner's physical iPhone. Apple signing and submission credentials remain outside Git and are injected only through the approval-gated `Release` environment. The separate MVP website Phase 2 scaffold is implemented and protected-preview-verified on branch `codex/mvp-web-scaffold`; its narrow security boundary is recorded below and in `MVP_HANDOFF.md`. The next mobile security slice remains multi-day physical-device validation and value-free issue triage. Do not start the main product Phase 2 until release readiness and the residual operational controls below are closed or explicitly accepted.
+> Phase 1 security controls are integrated on `main` at merge commit `75907c3`. PR #25 passed the required application-security, CodeQL, OWASP ZAP, Android native, and iOS simulator gates. Protected signed iOS release `1.0.0` build `2` completed EAS Build, App Store Connect processing, and build-level export-compliance clearance for the initial GCC-only scope. It is assigned manually to `GCC Internal Testers`, and installation and launch succeeded on the owner's physical iPhone. Apple signing and submission credentials remain outside Git and are injected only through the approval-gated `Release` environment. Website Phase 2 is integrated through PR #33. The current `codex/mvp-landing-legal` branch adds the protected owner web vault, cross-client cryptography, and one registry-driven 17-category model shared by mobile and web. The implementation and local hardening checks are complete but the branch remains undeployed; the existing hosted preview is still the earlier protected static build, and publication remains blocked pending owner/legal and release-readiness review. The next mobile security slice remains multi-day physical-device validation and value-free issue triage.
 
 ## Current Security Baseline
 
@@ -18,21 +18,26 @@ Last updated: 2026-07-19 (Asia/Dubai)
 - App Store Connect/TestFlight status: processed and `Ready to Test`; build expires 90 days after processing.
 - Export-compliance scope: standard third-party encryption, initial GCC distribution, France excluded. French ANSSI approval is deferred until France is added.
 - Internal testing: `GCC Internal Testers`, automatic distribution disabled, owner account invited, physical-iPhone installation and launch confirmed.
+- Supabase-enabled replacement: protected run [29695865266](https://github.com/shahbaz242630/Document-Vault/actions/runs/29695865266) successfully produced and submitted app `1.0.0` build `3` (EAS `9055529c-508a-415d-872a-08708e533613`). EAS production and GitHub `Release` now hold only the public Supabase URL/publishable key; no service-role key was added. App Store Connect processing, existing-scope export-compliance clearance, deliberate assignment to `GCC Internal Testers`, physical install, authentication, local vault unlock, cross-client encrypted-record visibility, test-row cleanup, and web-worker relock are complete.
 - Physical security QA: in progress over the next several days; launch is confirmed but biometrics, Keychain/Secure Enclave behavior, background locking, screenshot protection, recovery, and complete encrypted CRUD remain to be recorded.
 - No Apple private key, Expo token, certificate archive, provisioning profile, archive password, test-user password, service-role key, recovery phrase, raw MEK, or raw emergency code is committed.
 - Web preview project: `sanduqkin-web` (`prj_79jnCawgYkg4Fey9wFuiwYw0DpOk`), Git root `apps/web`, SSO-protected, no custom domain, and no project environment variables.
-- Expected unrelated untracked files: `.playwright-mcp/` and `welcome.png`.
+- Current Phase 3 preview: `dpl_56CPAxso438Az7z6pmVwisotCiH5`, `READY`, target `preview`; owner/legal publication approval is not yet recorded.
+- The hosted preview above predates the protected login/vault implementation. The current branch has not been deployed and does not depend on hosted project environment variables yet.
+- Expected unrelated local-only files: `.playwright-mcp/` and `welcome.png`; keep them excluded from commits.
 
 ## Web Preview Security Boundary
 
-- `apps/web` is an inert Next.js scaffold only. It contains no form, claim route, authentication, Supabase integration, API/data request, analytics, browser persistence, browser cryptography, or production claimant data path.
-- Metadata sets `noindex, nofollow`; Vercel deployment protection adds `X-Robots-Tag: noindex`, `Cache-Control: no-store`, and `X-Frame-Options: DENY` before authentication.
-- Vercel SSO protection applies to all deployments except future custom domains, and Git-fork protection is enabled. No custom domain is attached in this phase.
-- Unauthenticated checks against `/` and `/health.json` redirected to Vercel SSO. Authorized checks returned the prerendered shell, value-free static health JSON, and a true `404` for an unknown path.
-- Source and built-client scans found no service-role material, private-key marker, payment-secret marker, Supabase configuration, or application environment-variable use.
-- Temporary automation bypasses created by the Vercel CLI for protected verification were revoked; the one platform-required automation credential was rotated after use. The CLI-generated local `.env.local` OIDC file was deleted without reading or committing its value.
-- `poweredByHeader: false` prevents the standard framework disclosure header. Strict production-domain headers, CSP, caching policy separation, and monitoring remain Phase 4 work; do not mistake this protected preview baseline for completed production hardening.
-- Do not weaken preview protection, attach a production domain, add data credentials, or introduce claim/authentication behavior during MVP Phase 3. Any such change requires a separately reviewed security slice.
+- Public content routes and the explicitly inactive `/claim` route remain informational and collect no form data. They have no analytics, tracking, or non-essential cookies.
+- `/login` and `/vault` are protected dynamic routes. They use the Supabase publishable browser client for authentication, server-side claim validation, browser-worker cryptography, and Row Level Security. No service-role client or trusted server decryption path is introduced.
+- Vault payloads are encrypted before persistence. Supabase receives ciphertext and only the permitted metadata; the vault password, raw MEK, recovery material, and decrypted records are not sent to the web server or stored by Supabase.
+- Essential authentication cookies are limited to the protected product flow. Public, support, legal, and claim pages do not request account credentials or vault data.
+- The existing hosted preview remains the earlier SSO-protected static deployment. The protected owner-vault work is local to this branch and must not be described as deployed until a separately reviewed deployment succeeds.
+- Application-owned nonce CSP and security headers cover `/login` and `/vault`, including no-store, anti-framing, MIME-sniffing protection, referrer restrictions, and production HTTPS HSTS. Preview SSO and Git-fork protection remain required.
+- Local production Chromium verification returned the protected headers, found 17 correctly nonced scripts, and produced zero console warnings or errors. Unit, type, lint, build, keyboard, responsive, and accessibility checks also passed.
+- Source and built-client scans found no service-role value, private-key marker, payment-secret marker, or committed application credential. Supabase browser configuration is restricted to the public URL and publishable key.
+- Temporary automation bypasses created by the Vercel CLI for earlier protected verification were revoked; the platform-required automation credential was rotated after use. The CLI-generated local `.env.local` OIDC file was deleted without reading or committing its value.
+- Do not weaken preview protection, attach a production domain, or expose the protected flow to external users until owner/legal review, authenticated cross-client smoke coverage, hosted configuration review, backups, and single-session/displacement controls are complete or explicitly accepted.
 
 ## Release Credential Boundary
 
@@ -137,6 +142,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 - Dependency-free CycloneDX production SBOM generation and 90-day release-run artifact retention before release credentials are materialized.
 - Value-free secret lifecycle and incident procedures in `docs/secret-lifecycle-operations.md`.
 - SSO-protected, no-data Vercel web preview with Git-fork protection, `noindex`, a value-free health signal, scoped Next linting, and source/client secret scans.
+- Local protected owner-vault implementation with browser-worker cryptography, nonce CSP, server-side auth-claim validation, ciphertext-only persistence, and registry-driven parity across all 17 mobile and web categories.
 
 ## Current Findings And Residual Risks
 
@@ -148,6 +154,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 - Record only device/build/result metadata; never capture decrypted vault content or recovery material.
 - Review the U.S. export-classification rationale before setting `ios.infoPlist.ITSAppUsesNonExemptEncryption`; do not claim that the app contains no encryption.
 - Triage and remediate any findings reported during the owner's multi-day travel testing.
+- Run the authenticated mobile/browser synthetic smoke matrix before deploying the protected web flow.
 
 ### Operational Gaps
 
@@ -158,6 +165,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 - Review artifact/log retention and minimize it without losing necessary audit evidence.
 - Periodically audit persisted audit metadata to prove it contains safe identifiers only.
 - Review whether non-provider secret patterns and validity checks should be enabled.
+- Upgrade the hosted project and verify backups plus managed single-session/displacement behavior before enabling external protected-vault users.
 
 ### Dependency Risk
 
@@ -165,7 +173,7 @@ The prior required names `Android native debug compile` and `Supabase live secur
 - The successful production-monitoring runs emitted a non-blocking GitHub annotation that the pinned checkout/setup actions still target the deprecated Node 20 action runtime and are currently forced onto Node 24; migrate to compatible newer immutable action pins in a separate tooling slice.
 - PR #30 CI detected newer Expo SDK 56 patch expectations after the earlier green release-hardening run. The seven directly affected Expo packages and resolved lockfile graph were aligned to the compatible patch set; local Expo Doctor returned 21/21 and all full local safety gates passed.
 - The known Expo tooling path includes an upstream `uuid` advisory and moderate development-tooling audit entries.
-- The Phase 2 web dependency graph adds a moderate advisory in PostCSS bundled by current Next.js `16.2.10`. npm offers an invalid breaking downgrade; recheck supported Next.js/PostCSS releases before Phase 3 and do not force the suggested downgrade.
+- The web dependency graph includes a moderate advisory in PostCSS bundled by current Next.js `16.2.10`. Phase 3 rechecked the production audit at the high-severity threshold; no high or critical finding exists, and the offered PostCSS/Next force fix remains an invalid breaking downgrade. Do not force it.
 - npm's SBOM inventory requires scoped legacy-peer resolution because Expo's current lockfile resolves `react-native-worklets` outside an older `expo-modules-core` peer range; normal install, Expo Doctor, tests, and native CI remain green.
 - There are no accepted high or critical production dependency findings.
 - Do not force an Expo-incompatible downgrade; apply a compatible upstream update when available and rerun all native/security gates.
@@ -188,6 +196,7 @@ The findings were reviewed and did not expose credential values. GitGuardian was
 5. Document the U.S. export-classification rationale and set `apps/mobile/app.json` compliance metadata only if the result is supportable.
 6. Complete the French ANSSI declaration before enabling France in a later distribution expansion.
 7. Open narrowly scoped PRs for any code or configuration changes and require all protected checks.
+8. Run the authenticated cross-client browser/mobile smoke matrix and separately review the first protected-vault deployment configuration.
 
 ## Standard Security Verification
 

@@ -52,12 +52,12 @@ describe("createVaultCategoryListViewModel", () => {
       items: [
         {
           id: "bank-1",
-          summary: "USD - ending 8181 - Under 50k",
+        summary: "Apostrophe Bank - ending 8181 - USD - Under 50k",
           title: "O'Connor operating account",
         },
         {
           id: "bank-2",
-          summary: "AED - ending 4242 - Prefer not to say",
+        summary: "Zayed Bank - ending 4242 - AED - Value not stated",
           title: "Zayed savings",
         },
       ],
@@ -91,7 +91,7 @@ describe("createVaultCategoryListViewModel", () => {
     expect(viewModel.items).toEqual([
       {
         id: "investment-1",
-        summary: "O'Connor Brokerage - ending 2222 - 50k to 200k",
+        summary: "O'Connor Brokerage - ending 2222 - AED - 50k to 200k",
         title: "Brokerage account",
       },
     ]);

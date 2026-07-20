@@ -1,0 +1,29 @@
+{
+  "format": "sanduqkin-mobile-web-crypto-v1-test-only",
+  "password": "compatibility-test-password",
+  "keyMaterial": {
+    "kdfAlgorithm": "argon2id",
+    "kdfParams": {
+      "keyLength": 32,
+      "memlimit": 268435456,
+      "opslimit": 3
+    },
+    "kekSalt": "AAECAwQFBgcICQoLDA0ODw",
+    "wrappedMekNonce": "MDEyMzQ1Njc4OTo7PD0-P0BBQkNERUZH",
+    "wrappedMekCiphertext": "oIeX1TG1tXzb2Gk_XjN-j0ualkXIWh-E1y-ho3Edgg1aSQoX0dF264nsihMwEL1H7P7mJyliVpRNGFs"
+  },
+  "asset": {
+    "assetType": "bank_account",
+    "nonce": "UFFSU1RVVldYWVpbXF1eX2BhYmNkZWZn",
+    "ciphertext": "e9zsdJVBTKFIRmjKXEufVPctwc2PeetfXeJN644v_nLiWmYLcsdiBKEF5o5UfAa6RPUWBQ5VpcJEs67hNY_W_5M2f75AFdlxxilHREVm5AuEuOUgeyWIMLoNftM_6tFkJNm7Wi_7TybKJWe7qiPTHiZK1ikhuIygPFT97J-9qVUgCK-jHqvehWvUF1wDKEkHG6XnKD_vf0QFj0OH6cMddC1jRuOJ0twmpIwjcoKG"
+  },
+  "plaintext": {
+    "assetType": "bank_account",
+    "fields": {
+      "institutionName": "Compatibility Bank",
+      "lastFourDigits": "4242"
+    },
+    "notes": "Fixture only",
+    "title": "Mobile-created fixture"
+  }
+}

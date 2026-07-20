@@ -18,6 +18,7 @@ type SelectField = {
   label: string;
   name: string;
   options: { label: string; value: string }[];
+  required: boolean;
   type: "select";
 };
 

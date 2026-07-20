@@ -1,5 +1,5 @@
-import { AddExpandedAssetRoute } from "@/features/vault";
+import { AddSchemaDrivenAssetRoute } from "@/features/vault";
 
 export default function AddDigitalAccountRoute() {
-  return <AddExpandedAssetRoute assetType="digital_account" />;
+  return <AddSchemaDrivenAssetRoute assetType="digital_account" />;
 }
