@@ -116,14 +116,14 @@ Current security reference points:
 
 ### Dependencies and tooling
 
-- The 2026-07-21 dependency pass resolved the reported `js-yaml`, `shell-quote`, and `brace-expansion` advisories with compatible lockfile updates. Root overrides pin the remaining upstream paths to patched `postcss` `8.5.15` and `uuid` `11.1.1`; the full workspace audit now reports zero vulnerabilities.
+- The 2026-07-21 dependency passes resolved the reported `js-yaml`, `shell-quote`, `brace-expansion`, and Hono advisories with compatible lockfile updates. Root overrides pin upstream paths to patched `postcss` `8.5.15` and `uuid` `11.1.1`, while the canonical API pins Hono `4.12.27`; the full workspace audit reports zero vulnerabilities.
 - The override paths passed the web production build, Expo Doctor 21/21, and an Xcode UUID-generation compatibility check. Preserve those checks when changing or removing the overrides in a future upstream upgrade.
 - Update pinned GitHub actions when compatible immutable revisions remove the Node 20 runtime deprecation annotation.
 - Triage the existing GitGuardian false positives in its dashboard when access is available; do not weaken secret detection.
 
 ## Next Security Gate
 
-The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. Local branch/PR review and the standard security suite passed again on 2026-07-21, including 516 tests with 3 protected live tests skipped, web build, mobile coverage, Expo Doctor 21/21, 38 guard regression tests, Docker-backed database catalog and hostile RLS tests, and the high-severity production dependency threshold. The immediate remaining web gate is the dedicated-identity TestFlight build 3 native-UI confirmation; local repository execution is not a substitute for physical native UI evidence.
+The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. Local branch/PR review and the standard security suite passed again on 2026-07-21, including 516 tests with 3 protected live tests skipped, web build, mobile coverage, Expo Doctor 21/21, 38 guard regression tests, Docker-backed database catalog and hostile RLS tests, and a zero-vulnerability full workspace audit after the Hono `4.12.27` patch. The immediate remaining web gate is the dedicated-identity TestFlight build 3 native-UI confirmation; local repository execution is not a substitute for physical native UI evidence.
 
 The immediate mobile release gate is separate: complete and record physical QA on build 3. Neither gate authorizes public claimant functionality.
 
