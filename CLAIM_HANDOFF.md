@@ -1,6 +1,6 @@
 # Sanduqkin Claimant And Release Handoff
 
-Last updated: 2026-07-20 (Asia/Dubai)
+Last updated: 2026-07-21 (Asia/Dubai)
 
 ## Purpose And Status
 
@@ -8,7 +8,7 @@ This is the active playbook for claimant, trusted-recipient, emergency-code, rev
 
 Claim applications and release are not active. The public `/claim` entry is informational, no claimant schema or evidence path is approved, and no server can decrypt owner vault content. The owner-vault and mobile release gates in `HANDOFF.md` and `SECURITY_HANDOFF.md` remain separate.
 
-Slice 1 is complete locally on `codex/mvp-landing-legal`: the public entry now exposes two tested informational route pages from one typed capability model, while authentication, intake, code entry, evidence, review, and release remain hard-disabled.
+Slice 1 is complete and pushed on `codex/mvp-landing-legal`: the public entry now exposes two tested informational route pages from one typed capability model, while authentication, intake, code entry, evidence, review, and release remain hard-disabled.
 
 ## Non-Negotiable Boundaries
 
@@ -17,6 +17,8 @@ Slice 1 is complete locally on `codex/mvp-landing-legal`: the public entry now e
 - Never submit, log, email, place in a URL, or store a complete emergency secret.
 - Never give a claimant a direct policy path to `vault_assets`, `vault_key_material`, another claim, or another claimant's evidence.
 - Released information remains ciphertext plus claimant-addressed sealed key material and decrypts only in the claimant client.
+- Every claim binds one route-specific release-material profile. Registered-recipient grants and V2 secret-wrapped MEKs are never interchangeable.
+- Registered-recipient implementation cannot begin until an approved client custody design can retain or recover the claimant private key without violating the browser-persistence and server-recovery prohibitions.
 - Claim-sensitive actions require a fresh authenticated session and enforced `aal2` in the UI, API, and database policies.
 - Claim state transitions are API/database controlled. Client-supplied owner IDs, roles, assurance levels, states, decisions, deadlines, or release eligibility are untrusted.
 - Evidence, if approved, is server-visible sensitive PII outside the normal vault zero-knowledge claim and must use an isolated private quarantine boundary.
@@ -41,10 +43,12 @@ Production hostnames are recommendations until formally approved. Public hosts m
 
 1. The owner nominates a recipient without sharing vault content.
 2. A value-free, single-use invitation lets the recipient create or link an account.
-3. The recipient enrolls MFA and generates a key pair locally; only the public key leaves the client.
-4. The unlocked owner client explicitly finalizes a recipient-addressed sealed grant.
-5. Grant replacement and revocation are supported before any claim is allowed.
-6. A later claim still requires the approved identity, evidence, cooldown, cancellation, and authorization workflow.
+3. Acceptance is bound to the same verified, normalized recipient address; stored address matching uses a versioned keyed digest, not a bare hash.
+4. The recipient enrolls MFA and generates a key pair locally; only the public key leaves the client.
+5. Key generation remains blocked until an approved native, hardware-backed, or otherwise compliant custody design exists. The current browser policy does not permit persistent claimant private keys.
+6. The unlocked owner client explicitly finalizes a recipient-addressed sealed grant.
+7. Grant replacement and revocation are supported before any claim is allowed.
+8. A later claim still requires the approved identity, evidence, cooldown, cancellation, and authorization workflow.
 
 ### V2 offline handover code
 
@@ -67,7 +71,7 @@ Do not scan grants, accept a full V1 code, silently lower KDF cost, or place eit
 - Release requires completed identity/evidence review, expired cooldown, no owner cancellation, and two distinct authorized human approvals.
 - An approver cannot review their own claim or supply both approvals.
 - Owner non-response, witness non-response, delivery failure, ambiguity, dispute, account inconsistency, or processor error moves the case to hold/manual review.
-- Release produces a time-limited claimant-specific ciphertext package; it does not change owner-vault RLS to expose source rows.
+- Release produces a time-limited claimant-specific ciphertext package containing exactly one validated release-material profile: a registered-recipient sealed grant or a V2 secret-wrapped MEK. It does not change owner-vault RLS to expose source rows.
 - Released access is read-only, expires, and can be suspended for incident response without pretending already-decrypted information can be recalled.
 
 Before stateful implementation, owner/security/legal review must approve release authority, reviewer qualifications, evidence policy, supported jurisdictions, cooldown length, appeal/dispute process, conflicts of interest, operator/data-controller identity, retention/deletion, and incident procedure.
@@ -99,7 +103,7 @@ Every transition requires an allowlisted previous state, authorized actor, idemp
 - `claim_state_events` — append-only transition history.
 - `claim_evidence` — quarantine object references, classification, scan, retention, and review state; never public URLs.
 - `claim_decisions` — independent reviewer decisions and conflict checks.
-- `release_packages` — claimant-addressed ciphertext manifest, expiry, and retrieval state.
+- `release_packages` — signed claimant-addressed ciphertext manifest, route discriminator, release-material and cancellation versions, expiry, and retrieval state.
 - `release_sessions` — bounded read-only access sessions.
 - `notification_outbox` — idempotent value-free notification jobs.
 - `claim_security_events` — value-free abuse, rate-limit, and incident signals.
@@ -139,7 +143,7 @@ Prefer a private, non-exposed workflow schema with narrow API/database functions
 
 ## Slice Plan And Stop Gates
 
-### Slice 1 — inactive claimant portal foundation — complete locally
+### Slice 1 — inactive claimant portal foundation — complete and pushed
 
 - Maintain the existing `Claim access` navigation entry and static `/claim` landing page.
 - Define the two planned route cards and planned portal stages from one typed, hard-disabled capability model.
@@ -151,13 +155,13 @@ Exit: UI foundation and tests pass; no claimant data path, schema, API, or relea
 ### Slice 2 — protocol, authority, and threat-model approval
 
 - Resolve every pending authority, identity/evidence, jurisdiction, cooldown, review, privacy, retention, incident, V2 protocol, and origin decision.
-- Produce protocol messages, cryptographic envelopes, state-transition matrix, role/capability matrix, abuse cases, test vectors, and rollback/kill-switch design.
+- Produce protocol messages, route-specific cryptographic and release envelopes, claimant-key custody decision, state-transition matrix, role/capability matrix, abuse cases, test vectors, and rollback/kill-switch design.
 
 Exit: written owner/security/legal approval and no unresolved critical threat. No live claim.
 
 ### Slice 3 — registered-recipient preparation, no release
 
-- Invitation, mandatory MFA, claimant-local keypair, public-key registration/replacement, owner-local grant finalization, revocation, and value-free notifications.
+- Only after claimant-key custody is independently approved: privacy-preserving verified-address invitation binding, mandatory MFA, claimant-local keypair, public-key registration/replacement, owner-local grant finalization, revocation, and value-free notifications.
 
 Exit: hostile auth/RLS/crypto/E2E tests pass; recipient cannot read vault data or initiate release.
 
@@ -181,7 +185,9 @@ Exit: focused security review or penetration test, restore drill, synthetic E2E,
 
 ## Active Next Slice
 
-Slice 2 is the protocol, authority, and threat-model approval package. It is documentation and test-vector design, not a stateful claimant implementation. Resolve the pending authority and policy choices, specify the registered-recipient messages and cryptographic envelopes, define the role/capability and state-transition matrices, and design the kill switch, rollback, abuse tests, and V2 compatibility boundary. Stop for written owner/security/legal approval before any claimant migration, authenticated claimant route, invitation, evidence path, or API transition is added.
+Slice 2 is now drafted for approval review in `docs/superpowers/specs/2026-07-20-claim-protocol-authority-threat-model.md`. It is the active claimant design track and does not supersede the project-wide device-validation slice in `HANDOFF.md`. The owner approved the proposed two-route product flow, all internal product directions, and protected scaffolding on 2026-07-20. The project currently has one human owner/operator, so independent security assurance, qualified legal/privacy review, and two-human reviewer separation remain unavailable. The package proposes the authority baseline, registered-recipient and V2 protocols, route-specific release contracts, claimant-key custody gate, message/envelope contracts, role/capability and transition matrices, evidence and release boundaries, abuse tests, test-vector plan, kill switches, rollback, and V1 compatibility rules.
+
+The direction is owner-approved for documentation, versioned synthetic test-vector tooling without runtime integration, and static information-only pages with every capability hard-disabled. Authentication, persistence, migrations, API routes, invitations, evidence handling, notifications, workflow processors, and release behavior remain blocked. Before registered-recipient setup, approve a claimant-key custody client that does not persist the private key in prohibited browser storage or make it server-recoverable. Before collecting real claimant data or enabling external access, resolve qualified legal/privacy review and independent security assurance. Before any approval or release capability, add a second qualified human reviewer and prove separation of duties. No protected scaffold may be described as live, legally approved, independently reviewed, or production-ready.
 
 ## Slice 1 Evidence
 
@@ -190,6 +196,17 @@ Slice 2 is the protocol, authority, and threat-model approval package. It is doc
 - Focused tests cover declared routes, content, disabled capabilities, and absence of forms, action links, Supabase, network calls, cookies, environment toggles, and browser persistence APIs.
 - Headed browser checks passed on desktop and a 390 × 844 viewport for both route links, return navigation, mobile navigation, accessible structure, and zero console errors or warnings after the smooth-scroll document marker was added.
 - No claimant schema, migration, RLS policy, Storage bucket, API route, authentication flow, evidence intake, claim state, notification, or release capability was introduced.
+
+## Slice 2 Placeholder Evidence
+
+- Both informational routes now render one typed future evidence checklist, seven-stage claimant-visible progress model, and three explicit data-visibility boundaries.
+- The registered-recipient route shows future account login, fresh MFA, grant/key recheck, and application creation as disconnected placeholders.
+- The V2 route shows future local locator/secret processing and possession proof; it does not accept or transmit a code.
+- Admin email is described only as a value-free work notice. Identity/authority documents remain assigned to a future private quarantine and are never described as email attachments.
+- Reviewers are explicitly separated from vault data: they may later see only approved claimant-submitted evidence, while released vault details remain claimant-addressed ciphertext for local read-only decryption.
+- All claimant capabilities remain hard-disabled with no environment override. `npm test --workspace @vault/web -- app/content.test.tsx app/claim/claimant-portal.test.tsx` passed 13/13; web typecheck and lint passed.
+- Headed checks passed on desktop and a 390 × 844 viewport for both route structures with no horizontal overflow, forms, inputs, main action buttons, console errors, or warnings.
+- No authentication, upload, email, database, reviewer, state-transition, or release integration was added.
 
 ## Standard Verification
 

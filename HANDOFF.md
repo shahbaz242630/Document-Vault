@@ -1,6 +1,6 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-07-20 (Asia/Dubai)
+Last updated: 2026-07-21 (Asia/Dubai)
 
 ## Start Here
 
@@ -23,7 +23,7 @@ Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its 
 - GitHub: `shahbaz242630/Document-Vault`
 - Default/release branch: `main`
 - Current feature branch: `codex/mvp-landing-legal`
-- Latest pushed feature-branch commit: `152a207` (`Fix Vercel web build filtering`); the protected cross-client smoke test and handoff updates are the current local slice.
+- Latest pushed feature-branch commit: `ff0187d` (`Add inactive claimant portal foundation`); the Slice 2 claimant approval package is the current local documentation slice.
 - `main` at consolidation: `c4f1f91` (MVP web scaffold merged through PR #33)
 - Product requirements: `Vault_BRD_v1.0.md` (document version 1.1)
 - Expected unrelated local-only items: `.playwright-mcp/` and `welcome.png`; do not commit or delete them unless explicitly requested.
@@ -108,7 +108,7 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Define durable SBOM/dependency-license ownership before 90-day GitHub artifacts expire.
 - Review artifact and log retention and periodically audit that audit metadata remains value-free.
 - Replace immutable action pins that still trigger GitHub's deprecated Node 20 action-runtime annotation when compatible upstream revisions are available.
-- Revisit accepted moderate Expo-tooling and Next/PostCSS advisories through compatible upstream releases; do not force breaking downgrades. No accepted high or critical production dependency finding was present at the last full audit.
+- Revisit the remaining moderate Expo/UUID tooling path and Next/PostCSS advisory through compatible upstream releases; do not force breaking downgrades. On 2026-07-21, compatible lockfile updates moved `js-yaml` to `4.3.0` and `shell-quote` to `1.10.0`, removing two newly reported high-severity production findings. The post-fix production audit has no high or critical finding.
 - Update the local Node runtime: this machine reports `24.2.0`, below the repository's deliberate `>=24.3.0` Node 24 range. Do not weaken the engine requirement.
 
 ### Public and claimant blockers
@@ -121,15 +121,18 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 
 Finish device-backed validation and review `codex/mvp-landing-legal` for PR readiness.
 
+This remains the single project-wide implementation slice. The parallel claimant Slice 2 track in `CLAIM_HANDOFF.md` is limited to documentation, non-runtime synthetic test-vector tooling, and static information-only pages with every capability hard-disabled. It does not authorize claimant authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, or release behavior.
+
 The repeatable local portion is complete and lives in `apps/mobile/src/features/vault/mobile-web-live-supabase-smoke.test.ts`. It passed bidirectional browser/mobile-repository decrypt and edit for four representative categories, optional and multiline fields, unknown-field preservation, ciphertext-only persistence, the browser deletion lifecycle, offline-save reconciliation, protected headers, empty local/session storage, worker relock, and tagged identity/row cleanup.
+
+The local branch/PR-readiness review completed on 2026-07-21. The full diff passed whitespace and changed-file risk scans; web production build, all workspace typechecks and lint, 516 tests with the expected 3 protected live tests skipped, mobile coverage, Expo Doctor 21/21, Phase 1/security/workflow/secret guards, 38 guard regression tests, Docker-backed Supabase catalog and hostile RLS tests, and the high-severity production dependency threshold passed. The local Supabase stack must be started with `npx supabase start --workdir supabase` because the checked-in security harness targets that project id. No unresolved high-severity branch-review finding remains.
 
 Remaining evidence:
 
 1. On TestFlight build 3, use a dedicated synthetic identity to confirm web-created records display and edit through the native UI and that the web reads the native edit.
 2. Record only value-free device/build/pass-fail evidence; remove every tagged row and test identity.
-3. Run the standard verification, inspect the complete branch diff, and resolve any PR-readiness finding before owner review.
 
-Do not deploy the protected vault, attach production domains, publish draft legal content, change Supabase Auth globally, or resume claimant implementation in this slice.
+Do not deploy the protected vault, attach production domains, publish draft legal content, change Supabase Auth globally, or begin stateful claimant implementation in this slice.
 
 ## Standard Verification
 

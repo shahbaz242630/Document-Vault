@@ -4,6 +4,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import {
+  claimantApplicationStatuses,
+  claimantDataBoundaries,
+  claimantEvidenceChecklist,
   claimantInformationRoutes,
   claimantPortalCapabilities,
   claimantPortalStages,
@@ -21,10 +24,12 @@ const routeMarkup = [ClaimPage, RegisteredRecipientClaimPage, EmergencyCodeClaim
 describe("inactive claimant portal foundation", () => {
   it("keeps every stateful claimant capability hard-disabled", () => {
     expect(claimantPortalCapabilities).toEqual({
+      adminCaseNotification: false,
       authentication: false,
       claimIntake: false,
       emergencyCodeEntry: false,
       evidenceUpload: false,
+      localClaimantDecryption: false,
       review: false,
       release: false,
     });
@@ -53,8 +58,36 @@ describe("inactive claimant portal foundation", () => {
     expect(routeMarkup).toContain("Non-response never auto-releases the MVP");
     expect(routeMarkup).toContain("time-limited claimant-addressed ciphertext package");
     expect(routeMarkup).toContain("Do not submit information here");
+    expect(routeMarkup).toContain("Documents stay out of email");
+    expect(routeMarkup).toContain("Application progress placeholder");
+    expect(routeMarkup).toContain("Approval creates claimant-addressed ciphertext");
     expect(routeMarkup).not.toMatch(/<(form|input|textarea|select|button)\b/iu);
     expect(routeMarkup).not.toMatch(/href="(?:javascript:|mailto:|tel:)/iu);
+  });
+
+  it("defines one shared evidence, status, and data-boundary model for both routes", () => {
+    expect(claimantEvidenceChecklist.length).toBeGreaterThanOrEqual(5);
+    expect(claimantApplicationStatuses.map(({ key }) => key)).toEqual([
+      "account-verified",
+      "documents-needed",
+      "submitted",
+      "owner-protection",
+      "human-review",
+      "decision",
+      "encrypted-release",
+    ]);
+    expect(claimantDataBoundaries).toHaveLength(3);
+
+    const model = JSON.stringify({
+      claimantApplicationStatuses,
+      claimantDataBoundaries,
+      claimantEvidenceChecklist,
+      claimantInformationRoutes,
+    });
+    expect(model).toContain("value-free email");
+    expect(model).toContain("documents are not emailed");
+    expect(model).toContain("complete secret");
+    expect(model).toContain("decrypts it locally");
   });
 
   it("keeps both route pages out of search indexes", () => {
@@ -81,6 +114,7 @@ describe("inactive claimant portal foundation", () => {
       "sessionStorage",
       "document.cookie",
       "process.env",
+      "mailto:",
     ]) {
       expect(source, forbidden).not.toContain(forbidden);
     }

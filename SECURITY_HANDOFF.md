@@ -1,6 +1,6 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-07-20 (Asia/Dubai)
+Last updated: 2026-07-21 (Asia/Dubai)
 
 ## Security Status
 
@@ -12,7 +12,7 @@ Current security reference points:
 
 - Mobile TestFlight build: app `1.0.0`, build `3`, EAS build `9055529c-508a-415d-872a-08708e533613`.
 - Protected release run: `29695865266`.
-- Current pushed feature branch/commit: `codex/mvp-landing-legal` at `152a207`; the protected cross-client smoke test and handoff updates are the current local slice.
+- Current pushed feature branch/commit: `codex/mvp-landing-legal` at `ff0187d`; the working tree contains the Slice 2 claimant approval package/static placeholders, synchronized handoffs, and a compatible production-audit lockfile update.
 - Supabase: existing Free project in `eu-central-1`; local stack is used for migrations and attack tests.
 - Web preview: `sanduqkin-web`, SSO protected, no custom domain, no hosted environment variables, and still serving the earlier static Phase 3 preview.
 
@@ -89,6 +89,8 @@ Current security reference points:
 
 - Current V1 emergency codes wrap the MEK safely but have no public locator and cannot support safe grant lookup.
 - Do not scan grants or submit a full secret to locate one. V2 must split a public locator from a high-entropy client-only secret and define legacy compatibility.
+- Registered-recipient and V2 releases use distinct, version-bound release-material profiles. A registered-recipient sealed grant cannot substitute for a V2 secret-wrapped MEK or vice versa.
+- Registered-recipient setup remains blocked until an approved claimant-key custody client exists. The current browser policy forbids persisting the claimant private key in browser storage, and Sanduqkin must not provide server-recoverable private-key custody.
 - Possessing a code never authorizes release.
 - No claimant schema or RLS path may be added before the protocol, threat model, release authority, roles, state machine, retention, privacy model, and abuse controls are approved.
 - Claimant evidence, if later approved, must use a private isolated quarantine boundary with randomized names, allowlisted types, strict limits, malware scanning, short-lived capabilities, retention/deletion controls, and claimant/claim-bound Storage RLS.
@@ -114,14 +116,14 @@ Current security reference points:
 
 ### Dependencies and tooling
 
-- The last full audit had no accepted high or critical production finding.
-- Moderate findings remain in Expo's upstream tooling graph and Next.js-bundled PostCSS. Do not apply breaking or invalid force fixes; update through compatible upstream releases and rerun native/security gates.
+- The 2026-07-21 audit initially reported high-severity `js-yaml` and `shell-quote` denial-of-service advisories. Compatible lockfile updates to `js-yaml` `4.3.0` and `shell-quote` `1.10.0` removed both; the post-fix production audit passes the high-severity threshold with no high or critical finding.
+- Moderate findings remain in Expo's upstream UUID/tooling graph and Next.js-bundled PostCSS. Do not apply breaking or invalid force fixes; update through compatible upstream releases and rerun native/security gates.
 - Update pinned GitHub actions when compatible immutable revisions remove the Node 20 runtime deprecation annotation.
 - Triage the existing GitGuardian false positives in its dashboard when access is available; do not weaken secret detection.
 
 ## Next Security Gate
 
-The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. The immediate remaining web gate is a dedicated-identity TestFlight build 3 native-UI confirmation followed by branch/PR review; local repository execution is not a substitute for physical native UI evidence.
+The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. Local branch/PR review and the standard security suite passed again on 2026-07-21, including 516 tests with 3 protected live tests skipped, web build, mobile coverage, Expo Doctor 21/21, 38 guard regression tests, Docker-backed database catalog and hostile RLS tests, and the high-severity production dependency threshold. The immediate remaining web gate is the dedicated-identity TestFlight build 3 native-UI confirmation; local repository execution is not a substitute for physical native UI evidence.
 
 The immediate mobile release gate is separate: complete and record physical QA on build 3. Neither gate authorizes public claimant functionality.
 

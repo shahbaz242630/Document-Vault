@@ -1,6 +1,6 @@
 # Sanduqkin Website, Owner Web Vault, And Claimant MVP Handoff
 
-Last updated: 2026-07-20 (Asia/Dubai)
+Last updated: 2026-07-21 (Asia/Dubai)
 
 ## Current Decision
 
@@ -9,7 +9,7 @@ Continue protected core-flow validation before public website publication or cla
 - API region alignment and the web workspace scaffold are merged on `main`.
 - Static landing/legal content is implemented and protected-preview-verified, but publication is parked pending owner/design/legal approval.
 - The current branch implements the protected owner web vault and shared mobile/web 17-category engine. It is committed but not deployed.
-- The repeatable local browser/mobile-repository smoke passed; the next slice is the remaining TestFlight build 3 native-UI confirmation and branch PR-readiness review.
+- The repeatable local browser/mobile-repository smoke and branch PR-readiness review passed; the remaining gate in this slice is the TestFlight build 3 native-UI confirmation.
 - `/claim` remains informational and inactive. No real claimant data, evidence intake, entitlement decision, release, or claimant decryption is authorized.
 
 Detailed pre-consolidation phase evidence is preserved in Git at commit `96e89c1` and indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
@@ -91,12 +91,14 @@ Product intent is that the latest successful sign-in becomes the only active ses
 
 1. Owner nominates a recipient and Sanduqkin sends a value-free invitation.
 2. Recipient authenticates, enrolls MFA, and creates a key pair locally.
-3. Only the public key and an approved encrypted private-key recovery package leave the client.
+3. Only the public key leaves the client; no claimant private key or server-recoverable private-key package is uploaded.
 4. The unlocked owner client creates a recipient-specific sealed MEK grant.
 5. A later claim still requires identity, evidence, challenge/cooldown, and release authorization.
 6. After authorized release, ciphertext and claimant-specific sealed material decrypt locally into a read-only view.
 
 The existing `pre_authorized_kin` symmetric-key helper is not a finished public-key or account-bound recipient protocol.
+
+Registered-recipient setup is blocked until security and privacy review approve a native, hardware-backed, or otherwise compliant custody design. The current browser policy does not permit persistent claimant private keys.
 
 ### V2 offline handover code
 
@@ -153,7 +155,7 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - Mobile unknown-field preservation and failed-mutation reconciliation.
 - Protected-route nonce CSP and security headers.
 - Repeatable local protected smoke across card, contact, medical-care, and business-interest records, including bidirectional edit/decrypt, forward-field preservation, ciphertext-only rows, browser deletion lifecycle, offline failure reconciliation, browser storage/key cleanup, protected headers, and full synthetic cleanup.
-- Current regression result: 515 tests passed, 3 protected live tests skipped by default; typecheck, lint, web build, Phase 1/security/workflow/secret guards, and the high-severity production dependency threshold passed. Expo Doctor, mobile coverage, and database guards also passed in the preceding full branch verification.
+- Current 2026-07-21 regression result: 516 tests passed, 3 protected live tests skipped by default; typecheck, lint, web build, mobile coverage, Expo Doctor 21/21, Phase 1/security/workflow/secret guards, 38 guard regression tests, Docker-backed database catalog/RLS guards, and the high-severity production dependency threshold passed. Compatible lockfile updates removed newly reported high-severity `js-yaml` and `shell-quote` findings; only the documented moderate upstream Expo/UUID and Next/PostCSS paths remain.
 
 ### Hosted state
 
@@ -163,13 +165,14 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 
 ## Execution Plan
 
-### 1. Complete protected cross-client smoke and PR review — next
+### 1. Complete protected cross-client smoke and PR review — active, local review complete
 
 The repeatable local leg passed with a dedicated identity and synthetic/tagged rows across four representative categories. It covered bidirectional browser/mobile-repository decrypt and edit, optional and multiline fields, forward-field preservation, ciphertext-only rows, browser create/update/delete/restore/permanent-delete, offline failure without a ghost record, protected headers, empty local/session storage, worker relock, and full tagged cleanup.
 
 - Repeat the cross-client display/edit path through the physical TestFlight build 3 UI with a dedicated synthetic identity; local repository execution is not physical-device evidence.
 - Record only value-free device/build/pass-fail evidence and remove all tagged data and the identity.
-- Run the standard verification and inspect the complete branch diff for PR readiness.
+
+The standard verification and complete local branch diff review passed on 2026-07-21. Docker-backed checks require the local stack started with `npx supabase start --workdir supabase`; starting from the repository root creates a different project id than the checked-in harness expects.
 
 Exit gate: physical native UI evidence and branch review pass without plaintext leakage, cross-client field loss, ghost/local-divergent state, uncleaned test data, or unresolved high-severity finding. Stop for owner review.
 
@@ -198,7 +201,7 @@ Exit gate: hosted configuration and cross-client session/data behavior pass, wit
 ### 5. Claim protocol and threat model — blocked on decisions
 
 - Resolve release authority and legal/privacy/operator responsibilities.
-- Specify V2 code, registered-recipient cryptography, state machine, roles, API, RLS, audit, error, abuse, retention, and compatibility contracts.
+- Specify V2 code, registered-recipient cryptography and claimant-key custody, route-specific release material, state machine, roles, API, RLS, audit, error, abuse, retention, and compatibility contracts.
 - Produce protocol vectors, property/replay/guessing analysis, browser KDF benchmarks, and RLS attack designs.
 
 Exit gate: written owner/security/legal approval and no unresolved critical threat. No live claim yet.
