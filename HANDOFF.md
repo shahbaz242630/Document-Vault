@@ -108,7 +108,7 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Define durable SBOM/dependency-license ownership before 90-day GitHub artifacts expire.
 - Review artifact and log retention and periodically audit that audit metadata remains value-free.
 - Replace immutable action pins that still trigger GitHub's deprecated Node 20 action-runtime annotation when compatible upstream revisions are available.
-- Revisit the remaining moderate Expo/UUID tooling path and Next/PostCSS advisory through compatible upstream releases; do not force breaking downgrades. On 2026-07-21, compatible lockfile updates moved `js-yaml` to `4.3.0` and `shell-quote` to `1.10.0`, removing two newly reported high-severity production findings. The post-fix production audit has no high or critical finding.
+- The 2026-07-21 dependency pass resolved the remaining Dependabot findings without breaking downgrades: `brace-expansion` moved to patched releases, while root overrides pin `postcss` `8.5.15` and `uuid` `11.1.1`. The full workspace audit now reports zero vulnerabilities; the override paths were validated with the web production build, Expo Doctor 21/21, and Xcode UUID generation.
 - Update the local Node runtime: this machine reports `24.2.0`, below the repository's deliberate `>=24.3.0` Node 24 range. Do not weaken the engine requirement.
 
 ### Public and claimant blockers

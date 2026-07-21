@@ -155,7 +155,7 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - Mobile unknown-field preservation and failed-mutation reconciliation.
 - Protected-route nonce CSP and security headers.
 - Repeatable local protected smoke across card, contact, medical-care, and business-interest records, including bidirectional edit/decrypt, forward-field preservation, ciphertext-only rows, browser deletion lifecycle, offline failure reconciliation, browser storage/key cleanup, protected headers, and full synthetic cleanup.
-- Current 2026-07-21 regression result: 516 tests passed, 3 protected live tests skipped by default; typecheck, lint, web build, mobile coverage, Expo Doctor 21/21, Phase 1/security/workflow/secret guards, 38 guard regression tests, Docker-backed database catalog/RLS guards, and the high-severity production dependency threshold passed. Compatible lockfile updates removed newly reported high-severity `js-yaml` and `shell-quote` findings; only the documented moderate upstream Expo/UUID and Next/PostCSS paths remain.
+- Current 2026-07-21 regression result: 516 tests passed, 3 protected live tests skipped by default; typecheck, lint, web build, mobile coverage, Expo Doctor 21/21, Phase 1/security/workflow/secret guards, 38 guard regression tests, Docker-backed database catalog/RLS guards, and the full workspace dependency audit passed. Compatible lockfile updates and patched `postcss`/`uuid` overrides resolved the reported advisories; the audit now reports zero vulnerabilities.
 
 ### Hosted state
 

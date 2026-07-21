@@ -116,8 +116,8 @@ Current security reference points:
 
 ### Dependencies and tooling
 
-- The 2026-07-21 audit initially reported high-severity `js-yaml` and `shell-quote` denial-of-service advisories. Compatible lockfile updates to `js-yaml` `4.3.0` and `shell-quote` `1.10.0` removed both; the post-fix production audit passes the high-severity threshold with no high or critical finding.
-- Moderate findings remain in Expo's upstream UUID/tooling graph and Next.js-bundled PostCSS. Do not apply breaking or invalid force fixes; update through compatible upstream releases and rerun native/security gates.
+- The 2026-07-21 dependency pass resolved the reported `js-yaml`, `shell-quote`, and `brace-expansion` advisories with compatible lockfile updates. Root overrides pin the remaining upstream paths to patched `postcss` `8.5.15` and `uuid` `11.1.1`; the full workspace audit now reports zero vulnerabilities.
+- The override paths passed the web production build, Expo Doctor 21/21, and an Xcode UUID-generation compatibility check. Preserve those checks when changing or removing the overrides in a future upstream upgrade.
 - Update pinned GitHub actions when compatible immutable revisions remove the Node 20 runtime deprecation annotation.
 - Triage the existing GitGuardian false positives in its dashboard when access is available; do not weaken secret detection.
 
