@@ -1,5 +1,5 @@
-import { AddExpandedAssetRoute } from "@/features/vault";
+import { AddSchemaDrivenAssetRoute } from "@/features/vault";
 
 export default function AddLoanDebtRoute() {
-  return <AddExpandedAssetRoute assetType="loan_debt" />;
+  return <AddSchemaDrivenAssetRoute assetType="loan_debt" />;
 }

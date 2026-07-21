@@ -84,6 +84,9 @@ export function createVaultStore({
         records.set(record.id, cloneEncryptedRecord(record));
       }
     },
+    replaceEncryptedRecord(record: VaultEncryptedAssetRecord): void {
+      records.set(record.id, cloneEncryptedRecord(record));
+    },
     softDeleteAsset: (id: string) => softDeleteAssetRecord(records, id, createTimestamp),
     updateAsset: (input: UpdateAssetInput) =>
       updateAssetRecord(records, input, createTimestamp),

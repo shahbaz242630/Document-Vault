@@ -35,7 +35,7 @@ export default function EditAssetRoute() {
             initialValues={initialValues}
             mode="edit"
             onSave={async (values) => {
-              const payload = config.createPayload(values);
+              const payload = config.createPayload(values, asset.fields);
               await updateAsset(asset.id, payload);
               router.replace({ pathname: "/vault/[id]", params: { id: asset.id } });
             }}

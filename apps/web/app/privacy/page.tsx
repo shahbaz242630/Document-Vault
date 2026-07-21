@@ -1,0 +1,30 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { LegalDocument } from "@/components/legal-document";
+
+export const metadata: Metadata = {
+  title: "Privacy notice — draft",
+  description: "Draft Sanduqkin privacy notice for review. Not yet effective.",
+};
+
+export default function PrivacyPage() {
+  return (
+    <LegalDocument
+      eyebrow="Privacy notice"
+      title="Privacy should be understandable before it is binding."
+      summary="This draft describes the current mobile, public-site, and protected owner-vault boundaries. Controller identity, approved contacts, retention schedule, transfer position, and counsel approval remain publication blockers."
+    >
+      <section><h2>1. Scope and status</h2><p>This notice is a review draft for Sanduqkin’s mobile encrypted-vault service and informational website. It is not yet an effective privacy notice. The public launch must not occur until the responsible legal entity and jurisdiction-specific disclosures are approved.</p></section>
+      <section><h2>2. Website and protected owner vault</h2><p>The public Phase 3 routes provide product, security, legal, deletion, support, accessibility, and inactive claim information. They contain no contact or claim form, advertising tracker, analytics tool, or non-essential cookie.</p><p>The separately protected login and owner-vault routes use essential authentication cookies and Supabase authentication. When the owner unlocks the browser vault, cryptography runs locally in a dedicated browser worker; the web server does not receive the readable vault or its encryption key, and remote storage receives ciphertext plus permitted metadata.</p><p>The hosting platform necessarily receives standard request information such as IP address, browser and device details, requested URL, timestamps, and security events to deliver and protect the site. Deployment protection may also set essential reviewer-access cookies.</p></section>
+      <section><h2>3. Information used by the mobile service</h2><ul><li><strong>Account data:</strong> authentication identifiers and verification state needed to operate an account.</li><li><strong>Encrypted vault data:</strong> ciphertext and the technical material required to store and synchronize it. Readable vault fields are intended to be encrypted on the device before storage.</li><li><strong>Security and operational data:</strong> limited audit events, device or session context, error and processor state needed to protect and operate the service.</li><li><strong>Subscription data:</strong> entitlement and transaction status supplied by app-store and subscription-processing services. Sanduqkin does not receive full payment-card details from an app-store purchase.</li><li><strong>Deletion and continuity state:</strong> the minimum records needed to process deletion requests and owner-prepared emergency settings.</li></ul></section>
+      <section><h2>4. Why information is used</h2><p>Information is used to create and protect accounts, store and synchronize encrypted records, provide requested product functions, maintain security and auditability, process entitlements, fulfill deletion requests, prevent misuse, and meet approved legal obligations. A final policy must identify the lawful basis for each purpose in every launch jurisdiction.</p></section>
+      <section><h2>5. Service providers and transfers</h2><p>The current architecture uses specialist providers for authentication and encrypted-data storage, web and API hosting, mobile-app distribution, and subscription entitlement processing. Those providers process limited information for their assigned service.</p><p>The final named processor list, processing locations, international-transfer position, safeguards, and change-notification method are still under legal review and must be published before this notice becomes effective.</p></section>
+      <section><h2>6. Retention and deletion</h2><p>Sanduqkin aims to keep personal data only for an approved purpose and period. The final schedule must distinguish active account data, encrypted vault records, deleted items, backups, security logs, transaction records, rejected requests, and legally required retention. Until that schedule is approved, this draft does not promise a specific deletion deadline.</p><p>Current in-app deletion instructions are described on the <Link href="/account-deletion">account deletion page</Link>.</p></section>
+      <section><h2>7. Individual choices and rights</h2><p>Depending on applicable law, people may have rights concerning access, correction, deletion, restriction, objection, portability, consent, or complaints to a regulator. Identity must be verified before an account-specific request is fulfilled. The final notice will state the applicable rights, response process, and approved privacy contact.</p></section>
+      <section><h2>8. Security and sensitive material</h2><p>Technical and organizational safeguards are designed around client-side vault encryption, authorization, database access controls, protected processors, audit events, and tested deletion. No system is risk-free. Enter credentials or vault information only in the authenticated Sanduqkin product flow; never send a password, recovery phrase, emergency code, private key, or plaintext vault record through a public information, claim, or unverified support channel.</p></section>
+      <section><h2>9. Children and eligibility</h2><p>Age and eligibility rules have not yet been approved for publication. The service must not be represented as available to children, and the public launch remains blocked until the applicable minimum age and parental-consent position are established.</p></section>
+      <section><h2>10. Contact and changes</h2><p>A verified privacy contact, responsible entity address, version history, effective date, and complaint route will be published before this notice becomes effective. Material changes will be versioned and dated rather than silently replacing the record.</p></section>
+    </LegalDocument>
+  );
+}

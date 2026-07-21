@@ -1,5 +1,5 @@
-import { AddExpandedAssetRoute } from "@/features/vault";
+import { AddSchemaDrivenAssetRoute } from "@/features/vault";
 
 export default function AddMedicalCareRoute() {
-  return <AddExpandedAssetRoute assetType="medical_care" />;
+  return <AddSchemaDrivenAssetRoute assetType="medical_care" />;
 }

@@ -6,8 +6,8 @@ import RootLayout, { metadata } from "./layout";
 import NotFoundPage from "./not-found";
 import HomePage from "./page";
 
-describe("web scaffold", () => {
-  it("renders an accessible, inert preview shell", () => {
+describe("web shell", () => {
+  it("renders an accessible, informational preview shell", () => {
     const markup = renderToStaticMarkup(
       <RootLayout>
         <HomePage />
@@ -17,8 +17,10 @@ describe("web scaffold", () => {
     expect(markup).toContain('lang="en"');
     expect(markup).toContain('href="#main-content"');
     expect(markup).toContain('id="main-content"');
-    expect(markup).toContain("The Sanduqkin web foundation is ready.");
-    expect(markup).toContain("No accounts, claims, or vault data");
+    expect(markup).toContain('tabindex="-1"');
+    expect(markup).toContain("Keep the record. Protect the meaning.");
+    expect(markup).toContain('aria-label="Primary navigation"');
+    expect(markup).toContain("Informational preview — claims are not active.");
     expect(markup).not.toContain("<form");
     expect(markup).not.toContain("<input");
   });

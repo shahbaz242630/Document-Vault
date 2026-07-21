@@ -1,12 +1,11 @@
 .git
 .codex-logs
 .vscode
-Details
+/Details
 node_modules
-apps/mobile
-packages
-patches
-supabase
+/apps/mobile
+/patches
+/supabase
 
 .env
 *.xlsx

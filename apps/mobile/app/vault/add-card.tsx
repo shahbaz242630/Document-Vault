@@ -1,5 +1,5 @@
-import { AddExpandedAssetRoute } from "@/features/vault";
+import { AddSchemaDrivenAssetRoute } from "@/features/vault";
 
 export default function AddCardRoute() {
-  return <AddExpandedAssetRoute assetType="card" />;
+  return <AddSchemaDrivenAssetRoute assetType="card" />;
 }

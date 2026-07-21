@@ -65,4 +65,16 @@ describe("createCryptoAssetPayload", () => {
       }),
     ).toThrow();
   });
+
+  it("rejects complete wallet addresses", () => {
+    expect(() =>
+      createCryptoAssetPayload({
+        approximateValueRange: "prefer_not_to_say",
+        country: "UAE",
+        cryptoType: "ethereum",
+        title: "Ethereum wallet",
+        walletIdentifier: "0x52908400098527886E0F7030069857D2E4169EE7",
+      }),
+    ).toThrow("Enter a short label or only the last 4 wallet characters, not a complete address.");
+  });
 });

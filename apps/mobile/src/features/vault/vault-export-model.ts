@@ -1,3 +1,5 @@
+import { schemaDrivenVaultCategories } from "@vault/shared-validation";
+
 import type { AssetType } from "./asset-payload";
 import type { VaultDecryptedAsset } from "./vault-store";
 
@@ -24,27 +26,7 @@ export type VaultExportModel = {
   sections: VaultExportSection[];
 };
 
-const categoryLabels: Record<AssetType, string> = {
-  bank_account: "Bank accounts",
-  business_interest: "Business interests",
-  card: "Cards",
-  contact: "Contacts",
-  crypto: "Crypto",
-  dependent_pet: "Dependents and pets",
-  digital_account: "Digital accounts",
-  document_location: "Document locations",
-  insurance: "Insurance",
-  investment: "Investments",
-  loan_debt: "Loans and debts",
-  medical_care: "Medical care",
-  other: "Other",
-  pension: "Pensions",
-  property: "Properties",
-  subscription: "Subscriptions",
-  vehicle: "Vehicles",
-};
-
-const categoryOrder = Object.keys(categoryLabels) as AssetType[];
+const categoryOrder = schemaDrivenVaultCategories.map(({ assetType }) => assetType);
 
 export function createVaultExportModel({
   assets,
@@ -71,7 +53,8 @@ function createSection(
       .filter((asset) => asset.assetType === assetType)
       .map(createExportItem)
       .sort((left, right) => left.title.localeCompare(right.title)),
-    label: categoryLabels[assetType],
+    label: schemaDrivenVaultCategories.find((definition) => definition.assetType === assetType)?.pluralLabel
+      ?? "Vault records",
   };
 }
 
