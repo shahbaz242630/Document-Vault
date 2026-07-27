@@ -127,16 +127,11 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 
 ## Active Next Slice
 
-Discuss and then build the four versioned synthetic claimant vector suites defined by the Slice 2 approval package:
+Open the next session with a claimant-integration and end-to-end flow discussion. Reconcile the inactive claimant UI, the Slice 2 approval package, and the proposed Slices 3–6 into one sequenced delivery map from registered-recipient onboarding through controlled review, encrypted release, and the read-only claimant viewer.
 
-1. registered-recipient grant V1;
-2. offline handover code V2;
-3. claimant state machine V1; and
-4. release package V1.
+The discussion must identify the first bounded implementation slice, its non-goals, dependencies, acceptance tests, rollback/kill switch, and owner stop gate. The four versioned synthetic suites—registered-recipient grant V1, offline handover code V2, claimant state V1, and release package V1—remain required protocol and cross-client test inputs, but they are no longer the sole next-session topic.
 
-This slice is deterministic test tooling and fixtures only. It must have no runtime integration, authentication, persistence, migration, API, invitation, evidence, notification, processor, or release behavior. Production identifiers and secrets are forbidden. Unknown protocol versions must fail closed, and generated vectors must be reproducible and independently verifiable where practical.
-
-The protocol, authority, legal/privacy, claimant-key custody, jurisdiction, retention, independent assurance, and reviewer-separation gates remain unresolved. Stop for owner review after agreeing the vector-suite scope and again after implementation evidence is recorded.
+The protocol, authority, legal/privacy, claimant-key custody, jurisdiction, retention, independent assurance, and reviewer-separation gates remain unresolved. Discussion and planning are authorized; runtime integration begins only after the specific bounded slice and its prerequisites are approved.
 
 Do not deploy the protected vault, attach production domains, publish draft legal content, change Supabase Auth globally, collect real claimant data, or enable claimant runtime or release behavior without the approvals in `CLAIM_HANDOFF.md` and `SECURITY_HANDOFF.md`.
 

@@ -187,14 +187,16 @@ Exit: focused security review or penetration test, restore drill, synthetic E2E,
 
 Slice 2 remains a proposed approval package in `docs/superpowers/specs/2026-07-20-claim-protocol-authority-threat-model.md`. Product direction and hard-disabled scaffolding are owner-approved, but independent security assurance, qualified legal/privacy review, claimant-key custody, jurisdiction, retention, and two-human reviewer separation remain unresolved.
 
-The next bounded engineering discussion is the scope and acceptance criteria for four versioned synthetic suites under `packages/shared-types/test-vectors/claim/`:
+Open the next session with a claimant-integration and end-to-end flow discussion. Reconcile the current inactive claimant pages and typed capability model with the proposed Slices 3–6, then produce one sequenced delivery map covering registered-recipient onboarding, V2 initiation, evidence quarantine, controlled review, encrypted release, and the read-only claimant viewer.
+
+Before implementation, agree the first bounded slice, its non-goals, prerequisites, schema/API/client boundaries, abuse cases, acceptance tests, rollback/kill switch, and owner stop gate. The four versioned synthetic suites under `packages/shared-types/test-vectors/claim/` remain required protocol and cross-client verification inputs:
 
 1. `recipient-grant-v1.json`;
 2. `offline-code-v2.json`;
 3. `claim-state-v1.json`; and
 4. `release-package-v1.json`.
 
-After owner agreement, reviewed generators and cross-client verifiers may be implemented without runtime integration. Authentication, persistence, migrations, API routes, invitations, evidence handling, notifications, workflow processors, and release behavior remain blocked. Vector completion will provide design evidence; it will not satisfy the Slice 2 approval gate or authorize Slice 3.
+The vectors are supporting prerequisites, not the sole next-session deliverable. Discussion and planning are authorized; authentication, persistence, migrations, API routes, invitations, evidence handling, notifications, workflow processors, and release behavior remain blocked until the applicable bounded slice and its unresolved approval gates are explicitly cleared.
 
 ## Slice 1 Evidence
 

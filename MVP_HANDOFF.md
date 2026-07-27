@@ -4,14 +4,14 @@ Last updated: 2026-07-27 (Asia/Dubai)
 
 ## Current Decision
 
-Continue protected core-flow validation before public website publication or claimant implementation.
+Continue protected core-flow validation while preparing a bounded claimant-integration plan; public website publication and live claimant/release behavior remain gated.
 
 - API region alignment and the web workspace scaffold are merged on `main`.
 - Static landing/legal content is implemented and protected-preview-verified, but publication is parked pending owner/design/legal approval.
 - The current branch implements the protected owner web vault and shared mobile/web 17-category engine. It is committed but not deployed.
 - The repeatable local browser/mobile-repository smoke, TestFlight build 3 native-UI confirmation, synthetic-data cleanup, and branch PR-readiness review passed.
 - The current feature branch preserves the verified mobile MVP navigation/dashboard redesign and web sign-in UI cleanup from the 2026-07-26 owner QA session. It is not a release build.
-- The next claimant discussion is limited to the four versioned synthetic vector suites in `CLAIM_HANDOFF.md`; no claimant runtime integration is authorized.
+- The next session opens with claimant integration and completion of the end-to-end flow as a planning discussion. It must select and approve a bounded first implementation slice before any claimant runtime integration begins.
 - `/claim` remains informational and inactive. No real claimant data, evidence intake, entitlement decision, release, or claimant decryption is authorized.
 
 Detailed pre-consolidation phase evidence is preserved in Git at commit `96e89c1` and indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
@@ -230,11 +230,11 @@ Only after step 5 approval:
 
 Each slice must define non-goals, tests, rollback/kill switch, value-free evidence, and an owner stop gate.
 
-## Next Session: Synthetic Claimant Protocol Vectors
+## Next Session: Claimant Integration And Flow Completion
 
-Discuss the scope and acceptance criteria for the registered-recipient grant V1, offline-code V2, claimant-state V1, and release-package V1 vector suites. After owner agreement, implement them as versioned deterministic fixtures and generators with no runtime integration.
+Discuss the complete claimant journey and convert the proposed Slices 2–6 into one sequenced integration plan. Start from the existing inactive route pages, identify the decisions and external approvals still blocking each stage, and agree the first bounded implementation slice with explicit non-goals, acceptance tests, rollback/kill switch, and an owner stop gate.
 
-Authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, and release behavior remain blocked. The vector work does not constitute Slice 2 approval or authorize Slice 3.
+The registered-recipient grant V1, offline-code V2, claimant-state V1, and release-package V1 vector suites remain required protocol and cross-client test inputs. They should be scheduled within the integration plan rather than treated as the only next deliverable. Authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, and release behavior remain disabled until their specific slice is approved.
 
 ## Cost, Resilience, And Performance Constraints
 
