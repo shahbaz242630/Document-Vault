@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { BiometricPreferencesPanel, SignOutButton } from "@/features/auth";
+import { VaultBottomNavigation } from "@/features/vault/components/vault-bottom-navigation";
 import {
   Card,
   ListRow,
@@ -29,8 +30,11 @@ export function SettingsScreen({
   const router = useRouter();
 
   return (
-    <View style={{ gap: 18 }}>
-      <ScreenHeader />
+    <View style={{ flex: 1, gap: 18 }}>
+      <ScreenHeader
+        eyebrow="Dashboard"
+        onBack={() => router.replace("/vault")}
+      />
       <SerifTitle size={28}>Settings</SerifTitle>
 
       <View style={{ gap: 8 }}>
@@ -78,6 +82,7 @@ export function SettingsScreen({
       </View>
 
       <SignOutButton storage={storage} vaultSignOut={vaultSignOut} />
+      <VaultBottomNavigation active="settings" />
     </View>
   );
 }

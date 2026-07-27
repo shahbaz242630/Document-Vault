@@ -25,3 +25,12 @@ describe("SettingsScreen emergency access entry", () => {
     );
   });
 });
+
+describe("SettingsScreen app navigation", () => {
+  it("returns to the dashboard without exposing auth history and keeps the footer", () => {
+    const source = readFileSync(resolve(__dirname, "settings-screen.tsx"), "utf8");
+
+    expect(source).toContain('onBack={() => router.replace("/vault")}');
+    expect(source).toContain('<VaultBottomNavigation active="settings" />');
+  });
+});

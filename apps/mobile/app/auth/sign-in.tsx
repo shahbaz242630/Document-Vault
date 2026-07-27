@@ -1,4 +1,4 @@
-import { EmailPasswordAuthForm } from "@/features/auth";
+import { EmailPasswordAuthForm } from "@/features/auth/components/email-password-auth-form";
 import { Screen } from "@/shared/ui";
 
 export default function SignInRoute() {

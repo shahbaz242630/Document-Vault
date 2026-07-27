@@ -10,17 +10,9 @@ import {
   useState,
 } from "react";
 
-import {
-  createBiometricStorage,
-  createMekStorage,
-  defaultAuditLog,
-  type AuditEventType,
-} from "@/features/auth";
-import {
-  fromBase64,
-  generateMasterEncryptionKey,
-  toBase64,
-} from "@/shared/crypto/vault-crypto";
+import { defaultAuditLog, type AuditEventType } from "@/features/auth/audit-log";
+import { createBiometricStorage } from "@/features/auth/biometric-storage";
+import { createMekStorage } from "@/features/auth/mek-storage";
 import * as ExpoSecureStore from "expo-secure-store";
 
 import type { AssetPlaintextPayload } from "./asset-payload";
@@ -28,11 +20,7 @@ import {
   createSupabaseVaultRepository,
   type SupabaseVaultClient,
 } from "./supabase-vault-repository";
-import {
-  createVaultSession,
-  type VaultAssetRepository,
-  type VaultSession,
-} from "./vault-session";
+import type { VaultAssetRepository, VaultSession } from "./vault-session";
 import type {
   SealedEmergencyCodeGrantRepository,
   SealedEmergencyCodeSetupOptions,
@@ -209,6 +197,13 @@ function useStartupSession({
     let isMounted = true;
 
     async function initializeSession() {
+      if (
+        __DEV__ &&
+        process.env.EXPO_PUBLIC_SKIP_STARTUP_VAULT === "1"
+      ) {
+        return;
+      }
+
       const storage = createBiometricStorage(ExpoSecureStore);
       const biometricEnabled = await storage.isEnabled();
       const cachedKey = await storage.getKey();
@@ -221,6 +216,13 @@ function useStartupSession({
       }
 
       const key = await loadStartupVaultKey();
+      if (!key) {
+        return;
+      }
+      const [{ toBase64 }, { createVaultSession }] = await Promise.all([
+        import("@/shared/crypto/vault-crypto"),
+        import("./vault-session"),
+      ]);
       const newSession = createVaultSession({ key });
 
       if (isMounted) {
@@ -251,6 +253,10 @@ function useVaultInitialize({
 }) {
   return useCallback(
     async (keyBase64: string, client?: SupabaseVaultClient) => {
+      const [{ fromBase64 }, { createVaultSession }] = await Promise.all([
+        import("@/shared/crypto/vault-crypto"),
+        import("./vault-session"),
+      ]);
       const key = await fromBase64(keyBase64);
       const newSession = createVaultSession({
         key,
@@ -373,11 +379,16 @@ export function useVaultSession(): VaultSessionContextValue {
   return value;
 }
 
-async function loadStartupVaultKey() {
+async function loadStartupVaultKey(): Promise<Uint8Array | null> {
   const mekStorage = createMekStorage(ExpoSecureStore);
   const storedMek = await mekStorage.get();
 
-  return storedMek ? fromBase64(storedMek) : generateMasterEncryptionKey();
+  if (!storedMek) {
+    return null;
+  }
+
+  const { fromBase64 } = await import("@/shared/crypto/vault-crypto");
+  return fromBase64(storedMek);
 }
 
 function clearVaultSession(setters: VaultSessionStateSetters) {

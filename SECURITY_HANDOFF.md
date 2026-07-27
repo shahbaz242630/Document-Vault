@@ -1,6 +1,6 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-07-21 (Asia/Dubai)
+Last updated: 2026-07-27 (Asia/Dubai)
 
 ## Security Status
 
@@ -12,7 +12,7 @@ Current security reference points:
 
 - Mobile TestFlight build: app `1.0.0`, build `3`, EAS build `9055529c-508a-415d-872a-08708e533613`.
 - Protected release run: `29695865266`.
-- Current pushed feature branch/commit: `codex/mvp-landing-legal` at `ff0187d`; the working tree contains the Slice 2 claimant approval package/static placeholders, synchronized handoffs, and a compatible production-audit lockfile update.
+- Current feature branch: `codex/fix-hono-alerts`; latest pushed commit `9292014` patches the Hono advisories, and the branch contains the preserved July 26 owner UI/login consolidation.
 - Supabase: existing Free project in `eu-central-1`; local stack is used for migrations and attack tests.
 - Web preview: `sanduqkin-web`, SSO protected, no custom domain, no hosted environment variables, and still serving the earlier static Phase 3 preview.
 
@@ -102,7 +102,7 @@ Current security reference points:
 ### Immediate
 
 - Complete multi-day physical-device security QA on TestFlight build 3, including Keychain/Secure Enclave behavior, biometrics, background locking, screenshot protection, recovery, emergency access, encrypted CRUD, and sign-out/return.
-- Complete the remaining TestFlight build 3 native-UI leg of the protected browser/native synthetic smoke before deploying the owner web vault; the repeatable local browser/mobile-repository leg is complete.
+- The TestFlight build 3 native-UI leg of the protected browser/native synthetic smoke is complete on an iPhone 12 running iOS 26.5.2: the native app displayed and edited a web-created encrypted record, the web read the native edit, and the tagged record was permanently removed.
 - Complete TestFlight metadata and initial GCC territory configuration; keep France disabled until French ANSSI approval.
 - Finalize the U.S. export-classification rationale before setting persistent iOS compliance metadata.
 
@@ -116,16 +116,18 @@ Current security reference points:
 
 ### Dependencies and tooling
 
-- The 2026-07-21 dependency passes resolved the reported `js-yaml`, `shell-quote`, `brace-expansion`, and Hono advisories with compatible lockfile updates. Root overrides pin upstream paths to patched `postcss` `8.5.15` and `uuid` `11.1.1`, while the canonical API pins Hono `4.12.27`; the full workspace audit reports zero vulnerabilities.
+- The 2026-07-21 dependency pass resolved the advisories known at that time. A 2026-07-27 production audit reports four high-severity findings: nested `brace-expansion` `5.0.7`, Next-bundled PostCSS `8.4.31`, and Sharp `0.34.5`. Next.js is now pinned to the latest stable `16.2.12` and the root PostCSS override to `8.5.23`; no compatible stable Next.js release currently removes the remaining exact transitive paths. Keep the web deployment blocked, monitor stable upstream patches, and rerun the full build/audit when upgrading.
 - The override paths passed the web production build, Expo Doctor 21/21, and an Xcode UUID-generation compatibility check. Preserve those checks when changing or removing the overrides in a future upstream upgrade.
 - Update pinned GitHub actions when compatible immutable revisions remove the Node 20 runtime deprecation annotation.
 - Triage the existing GitGuardian false positives in its dashboard when access is available; do not weaken secret detection.
 
 ## Next Security Gate
 
-The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. Local branch/PR review and the standard security suite passed again on 2026-07-21, including 516 tests with 3 protected live tests skipped, web build, mobile coverage, Expo Doctor 21/21, 38 guard regression tests, Docker-backed database catalog and hostile RLS tests, and a zero-vulnerability full workspace audit after the Hono `4.12.27` patch. The immediate remaining web gate is the dedicated-identity TestFlight build 3 native-UI confirmation; local repository execution is not a substitute for physical native UI evidence.
+The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. Local branch/PR review and the standard security suite passed on 2026-07-21, including 516 tests with 3 protected live tests skipped, web build, mobile coverage, Expo Doctor 21/21, 38 guard regression tests, Docker-backed database catalog and hostile RLS tests, and the dependency audit available at that time. The dedicated-identity TestFlight build 3 native-UI confirmation also passed. The newer dependency findings recorded above are now an additional protected-web deployment blocker.
 
-The immediate mobile release gate is separate: complete and record physical QA on build 3. Neither gate authorizes public claimant functionality.
+The remaining mobile release gate is the broader multi-day physical QA on build 3. Completion of the cross-client gate does not authorize public claimant functionality.
+
+The next claimant security work is limited to discussing and, after owner agreement, building the four deterministic synthetic protocol vector suites specified in `CLAIM_HANDOFF.md`. Vector generators and fixtures must contain no production identifiers or secrets, must reject unknown versions closed, and must not connect to runtime authentication, storage, APIs, evidence, notifications, processors, or release paths.
 
 ## Standard Security Verification
 

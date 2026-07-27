@@ -1,13 +1,13 @@
-import { VaultDashboard, useVaultSession } from "@/features/vault";
+import { VaultAddMenu, useVaultSession } from "@/features/vault";
 import { MutedText, Screen } from "@/shared/ui";
 
-export default function VaultRoute() {
-  const { assets, isReady } = useVaultSession();
+export default function VaultAddRoute() {
+  const { isReady } = useVaultSession();
 
   return (
     <Screen>
       {isReady ? (
-        <VaultDashboard assets={assets} />
+        <VaultAddMenu />
       ) : (
         <MutedText style={{ fontSize: 17 }}>Opening vault...</MutedText>
       )}

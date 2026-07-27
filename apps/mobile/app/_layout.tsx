@@ -26,8 +26,9 @@ import { Stack } from "expo-router/stack";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 
-import { AppLockOverlay, RecoveryPhraseSessionProvider } from "@/features/auth";
-import { VaultSessionProvider } from "@/features/vault";
+import { AppLockOverlay } from "@/features/auth/components/app-lock-overlay";
+import { RecoveryPhraseSessionProvider } from "@/features/auth/recovery-phrase-session-context";
+import { VaultSessionProvider } from "@/features/vault/vault-session-context";
 import { initializeSslPinningIfAvailable } from "@/shared/security/ssl-pinning";
 import { colors } from "@/shared/theme/colors";
 import {

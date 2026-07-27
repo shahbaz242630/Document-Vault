@@ -14,15 +14,23 @@ describe("Emergency access settings route", () => {
   it("stores only an interruption marker while the one-time code is visible", () => {
     const source = readFileSync(resolve(__dirname, "../../app/settings/emergency-access.tsx"), "utf8");
 
-    expect(source).toContain('SecureStore.setItemAsync(pendingConfirmationKey, "true")');
-    expect(source).not.toContain("SecureStore.setItemAsync(pendingConfirmationKey, result.code)");
-    expect(source).not.toContain("SecureStore.setItemAsync(pendingConfirmationKey, oneTimeCode)");
+    expect(source).toContain(
+      'SecureStore.setItemAsync(emergencyAccessPendingConfirmationKey, "true")',
+    );
+    expect(source).not.toContain(
+      "SecureStore.setItemAsync(emergencyAccessPendingConfirmationKey, result.code)",
+    );
+    expect(source).not.toContain(
+      "SecureStore.setItemAsync(emergencyAccessPendingConfirmationKey, oneTimeCode)",
+    );
   });
 
   it("recovers an interrupted setup only from the marker plus an active grant", () => {
     const source = readFileSync(resolve(__dirname, "../../app/settings/emergency-access.tsx"), "utf8");
 
-    expect(source).toContain("SecureStore.getItemAsync(pendingConfirmationKey)");
+    expect(source).toContain(
+      "SecureStore.getItemAsync(emergencyAccessPendingConfirmationKey)",
+    );
     expect(source).toContain("repository.loadActiveSealedCodeGrant()");
     expect(source).toContain('"interrupted"');
   });

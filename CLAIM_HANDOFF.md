@@ -1,6 +1,6 @@
 # Sanduqkin Claimant And Release Handoff
 
-Last updated: 2026-07-21 (Asia/Dubai)
+Last updated: 2026-07-27 (Asia/Dubai)
 
 ## Purpose And Status
 
@@ -8,7 +8,7 @@ This is the active playbook for claimant, trusted-recipient, emergency-code, rev
 
 Claim applications and release are not active. The public `/claim` entry is informational, no claimant schema or evidence path is approved, and no server can decrypt owner vault content. The owner-vault and mobile release gates in `HANDOFF.md` and `SECURITY_HANDOFF.md` remain separate.
 
-Slice 1 is complete and pushed on `codex/mvp-landing-legal`: the public entry now exposes two tested informational route pages from one typed capability model, while authentication, intake, code entry, evidence, review, and release remain hard-disabled.
+Slice 1 is complete and merged into `main` through PR #34 (`2c82c93`): the public entry exposes two tested informational route pages from one typed capability model, while authentication, intake, code entry, evidence, review, and release remain hard-disabled.
 
 ## Non-Negotiable Boundaries
 
@@ -143,7 +143,7 @@ Prefer a private, non-exposed workflow schema with narrow API/database functions
 
 ## Slice Plan And Stop Gates
 
-### Slice 1 — inactive claimant portal foundation — complete and pushed
+### Slice 1 — inactive claimant portal foundation — complete and merged
 
 - Maintain the existing `Claim access` navigation entry and static `/claim` landing page.
 - Define the two planned route cards and planned portal stages from one typed, hard-disabled capability model.
@@ -185,9 +185,16 @@ Exit: focused security review or penetration test, restore drill, synthetic E2E,
 
 ## Active Next Slice
 
-Slice 2 is now drafted for approval review in `docs/superpowers/specs/2026-07-20-claim-protocol-authority-threat-model.md`. It is the active claimant design track and does not supersede the project-wide device-validation slice in `HANDOFF.md`. The owner approved the proposed two-route product flow, all internal product directions, and protected scaffolding on 2026-07-20. The project currently has one human owner/operator, so independent security assurance, qualified legal/privacy review, and two-human reviewer separation remain unavailable. The package proposes the authority baseline, registered-recipient and V2 protocols, route-specific release contracts, claimant-key custody gate, message/envelope contracts, role/capability and transition matrices, evidence and release boundaries, abuse tests, test-vector plan, kill switches, rollback, and V1 compatibility rules.
+Slice 2 remains a proposed approval package in `docs/superpowers/specs/2026-07-20-claim-protocol-authority-threat-model.md`. Product direction and hard-disabled scaffolding are owner-approved, but independent security assurance, qualified legal/privacy review, claimant-key custody, jurisdiction, retention, and two-human reviewer separation remain unresolved.
 
-The direction is owner-approved for documentation, versioned synthetic test-vector tooling without runtime integration, and static information-only pages with every capability hard-disabled. Authentication, persistence, migrations, API routes, invitations, evidence handling, notifications, workflow processors, and release behavior remain blocked. Before registered-recipient setup, approve a claimant-key custody client that does not persist the private key in prohibited browser storage or make it server-recoverable. Before collecting real claimant data or enabling external access, resolve qualified legal/privacy review and independent security assurance. Before any approval or release capability, add a second qualified human reviewer and prove separation of duties. No protected scaffold may be described as live, legally approved, independently reviewed, or production-ready.
+The next bounded engineering discussion is the scope and acceptance criteria for four versioned synthetic suites under `packages/shared-types/test-vectors/claim/`:
+
+1. `recipient-grant-v1.json`;
+2. `offline-code-v2.json`;
+3. `claim-state-v1.json`; and
+4. `release-package-v1.json`.
+
+After owner agreement, reviewed generators and cross-client verifiers may be implemented without runtime integration. Authentication, persistence, migrations, API routes, invitations, evidence handling, notifications, workflow processors, and release behavior remain blocked. Vector completion will provide design evidence; it will not satisfy the Slice 2 approval gate or authorize Slice 3.
 
 ## Slice 1 Evidence
 

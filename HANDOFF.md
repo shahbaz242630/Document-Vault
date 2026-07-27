@@ -1,6 +1,6 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-07-21 (Asia/Dubai)
+Last updated: 2026-07-27 (Asia/Dubai)
 
 ## Start Here
 
@@ -22,19 +22,22 @@ Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
 - GitHub: `shahbaz242630/Document-Vault`
 - Default/release branch: `main`
-- Current feature branch: `codex/mvp-landing-legal`
-- Latest pushed feature-branch commit: `ff0187d` (`Add inactive claimant portal foundation`); the Slice 2 claimant approval package is the current local documentation slice.
-- `main` at consolidation: `c4f1f91` (MVP web scaffold merged through PR #33)
+- Current feature branch: `codex/fix-hono-alerts`
+- Latest pushed feature-branch commit: `9292014` (`Patch Hono security advisories`).
+- Current `origin/main`: `2c82c93` (`Complete secure MVP claimant and vault slice`, PR #34).
+- The current feature branch contains the preserved July 26 owner-approved web login and mobile MVP UI/UX consolidation; it is not a release build.
 - Product requirements: `Vault_BRD_v1.0.md` (document version 1.1)
-- Expected unrelated local-only items: `.playwright-mcp/` and `welcome.png`; do not commit or delete them unless explicitly requested.
+- Expected unrelated local-only items include `.playwright-mcp/`, `.codex-runtime/`, and `welcome.png`; do not commit or delete them unless explicitly requested.
 
 ## Current Product State
 
 ### Mobile owner vault
 
 - App version `1.0.0`, TestFlight build `3`, is the current Supabase-enabled test build.
-- Build 3 was produced by protected GitHub run `29695865266`, processed by App Store Connect, cleared for the current encryption/distribution scope, assigned manually to `GCC Internal Testers`, installed on the owner's iPhone, and verified for password sign-in, local vault unlock, and web-to-mobile encrypted-record visibility.
+- Build 3 was produced by protected GitHub run `29695865266`, processed by App Store Connect, cleared for the current encryption/distribution scope, assigned manually to `GCC Internal Testers`, installed on an iPhone 12 running iOS 26.5.2, and verified for password sign-in, local vault unlock, web-to-mobile encrypted-record visibility, native edit, web read-back, and permanent synthetic-data cleanup.
 - Phase 1 remains a controlled internal test, not a production-readiness declaration. Multi-day physical-device functional and security QA is still open.
+- The current feature branch has a dedicated Dashboard, separate Add and Saved Records pages, explicit Dashboard returns, and an icon-based Home/Add/Records/Settings/Lock footer.
+- Dashboard content now includes live encrypted-record coverage, a safe data-derived next-reference suggestion, and live emergency-readiness status from the existing sealed emergency grant. All cards use one consistent surface treatment.
 
 ### Owner web vault
 
@@ -81,6 +84,11 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Cross-client crypto vector, browser Web Worker key boundary, live mobile-to-web and web-to-mobile encrypted bank-account proof, and shared 17-category owner-vault parity.
 - Forward-compatible encrypted-field preservation and failure reconciliation across mobile persistence operations.
 - Local authenticated browser/mobile-repository smoke across card, contact, medical-care, and business-interest records: bidirectional decrypt/edit, unknown-field preservation, ciphertext-only rows, deletion lifecycle, offline-save reconciliation, empty browser storage, worker relock, protected headers, and complete tagged-row/account cleanup.
+- Refined public landing-to-sign-in navigation and aligned the protected web login form.
+- Completed the 2026-07-26 Android-emulator owner-flow redesign: Dashboard separation, Add and Saved Records destinations, explicit back routes, correctly wired icon footer, footer Lock action, removal of duplicate header controls, live coverage, and consistent card styling.
+- Added a live emergency-readiness Dashboard card using the existing Supabase sealed grant and secure interruption marker, including seven-day on-device reminder deferral for missing or interrupted setup. The controlled test account reported `Ready` without changing its grant.
+- Verified controlled TestFlight-created test entries reached encrypted Supabase storage and the selected deleted test item was fully removed.
+- The 2026-07-27 consolidation passed repository typecheck and lint, mobile 377 tests with 3 protected skips, web 81 tests, the Next.js `16.2.12` production build, Expo Doctor 21/21, and Phase 1/security/mobile-secret guards. The production audit remains blocked as recorded below.
 
 ## Current Blockers And Technical Debt
 
@@ -108,7 +116,7 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Define durable SBOM/dependency-license ownership before 90-day GitHub artifacts expire.
 - Review artifact and log retention and periodically audit that audit metadata remains value-free.
 - Replace immutable action pins that still trigger GitHub's deprecated Node 20 action-runtime annotation when compatible upstream revisions are available.
-- The 2026-07-21 dependency passes resolved the reported Dependabot findings without breaking downgrades: `brace-expansion` moved to patched releases, root overrides pin `postcss` `8.5.15` and `uuid` `11.1.1`, and the canonical API pins patched Hono `4.12.27`. The full workspace audit reports zero vulnerabilities; repository-wide tests, typecheck, lint, and security guards passed after the Hono update, while the override paths were also validated with the web production build, Expo Doctor 21/21, and Xcode UUID generation.
+- The 2026-07-21 dependency pass resolved the advisories known at that time. On 2026-07-27, a fresh production audit reported four high-severity findings in the stable Next.js dependency path: nested `brace-expansion` `5.0.7`, Next-bundled PostCSS `8.4.31`, and Sharp `0.34.5`. Next.js was raised to the latest stable `16.2.12` and the root PostCSS override to `8.5.23`, but no compatible stable Next.js release currently removes those exact transitive paths. Do not describe the audit as clean or deploy the web surface until patched stable dependencies are available and verified.
 - Update the local Node runtime: this machine reports `24.2.0`, below the repository's deliberate `>=24.3.0` Node 24 range. Do not weaken the engine requirement.
 
 ### Public and claimant blockers
@@ -119,20 +127,18 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 
 ## Active Next Slice
 
-Finish device-backed validation and review `codex/mvp-landing-legal` for PR readiness.
+Discuss and then build the four versioned synthetic claimant vector suites defined by the Slice 2 approval package:
 
-This remains the single project-wide implementation slice. The parallel claimant Slice 2 track in `CLAIM_HANDOFF.md` is limited to documentation, non-runtime synthetic test-vector tooling, and static information-only pages with every capability hard-disabled. It does not authorize claimant authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, or release behavior.
+1. registered-recipient grant V1;
+2. offline handover code V2;
+3. claimant state machine V1; and
+4. release package V1.
 
-The repeatable local portion is complete and lives in `apps/mobile/src/features/vault/mobile-web-live-supabase-smoke.test.ts`. It passed bidirectional browser/mobile-repository decrypt and edit for four representative categories, optional and multiline fields, unknown-field preservation, ciphertext-only persistence, the browser deletion lifecycle, offline-save reconciliation, protected headers, empty local/session storage, worker relock, and tagged identity/row cleanup.
+This slice is deterministic test tooling and fixtures only. It must have no runtime integration, authentication, persistence, migration, API, invitation, evidence, notification, processor, or release behavior. Production identifiers and secrets are forbidden. Unknown protocol versions must fail closed, and generated vectors must be reproducible and independently verifiable where practical.
 
-The local branch/PR-readiness review completed on 2026-07-21. The full diff passed whitespace and changed-file risk scans; web production build, all workspace typechecks and lint, 516 tests with the expected 3 protected live tests skipped, mobile coverage, Expo Doctor 21/21, Phase 1/security/workflow/secret guards, 38 guard regression tests, Docker-backed Supabase catalog and hostile RLS tests, and the high-severity production dependency threshold passed. The local Supabase stack must be started with `npx supabase start --workdir supabase` because the checked-in security harness targets that project id. No unresolved high-severity branch-review finding remains.
+The protocol, authority, legal/privacy, claimant-key custody, jurisdiction, retention, independent assurance, and reviewer-separation gates remain unresolved. Stop for owner review after agreeing the vector-suite scope and again after implementation evidence is recorded.
 
-Remaining evidence:
-
-1. On TestFlight build 3, use a dedicated synthetic identity to confirm web-created records display and edit through the native UI and that the web reads the native edit.
-2. Record only value-free device/build/pass-fail evidence; remove every tagged row and test identity.
-
-Do not deploy the protected vault, attach production domains, publish draft legal content, change Supabase Auth globally, or begin stateful claimant implementation in this slice.
+Do not deploy the protected vault, attach production domains, publish draft legal content, change Supabase Auth globally, collect real claimant data, or enable claimant runtime or release behavior without the approvals in `CLAIM_HANDOFF.md` and `SECURITY_HANDOFF.md`.
 
 ## Standard Verification
 

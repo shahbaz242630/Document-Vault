@@ -9,8 +9,17 @@ describe("createVaultDashboardViewModel", () => {
     expect(viewModel).toEqual({
       activeCount: 0,
       categories: [],
+      coverageCount: 0,
+      coverageGroups: [
+        expect.objectContaining({ count: 0, id: "financial", isCovered: false }),
+        expect.objectContaining({ count: 0, id: "property", isCovered: false }),
+        expect.objectContaining({ count: 0, id: "people", isCovered: false }),
+        expect.objectContaining({ count: 0, id: "digital", isCovered: false }),
+      ],
+      coveragePercent: 0,
       hasAssets: false,
       items: [],
+      nextSuggestedGroup: expect.objectContaining({ id: "financial" }),
     });
   });
 
@@ -52,6 +61,14 @@ describe("createVaultDashboardViewModel", () => {
           routeHref: "/vault/insurance",
         },
       ],
+      coverageCount: 1,
+      coverageGroups: [
+        expect.objectContaining({ count: 3, id: "financial", isCovered: true }),
+        expect.objectContaining({ count: 0, id: "property", isCovered: false }),
+        expect.objectContaining({ count: 0, id: "people", isCovered: false }),
+        expect.objectContaining({ count: 0, id: "digital", isCovered: false }),
+      ],
+      coveragePercent: 25,
       hasAssets: true,
       items: [
         {
@@ -70,6 +87,20 @@ describe("createVaultDashboardViewModel", () => {
           title: "Savings reference",
         },
       ],
+      nextSuggestedGroup: expect.objectContaining({ id: "property" }),
     });
+  });
+
+  it("reports complete coverage without inventing a readiness score", () => {
+    const viewModel = createVaultDashboardViewModel([
+      { assetType: "bank_account", fields: {}, id: "1", title: "Bank" },
+      { assetType: "property", fields: {}, id: "2", title: "Home" },
+      { assetType: "contact", fields: {}, id: "3", title: "Contact" },
+      { assetType: "digital_account", fields: {}, id: "4", title: "Email" },
+    ]);
+
+    expect(viewModel.coverageCount).toBe(4);
+    expect(viewModel.coveragePercent).toBe(100);
+    expect(viewModel.nextSuggestedGroup).toBeNull();
   });
 });

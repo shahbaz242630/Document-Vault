@@ -5,13 +5,10 @@ import { View } from "react-native";
 import {
   createSupabaseKeyMaterialRepository,
   type SupabaseKeyMaterialClient,
-  type SupabaseVaultClient,
-  useVaultSession,
-} from "@/features/vault";
+} from "@/features/vault/supabase-key-material-repository";
+import type { SupabaseVaultClient } from "@/features/vault/supabase-vault-repository";
+import { useVaultSession } from "@/features/vault/vault-session-context";
 import { createSupabaseClient } from "@/shared/api/supabase-client";
-import { deriveKEK } from "@/shared/crypto/kek-derivation";
-import { unwrapMEK } from "@/shared/crypto/mek-wrapping";
-import { toBase64 } from "@/shared/crypto/vault-crypto";
 import {
   BodyText,
   ErrorText,
@@ -358,6 +355,12 @@ async function routeToUnlockedVault({
   if (!supabaseClient) {
     throw new Error("Supabase is not configured yet.");
   }
+
+  const [{ deriveKEK }, { unwrapMEK }, { toBase64 }] = await Promise.all([
+    import("@/shared/crypto/kek-derivation"),
+    import("@/shared/crypto/mek-wrapping"),
+    import("@/shared/crypto/vault-crypto"),
+  ]);
 
   await unlockReturningUserVault({
     deriveKEK,
