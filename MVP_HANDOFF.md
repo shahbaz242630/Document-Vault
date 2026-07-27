@@ -158,7 +158,7 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - Mobile unknown-field preservation and failed-mutation reconciliation.
 - Protected-route nonce CSP and security headers.
 - Repeatable local protected smoke across card, contact, medical-care, and business-interest records, including bidirectional edit/decrypt, forward-field preservation, ciphertext-only rows, browser deletion lifecycle, offline failure reconciliation, browser storage/key cleanup, protected headers, and full synthetic cleanup.
-- The 2026-07-21 regression passed 516 tests with 3 protected live tests skipped, typecheck, lint, web build, mobile coverage, Expo Doctor 21/21, security/workflow guards, database catalog/RLS guards, and the dependency audit as it existed then. A 2026-07-27 audit now reports four high-severity findings in stable Next.js transitive dependencies; see `SECURITY_HANDOFF.md`. The protected web surface remains blocked from deployment.
+- The 2026-07-27 regression passed mobile 377 tests with 3 protected live tests skipped, web 81 tests, repository typecheck and lint, the Next.js `16.2.12` production build, Expo Doctor 21/21, Phase 1/security/mobile-secret guards, and a production dependency audit reporting zero vulnerabilities. The protected web surface remains blocked from deployment for the remaining release-readiness work described in this handoff.
 
 ### Mobile MVP UI/UX session — 2026-07-26
 

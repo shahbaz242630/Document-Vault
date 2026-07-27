@@ -88,7 +88,7 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Completed the 2026-07-26 Android-emulator owner-flow redesign: Dashboard separation, Add and Saved Records destinations, explicit back routes, correctly wired icon footer, footer Lock action, removal of duplicate header controls, live coverage, and consistent card styling.
 - Added a live emergency-readiness Dashboard card using the existing Supabase sealed grant and secure interruption marker, including seven-day on-device reminder deferral for missing or interrupted setup. The controlled test account reported `Ready` without changing its grant.
 - Verified controlled TestFlight-created test entries reached encrypted Supabase storage and the selected deleted test item was fully removed.
-- The 2026-07-27 consolidation passed repository typecheck and lint, mobile 377 tests with 3 protected skips, web 81 tests, the Next.js `16.2.12` production build, Expo Doctor 21/21, and Phase 1/security/mobile-secret guards. The production audit remains blocked as recorded below.
+- The 2026-07-27 consolidation passed repository typecheck and lint, mobile 377 tests with 3 protected skips, web 81 tests, the Next.js `16.2.12` production build, Expo Doctor 21/21, Phase 1/security/mobile-secret guards, and a production dependency audit reporting zero vulnerabilities.
 
 ## Current Blockers And Technical Debt
 
@@ -116,7 +116,7 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Define durable SBOM/dependency-license ownership before 90-day GitHub artifacts expire.
 - Review artifact and log retention and periodically audit that audit metadata remains value-free.
 - Replace immutable action pins that still trigger GitHub's deprecated Node 20 action-runtime annotation when compatible upstream revisions are available.
-- The 2026-07-21 dependency pass resolved the advisories known at that time. On 2026-07-27, a fresh production audit reported four high-severity findings in the stable Next.js dependency path: nested `brace-expansion` `5.0.7`, Next-bundled PostCSS `8.4.31`, and Sharp `0.34.5`. Next.js was raised to the latest stable `16.2.12` and the root PostCSS override to `8.5.23`, but no compatible stable Next.js release currently removes those exact transitive paths. Do not describe the audit as clean or deploy the web surface until patched stable dependencies are available and verified.
+- The four 2026-07-27 production dependency findings are resolved: the production `glob@13.0.6` path uses `brace-expansion` `5.0.8`, Next.js uses PostCSS `8.5.23` and Sharp `0.35.3`, and the production audit reports zero vulnerabilities. Preserve the scoped overrides and the lockfile minimum-version checks until compatible upstream dependency ranges make them unnecessary.
 - Update the local Node runtime: this machine reports `24.2.0`, below the repository's deliberate `>=24.3.0` Node 24 range. Do not weaken the engine requirement.
 
 ### Public and claimant blockers

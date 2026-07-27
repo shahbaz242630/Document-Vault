@@ -116,8 +116,8 @@ Current security reference points:
 
 ### Dependencies and tooling
 
-- The 2026-07-21 dependency pass resolved the advisories known at that time. A 2026-07-27 production audit reports four high-severity findings: nested `brace-expansion` `5.0.7`, Next-bundled PostCSS `8.4.31`, and Sharp `0.34.5`. Next.js is now pinned to the latest stable `16.2.12` and the root PostCSS override to `8.5.23`; no compatible stable Next.js release currently removes the remaining exact transitive paths. Keep the web deployment blocked, monitor stable upstream patches, and rerun the full build/audit when upgrading.
-- The override paths passed the web production build, Expo Doctor 21/21, and an Xcode UUID-generation compatibility check. Preserve those checks when changing or removing the overrides in a future upstream upgrade.
+- The four 2026-07-27 high-severity production findings are resolved. Scoped root overrides now keep `glob@13.0.6` on `brace-expansion` `5.0.8` and Next.js `16.2.12` on PostCSS `8.5.23` and Sharp `0.35.3`; the production audit reports zero vulnerabilities.
+- `scripts/security-check.cjs` now rejects production lockfile resolutions below `brace-expansion` `5.0.8`, PostCSS `8.5.18`, or Sharp `0.35.0`. The resolved paths passed the web production build and Expo Doctor 21/21. `npm ls` identifies the PostCSS and Sharp resolutions as intentional out-of-range Next.js overrides; preserve the scoped overrides and compatibility checks until upstream ranges make them unnecessary.
 - Update pinned GitHub actions when compatible immutable revisions remove the Node 20 runtime deprecation annotation.
 - Triage the existing GitGuardian false positives in its dashboard when access is available; do not weaken secret detection.
 
