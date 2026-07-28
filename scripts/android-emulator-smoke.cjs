@@ -246,6 +246,8 @@ function clearAndSignIn(email, password, timeoutMs = 120_000) {
 }
 
 function createEncryptedBankRecord(title) {
+  tapNode("Add");
+  waitForNode("Add something new");
   tapNodeAfterScroll("Bank account");
   sleep(500);
   if (!findNode(dumpUi(), "Add bank account")) {
@@ -263,7 +265,9 @@ function createEncryptedBankRecord(title) {
 }
 
 function openEncryptedBankRecord(title) {
-  tapNodeAfterScroll("Bank account");
+  tapNode("Records");
+  waitForNode("Saved records");
+  tapNodeAfterScroll("Bank accounts");
   waitForNode(title, 120_000);
   tapNode(title);
   waitForNode("Stored sealed on this device");
@@ -292,6 +296,8 @@ function runEncryptedRecordCrudSmoke() {
   waitForNode(editedTitle, 120_000);
   waitForNode("TestBank");
   permanentlyDeleteOpenRecord();
+  tapNode("Records");
+  waitForNode("Saved records");
   if (findNode(dumpUi(), "Bank accounts")) {
     tapNode("Bank accounts");
     waitForNode("Bank accounts");
