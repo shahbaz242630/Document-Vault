@@ -241,8 +241,8 @@ function clearAndSignIn(email, password, timeoutMs = 120_000) {
   runAdb(["shell", "input", "keyevent", "KEYCODE_BACK"]);
   sleep(500);
   tapNode("Continue");
-  waitForNode("Your vault", timeoutMs);
-  waitForNode("Sealed on this device");
+  waitForNode("Everything important, in one place.", timeoutMs);
+  waitForNode("Private on this device");
 }
 
 function createEncryptedBankRecord(title) {
@@ -273,7 +273,7 @@ function openEncryptedBankRecord(title) {
 function permanentlyDeleteOpenRecord() {
   tapNodeAfterScroll("Delete this record");
   tapNodeAfterScroll("Delete permanently");
-  waitForNode("Your vault", 120_000);
+  waitForNode("Everything important, in one place.", 120_000);
 }
 
 function runEncryptedRecordCrudSmoke() {
