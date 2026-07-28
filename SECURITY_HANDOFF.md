@@ -1,6 +1,6 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-07-27 (Asia/Dubai)
+Last updated: 2026-07-28 (Asia/Dubai)
 
 ## Security Status
 
@@ -61,6 +61,7 @@ Current security reference points:
 - Mobile mutation failures reconcile from Supabase or roll back locally, preventing ghost records and local/remote deletion-state divergence.
 - Protected `/login` and `/vault` routes use server-side claim validation, private/no-store responses, nonce CSP, and security headers.
 - Static public and inactive `/claim` pages contain no forms, trackers, browser persistence, or claimant data path.
+- The current working tree adds runtime-disconnected claimant contracts, five reproducible synthetic vector suites, cross-consumer tests, and a hard-disabled native custody probe. The offline-code V2 Argon2id fixture profile is explicitly synthetic-only and not production-approved.
 - GitHub branch protection, CODEOWNERS coverage, immutable action pins, CodeQL, OWASP ZAP, dependency audit, secret scans, native build/smoke jobs, Supabase tests, release checklist, SBOM generation, and approval-gated environments.
 - Release signing and submission credentials are materialized only in the protected runner and removed in unconditional cleanup.
 - Account-deletion and audit-retention processors have value-free secretless failure monitoring.
@@ -123,6 +124,18 @@ Current security reference points:
 
 ## Next Security Gate
 
+The four original deterministic synthetic protocol vector suites and the later registered-recipient V2 custody suite specified in `CLAIM_HANDOFF.md` are implemented and owner-approved. Reproducibility, primitive and binding checks, state invariants, cross-consumer verification, unknown-version rejection, synthetic markers, and runtime isolation passed. The slice contains no runtime authentication, storage, API, evidence, notification, processor, or release path.
+
+The claimant-key custody and client-boundary direction in `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md` is owner-approved. Its hard-disabled feasibility probe and findings are recorded in `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`.
+
+Android Kotlin compilation confirms hardware-backed P-256 ECDH support, but the current Android 36 platform cannot bind `KeyAgreement` to `BiometricPrompt.CryptoObject` under the approved transaction-bound guarantee. Android remains ineligible; no timed authentication or software fallback is accepted implicitly. Physical-device evidence and iOS native compilation are outstanding.
+
+Before any registered-recipient runtime work, approve a revised Android transaction-binding design or minimum platform baseline and obtain independent review. Before pilot, product must also accept the single-device loss risk or require multi-device enrollment or a claimant-held recovery protocol. Offline-code V2 production KDF parameters remain unapproved until representative iOS, Android, desktop, and low-memory worker benchmarks pass security review.
+
+The Docker-backed Supabase database catalog check and hostile RLS attack suite passed after the checked-in local stack was started. No migration, schema, RLS, Storage, or runtime API code changed in this slice.
+
+### Superseded pre-vector direction
+
 The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. Local branch/PR review and the standard security suite passed on 2026-07-21, including 516 tests with 3 protected live tests skipped, web build, mobile coverage, Expo Doctor 21/21, 38 guard regression tests, Docker-backed database catalog and hostile RLS tests, and the dependency audit available at that time. The dedicated-identity TestFlight build 3 native-UI confirmation also passed. The newer dependency findings recorded above are now an additional protected-web deployment blocker.
 
 The remaining mobile release gate is the broader multi-day physical QA on build 3. Completion of the cross-client gate does not authorize public claimant functionality.
@@ -144,6 +157,8 @@ npm run check:github-actions-security
 npm run check:mobile-secrets
 npm run check:supabase-db-security
 npm run check:supabase-rls
+npm run check:claim-vectors
+npm run check:claim-vector-isolation
 node --test scripts/security-check.test.cjs scripts/mobile-secret-scan.test.cjs scripts/supabase-db-security-check.test.cjs scripts/github-actions-security-check.test.cjs scripts/phase1-dod-check.test.cjs
 npm audit --omit=dev --workspaces --audit-level=high
 ```

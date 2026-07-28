@@ -1,6 +1,6 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-07-27 (Asia/Dubai)
+Last updated: 2026-07-28 (Asia/Dubai)
 
 ## Start Here
 
@@ -23,7 +23,7 @@ Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its 
 - GitHub: `shahbaz242630/Document-Vault`
 - Default/release branch: `main`
 - Current feature branch: `codex/fix-hono-alerts`
-- Latest pushed feature-branch commit: `9292014` (`Patch Hono security advisories`).
+- Latest pushed feature-branch commit: `13fa161` (`Set claimant integration as next session focus`).
 - Current `origin/main`: `2c82c93` (`Complete secure MVP claimant and vault slice`, PR #34).
 - The current feature branch contains the preserved July 26 owner-approved web login and mobile MVP UI/UX consolidation; it is not a release build.
 - Product requirements: `Vault_BRD_v1.0.md` (document version 1.1)
@@ -89,6 +89,7 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Added a live emergency-readiness Dashboard card using the existing Supabase sealed grant and secure interruption marker, including seven-day on-device reminder deferral for missing or interrupted setup. The controlled test account reported `Ready` without changing its grant.
 - Verified controlled TestFlight-created test entries reached encrypted Supabase storage and the selected deleted test item was fully removed.
 - The 2026-07-27 consolidation passed repository typecheck and lint, mobile 377 tests with 3 protected skips, web 81 tests, the Next.js `16.2.12` production build, Expo Doctor 21/21, Phase 1/security/mobile-secret guards, and a production dependency audit reporting zero vulnerabilities.
+- The current working tree adds the owner-approved, runtime-disconnected claimant protocol/vector and custody feasibility work: closed shared contracts and validators, five reproducible synthetic suites, state invariants, cross-consumer tests, a hard-disabled native custody module, and runtime-isolation guards. It is not deployed.
 
 ## Current Blockers And Technical Debt
 
@@ -127,6 +128,16 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 
 ## Active Next Slice
 
+The runtime-disconnected claimant contract/vector slice is completed and owner-approved. Its evidence and the sequenced delivery map are recorded in `CLAIM_HANDOFF.md` and `docs/superpowers/plans/2026-07-28-claimant-integration-delivery-map.md`.
+
+The claimant-key custody and client-boundary direction in `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md` is owner-approved. Its runtime-disconnected feasibility implementation and findings are recorded in `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`.
+
+The next decision is the Android transaction-binding design and minimum platform baseline. The current Android 36 client supports hardware-backed P-256 ECDH but cannot bind `KeyAgreement` to a biometric transaction, so the probe reports Android ineligible. Physical iOS/Android evidence, independent review, and the non-recoverable single-device decision also remain open.
+
+Authority, legal/privacy, jurisdiction, retention, origin, backup/restore, independent-assurance, and reviewer-separation gates remain unresolved. Discussion, documentation, physical testing, benchmarks, and independent-review preparation are authorized; runtime integration remains blocked.
+
+## Superseded Pre-Implementation Direction
+
 Open the next session with a claimant-integration and end-to-end flow discussion. Reconcile the inactive claimant UI, the Slice 2 approval package, and the proposed Slices 3–6 into one sequenced delivery map from registered-recipient onboarding through controlled review, encrypted release, and the read-only claimant viewer.
 
 The discussion must identify the first bounded implementation slice, its non-goals, dependencies, acceptance tests, rollback/kill switch, and owner stop gate. The four versioned synthetic suites—registered-recipient grant V1, offline handover code V2, claimant state V1, and release package V1—remain required protocol and cross-client test inputs, but they are no longer the sole next-session topic.
@@ -150,6 +161,8 @@ npm run check:github-actions-security
 npm run check:mobile-secrets
 npm run check:supabase-db-security
 npm run check:supabase-rls
+npm run check:claim-vectors
+npm run check:claim-vector-isolation
 npm audit --omit=dev --workspaces --audit-level=high
 ```
 

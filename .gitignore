@@ -7,9 +7,10 @@ dist/
 web-build/
 expo-env.d.ts
 
-# Native generated folders
-ios/
-android/
+# Native generated app folders (do not hide local-module native sources)
+/apps/mobile/ios/
+/apps/mobile/android/
+/apps/mobile/modules/*/android/build/
 
 # Build output
 coverage/

@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "generated_by": "scripts/generate-claim-test-vectors.mjs",
+    "production_data": false,
+    "synthetic_only": true,
+    "warning": "The Argon2id profile is synthetic-only and is not approved for production. Production values remain blocked on device benchmarks and security review."
+  },
+  "protocol": "sanduqkin:claim:offline-code:v2",
+  "human_material": {
+    "locator_bytes": "oaKjpKWmp6ipqqusra6vsA",
+    "locator": "SK2-L-M6HA-7955-MTKT-HADA-NEPA-VBNF-P0-F",
+    "normalized_locator": "M6HA7955MTKTHADANEPAVBNFP0",
+    "secret_bytes": "sbKztLW2t7i5uru8vb6_wMHCw8TFxsfI",
+    "secret": "SK2-S-P6SB-7D5N-PTVV-HEDT-QEYB-VFNZ-R30W-5GY4-RQ3C-FJ0-=",
+    "normalized_secret": "P6SB7D5NPTVVHEDTQEYBVFNZR30W5GY4RQ3CFJ0"
+  },
+  "kdf_profile": {
+    "algorithm": "argon2id",
+    "profile_id": "argon2id-synthetic-test-v1",
+    "production_approved": false,
+    "opslimit": 2,
+    "memlimit_bytes": 67108864,
+    "output_bytes": 32,
+    "salt": "ycrLzM3Oz9DR0tPU1dbX2A"
+  },
+  "synthetic_locator_index_key": "2drb3N3e3-Dh4uPk5ebn6Onq6-zt7u_w8fLz9PX29_g",
+  "derived": {
+    "root": "kqxhM4QX5MQNi9i8wTL39vzTVfI3_3fx9Ol-_p9T_KE",
+    "proof_seed": "ybohzCxnDYZohbVYAhaP7Pina5tJc69lB8xJaYrBdQg",
+    "proof_public_key": "Rk-TMdLuqqJHOl8leM_PjBj0c-v1Db_YZchbu_cv7BQ",
+    "proof_private_key": "ybohzCxnDYZohbVYAhaP7Pina5tJc69lB8xJaYrBdQhGT5Mx0u6qokc6XyV4z8-MGPRz6_UNv9hlyFu79y_sFA",
+    "wrap_key": "5_v10vyhmVS4BUMlH-5s5KyIjh8UmDi1Qp9VibJQjc4",
+    "locator_digest": "j1fI8mLjkzBZuaTq6ePqRg52aQRKZC0aVXtPGbHyn4k"
+  },
+  "challenge": {
+    "protocol": "sanduqkin:claim:offline-code:v2",
+    "challenge_id": "60000000-0000-4000-8000-000000000006",
+    "nonce": "-fr7_P3-_wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxg",
+    "origin": "https://app.sanduqkin.test",
+    "expires_at": "2026-07-28T08:05:00.000Z",
+    "locator_hash": "cjG6a83B-gs5EYqyu1L7QpUHzGDTSkrjMPxT46JaqHQ"
+  },
+  "challenge_canonical": "eyJjaGFsbGVuZ2VfaWQiOiI2MDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDYiLCJleHBpcmVzX2F0IjoiMjAyNi0wNy0yOFQwODowNTowMC4wMDBaIiwibG9jYXRvcl9oYXNoIjoiY2pHNmE4M0ItZ3M1RVlxeXUxTDdRcFVIekdEVFNrcmpNUHhUNDZKYXFIUSIsIm5vbmNlIjoiLWZyN19QMy1fd0FCQWdNRUJRWUhDQWtLQ3d3TkRnOFFFUklURkJVV0Z4ZyIsIm9yaWdpbiI6Imh0dHBzOi8vYXBwLnNhbmR1cWtpbi50ZXN0IiwicHJvdG9jb2wiOiJzYW5kdXFraW46Y2xhaW06b2ZmbGluZS1jb2RlOnYyIn0",
+  "challenge_signature": "1FN43Yw4NN8wkHbr2r-dd9b17HPQyA_h95XZ2ZHsBguQNb16RT0GRZLGM9niH-PWRmwnZp6Z-6yMjrmXT1Q7Bg",
+  "wrap": {
+    "associated_data": {
+      "protocol": "sanduqkin:claim:offline-code:v2",
+      "locator_digest": "j1fI8mLjkzBZuaTq6ePqRg52aQRKZC0aVXtPGbHyn4k",
+      "grant_id": "40000000-0000-4000-8000-000000000004",
+      "owner_id": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-07-28T08:00:00.000Z"
+    },
+    "associated_data_canonical": "eyJjcmVhdGVkX2F0IjoiMjAyNi0wNy0yOFQwODowMDowMC4wMDBaIiwiZ3JhbnRfaWQiOiI0MDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDQiLCJsb2NhdG9yX2RpZ2VzdCI6ImoxZkk4bUxqa3pCWnVhVHE2ZVBxUmc1MmFRUktaQzBhVlh0UEdiSHluNGsiLCJvd25lcl9pZCI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsInByb3RvY29sIjoic2FuZHVxa2luOmNsYWltOm9mZmxpbmUtY29kZTp2MiJ9",
+    "mek": "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2A",
+    "nonce": "GRobHB0eHyAhIiMkJSYnKCkqKywtLi8w",
+    "ciphertext": "DAuOHcQ5JFXf_9OtpUUU8Xi0X4xGdXwWhd3115sO_UbmM1_wBx6LcL-kq5UkPYMh",
+    "expected_unwrapped_mek": "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2A"
+  },
+  "negative_cases": [
+    "changed_locator",
+    "changed_challenge_origin",
+    "expired_challenge",
+    "changed_grant_binding",
+    "changed_owner_binding",
+    "changed_signature",
+    "wrong_secret",
+    "changed_ciphertext",
+    "unsupported_protocol_version",
+    "unapproved_production_kdf_profile"
+  ]
+}

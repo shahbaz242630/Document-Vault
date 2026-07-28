@@ -38,6 +38,10 @@
     "check:mobile-secrets": "node scripts/mobile-secret-scan.cjs",
     "check:supabase-db-security": "node scripts/supabase-db-security-check.cjs",
     "check:supabase-rls": "node scripts/supabase-rls-attack-test.cjs",
+    "check:claim-vectors": "node scripts/generate-claim-test-vectors.mjs --check",
+    "check:claim-vector-isolation": "node scripts/claim-vector-isolation-check.cjs",
+    "check:claim-custody-isolation": "node scripts/claim-custody-isolation-check.cjs",
+    "generate:claim-vectors": "node scripts/generate-claim-test-vectors.mjs",
     "sbom:release": "node scripts/generate-release-sbom.cjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint . --max-warnings=0"

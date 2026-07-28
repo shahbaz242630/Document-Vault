@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "generated_by": "scripts/generate-claim-test-vectors.mjs",
+    "production_data": false,
+    "synthetic_only": true
+  },
+  "protocol": "sanduqkin:claim:recipient-grant:v1",
+  "key_material": {
+    "recipient_seed": "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA",
+    "recipient_public_key": "SjgH0GTQdxgcwHCYnnaJHSDcpVWVSNwsd8GlAnOIKzg",
+    "recipient_private_key": "d3iPGgzqABomMdrl0F29BiAI1bMPULnim-sqeCIokAQ",
+    "recipient_key_fingerprint": "ibL32O0gnY-xzgo3xo8Zg04KJulTipnIojwXkFSmxXQ",
+    "key_version": 1
+  },
+  "plaintext": {
+    "protocol": "sanduqkin:claim:recipient-grant:v1",
+    "grant_id": "40000000-0000-4000-8000-000000000004",
+    "owner_id": "10000000-0000-4000-8000-000000000001",
+    "recipient_id": "20000000-0000-4000-8000-000000000002",
+    "recipient_key_id": "30000000-0000-4000-8000-000000000003",
+    "recipient_key_fingerprint": "ibL32O0gnY-xzgo3xo8Zg04KJulTipnIojwXkFSmxXQ",
+    "issued_at": "2026-07-28T08:00:00.000Z",
+    "grant_nonce": "YWJjZGVmZ2hpamtsbW5vcA",
+    "mek": "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2A"
+  },
+  "canonical_plaintext": "eyJncmFudF9pZCI6IjQwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwNCIsImdyYW50X25vbmNlIjoiWVdKalpHVm1aMmhwYW10c2JXNXZjQSIsImlzc3VlZF9hdCI6IjIwMjYtMDctMjhUMDg6MDA6MDAuMDAwWiIsIm1layI6IlFVSkRSRVZHUjBoSlNrdE1UVTVQVUZGU1UxUlZWbGRZV1ZwYlhGMWVYMkEiLCJvd25lcl9pZCI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsInByb3RvY29sIjoic2FuZHVxa2luOmNsYWltOnJlY2lwaWVudC1ncmFudDp2MSIsInJlY2lwaWVudF9pZCI6IjIwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMiIsInJlY2lwaWVudF9rZXlfZmluZ2VycHJpbnQiOiJpYkwzMk8wZ25ZLXh6Z28zeG84WmcwNEtKdWxUaXBuSW9qd1hrRlNteFhRIiwicmVjaXBpZW50X2tleV9pZCI6IjMwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMyJ9",
+  "canonical_plaintext_digest": "QKVeWcRJps2FQZQtyYt3eXLXDoRS95WOR8GBMT4wSBo",
+  "captured_sealed_box_ciphertext": "OHuTrDM0D0S0o-LCXYnPsiPFAnqYK3l-xAUz-uGdrlW8Q-8tfHvS_AhtkGJOSba0URw0iEf82eqjc2M56tiRYzm5G0ITFMBeVa5dHd2xRR9yjkzo_NNHU5JoaBA_eusoRlwy9p9hOnMp6csS_ZbaQAsF2ooUjhAErsFyzQ_Yto3paBzSNfpDIOpDZTOkRXuamVGbdo6mu8GIzhLEGeJbvsY8tzdxWgaXOMqgAo35ua1jnkVHJ4sHkIOOFGOQTJMKp62RAmb_Xmzh6Cte1GClpd5gwH93ZBORLcuAHuGVhjuslTz52_5bALr8qIPPeLucUfWuMn4Bn0A4Gjx9tN89MuITSENm_hKtdkSs1ZSOHiVZLGJJz7IBFyFCpTtBOdk4LvJXdGsiSr4Rf4fYcP2d0atJJZteKUzZzIV9Z4NCwp6Sb40LZhS5kVSZ4bPp2DrS6sIzHXAgQCSpkWqKjZN0TUcMQyJEEc_oUzFqwREz3aF-cBzac7AkpdlKyL_wPKBpmTzb5CmEHB-b4JwJLtxnuJpo7SxbtSf_gRVZmoLRHkVV5nBsBz2ZK6ph4SngcRt6UcXK7W9Oqnlfvr2tG_DBkBgHGFgq0PMXD-Hs6CRY2d6FcU-S65kT96yRvYVrH6nlxn78J5EWxWSqOSBuwrXo3TirImtSwNj__Tx6-pAXfswK",
+  "envelope": {
+    "protocol": "sanduqkin:claim:recipient-grant:v1",
+    "algorithm": "crypto_box_seal",
+    "grant_id": "40000000-0000-4000-8000-000000000004",
+    "recipient_id": "20000000-0000-4000-8000-000000000002",
+    "recipient_key_id": "30000000-0000-4000-8000-000000000003",
+    "recipient_key_version": 1,
+    "ciphertext": "OHuTrDM0D0S0o-LCXYnPsiPFAnqYK3l-xAUz-uGdrlW8Q-8tfHvS_AhtkGJOSba0URw0iEf82eqjc2M56tiRYzm5G0ITFMBeVa5dHd2xRR9yjkzo_NNHU5JoaBA_eusoRlwy9p9hOnMp6csS_ZbaQAsF2ooUjhAErsFyzQ_Yto3paBzSNfpDIOpDZTOkRXuamVGbdo6mu8GIzhLEGeJbvsY8tzdxWgaXOMqgAo35ua1jnkVHJ4sHkIOOFGOQTJMKp62RAmb_Xmzh6Cte1GClpd5gwH93ZBORLcuAHuGVhjuslTz52_5bALr8qIPPeLucUfWuMn4Bn0A4Gjx9tN89MuITSENm_hKtdkSs1ZSOHiVZLGJJz7IBFyFCpTtBOdk4LvJXdGsiSr4Rf4fYcP2d0atJJZteKUzZzIV9Z4NCwp6Sb40LZhS5kVSZ4bPp2DrS6sIzHXAgQCSpkWqKjZN0TUcMQyJEEc_oUzFqwREz3aF-cBzac7AkpdlKyL_wPKBpmTzb5CmEHB-b4JwJLtxnuJpo7SxbtSf_gRVZmoLRHkVV5nBsBz2ZK6ph4SngcRt6UcXK7W9Oqnlfvr2tG_DBkBgHGFgq0PMXD-Hs6CRY2d6FcU-S65kT96yRvYVrH6nlxn78J5EWxWSqOSBuwrXo3TirImtSwNj__Tx6-pAXfswK",
+    "created_at": "2026-07-28T08:00:00.000Z",
+    "grant_version": 1,
+    "revoked_at": null
+  },
+  "expected_opened_plaintext": {
+    "protocol": "sanduqkin:claim:recipient-grant:v1",
+    "grant_id": "40000000-0000-4000-8000-000000000004",
+    "owner_id": "10000000-0000-4000-8000-000000000001",
+    "recipient_id": "20000000-0000-4000-8000-000000000002",
+    "recipient_key_id": "30000000-0000-4000-8000-000000000003",
+    "recipient_key_fingerprint": "ibL32O0gnY-xzgo3xo8Zg04KJulTipnIojwXkFSmxXQ",
+    "issued_at": "2026-07-28T08:00:00.000Z",
+    "grant_nonce": "YWJjZGVmZ2hpamtsbW5vcA",
+    "mek": "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2A"
+  },
+  "negative_cases": [
+    "wrong_private_key",
+    "changed_recipient_binding",
+    "changed_key_binding",
+    "changed_grant_binding",
+    "truncated_ciphertext",
+    "unsupported_version"
+  ]
+}
