@@ -6,12 +6,11 @@ import { defaultAuditLog } from "@/features/auth/audit-log";
 import { EmergencyAccessScreen, type SealedCodeSetupStatus } from "@/features/settings";
 import {
   createSupabaseEmergencyGrantRepository,
+  emergencyAccessPendingConfirmationKey,
   type SupabaseEmergencyGrantClient,
   useVaultSession,
 } from "@/features/vault";
 import { Screen } from "@/shared/ui";
-
-const pendingConfirmationKey = "sanduqkin.sealedEmergencyCode.pendingConfirmation";
 
 export default function EmergencyAccessRoute() {
   const setupState = useEmergencyAccessSetupState();
@@ -57,7 +56,7 @@ function useEmergencyAccessSetupState() {
     }
 
     await runSetupAction(async () => {
-      await SecureStore.setItemAsync(pendingConfirmationKey, "true");
+      await SecureStore.setItemAsync(emergencyAccessPendingConfirmationKey, "true");
       const result = await vaultSession.createSealedEmergencyCodeSetup(repository, {
         auditLog: defaultAuditLog,
       });
@@ -69,7 +68,7 @@ function useEmergencyAccessSetupState() {
   function confirmSealedCodeWritten() {
     setOneTimeCode(null);
     setStatus("active");
-    void SecureStore.deleteItemAsync(pendingConfirmationKey);
+    void SecureStore.deleteItemAsync(emergencyAccessPendingConfirmationKey);
   }
 
   async function regenerateSealedCode() {
@@ -79,7 +78,7 @@ function useEmergencyAccessSetupState() {
     }
 
     await runSetupAction(async () => {
-      await SecureStore.setItemAsync(pendingConfirmationKey, "true");
+      await SecureStore.setItemAsync(emergencyAccessPendingConfirmationKey, "true");
       const result = await vaultSession.regenerateSealedEmergencyCodeSetup(repository, {
         auditLog: defaultAuditLog,
       });
@@ -98,7 +97,7 @@ function useEmergencyAccessSetupState() {
       await vaultSession.revokeSealedEmergencyCodeSetup(repository, {
         auditLog: defaultAuditLog,
       });
-      await SecureStore.deleteItemAsync(pendingConfirmationKey);
+      await SecureStore.deleteItemAsync(emergencyAccessPendingConfirmationKey);
       setOneTimeCode(null);
       setStatus("none");
     });
@@ -146,7 +145,7 @@ function useInterruptedSetupStatus({
       }
 
       const [pending, activeGrant] = await Promise.all([
-        SecureStore.getItemAsync(pendingConfirmationKey),
+        SecureStore.getItemAsync(emergencyAccessPendingConfirmationKey),
         repository.loadActiveSealedCodeGrant(),
       ]);
 

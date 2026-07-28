@@ -40,15 +40,36 @@ export function LoginForm({ configured }: { configured: boolean }) {
 
   return (
     <form className="auth-form" onSubmit={submit}>
-      <label htmlFor="email">Email</label>
-      <input id="email" name="email" type="email" autoComplete="username" required />
-      <label htmlFor="password">Password</label>
-      <input id="password" name="password" type="password" autoComplete="current-password" required />
-      {error ? <p role="alert">{error}</p> : null}
-      <button type="submit" disabled={!configured || pending}>
+      <div className="auth-field">
+        <label htmlFor="email">Email address</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="username"
+          inputMode="email"
+          placeholder="you@example.com"
+          required
+        />
+      </div>
+
+      <div className="auth-field">
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          required
+        />
+      </div>
+
+      {error ? <p className="auth-message auth-message-error" role="alert">{error}</p> : null}
+      <button className="auth-submit" type="submit" disabled={!configured || pending}>
         {pending ? "Signing in…" : "Sign in"}
       </button>
-      {!configured ? <p role="status">Web sign-in is not enabled in this protected environment.</p> : null}
+      {!configured ? <p className="auth-message" role="status">Web sign-in is not enabled in this protected environment.</p> : null}
     </form>
   );
 }

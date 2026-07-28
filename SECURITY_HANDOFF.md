@@ -1,6 +1,6 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-07-21 (Asia/Dubai)
+Last updated: 2026-07-28 (Asia/Dubai)
 
 ## Security Status
 
@@ -12,7 +12,7 @@ Current security reference points:
 
 - Mobile TestFlight build: app `1.0.0`, build `3`, EAS build `9055529c-508a-415d-872a-08708e533613`.
 - Protected release run: `29695865266`.
-- Current pushed feature branch/commit: `codex/mvp-landing-legal` at `ff0187d`; the working tree contains the Slice 2 claimant approval package/static placeholders, synchronized handoffs, and a compatible production-audit lockfile update.
+- Current feature branch: `codex/fix-hono-alerts`; latest pushed commit `9292014` patches the Hono advisories, and the branch contains the preserved July 26 owner UI/login consolidation.
 - Supabase: existing Free project in `eu-central-1`; local stack is used for migrations and attack tests.
 - Web preview: `sanduqkin-web`, SSO protected, no custom domain, no hosted environment variables, and still serving the earlier static Phase 3 preview.
 
@@ -61,6 +61,7 @@ Current security reference points:
 - Mobile mutation failures reconcile from Supabase or roll back locally, preventing ghost records and local/remote deletion-state divergence.
 - Protected `/login` and `/vault` routes use server-side claim validation, private/no-store responses, nonce CSP, and security headers.
 - Static public and inactive `/claim` pages contain no forms, trackers, browser persistence, or claimant data path.
+- The current working tree adds runtime-disconnected claimant contracts, five reproducible synthetic vector suites, cross-consumer tests, and a hard-disabled native custody probe. The offline-code V2 Argon2id fixture profile is explicitly synthetic-only and not production-approved.
 - GitHub branch protection, CODEOWNERS coverage, immutable action pins, CodeQL, OWASP ZAP, dependency audit, secret scans, native build/smoke jobs, Supabase tests, release checklist, SBOM generation, and approval-gated environments.
 - Release signing and submission credentials are materialized only in the protected runner and removed in unconditional cleanup.
 - Account-deletion and audit-retention processors have value-free secretless failure monitoring.
@@ -102,7 +103,7 @@ Current security reference points:
 ### Immediate
 
 - Complete multi-day physical-device security QA on TestFlight build 3, including Keychain/Secure Enclave behavior, biometrics, background locking, screenshot protection, recovery, emergency access, encrypted CRUD, and sign-out/return.
-- Complete the remaining TestFlight build 3 native-UI leg of the protected browser/native synthetic smoke before deploying the owner web vault; the repeatable local browser/mobile-repository leg is complete.
+- The TestFlight build 3 native-UI leg of the protected browser/native synthetic smoke is complete on an iPhone 12 running iOS 26.5.2: the native app displayed and edited a web-created encrypted record, the web read the native edit, and the tagged record was permanently removed.
 - Complete TestFlight metadata and initial GCC territory configuration; keep France disabled until French ANSSI approval.
 - Finalize the U.S. export-classification rationale before setting persistent iOS compliance metadata.
 
@@ -116,16 +117,30 @@ Current security reference points:
 
 ### Dependencies and tooling
 
-- The 2026-07-21 dependency pass resolved the reported `js-yaml`, `shell-quote`, and `brace-expansion` advisories with compatible lockfile updates. Root overrides pin the remaining upstream paths to patched `postcss` `8.5.15` and `uuid` `11.1.1`; the full workspace audit now reports zero vulnerabilities.
-- The override paths passed the web production build, Expo Doctor 21/21, and an Xcode UUID-generation compatibility check. Preserve those checks when changing or removing the overrides in a future upstream upgrade.
+- The four 2026-07-27 high-severity production findings are resolved. Scoped root overrides now keep `glob@13.0.6` on `brace-expansion` `5.0.8` and Next.js `16.2.12` on PostCSS `8.5.23` and Sharp `0.35.3`; the production audit reports zero vulnerabilities.
+- `scripts/security-check.cjs` now rejects production lockfile resolutions below `brace-expansion` `5.0.8`, PostCSS `8.5.18`, or Sharp `0.35.0`. The resolved paths passed the web production build and Expo Doctor 21/21. `npm ls` identifies the PostCSS and Sharp resolutions as intentional out-of-range Next.js overrides; preserve the scoped overrides and compatibility checks until upstream ranges make them unnecessary.
 - Update pinned GitHub actions when compatible immutable revisions remove the Node 20 runtime deprecation annotation.
 - Triage the existing GitGuardian false positives in its dashboard when access is available; do not weaken secret detection.
 
 ## Next Security Gate
 
-The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. Local branch/PR review and the standard security suite passed again on 2026-07-21, including 516 tests with 3 protected live tests skipped, web build, mobile coverage, Expo Doctor 21/21, 38 guard regression tests, Docker-backed database catalog and hostile RLS tests, and the high-severity production dependency threshold. The immediate remaining web gate is the dedicated-identity TestFlight build 3 native-UI confirmation; local repository execution is not a substitute for physical native UI evidence.
+The four original deterministic synthetic protocol vector suites and the later registered-recipient V2 custody suite specified in `CLAIM_HANDOFF.md` are implemented and owner-approved. Reproducibility, primitive and binding checks, state invariants, cross-consumer verification, unknown-version rejection, synthetic markers, and runtime isolation passed. The slice contains no runtime authentication, storage, API, evidence, notification, processor, or release path.
 
-The immediate mobile release gate is separate: complete and record physical QA on build 3. Neither gate authorizes public claimant functionality.
+The claimant-key custody and client-boundary direction in `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md` is owner-approved. Its hard-disabled feasibility probe and findings are recorded in `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`.
+
+Android Kotlin compilation confirms hardware-backed P-256 ECDH support, but the current Android 36 platform cannot bind `KeyAgreement` to `BiometricPrompt.CryptoObject` under the approved transaction-bound guarantee. Android remains ineligible; no timed authentication or software fallback is accepted implicitly. Physical-device evidence and iOS native compilation are outstanding.
+
+Before any registered-recipient runtime work, approve a revised Android transaction-binding design or minimum platform baseline and obtain independent review. Before pilot, product must also accept the single-device loss risk or require multi-device enrollment or a claimant-held recovery protocol. Offline-code V2 production KDF parameters remain unapproved until representative iOS, Android, desktop, and low-memory worker benchmarks pass security review.
+
+The Docker-backed Supabase database catalog check and hostile RLS attack suite passed after the checked-in local stack was started. No migration, schema, RLS, Storage, or runtime API code changed in this slice.
+
+### Superseded pre-vector direction
+
+The repeatable local web security gate passed for cross-client ciphertext compatibility, representative field shapes, failure reconciliation, unknown-field preservation, protected headers, no browser key persistence, worker relock, and cleanup. Local branch/PR review and the standard security suite passed on 2026-07-21, including 516 tests with 3 protected live tests skipped, web build, mobile coverage, Expo Doctor 21/21, 38 guard regression tests, Docker-backed database catalog and hostile RLS tests, and the dependency audit available at that time. The dedicated-identity TestFlight build 3 native-UI confirmation also passed. The newer dependency findings recorded above are now an additional protected-web deployment blocker.
+
+The remaining mobile release gate is the broader multi-day physical QA on build 3. Completion of the cross-client gate does not authorize public claimant functionality.
+
+The next claimant security work is limited to discussing and, after owner agreement, building the four deterministic synthetic protocol vector suites specified in `CLAIM_HANDOFF.md`. Vector generators and fixtures must contain no production identifiers or secrets, must reject unknown versions closed, and must not connect to runtime authentication, storage, APIs, evidence, notifications, processors, or release paths.
 
 ## Standard Security Verification
 
@@ -142,6 +157,8 @@ npm run check:github-actions-security
 npm run check:mobile-secrets
 npm run check:supabase-db-security
 npm run check:supabase-rls
+npm run check:claim-vectors
+npm run check:claim-vector-isolation
 node --test scripts/security-check.test.cjs scripts/mobile-secret-scan.test.cjs scripts/supabase-db-security-check.test.cjs scripts/github-actions-security-check.test.cjs scripts/phase1-dod-check.test.cjs
 npm audit --omit=dev --workspaces --audit-level=high
 ```

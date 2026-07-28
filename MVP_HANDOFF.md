@@ -1,15 +1,17 @@
 # Sanduqkin Website, Owner Web Vault, And Claimant MVP Handoff
 
-Last updated: 2026-07-21 (Asia/Dubai)
+Last updated: 2026-07-28 (Asia/Dubai)
 
 ## Current Decision
 
-Continue protected core-flow validation before public website publication or claimant implementation.
+Continue protected core-flow validation while preparing a bounded claimant-integration plan; public website publication and live claimant/release behavior remain gated.
 
 - API region alignment and the web workspace scaffold are merged on `main`.
 - Static landing/legal content is implemented and protected-preview-verified, but publication is parked pending owner/design/legal approval.
 - The current branch implements the protected owner web vault and shared mobile/web 17-category engine. It is committed but not deployed.
-- The repeatable local browser/mobile-repository smoke and branch PR-readiness review passed; the remaining gate in this slice is the TestFlight build 3 native-UI confirmation.
+- The repeatable local browser/mobile-repository smoke, TestFlight build 3 native-UI confirmation, synthetic-data cleanup, and branch PR-readiness review passed.
+- The current feature branch preserves the verified mobile MVP navigation/dashboard redesign and web sign-in UI cleanup from the 2026-07-26 owner QA session. It is not a release build.
+- The next session opens with claimant integration and completion of the end-to-end flow as a planning discussion. It must select and approve a bounded first implementation slice before any claimant runtime integration begins.
 - `/claim` remains informational and inactive. No real claimant data, evidence intake, entitlement decision, release, or claimant decryption is authorized.
 
 Detailed pre-consolidation phase evidence is preserved in Git at commit `96e89c1` and indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
@@ -148,6 +150,7 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 ### Completed on the current branch, not deployed
 
 - Static landing/legal/support/accessibility/security routes and inactive `/claim` preview.
+- Refined public landing-to-sign-in navigation and a cleaned, aligned web login experience.
 - Supabase web authentication foundation and server-side protected-route claim validation.
 - Deterministic mobile/web crypto compatibility vector and Web Worker key boundary.
 - Live owner-only bank-account proof in both cross-client directions with tagged-row cleanup.
@@ -155,7 +158,16 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - Mobile unknown-field preservation and failed-mutation reconciliation.
 - Protected-route nonce CSP and security headers.
 - Repeatable local protected smoke across card, contact, medical-care, and business-interest records, including bidirectional edit/decrypt, forward-field preservation, ciphertext-only rows, browser deletion lifecycle, offline failure reconciliation, browser storage/key cleanup, protected headers, and full synthetic cleanup.
-- Current 2026-07-21 regression result: 516 tests passed, 3 protected live tests skipped by default; typecheck, lint, web build, mobile coverage, Expo Doctor 21/21, Phase 1/security/workflow/secret guards, 38 guard regression tests, Docker-backed database catalog/RLS guards, and the full workspace dependency audit passed. Compatible lockfile updates and patched `postcss`/`uuid` overrides resolved the reported advisories; the audit now reports zero vulnerabilities.
+- The 2026-07-27 regression passed mobile 377 tests with 3 protected live tests skipped, web 81 tests, repository typecheck and lint, the Next.js `16.2.12` production build, Expo Doctor 21/21, Phase 1/security/mobile-secret guards, and a production dependency audit reporting zero vulnerabilities. The protected web surface remains blocked from deployment for the remaining release-readiness work described in this handoff.
+- The current working tree adds closed claimant protocol contracts and validators, five reproducible synthetic suites, cross-consumer verification, state-release invariants, a hard-disabled native custody probe, and runtime-isolation guards. It adds no claimant authentication, persistence, API, evidence, notification, processor, or release path. Its offline-code V2 Argon2id profile is synthetic-only and not production-approved.
+
+### Mobile MVP UI/UX session — 2026-07-26
+
+- Verified the controlled test account against Supabase: new TestFlight records reached the encrypted vault path, stored rows did not expose plaintext vault fields, and the owner-selected deleted test item was fully removed as expected.
+- Replaced the mixed landing experience with a dedicated Dashboard, separate Add and Saved Records destinations, explicit return controls, and a five-action Home/Add/Records/Settings/Lock footer.
+- Added safe live vault-coverage guidance and emergency-readiness status backed by existing encrypted-record and sealed-grant state, including a seven-day on-device reminder deferral. No emergency grant was changed.
+- Android emulator checks covered sign-in, Dashboard rendering, all footer destinations, Lock, emergency-access routing, return-time refresh, and final styling.
+- Latest mobile verification after the final styling change: TypeScript passed; Vitest passed 377 tests with 3 protected tests skipped across 100 passed and 3 skipped files.
 
 ### Hosted state
 
@@ -165,16 +177,17 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 
 ## Execution Plan
 
-### 1. Complete protected cross-client smoke and PR review — active, local review complete
+### 1. Complete protected cross-client smoke and PR review — complete
 
 The repeatable local leg passed with a dedicated identity and synthetic/tagged rows across four representative categories. It covered bidirectional browser/mobile-repository decrypt and edit, optional and multiline fields, forward-field preservation, ciphertext-only rows, browser create/update/delete/restore/permanent-delete, offline failure without a ghost record, protected headers, empty local/session storage, worker relock, and full tagged cleanup.
 
-- Repeat the cross-client display/edit path through the physical TestFlight build 3 UI with a dedicated synthetic identity; local repository execution is not physical-device evidence.
-- Record only value-free device/build/pass-fail evidence and remove all tagged data and the identity.
+- The dedicated synthetic identity passed the physical TestFlight build 3 display/edit path: the native app displayed and edited a web-created encrypted record, the web read the native edit, and the tagged record was permanently removed.
+- Value-free device evidence: iPhone 12, iOS 26.5.2, TestFlight build 3 — pass.
+- Only value-free device/build/pass-fail evidence is retained.
 
 The standard verification and complete local branch diff review passed on 2026-07-21. Docker-backed checks require the local stack started with `npx supabase start --workdir supabase`; starting from the repository root creates a different project id than the checked-in harness expects.
 
-Exit gate: physical native UI evidence and branch review pass without plaintext leakage, cross-client field loss, ghost/local-divergent state, uncleaned test data, or unresolved high-severity finding. Stop for owner review.
+Exit gate passed: physical native UI evidence and branch review completed without observed plaintext leakage, cross-client field loss, ghost/local-divergent state, uncleaned tagged data, or unresolved high-severity finding. Stop for owner review.
 
 ### 2. Public website publication — parked
 
@@ -218,6 +231,22 @@ Only after step 5 approval:
 
 Each slice must define non-goals, tests, rollback/kill switch, value-free evidence, and an owner stop gate.
 
+## Next Session: Claimant Integration And Flow Completion
+
+The first runtime-disconnected contract/vector slice and its evidence in `CLAIM_HANDOFF.md` are completed and owner-approved.
+
+The claimant private-key custody direction and client surface in `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md` are owner-approved. The runtime-disconnected feasibility implementation is stopped at the findings in `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`: Android 36 cannot currently provide the approved transaction-bound biometric P-256 ECDH operation and therefore fails closed.
+
+Decide the Android transaction-binding design and minimum platform baseline, complete physical iOS/Android evidence and independent review, and explicitly address the MVP's non-recoverable single-device key-loss risk. Separately schedule representative-device offline-code V2 Argon2id benchmarks; the fixture profile cannot become a production configuration.
+
+Authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, and release behavior remain disabled until their specific slice and unresolved approval gates are approved.
+
+### Superseded pre-implementation direction
+
+Discuss the complete claimant journey and convert the proposed Slices 2–6 into one sequenced integration plan. Start from the existing inactive route pages, identify the decisions and external approvals still blocking each stage, and agree the first bounded implementation slice with explicit non-goals, acceptance tests, rollback/kill switch, and an owner stop gate.
+
+The registered-recipient grant V1, offline-code V2, claimant-state V1, and release-package V1 vector suites remain required protocol and cross-client test inputs. They should be scheduled within the integration plan rather than treated as the only next deliverable. Authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, and release behavior remain disabled until their specific slice is approved.
+
 ## Cost, Resilience, And Performance Constraints
 
 - Do not claim multi-region database failover; Supabase has one primary region.
@@ -243,6 +272,8 @@ npm run check:github-actions-security
 npm run check:mobile-secrets
 npm run check:supabase-db-security
 npm run check:supabase-rls
+npm run check:claim-vectors
+npm run check:claim-vector-isolation
 npm audit --omit=dev --workspaces --audit-level=high
 ```
 

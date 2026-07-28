@@ -8,13 +8,21 @@
     "services/*"
   ],
   "overrides": {
-    "postcss": "8.5.15",
+    "glob@13.0.6": {
+      "brace-expansion": "5.0.8"
+    },
+    "next": {
+      "postcss": "8.5.23",
+      "sharp": "0.35.3"
+    },
+    "postcss": "8.5.23",
     "react-devtools-core": {
       "shell-quote": "1.10.0"
     },
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native-safe-area-context": "5.7.0",
+    "sharp": "0.35.3",
     "uuid": "11.1.1"
   },
   "scripts": {
@@ -30,6 +38,10 @@
     "check:mobile-secrets": "node scripts/mobile-secret-scan.cjs",
     "check:supabase-db-security": "node scripts/supabase-db-security-check.cjs",
     "check:supabase-rls": "node scripts/supabase-rls-attack-test.cjs",
+    "check:claim-vectors": "node scripts/generate-claim-test-vectors.mjs --check",
+    "check:claim-vector-isolation": "node scripts/claim-vector-isolation-check.cjs",
+    "check:claim-custody-isolation": "node scripts/claim-custody-isolation-check.cjs",
+    "generate:claim-vectors": "node scripts/generate-claim-test-vectors.mjs",
     "sbom:release": "node scripts/generate-release-sbom.cjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint . --max-warnings=0"
@@ -38,9 +50,12 @@
     "node": "^22.13.0 || >=24.3.0"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "2.108.2",
     "@vitest/coverage-v8": "4.1.9",
+    "bip39": "3.1.0",
     "eslint": "9.39.3",
     "eslint-config-expo": "56.0.4",
+    "libsodium-wrappers-sumo": "0.7.15",
     "patch-package": "^8.0.1"
   },
   "optionalDependencies": {

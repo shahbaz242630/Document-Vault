@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["ClaimantKeyCustodyModule"]
+  },
+  "android": {
+    "modules": ["com.sanduqkin.claimantkeycustody.ClaimantKeyCustodyModule"]
+  }
+}

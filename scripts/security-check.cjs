@@ -3,8 +3,15 @@ const path = require("node:path");
 
 const DEFAULT_OPTIONS = {
   configPath: path.join("supabase", "config.toml"),
+  lockPath: "package-lock.json",
   migrationDir: path.join("supabase", "migrations"),
   mobileRoots: [path.join("apps", "mobile", "app"), path.join("apps", "mobile", "src")],
+};
+
+const MINIMUM_SAFE_DEPENDENCY_VERSIONS = {
+  "brace-expansion": "5.0.8",
+  postcss: "8.5.18",
+  sharp: "0.35.0",
 };
 
 function runSecurityCheck(options = {}) {
@@ -14,12 +21,61 @@ function runSecurityCheck(options = {}) {
     ...checkSupabaseAuthConfig(cwd, checkOptions.configPath),
     ...checkSupabaseMigrations(cwd, checkOptions.migrationDir),
     ...checkMobileSecrets(cwd, checkOptions.mobileRoots),
+    ...checkDependencyResolutions(cwd, checkOptions.lockPath),
   ];
 
   return {
     ok: violations.length === 0,
     violations,
   };
+}
+
+function checkDependencyResolutions(cwd, lockPath) {
+  const absolutePath = path.join(cwd, lockPath);
+  const contents = readFileIfExists(absolutePath);
+
+  if (contents === null) {
+    return [
+      {
+        message: "Dependency lockfile is missing.",
+        path: normalizePath(lockPath),
+        rule: "dependency-lock-present",
+      },
+    ];
+  }
+
+  let lockfile;
+  try {
+    lockfile = JSON.parse(contents);
+  } catch {
+    return [
+      {
+        message: "Dependency lockfile is not valid JSON.",
+        path: normalizePath(lockPath),
+        rule: "dependency-lock-valid",
+      },
+    ];
+  }
+
+  const violations = [];
+  for (const [packagePath, packageEntry] of Object.entries(lockfile.packages ?? {})) {
+    const packageName = getLockPackageName(packagePath);
+    const minimumVersion = MINIMUM_SAFE_DEPENDENCY_VERSIONS[packageName];
+    if (
+      minimumVersion &&
+      packageEntry.dev !== true &&
+      typeof packageEntry.version === "string" &&
+      compareVersions(packageEntry.version, minimumVersion) < 0
+    ) {
+      violations.push({
+        message: `${packageName} ${packageEntry.version} must be at least ${minimumVersion}.`,
+        path: normalizePath(lockPath),
+        rule: `dependency-${packageName}-patched`,
+      });
+    }
+  }
+
+  return violations;
 }
 
 function checkSupabaseAuthConfig(cwd, configPath) {
@@ -207,6 +263,24 @@ function collectFiles(directory) {
 function getStatementForMatch(sql, index) {
   const endIndex = sql.indexOf(";", index);
   return sql.slice(index, endIndex === -1 ? undefined : endIndex + 1);
+}
+
+function getLockPackageName(packagePath) {
+  return normalizePath(packagePath).split("node_modules/").at(-1);
+}
+
+function compareVersions(left, right) {
+  const leftParts = left.split(".").map(Number);
+  const rightParts = right.split(".").map(Number);
+
+  for (let index = 0; index < Math.max(leftParts.length, rightParts.length); index += 1) {
+    const difference = (leftParts[index] ?? 0) - (rightParts[index] ?? 0);
+    if (difference !== 0) {
+      return difference;
+    }
+  }
+
+  return 0;
 }
 
 function readTomlNumber(contents, key) {

@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "generated_by": "scripts/generate-claim-test-vectors.mjs",
+    "production_data": false,
+    "synthetic_only": true
+  },
+  "protocol": "sanduqkin:claim:release-package:v1",
+  "signing_key": {
+    "signing_key_id": "claim-release-signing-synthetic-v1",
+    "seed": "OTo7PD0-P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1g",
+    "public_key": "oNXbwyS9Z8ErAOfnmVVJukUw9Z55SQzltMich9yuIjk",
+    "private_key": "OTo7PD0-P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1ig1dvDJL1nwSsA5-eZVUm6RTD1nnlJDOW0yJyH3K4iOQ"
+  },
+  "registered_recipient": {
+    "manifest": {
+      "protocol": "sanduqkin:claim:release-package:v1",
+      "claim_id": "70000000-0000-4000-8000-000000000007",
+      "release_package_id": "80000000-0000-4000-8000-000000000009",
+      "owner_id": "10000000-0000-4000-8000-000000000001",
+      "claimant_id": "20000000-0000-4000-8000-000000000002",
+      "claim_version": 11,
+      "cancellation_version": 3,
+      "created_at": "2026-07-28T08:00:00.000Z",
+      "expires_at": "2026-07-31T08:00:00.000Z",
+      "asset_snapshot_boundary": "2026-07-28T07:59:59.000Z",
+      "asset_ciphertext_digests": [
+        "zjEJ8AeYYrbnmmYM104PGU1va2bue9_xzdO_p6J1Euw",
+        "r1s8NeTAOi_iWnWwzXyFioi_ZkiIrMlkvA8zwlWwtVk"
+      ],
+      "policy_decision_version": 5,
+      "signing_key_id": "claim-release-signing-synthetic-v1",
+      "release_material": {
+        "profile": "registered_recipient_v1",
+        "grant_id": "40000000-0000-4000-8000-000000000004",
+        "grant_version": 1,
+        "recipient_id": "20000000-0000-4000-8000-000000000002",
+        "recipient_key_id": "30000000-0000-4000-8000-000000000003",
+        "recipient_key_version": 1,
+        "sealed_grant_digest": "bNR18kwl5FFTE9mldi9Lff3Jt97QCd05O0kAonhfV38"
+      }
+    },
+    "canonical_manifest": "eyJhc3NldF9jaXBoZXJ0ZXh0X2RpZ2VzdHMiOlsiempFSjhBZVlZcmJubW1ZTTEwNFBHVTF2YTJidWU5X3h6ZE9fcDZKMUV1dyIsInIxczhOZVRBT2lfaVduV3d6WHlGaW9pX1praUlyTWxrdkE4endsV3d0VmsiXSwiYXNzZXRfc25hcHNob3RfYm91bmRhcnkiOiIyMDI2LTA3LTI4VDA3OjU5OjU5LjAwMFoiLCJjYW5jZWxsYXRpb25fdmVyc2lvbiI6MywiY2xhaW1faWQiOiI3MDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDciLCJjbGFpbV92ZXJzaW9uIjoxMSwiY2xhaW1hbnRfaWQiOiIyMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLCJjcmVhdGVkX2F0IjoiMjAyNi0wNy0yOFQwODowMDowMC4wMDBaIiwiZXhwaXJlc19hdCI6IjIwMjYtMDctMzFUMDg6MDA6MDAuMDAwWiIsIm93bmVyX2lkIjoiMTAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwicG9saWN5X2RlY2lzaW9uX3ZlcnNpb24iOjUsInByb3RvY29sIjoic2FuZHVxa2luOmNsYWltOnJlbGVhc2UtcGFja2FnZTp2MSIsInJlbGVhc2VfbWF0ZXJpYWwiOnsiZ3JhbnRfaWQiOiI0MDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDQiLCJncmFudF92ZXJzaW9uIjoxLCJwcm9maWxlIjoicmVnaXN0ZXJlZF9yZWNpcGllbnRfdjEiLCJyZWNpcGllbnRfaWQiOiIyMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLCJyZWNpcGllbnRfa2V5X2lkIjoiMzAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAzIiwicmVjaXBpZW50X2tleV92ZXJzaW9uIjoxLCJzZWFsZWRfZ3JhbnRfZGlnZXN0IjoiYk5SMThrd2w1RkZURTltbGRpOUxmZjNKdDk3UUNkMDVPMGtBb25oZlYzOCJ9LCJyZWxlYXNlX3BhY2thZ2VfaWQiOiI4MDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDkiLCJzaWduaW5nX2tleV9pZCI6ImNsYWltLXJlbGVhc2Utc2lnbmluZy1zeW50aGV0aWMtdjEifQ",
+    "detached_signature": "QG6puO_qUiFlb5Q5UN8T_sQq7bYc0t9g2W8MCssvHdfot5U8IYJ0CK0ONxZs-f8SI9qIWL6FlgVntj-3KQVYBw",
+    "expected_valid": true
+  },
+  "offline_code": {
+    "manifest": {
+      "protocol": "sanduqkin:claim:release-package:v1",
+      "claim_id": "70000000-0000-4000-8000-000000000008",
+      "release_package_id": "80000000-0000-4000-8000-00000000000a",
+      "owner_id": "10000000-0000-4000-8000-000000000001",
+      "claimant_id": "20000000-0000-4000-8000-000000000002",
+      "claim_version": 11,
+      "cancellation_version": 3,
+      "created_at": "2026-07-28T08:00:00.000Z",
+      "expires_at": "2026-07-31T08:00:00.000Z",
+      "asset_snapshot_boundary": "2026-07-28T07:59:59.000Z",
+      "asset_ciphertext_digests": [
+        "zjEJ8AeYYrbnmmYM104PGU1va2bue9_xzdO_p6J1Euw",
+        "r1s8NeTAOi_iWnWwzXyFioi_ZkiIrMlkvA8zwlWwtVk"
+      ],
+      "policy_decision_version": 5,
+      "signing_key_id": "claim-release-signing-synthetic-v1",
+      "release_material": {
+        "profile": "offline_code_v2",
+        "locator_record_id": "50000000-0000-4000-8000-000000000005",
+        "locator_version": 2,
+        "kdf_profile_id": "argon2id-synthetic-test-v1",
+        "proof_key_version": 1,
+        "wrapped_mek_digest": "Nbc_GEZNtr8n8KpOWX8gSH-x0SA1MBv-8r_-6EeKbh0"
+      }
+    },
+    "canonical_manifest": "eyJhc3NldF9jaXBoZXJ0ZXh0X2RpZ2VzdHMiOlsiempFSjhBZVlZcmJubW1ZTTEwNFBHVTF2YTJidWU5X3h6ZE9fcDZKMUV1dyIsInIxczhOZVRBT2lfaVduV3d6WHlGaW9pX1praUlyTWxrdkE4endsV3d0VmsiXSwiYXNzZXRfc25hcHNob3RfYm91bmRhcnkiOiIyMDI2LTA3LTI4VDA3OjU5OjU5LjAwMFoiLCJjYW5jZWxsYXRpb25fdmVyc2lvbiI6MywiY2xhaW1faWQiOiI3MDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDgiLCJjbGFpbV92ZXJzaW9uIjoxMSwiY2xhaW1hbnRfaWQiOiIyMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLCJjcmVhdGVkX2F0IjoiMjAyNi0wNy0yOFQwODowMDowMC4wMDBaIiwiZXhwaXJlc19hdCI6IjIwMjYtMDctMzFUMDg6MDA6MDAuMDAwWiIsIm93bmVyX2lkIjoiMTAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwicG9saWN5X2RlY2lzaW9uX3ZlcnNpb24iOjUsInByb3RvY29sIjoic2FuZHVxa2luOmNsYWltOnJlbGVhc2UtcGFja2FnZTp2MSIsInJlbGVhc2VfbWF0ZXJpYWwiOnsia2RmX3Byb2ZpbGVfaWQiOiJhcmdvbjJpZC1zeW50aGV0aWMtdGVzdC12MSIsImxvY2F0b3JfcmVjb3JkX2lkIjoiNTAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDA1IiwibG9jYXRvcl92ZXJzaW9uIjoyLCJwcm9maWxlIjoib2ZmbGluZV9jb2RlX3YyIiwicHJvb2Zfa2V5X3ZlcnNpb24iOjEsIndyYXBwZWRfbWVrX2RpZ2VzdCI6Ik5iY19HRVpOdHI4bjhLcE9XWDhnU0gteDBTQTFNQnYtOHJfLTZFZUtiaDAifSwicmVsZWFzZV9wYWNrYWdlX2lkIjoiODAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDBhIiwic2lnbmluZ19rZXlfaWQiOiJjbGFpbS1yZWxlYXNlLXNpZ25pbmctc3ludGhldGljLXYxIn0",
+    "detached_signature": "0QSiUjWN6G4hhDDUPImWz7oVe85J1VVpn_nrI4IE2sYJFM4R0Y5zmyxSCABpa1RN5zuqV_ZCyjUaQvmVcBTDDA",
+    "expected_valid": true
+  },
+  "negative_cases": [
+    "missing_route_discriminator",
+    "cross_route_material_substitution",
+    "stale_recipient_key",
+    "stale_kdf_profile",
+    "changed_cancellation_version",
+    "reordered_asset_digests",
+    "unknown_signing_key",
+    "expired_package",
+    "inner_outer_binding_mismatch"
+  ]
+}

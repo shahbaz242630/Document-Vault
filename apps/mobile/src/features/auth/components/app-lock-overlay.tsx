@@ -3,7 +3,8 @@ import { useRouter } from "expo-router";
 import { AppState } from "react-native";
 import * as ExpoSecureStore from "expo-secure-store";
 
-import { type SupabaseVaultClient, useVaultSession } from "@/features/vault";
+import type { SupabaseVaultClient } from "@/features/vault/supabase-vault-repository";
+import { useVaultSession } from "@/features/vault/vault-session-context";
 import { createSupabaseClient } from "@/shared/api/supabase-client";
 
 import { shouldLockAfterBackground } from "../app-lock-service";

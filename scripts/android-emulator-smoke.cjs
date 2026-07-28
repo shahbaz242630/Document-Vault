@@ -241,11 +241,13 @@ function clearAndSignIn(email, password, timeoutMs = 120_000) {
   runAdb(["shell", "input", "keyevent", "KEYCODE_BACK"]);
   sleep(500);
   tapNode("Continue");
-  waitForNode("Your vault", timeoutMs);
-  waitForNode("Sealed on this device");
+  waitForNode("Everything important, in one place.", timeoutMs);
+  waitForNode("Private on this device");
 }
 
 function createEncryptedBankRecord(title) {
+  tapNodeAfterScroll("Add");
+  waitForNode("Add something new");
   tapNodeAfterScroll("Bank account");
   sleep(500);
   if (!findNode(dumpUi(), "Add bank account")) {
@@ -263,7 +265,9 @@ function createEncryptedBankRecord(title) {
 }
 
 function openEncryptedBankRecord(title) {
-  tapNodeAfterScroll("Bank account");
+  tapNodeAfterScroll("Records");
+  waitForNode("Saved records");
+  tapNodeAfterScroll("Bank accounts");
   waitForNode(title, 120_000);
   tapNode(title);
   waitForNode("Stored sealed on this device");
@@ -273,7 +277,7 @@ function openEncryptedBankRecord(title) {
 function permanentlyDeleteOpenRecord() {
   tapNodeAfterScroll("Delete this record");
   tapNodeAfterScroll("Delete permanently");
-  waitForNode("Your vault", 120_000);
+  waitForNode("Everything important, in one place.", 120_000);
 }
 
 function runEncryptedRecordCrudSmoke() {
@@ -292,6 +296,8 @@ function runEncryptedRecordCrudSmoke() {
   waitForNode(editedTitle, 120_000);
   waitForNode("TestBank");
   permanentlyDeleteOpenRecord();
+  tapNodeAfterScroll("Records");
+  waitForNode("Saved records");
   if (findNode(dumpUi(), "Bank accounts")) {
     tapNode("Bank accounts");
     waitForNode("Bank accounts");

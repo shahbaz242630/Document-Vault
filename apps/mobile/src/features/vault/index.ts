@@ -11,6 +11,8 @@ export { RecentlyDeletedList } from "./components/recently-deleted-list";
 export { VaultCategoryList } from "./components/vault-category-list";
 export { VaultCategoryRoute } from "./components/vault-category-route";
 export { VaultDashboard } from "./components/vault-dashboard";
+export { VaultAddMenu } from "./components/vault-add-menu";
+export { VaultRecordsMenu } from "./components/vault-records-menu";
 export { VaultExportScreen } from "./components/vault-export-screen";
 export { createEncryptedStoragePreview } from "./encrypted-storage-preview";
 export {
@@ -88,6 +90,16 @@ export {
   generateEmergencyAccessCode,
   normalizeEmergencyAccessCode,
 } from "./emergency-access-code";
+export {
+  createEmergencyAccessDashboardViewModel,
+  createEmergencyAccessReminderDismissedUntil,
+  deriveEmergencyAccessDashboardStatus,
+  emergencyAccessPendingConfirmationKey,
+  emergencyAccessReminderDismissedUntilKey,
+  isEmergencyAccessReminderDismissed,
+  type EmergencyAccessDashboardStatus,
+  type EmergencyAccessDashboardViewModel,
+} from "./emergency-access-dashboard-status";
 export {
   unwrapKinGrantMEK,
   unwrapSealedEmergencyMEK,

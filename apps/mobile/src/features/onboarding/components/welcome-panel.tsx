@@ -7,7 +7,7 @@ import {
   createSignupProgressStorage,
   getResumeRoute,
   type SignupProgress,
-} from "@/features/auth";
+} from "@/features/auth/signup-progress";
 import { copy } from "@/shared/i18n/en";
 import { colors } from "@/shared/theme/colors";
 import { fonts } from "@/shared/theme/fonts";

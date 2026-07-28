@@ -50,5 +50,6 @@ module.exports = defineConfig([
     "apps/web/next-env.d.ts",
     "coverage/**",
     "dist/**",
+    "supabase/supabase/.temp/**",
   ]),
 ]);
