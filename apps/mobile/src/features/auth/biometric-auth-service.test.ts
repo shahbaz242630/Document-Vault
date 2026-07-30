@@ -50,6 +50,25 @@ describe("createBiometricAuthService", () => {
       });
     });
 
+    it("does not check enrollment when biometric hardware is unavailable", async () => {
+      const service = createBiometricAuthService({
+        async authenticateAsync() {
+          return { success: true };
+        },
+        async hasHardwareAsync() {
+          return false;
+        },
+        async isEnrolledAsync() {
+          throw new Error("Enrollment should not be checked");
+        },
+      });
+
+      await expect(service.checkSupport()).resolves.toEqual({
+        available: false,
+        enrolled: false,
+      });
+    });
+
     it("returns unavailable when hardware support checks fail", async () => {
       const service = createBiometricAuthService({
         async authenticateAsync() {
