@@ -105,32 +105,25 @@ function EmergencyAccessSummary({
         <Ionicons color={statusColor} name={icon} size={24} />
       </View>
       <View style={{ flex: 1, gap: 5 }}>
-        <View
+        <Text
           style={{
-            alignItems: "center",
-            flexDirection: "row",
-            justifyContent: "space-between",
+            color: statusColor,
+            fontFamily: fonts.serif.medium,
+            fontSize: 19,
+            lineHeight: 23,
           }}
         >
-          <Text
-            style={{
-              color: colors.ink,
-              fontFamily: fonts.sans.semibold,
-              fontSize: 15.5,
-            }}
-          >
-            Vault emergency access
-          </Text>
-          <Text
-            style={{
-              color: statusColor,
-              fontFamily: fonts.sans.semibold,
-              fontSize: 11.5,
-            }}
-          >
-            {label}
-          </Text>
-        </View>
+          {label}
+        </Text>
+        <Text
+          style={{
+            color: colors.ink,
+            fontFamily: fonts.sans.semibold,
+            fontSize: 14.5,
+          }}
+        >
+          Vault emergency access
+        </Text>
         <MutedText style={{ lineHeight: 20 }}>{body}</MutedText>
       </View>
     </View>

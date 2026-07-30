@@ -14,6 +14,11 @@ import {
   Subtitle,
 } from "@/shared/ui";
 
+import {
+  formatDynamicAssetFormError,
+  getMissingRequiredFieldError,
+} from "../dynamic-asset-form-validation";
+
 type SelectField = {
   label: string;
   name: string;
@@ -102,16 +107,18 @@ export function DynamicAssetForm({
   );
 
   async function saveAsset() {
+    const requiredFieldError = getMissingRequiredFieldError(fields, values);
+    if (requiredFieldError) {
+      setError(requiredFieldError);
+      return;
+    }
+
     try {
       setIsSaving(true);
       await onSave?.(values);
       setSavedTitle(values.title ?? "Reference");
     } catch (caughtError) {
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : "This reference could not be saved.",
-      );
+      setError(formatDynamicAssetFormError(caughtError, fields));
     } finally {
       setIsSaving(false);
     }

@@ -13,7 +13,6 @@ import {
 import { createVaultDashboardViewModel } from "../vault-dashboard-view-model";
 import type { VaultDecryptedAsset } from "../vault-store";
 import { EmergencyAccessDashboardCard } from "./emergency-access-dashboard-card";
-import { VaultBottomNavigation } from "./vault-bottom-navigation";
 
 type VaultDashboardProps = {
   assets: VaultDecryptedAsset[];
@@ -72,8 +71,6 @@ export function VaultDashboard({ assets }: VaultDashboardProps) {
       <CheckInCard
         nextSuggestedLabel={viewModel.nextSuggestedGroup?.label ?? null}
       />
-
-      <VaultBottomNavigation active="home" />
     </View>
   );
 }

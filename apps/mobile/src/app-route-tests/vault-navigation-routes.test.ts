@@ -23,6 +23,38 @@ describe("vault navigation routes", () => {
     expect(recordsRoute).toContain("VaultRecordsMenu");
   });
 
+  it("keeps top-level vault navigation outside scrolling content", () => {
+    const dashboardRoute = readFileSync(
+      resolve(process.cwd(), "app/vault/index.tsx"),
+      "utf8",
+    );
+    const addRoute = readFileSync(
+      resolve(process.cwd(), "app/vault/add.tsx"),
+      "utf8",
+    );
+    const recordsRoute = readFileSync(
+      resolve(process.cwd(), "app/vault/records.tsx"),
+      "utf8",
+    );
+    const screen = readFileSync(
+      resolve(process.cwd(), "src/shared/ui/screen.tsx"),
+      "utf8",
+    );
+
+    expect(dashboardRoute).toContain(
+      'fixedBottom={\n        isReady ? <VaultBottomNavigation active="home" />',
+    );
+    expect(addRoute).toContain(
+      'fixedBottom={\n        isReady ? <VaultBottomNavigation active="add" />',
+    );
+    expect(recordsRoute).toContain(
+      'fixedBottom={\n        isReady ? <VaultBottomNavigation active="records" />',
+    );
+    expect(screen.indexOf("</ScrollView>")).toBeLessThan(
+      screen.indexOf("{fixedBottom ?"),
+    );
+  });
+
   it("gives both top-level vault pages an explicit route back to dashboard", () => {
     const addMenu = readFileSync(
       resolve(

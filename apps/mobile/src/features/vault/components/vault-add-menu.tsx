@@ -13,7 +13,6 @@ import {
 import {
   getVaultCoverageSections,
 } from "../vault-navigation-sections";
-import { VaultBottomNavigation } from "./vault-bottom-navigation";
 
 export function VaultAddMenu() {
   const router = useRouter();
@@ -48,8 +47,6 @@ export function VaultAddMenu() {
           </Card>
         </View>
       ))}
-
-      <VaultBottomNavigation active="add" />
     </View>
   );
 }

@@ -41,12 +41,21 @@ export function createBiometricAuthService(hardware: BiometricHardware | null) {
         };
       }
 
-      const result = await hardware.authenticateAsync({
-        cancelLabel: "Cancel",
-        disableDeviceFallback: false,
-        fallbackLabel: "Use passcode",
-        promptMessage: "Unlock Sanduqkin",
-      });
+      let result: { error?: string; success: boolean };
+      try {
+        result = await hardware.authenticateAsync({
+          cancelLabel: "Cancel",
+          disableDeviceFallback: false,
+          fallbackLabel: "Use passcode",
+          promptMessage: "Unlock Sanduqkin",
+        });
+      } catch {
+        return {
+          message:
+            "Biometric authentication could not start. Check this device's biometric settings and try again.",
+          status: "error",
+        };
+      }
 
       if (!result.success) {
         if (result.error === "user_cancel") {

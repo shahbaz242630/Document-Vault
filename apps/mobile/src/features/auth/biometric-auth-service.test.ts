@@ -127,5 +127,25 @@ describe("createBiometricAuthService", () => {
 
       expect(result.status).toBe("error");
     });
+
+    it("returns an actionable error when the native prompt cannot start", async () => {
+      const service = createBiometricAuthService({
+        async authenticateAsync() {
+          throw new Error("Missing native permission");
+        },
+        async hasHardwareAsync() {
+          return true;
+        },
+        async isEnrolledAsync() {
+          return true;
+        },
+      });
+
+      await expect(service.authenticate()).resolves.toEqual({
+        message:
+          "Biometric authentication could not start. Check this device's biometric settings and try again.",
+        status: "error",
+      });
+    });
   });
 });

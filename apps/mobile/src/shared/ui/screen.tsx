@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  View,
   type ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -42,12 +43,14 @@ export function Screen({
   gap = 22,
   animateIn = true,
   contentStyle,
+  fixedBottom,
 }: {
   children: ReactNode;
   justify?: ViewStyle["justifyContent"];
   gap?: number;
   animateIn?: boolean;
   contentStyle?: ViewStyle;
+  fixedBottom?: ReactNode;
 }) {
   const insets = useSafeAreaInsets();
   const [opacity] = useState(() => new Animated.Value(animateIn ? 0 : 1));
@@ -81,7 +84,7 @@ export function Screen({
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
-          paddingBottom: Math.max(insets.bottom, 24) + 20,
+          paddingBottom: fixedBottom ? 24 : Math.max(insets.bottom, 24) + 20,
           paddingHorizontal: 28,
           paddingTop: insets.top + 20,
         }}
@@ -101,6 +104,17 @@ export function Screen({
           {children}
         </Animated.View>
       </ScrollView>
+      {fixedBottom ? (
+        <View
+          style={{
+            backgroundColor: colors.background,
+            paddingBottom: Math.max(insets.bottom, 12),
+            paddingHorizontal: 28,
+          }}
+        >
+          {fixedBottom}
+        </View>
+      ) : null}
     </KeyboardAvoidingView>
   );
 }
