@@ -460,7 +460,8 @@ async function writeVector(filename, value) {
   const expected = `${JSON.stringify(value, null, 2)}\n`;
   if (checkOnly) {
     const actual = await readFile(path, "utf8");
-    if (actual !== expected) {
+    const normalizedActual = actual.replace(/\r\n?/g, "\n");
+    if (normalizedActual !== expected) {
       throw new Error(`${filename} is not reproducible; regenerate claim vectors.`);
     }
     return;

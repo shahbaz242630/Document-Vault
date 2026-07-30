@@ -85,6 +85,23 @@ describe("development build configuration", () => {
     ]);
   });
 
+  it("registers the Face ID permission for standalone biometric unlock", () => {
+    const appConfigPath = resolve(repoRoot, "apps/mobile/app.json");
+    const appConfig = JSON.parse(readFileSync(appConfigPath, "utf8")) as {
+      expo?: {
+        plugins?: (string | [string, Record<string, unknown>])[];
+      };
+    };
+
+    expect(appConfig.expo?.plugins).toContainEqual([
+      "expo-local-authentication",
+      {
+        faceIDPermission:
+          "Allow Sanduqkin to use Face ID to unlock your encrypted vault.",
+      },
+    ]);
+  });
+
   it("installs native libsodium for both Android and iOS crypto", () => {
     const packagePath = resolve(repoRoot, "apps/mobile/package.json");
     const packageConfig = JSON.parse(readFileSync(packagePath, "utf8")) as {

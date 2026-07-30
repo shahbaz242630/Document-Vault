@@ -14,7 +14,6 @@ import {
 
 import { createVaultDashboardViewModel } from "../vault-dashboard-view-model";
 import type { VaultDecryptedAsset } from "../vault-store";
-import { VaultBottomNavigation } from "./vault-bottom-navigation";
 
 export function VaultRecordsMenu({
   assets,
@@ -87,8 +86,6 @@ export function VaultRecordsMenu({
           />
         </Card>
       </View>
-
-      <VaultBottomNavigation active="records" />
     </View>
   );
 }

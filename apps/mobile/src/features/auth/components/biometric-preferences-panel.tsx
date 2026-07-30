@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import * as ExpoLocalAuthentication from "expo-local-authentication";
+import { useFocusEffect } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
@@ -30,6 +31,7 @@ export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanel
         available={preferences.available}
         canEnable={preferences.canEnable}
         enabled={preferences.enabled}
+        isCheckingSupport={preferences.isCheckingSupport}
       />
 
       {preferences.error ? (
@@ -59,31 +61,47 @@ function useBiometricPreferences(storage: SecureStorage | null) {
   const [enrolled, setEnrolled] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
+  const [isCheckingSupport, setIsCheckingSupport] = useState(true);
   const { biometricAuth, biometricStorage, service } =
     useBiometricPreferenceServices(storage);
 
-  useEffect(() => {
-    let isMounted = true;
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
 
-    async function loadState() {
-      const [support, storedEnabled] = await Promise.all([
-        biometricAuth.checkSupport(),
-        biometricStorage.isEnabled(),
-      ]);
+      async function loadState() {
+        setIsCheckingSupport(true);
+        try {
+          const [support, storedEnabled] = await Promise.all([
+            biometricAuth.checkSupport(),
+            biometricStorage.isEnabled(),
+          ]);
 
-      if (isMounted) {
-        setAvailable(support.available);
-        setEnrolled(support.enrolled);
-        setEnabled(storedEnabled);
+          if (isMounted) {
+            setAvailable(support.available);
+            setEnrolled(support.enrolled);
+            setEnabled(storedEnabled);
+          }
+        } catch {
+          if (isMounted) {
+            setError(
+              "Biometric availability could not be checked. Please reopen Settings and try again.",
+            );
+          }
+        } finally {
+          if (isMounted) {
+            setIsCheckingSupport(false);
+          }
+        }
       }
-    }
 
-    void loadState();
+      void loadState();
 
-    return () => {
-      isMounted = false;
-    };
-  }, [biometricAuth, biometricStorage]);
+      return () => {
+        isMounted = false;
+      };
+    }, [biometricAuth, biometricStorage]),
+  );
 
   async function disable() {
     setError(null);
@@ -95,6 +113,8 @@ function useBiometricPreferences(storage: SecureStorage | null) {
         eventType: "biometric_unlock_disabled",
       });
       setEnabled(false);
+    } catch {
+      setError("Biometric unlock could not be disabled. Please try again.");
     } finally {
       setIsBusy(false);
     }
@@ -114,6 +134,10 @@ function useBiometricPreferences(storage: SecureStorage | null) {
       } else {
         setError(result.message);
       }
+    } catch {
+      setError(
+        "Biometric unlock could not be enabled. Check this device's biometric settings and try again.",
+      );
     } finally {
       setIsBusy(false);
     }
@@ -126,6 +150,7 @@ function useBiometricPreferences(storage: SecureStorage | null) {
     enable,
     enabled,
     error,
+    isCheckingSupport,
     isBusy,
   };
 }
@@ -153,10 +178,12 @@ function BiometricPreferenceStatus({
   available,
   canEnable,
   enabled,
+  isCheckingSupport,
 }: {
   available: boolean;
   canEnable: boolean;
   enabled: boolean;
+  isCheckingSupport: boolean;
 }) {
   return (
     <>
@@ -171,7 +198,12 @@ function BiometricPreferenceStatus({
           lineHeight: 21,
         }}
       >
-        {getBiometricPreferenceBody({ available, canEnable, enabled })}
+        {getBiometricPreferenceBody({
+          available,
+          canEnable,
+          enabled,
+          isCheckingSupport,
+        })}
       </Text>
     </>
   );
@@ -181,12 +213,18 @@ function getBiometricPreferenceBody({
   available,
   canEnable,
   enabled,
+  isCheckingSupport,
 }: {
   available: boolean;
   canEnable: boolean;
   enabled: boolean;
+  isCheckingSupport: boolean;
 }) {
-  if (enabled) return "Enabled on this device.";
+  if (isCheckingSupport) return "Checking biometric availability...";
+  if (enabled && canEnable) return "Enabled on this device.";
+  if (enabled) {
+    return "Biometric unlock needs attention. Check this device's biometric settings, then disable and re-enable it.";
+  }
   if (canEnable) return "Use this device's enrolled biometrics for app unlock.";
   if (available) return "No biometrics are enrolled on this device.";
   return "Biometric authentication is not available on this device.";

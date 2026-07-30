@@ -40,6 +40,12 @@
         "react-native-libsodium",
         {}
       ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Sanduqkin to use Face ID to unlock your encrypted vault."
+        }
+      ],
       "expo-splash-screen",
       "expo-sharing",
       "expo-font"

@@ -70,7 +70,6 @@ export function VaultBottomNavigation({
         flexDirection: "row",
         justifyContent: "space-around",
         marginHorizontal: -8,
-        marginTop: "auto",
         paddingTop: 10,
       }}
     >
