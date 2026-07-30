@@ -4,14 +4,14 @@ Last updated: 2026-07-28 (Asia/Dubai)
 
 ## Current Decision
 
-Continue protected core-flow validation while preparing a bounded claimant-integration plan; public website publication and live claimant/release behavior remain gated.
+Complete the protected replacement TestFlight release, then resolve the registered-claimant custody gates; public website publication and live claimant/release behavior remain gated.
 
 - API region alignment and the web workspace scaffold are merged on `main`.
 - Static landing/legal content is implemented and protected-preview-verified, but publication is parked pending owner/design/legal approval.
-- The current branch implements the protected owner web vault and shared mobile/web 17-category engine. It is committed but not deployed.
+- The protected owner web vault and shared mobile/web 17-category engine are merged on `main` but are not deployed.
 - The repeatable local browser/mobile-repository smoke, TestFlight build 3 native-UI confirmation, synthetic-data cleanup, and branch PR-readiness review passed.
-- The current feature branch preserves the verified mobile MVP navigation/dashboard redesign and web sign-in UI cleanup from the 2026-07-26 owner QA session. It is not a release build.
-- The next session opens with claimant integration and completion of the end-to-end flow as a planning discussion. It must select and approve a bounded first implementation slice before any claimant runtime integration begins.
+- PR #38 merged the verified mobile MVP navigation/dashboard redesign, web sign-in cleanup, claimant vectors, and hard-disabled custody feasibility work. TestFlight build 3 remains the installed baseline.
+- The first replacement release attempt stopped safely at its SBOM gate before signing or EAS. Green PR #48 contains the lockfile-based SBOM repair and must merge before the workflow is retried.
 - `/claim` remains informational and inactive. No real claimant data, evidence intake, entitlement decision, release, or claimant decryption is authorized.
 
 Detailed pre-consolidation phase evidence is preserved in Git at commit `96e89c1` and indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
@@ -147,7 +147,7 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - **API Frankfurt alignment:** merged through PR #32 as `affaef1`; production function verified in `fra1`, health and protected route behavior retained, and rollback recorded.
 - **Web workspace scaffold:** merged through PR #33 as `c4f1f91`; separate `sanduqkin-web` Vercel project, static shell, tests/build, protected preview, no credentials or data paths.
 
-### Completed on the current branch, not deployed
+### Completed and merged on `main`, not deployed
 
 - Static landing/legal/support/accessibility/security routes and inactive `/claim` preview.
 - Refined public landing-to-sign-in navigation and a cleaned, aligned web login experience.
@@ -159,7 +159,7 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - Protected-route nonce CSP and security headers.
 - Repeatable local protected smoke across card, contact, medical-care, and business-interest records, including bidirectional edit/decrypt, forward-field preservation, ciphertext-only rows, browser deletion lifecycle, offline failure reconciliation, browser storage/key cleanup, protected headers, and full synthetic cleanup.
 - The 2026-07-27 regression passed mobile 377 tests with 3 protected live tests skipped, web 81 tests, repository typecheck and lint, the Next.js `16.2.12` production build, Expo Doctor 21/21, Phase 1/security/mobile-secret guards, and a production dependency audit reporting zero vulnerabilities. The protected web surface remains blocked from deployment for the remaining release-readiness work described in this handoff.
-- The current working tree adds closed claimant protocol contracts and validators, five reproducible synthetic suites, cross-consumer verification, state-release invariants, a hard-disabled native custody probe, and runtime-isolation guards. It adds no claimant authentication, persistence, API, evidence, notification, processor, or release path. Its offline-code V2 Argon2id profile is synthetic-only and not production-approved.
+- PR #38 adds closed claimant protocol contracts and validators, five reproducible synthetic suites, cross-consumer verification, state-release invariants, a hard-disabled native custody probe, and runtime-isolation guards. It adds no claimant authentication, persistence, API, evidence, notification, processor, or release path. Its offline-code V2 Argon2id profile is synthetic-only and not production-approved.
 
 ### Mobile MVP UI/UX session — 2026-07-26
 
@@ -231,21 +231,15 @@ Only after step 5 approval:
 
 Each slice must define non-goals, tests, rollback/kill switch, value-free evidence, and an owner stop gate.
 
-## Next Session: Claimant Integration And Flow Completion
+## Next Session Opener
 
-The first runtime-disconnected contract/vector slice and its evidence in `CLAIM_HANDOFF.md` are completed and owner-approved.
+First merge green PR #48 and rerun the protected TestFlight workflow from `main`. Obtain `Release` approval and record the resulting EAS build, TestFlight processing state, build number, and value-free physical-device evidence. Do not describe the replacement build as available until App Store processing and tester assignment are confirmed.
 
-The claimant private-key custody direction and client surface in `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md` are owner-approved. The runtime-disconnected feasibility implementation is stopped at the findings in `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`: Android 36 cannot currently provide the approved transaction-bound biometric P-256 ECDH operation and therefore fails closed.
+The claimant journey and delivery map are already documented. Both registered recipients and V2 code holders enter the same claimant portal and later converge on application, evidence, review, cooldown, approval, and encrypted read-only retrieval. Neither registration nor code possession authorizes release.
 
-Decide the Android transaction-binding design and minimum platform baseline, complete physical iOS/Android evidence and independent review, and explicitly address the MVP's non-recoverable single-device key-loss risk. Separately schedule representative-device offline-code V2 Argon2id benchmarks; the fixture profile cannot become a production configuration.
+After the release, decide the Android transaction-binding design and minimum platform baseline, complete physical iOS/Android custody evidence and independent review, and explicitly address the MVP's non-recoverable single-device key-loss risk. Only after those gates may a bounded registered/verified-recipient setup slice be approved. That slice stops before claim submission, document intake, review, or release.
 
 Authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, and release behavior remain disabled until their specific slice and unresolved approval gates are approved.
-
-### Superseded pre-implementation direction
-
-Discuss the complete claimant journey and convert the proposed Slices 2–6 into one sequenced integration plan. Start from the existing inactive route pages, identify the decisions and external approvals still blocking each stage, and agree the first bounded implementation slice with explicit non-goals, acceptance tests, rollback/kill switch, and an owner stop gate.
-
-The registered-recipient grant V1, offline-code V2, claimant-state V1, and release-package V1 vector suites remain required protocol and cross-client test inputs. They should be scheduled within the integration plan rather than treated as the only next deliverable. Authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, and release behavior remain disabled until their specific slice is approved.
 
 ## Cost, Resilience, And Performance Constraints
 
@@ -274,6 +268,8 @@ npm run check:supabase-db-security
 npm run check:supabase-rls
 npm run check:claim-vectors
 npm run check:claim-vector-isolation
+npm run check:claim-custody-isolation
+npm run sbom:release
 npm audit --omit=dev --workspaces --audit-level=high
 ```
 

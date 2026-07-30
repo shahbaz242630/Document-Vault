@@ -4,9 +4,9 @@ Last updated: 2026-07-28 (Asia/Dubai)
 
 ## Status
 
-Proposed planning baseline for owner review. This document does not authorize claimant authentication, persistence, migrations, API routes, evidence intake, notifications, review processing, release packaging, or claimant decryption.
+Owner-approved delivery map. This document does not by itself authorize claimant authentication, persistence, migrations, API routes, evidence intake, notifications, review processing, release packaging, or claimant decryption.
 
-The first recommended implementation slice is limited to versioned TypeScript protocol contracts, deterministic synthetic fixtures, generators, and offline verification tests. All claimant capabilities remain hard-disabled.
+Stage 1 protocol contracts/vectors and the later hard-disabled custody feasibility slice are complete and merged through PR #38. All claimant capabilities remain hard-disabled. Stage 2 registered-recipient runtime preparation is blocked on the Android transaction-binding/platform decision, physical custody evidence, independent review, and claimant key recovery/multi-device decision.
 
 ## Product Outcome
 
@@ -198,8 +198,9 @@ After the contracts and fixtures pass review and verification:
 
 The following remain blockers, not implementation assumptions:
 
-- claimant private-key custody and recovery;
-- approved claimant client surface;
+- approved Android transaction binding and minimum platform baseline;
+- physical iOS and representative Android custody evidence;
+- claimant private-key recovery or multi-device policy;
 - production host/origin boundaries;
 - launch jurisdiction and evidence policy;
 - legal release authority and reviewer qualifications;

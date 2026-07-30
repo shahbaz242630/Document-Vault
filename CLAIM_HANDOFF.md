@@ -10,7 +10,7 @@ Claim applications and release are not active. The public `/claim` entry is info
 
 Slice 1 is complete and merged into `main` through PR #34 (`2c82c93`): the public entry exposes two tested informational route pages from one typed capability model, while authentication, intake, code entry, evidence, review, and release remain hard-disabled.
 
-The owner-approved, runtime-disconnected protocol-vector slice is implemented in the current working tree. It adds closed shared contracts, canonicalization, strict validation, the proposed state-transition evaluator, deterministic synthetic generators, the four original fixture suites, and the later approved registered-recipient V2 custody fixture. It does not add a claimant runtime path. The offline-code V2 Argon2id fixture profile is explicitly synthetic-only and `production_approved: false`; production parameters remain blocked on representative-device benchmarks and security approval.
+PR #38 merged the owner-approved, runtime-disconnected protocol-vector and custody-feasibility slices into `main` as merge commit `ed2a3d6`. They add closed shared contracts, canonicalization, strict validation, the proposed state-transition evaluator, deterministic synthetic generators, five fixture suites, a hard-disabled native custody module, and isolation guards. They do not add a claimant runtime path. The offline-code V2 Argon2id fixture profile is explicitly synthetic-only and `production_approved: false`; production parameters remain blocked on representative-device benchmarks and security approval.
 
 ## Non-Negotiable Boundaries
 
@@ -185,15 +185,13 @@ Exit: transition/property/race/retry/notification/authorization tests pass. Rele
 
 Exit: focused security review or penetration test, restore drill, synthetic E2E, and owner approval pass before an invitation-only pilot.
 
-## Active Next Slice
+## Next Session Opener
 
-The end-to-end delivery map is recorded in `docs/superpowers/plans/2026-07-28-claimant-integration-delivery-map.md`. The first bounded slice—runtime-disconnected shared contracts and synthetic vectors—is implemented and owner-approved.
+Complete the replacement TestFlight release described in `HANDOFF.md` before opening a new claimant implementation slice. The claimant end-to-end delivery map is already recorded in `docs/superpowers/plans/2026-07-28-claimant-integration-delivery-map.md`; do not repeat that planning exercise.
 
-The owner approved the claimant-key custody and client-boundary direction in `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md` and authorized its runtime-disconnected feasibility slice. The implementation and value-free findings are recorded in `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`.
+The next claimant decision is the Android transaction-binding design and minimum platform baseline. Physical iOS and representative Android custody evidence, independent review, and the claimant key recovery/multi-device decision must also be completed.
 
-The slice is stopped because the current Android 36 client can compile hardware-backed P-256 ECDH but cannot bind `KeyAgreement` to a biometric transaction under the approved guarantee. Android reports ineligible rather than silently using a timed authentication window. Physical iOS and Android evidence and independent review are also outstanding.
-
-Do not begin registered-recipient runtime preparation until the Android transaction-binding direction, minimum platform baseline, physical-device evidence, and independent review are approved. Before pilot, product must also confirm that the MVP's non-recoverable single-device claimant key is acceptable or require multi-device enrollment or a claimant-held recovery protocol.
+If those gates are approved, the next bounded runtime slice is registered/verified-recipient setup only: single-use invitation binding, verified normalized-address matching, fresh `aal2`, claimant-local public-key registration/replacement, and owner-local grant finalization/revocation. It must keep claim submission, document intake, evidence review, state progression, and release disabled.
 
 Authentication, persistence, migrations, API routes, invitations, evidence handling, notifications, workflow processors, and release behavior remain blocked until their applicable slice and approval gates are explicitly cleared.
 
@@ -210,23 +208,15 @@ Authentication, persistence, migrations, API routes, invitations, evidence handl
 - Verification passed repository typecheck/lint; mobile 383 tests with 3 protected skips; web 83 tests; shared types 19 tests; shared validation 40 tests; API 30 tests; web build; mobile coverage; Expo Doctor 21/21; Phase 1/security/GitHub Actions/mobile-secret/vector/custody guards; Docker-backed database/RLS checks; and a production audit with zero vulnerabilities.
 - The Docker-backed Supabase database catalog check and hostile RLS attack suite passed after the checked-in local stack was started. This slice contains no migration, schema, database, RLS, Storage, or runtime API change.
 - The owner-approved custody feasibility slice adds a hard-disabled local Expo module, a deterministic registered-recipient V2 P-256 reference vector, cross-consumer tests, and a custody-isolation guard. The native module and integrated Android app Kotlin compilation passed without raising the app's minimum SDK above 24.
-- Android remains fail-closed: the current Android 36 target does not provide transaction-bound `BiometricPrompt.CryptoObject(KeyAgreement)`. No physical device was connected, and iOS native/physical verification requires an Apple environment.
+- Android remains fail-closed: the current Android 36 target does not provide transaction-bound `BiometricPrompt.CryptoObject(KeyAgreement)`. No physical custody probe ran. The merged iOS module passed simulator compilation, while physical iOS and representative Android custody verification remain outstanding.
 
-## Superseded Pre-Implementation Direction
+## Session Close Evidence — 2026-07-28
 
-Slice 2 remains a proposed approval package in `docs/superpowers/specs/2026-07-20-claim-protocol-authority-threat-model.md`. Product direction and hard-disabled scaffolding are owner-approved, but independent security assurance, qualified legal/privacy review, claimant-key custody, jurisdiction, retention, and two-human reviewer separation remain unresolved.
-
-Open the next session with a claimant-integration and end-to-end flow discussion. Reconcile the current inactive claimant pages and typed capability model with the proposed Slices 3–6, then produce one sequenced delivery map covering registered-recipient onboarding, V2 initiation, evidence quarantine, controlled review, encrypted release, and the read-only claimant viewer.
-
-Before implementation, agree the first bounded slice, its non-goals, prerequisites, schema/API/client boundaries, abuse cases, acceptance tests, rollback/kill switch, and owner stop gate. The five versioned synthetic suites under `packages/shared-types/test-vectors/claim/` remain required protocol and cross-client verification inputs:
-
-1. `recipient-grant-v1.json`;
-2. `offline-code-v2.json`;
-3. `claim-state-v1.json`; and
-4. `release-package-v1.json`.
-5. `recipient-grant-v2.json`.
-
-The vectors are supporting prerequisites, not the sole next-session deliverable. Discussion and planning are authorized; authentication, persistence, migrations, API routes, invitations, evidence handling, notifications, workflow processors, and release behavior remain blocked until the applicable bounded slice and its unresolved approval gates are explicitly cleared.
+- PR #38 merged the claimant protocol/vector and hard-disabled custody feasibility work into `main`.
+- The final matrix passed Android native compile and emulator smoke, iOS simulator smoke, application/security gates, local/hosted Supabase gates, CodeQL, OWASP ZAP, GitGuardian, and protected previews.
+- Product understanding was confirmed: registered recipients and V2 code holders use different route assertions but converge on the same controlled claim application, document/evidence, review, cooldown, approval, and encrypted read-only retrieval journey.
+- Registration, MFA, or code possession establishes context only and never authorizes data release.
+- Claimant authentication, invitation delivery, persistence, migrations, APIs, evidence, review processors, notifications, package creation, decryption, and release remain disabled.
 
 ## Slice 1 Evidence
 

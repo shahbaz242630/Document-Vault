@@ -4,7 +4,7 @@ Last updated: 2026-07-28 (Asia/Dubai)
 
 ## Start Here
 
-Sanduqkin is a zero-knowledge personal-information vault. The mobile Phase 1 vault is in controlled TestFlight testing. A protected owner web vault is implemented on the current feature branch but is not deployed. The public website is still a protected draft, and all claimant submission and release functionality is disabled.
+Sanduqkin is a zero-knowledge personal-information vault. The mobile Phase 1 vault is in controlled TestFlight testing. The protected owner web vault, mobile MVP redesign, and runtime-disconnected claimant protocol/custody feasibility work are merged on `main` but are not deployed in a replacement TestFlight build. The public website remains a protected draft, and all claimant submission and release functionality is disabled.
 
 Read these active documents before changing the project:
 
@@ -22,10 +22,10 @@ Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
 - GitHub: `shahbaz242630/Document-Vault`
 - Default/release branch: `main`
-- Current feature branch: `codex/fix-hono-alerts`
-- Latest pushed feature-branch commit: `13fa161` (`Set claimant integration as next session focus`).
-- Current `origin/main`: `2c82c93` (`Complete secure MVP claimant and vault slice`, PR #34).
-- The current feature branch contains the preserved July 26 owner-approved web login and mobile MVP UI/UX consolidation; it is not a release build.
+- Current session-close branch: `codex/fix-release-sbom`, PR #48.
+- Current `origin/main`: `ed2a3d6` (`Merge pull request #38 from shahbaz242630/codex/fix-hono-alerts`).
+- PR #38 merged the owner web vault, mobile MVP redesign, claimant protocol vectors, hard-disabled custody feasibility module, isolation guards, and corrected Android smoke navigation.
+- PR #48 repairs the release SBOM gate and has a fully green check matrix; it must merge before the protected TestFlight workflow is retried.
 - Product requirements: `Vault_BRD_v1.0.md` (document version 1.1)
 - Expected unrelated local-only items include `.playwright-mcp/`, `.codex-runtime/`, and `welcome.png`; do not commit or delete them unless explicitly requested.
 
@@ -36,14 +36,14 @@ Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its 
 - App version `1.0.0`, TestFlight build `3`, is the current Supabase-enabled test build.
 - Build 3 was produced by protected GitHub run `29695865266`, processed by App Store Connect, cleared for the current encryption/distribution scope, assigned manually to `GCC Internal Testers`, installed on an iPhone 12 running iOS 26.5.2, and verified for password sign-in, local vault unlock, web-to-mobile encrypted-record visibility, native edit, web read-back, and permanent synthetic-data cleanup.
 - Phase 1 remains a controlled internal test, not a production-readiness declaration. Multi-day physical-device functional and security QA is still open.
-- The current feature branch has a dedicated Dashboard, separate Add and Saved Records pages, explicit Dashboard returns, and an icon-based Home/Add/Records/Settings/Lock footer.
+- `main` has a dedicated Dashboard, separate Add and Saved Records pages, explicit Dashboard returns, and an icon-based Home/Add/Records/Settings/Lock footer.
 - Dashboard content now includes live encrypted-record coverage, a safe data-derived next-reference suggestion, and live emergency-readiness status from the existing sealed emergency grant. All cards use one consistent surface treatment.
 
 ### Owner web vault
 
-- The current branch implements Supabase authentication, local browser-worker cryptography, and encrypted owner-vault CRUD for all 17 current asset types.
+- `main` implements Supabase authentication, local browser-worker cryptography, and encrypted owner-vault CRUD for all 17 current asset types.
 - Mobile and web share the same Supabase identity, `vault_key_material`, `vault_assets`, envelope format, and schema-driven category registry. There is no parallel web vault.
-- The branch includes mobile forward-field preservation, failed-persistence reconciliation, and nonce-based protected-route security headers.
+- `main` includes mobile forward-field preservation, failed-persistence reconciliation, and nonce-based protected-route security headers.
 - The owner web vault is committed but not deployed. The hosted web preview is still the earlier static protected build and has no Supabase environment variables.
 
 ### Public website and claimant flow
@@ -89,14 +89,17 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Added a live emergency-readiness Dashboard card using the existing Supabase sealed grant and secure interruption marker, including seven-day on-device reminder deferral for missing or interrupted setup. The controlled test account reported `Ready` without changing its grant.
 - Verified controlled TestFlight-created test entries reached encrypted Supabase storage and the selected deleted test item was fully removed.
 - The 2026-07-27 consolidation passed repository typecheck and lint, mobile 377 tests with 3 protected skips, web 81 tests, the Next.js `16.2.12` production build, Expo Doctor 21/21, Phase 1/security/mobile-secret guards, and a production dependency audit reporting zero vulnerabilities.
-- The current working tree adds the owner-approved, runtime-disconnected claimant protocol/vector and custody feasibility work: closed shared contracts and validators, five reproducible synthetic suites, state invariants, cross-consumer tests, a hard-disabled native custody module, and runtime-isolation guards. It is not deployed.
+- PR #38 merged the owner-approved, runtime-disconnected claimant protocol/vector and custody feasibility work: closed shared contracts and validators, five reproducible synthetic suites, state invariants, cross-consumer tests, a hard-disabled native custody module, and runtime-isolation guards. It remains runtime-disabled and is not present in TestFlight build 3.
+- The final PR #38 matrix passed Android native compile, Android emulator smoke, iOS simulator smoke, application/security gates, live and hosted Supabase gates, CodeQL, OWASP ZAP, GitGuardian, and Vercel preview checks.
+- Protected TestFlight run `30362667662` stopped at the release SBOM job before credentials or EAS were accessed. npm rejected the intentional dependency overrides as an invalid tree; the build-and-submit job was skipped.
+- PR #48 replaces npm dependency re-resolution with a tested CycloneDX production inventory generated directly from the committed npm v3 lockfile. Local generation produced 662 components, the production audit remained at zero vulnerabilities, and the full PR check matrix passed.
 
 ## Current Blockers And Technical Debt
 
 ### Before completing mobile Phase 1 readiness
 
 - Complete TestFlight contact/test information and intended initial GCC territory configuration.
-- Run and record multi-day physical-device QA against build 3: cold start, authentication/unlock, encrypted CRUD, background/foreground locking, biometrics, screenshot/sensitive-screen behavior, recovery, emergency access, sign-out, and returning-user flow.
+- Complete the open multi-day physical-device QA against the current installed build 3, then rerun the applicable regression set on the replacement build: cold start, authentication/unlock, encrypted CRUD, background/foreground locking, biometrics, screenshot/sensitive-screen behavior, recovery, emergency access, sign-out, and returning-user flow.
 - Record only device model, iOS version, build number, and value-free pass/fail evidence.
 - Finalize the supportable U.S. export-classification rationale before setting persistent iOS compliance metadata.
 - Complete the French ANSSI declaration before enabling France.
@@ -126,23 +129,16 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Decide who can authorize release when the owner cannot respond, what evidence is accepted, applicable jurisdictions, challenge/cooldown rules, operator responsibilities, retention, disputes, and governing law.
 - Design and review the V2 split emergency-code protocol before any code-based claim lookup. Existing V1 codes have no safe public locator.
 
-## Active Next Slice
+## Next Session Opener
 
-The runtime-disconnected claimant contract/vector slice is completed and owner-approved. Its evidence and the sequenced delivery map are recorded in `CLAIM_HANDOFF.md` and `docs/superpowers/plans/2026-07-28-claimant-integration-delivery-map.md`.
+1. Merge green PR #48.
+2. Dispatch `ios-testflight.yml` from the resulting `main` commit with `confirmation=testflight`.
+3. Obtain explicit `Release` environment approval, confirm the EAS build and automatic submission, wait for App Store processing, and record the new build number and value-free evidence.
+4. Keep TestFlight build 3 as the current installed baseline until the replacement build is processed and assigned.
 
-The claimant-key custody and client-boundary direction in `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md` is owner-approved. Its runtime-disconnected feasibility implementation and findings are recorded in `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`.
-
-The next decision is the Android transaction-binding design and minimum platform baseline. The current Android 36 client supports hardware-backed P-256 ECDH but cannot bind `KeyAgreement` to a biometric transaction, so the probe reports Android ineligible. Physical iOS/Android evidence, independent review, and the non-recoverable single-device decision also remain open.
+After release completion, the next product decision is the Android transaction-binding design and minimum platform baseline. The current Android 36 client supports hardware-backed P-256 ECDH but cannot bind `KeyAgreement` to a biometric transaction, so the probe fails closed. Physical iOS/Android evidence, independent review, and the single-device recovery decision remain open.
 
 Authority, legal/privacy, jurisdiction, retention, origin, backup/restore, independent-assurance, and reviewer-separation gates remain unresolved. Discussion, documentation, physical testing, benchmarks, and independent-review preparation are authorized; runtime integration remains blocked.
-
-## Superseded Pre-Implementation Direction
-
-Open the next session with a claimant-integration and end-to-end flow discussion. Reconcile the inactive claimant UI, the Slice 2 approval package, and the proposed Slices 3–6 into one sequenced delivery map from registered-recipient onboarding through controlled review, encrypted release, and the read-only claimant viewer.
-
-The discussion must identify the first bounded implementation slice, its non-goals, dependencies, acceptance tests, rollback/kill switch, and owner stop gate. The four versioned synthetic suites—registered-recipient grant V1, offline handover code V2, claimant state V1, and release package V1—remain required protocol and cross-client test inputs, but they are no longer the sole next-session topic.
-
-The protocol, authority, legal/privacy, claimant-key custody, jurisdiction, retention, independent assurance, and reviewer-separation gates remain unresolved. Discussion and planning are authorized; runtime integration begins only after the specific bounded slice and its prerequisites are approved.
 
 Do not deploy the protected vault, attach production domains, publish draft legal content, change Supabase Auth globally, collect real claimant data, or enable claimant runtime or release behavior without the approvals in `CLAIM_HANDOFF.md` and `SECURITY_HANDOFF.md`.
 
@@ -163,6 +159,8 @@ npm run check:supabase-db-security
 npm run check:supabase-rls
 npm run check:claim-vectors
 npm run check:claim-vector-isolation
+npm run check:claim-custody-isolation
+npm run sbom:release
 npm audit --omit=dev --workspaces --audit-level=high
 ```
 
@@ -173,6 +171,6 @@ Run database security checks before and after any migration or RLS change. Relea
 1. Read the four documents listed under `Start Here`.
 2. Run `git status --short --branch` and `git log --oneline --decorate -5`.
 3. Preserve unrelated user changes and expected local-only files.
-4. Confirm that the active slice above is still current and that the environment remains protected development.
+4. Complete the release opener above before selecting new claimant runtime work.
 5. Recheck time-sensitive provider or security guidance only when the slice depends on it.
 6. State the slice scope and non-goals, implement or verify only that slice, record evidence, update the handoffs, and stop for owner review.
