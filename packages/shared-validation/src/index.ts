@@ -175,7 +175,7 @@ export const documentTypes = [
   "deed",
   "passport",
   "marriage_certificate",
-  "death_certificate",
+  "divorce_certificate",
   "other",
 ] as const;
 

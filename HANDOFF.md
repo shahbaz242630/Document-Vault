@@ -23,9 +23,11 @@ Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its 
 - GitHub: `shahbaz242630/Document-Vault`
 - Default/release branch: `main`
 - Current session-close branch: `main`.
-- Current `origin/main`: `306c18f` (`Fix mobile QA regressions and claimant vector checks (#49)`).
+- Current `origin/main`: `9a903f2` (`Repair owner security controls and certificate records (#51)`).
 - PR #48 merged the lockfile-based release SBOM repair and enabled the successful protected build-4 release.
 - PR #49 merged the build-4 mobile QA repairs, Expo SDK 56 alignment, biometric/native Face ID configuration, deterministic claimant-vector line-ending repair, and focused coverage repair.
+- PR #51 merged the biometric unlock/session repair, password fallback, information-only trusted-person route, and certificate-location support; the newly added death-certificate location option was corrected locally to divorce certificate after merge, pending the next commit/build.
+- Physical-iPhone testing of TestFlight build 6 exposed a confirmed Settings interaction defect: the owner tapped the `Biometric unlock` row/card and nothing happened because it is a plain `View`/`Text` with no press handler. Only conditional enable/disable buttons are actionable. This does not yet prove the lock-screen protected-key path fails, but it blocks discoverable setup through the row.
 - Product requirements: `Vault_BRD_v1.0.md` (document version 1.1)
 - Expected unrelated local-only items include `.playwright-mcp/`, `.codex-runtime/`, and `welcome.png`; do not commit or delete them unless explicitly requested.
 
@@ -36,6 +38,7 @@ Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its 
 - App version `1.0.0`, TestFlight build `5`, is the current installed Supabase-enabled internal-test build.
 - Build 4 was produced by protected GitHub run `30520301290` from commit `7dab9b7`, processed by App Store Connect, cleared through the manual encryption questionnaire, assigned to `GCC Internal Testers`, and installed on the controlled iPhone.
 - Build 5 was produced and automatically submitted by protected GitHub run `30570280096` from `main` commit `306c18f`. EAS build `4a39030c-6345-440a-9aca-780fe9cdabd1` and submission `ffc74175-ea27-4201-b273-8486df020fc9` completed successfully. App Store compliance and `GCC Internal Testers` assignment were completed, and the controlled tester installed the build.
+- Build 6 was produced and submitted by protected run `30647817586` from `main` commit `9a903f2`. EAS build `905cf43a-369e-42fa-a9ba-1bc8d6bf787a` and submission `16464bb5-6ef9-4b24-b891-a664255c963f` completed; Apple processing, compliance, internal assignment, installation and physical QA remain open.
 - Phase 1 remains a controlled internal test, not a production-readiness declaration. Multi-day physical-device functional and security QA is still open.
 - `main` has a dedicated Dashboard, separate Add and Saved Records pages, explicit Dashboard returns, and an icon-based Home/Add/Records/Settings/Lock footer.
 - Dashboard content now includes live encrypted-record coverage, a safe data-derived next-reference suggestion, and live emergency-readiness status from the existing sealed emergency grant. All cards use one consistent surface treatment.
@@ -101,7 +104,7 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - Protected TestFlight run `30570280096` generated the release SBOM, built app `1.0.0` (5), and completed the EAS submission. App Store processing, compliance, internal assignment, and installation completed.
 - Build-5 physical QA passed the fixed footer, Emergency Readiness heading, friendly invalid-data handling, and valid encrypted record save. Sealed emergency-code creation also passed.
 - The two build-5 interaction regressions are repaired locally. Android now shows one native biometric prompt after explicit Unlock, restores only with a live Supabase session, and offers password fallback; the owner Emergency card opens a tested information-only trusted-person requirements page with no claimant runtime. Physical iOS regression is still required before release.
-- Marriage and death certificates are available through the existing encrypted Document Locations CRUD path. Hosted create/edit/persistence and permanent synthetic cleanup passed without a database schema change.
+- Marriage and divorce certificates are available through the existing encrypted Document Locations CRUD path. Hosted create/edit/persistence and permanent synthetic cleanup passed without a database schema change. The corrected divorce-certificate value requires fresh focused verification before release.
 - Sealed emergency-code regeneration persisted one active complete encrypted grant with prior grants revoked. No raw code was included in logs or evidence.
 - The 2026-07-31 pre-build gate passed 574 workspace tests with 3 protected skips, mobile coverage, typecheck, zero-warning lint, the web production build, Expo Doctor 21/21, Phase 1/security/GitHub Actions/mobile-secret and claimant isolation guards, local database catalog/hostile RLS suites, Android native assembly/install/biometric smoke, a zero-vulnerability production audit, and the 662-component release SBOM.
 
@@ -142,15 +145,16 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 
 ## Next Session Opener
 
-1. Commit the bounded repair set, open its PR, and pass the protected CI matrix, including database catalog, hostile RLS, native Android, and iOS simulator checks.
-2. After merge and explicit `Release` approval, create the next controlled internal TestFlight candidate. Run biometric, password fallback/recovery, trusted-person information navigation, certificate CRUD, emergency status, and returning-user checks on the physical iPhone; record value-free evidence and do not promote the candidate until it passes.
-3. Open the claimant workstream using `CLAIM_HANDOFF.md` and `docs/superpowers/plans/2026-07-28-claimant-integration-delivery-map.md`; do not repeat the delivery-map exercise.
-4. Begin bounded Slice 2 decision closure: release authority, supported jurisdictions, evidence/retention policy, owner challenge/cooldown, reviewer separation, claimant-key custody/recovery, Android transaction binding/minimum platform, and owner/claimant origin isolation.
-5. Produce a decision register, revised threat/control matrix, and explicit owner/security/legal approval checklist. Stop before migrations, authentication, invitations, evidence upload, notifications, processors, claim submission, or release.
+1. Finish Apple processing/compliance/internal assignment for build 6, install it, and record the full value-free physical-iPhone regression. Do not promote it until the owner-flow checklist passes.
+2. Preserve the recorded approval of all owner/product decisions, including iOS-only Slice 3 preparation with Android fail-closed, provisional 72-hour package availability and 15-minute retrieval, the claimant journey dashboard, internal audit ledger, and nationality-neutral global architecture with document-specific jurisdiction policy packs.
+3. Route immutable document versions to named legal/privacy, security, operations and independent reviewers, including the public-state vocabulary, audit event catalogue, tamper evidence, access, retention, legal hold and export design; capture approval, conditions, evidence and expiry.
+   The review set now includes the owner-described manual-review/retrieval journey. Preserve the ciphertext-only backend and native local decrypt/export boundary unless D17/D32 are explicitly reopened through security/privacy review.
+4. Obtain physical iOS custody evidence and resolve the Android transaction-bound platform or iOS-only preparation decision.
+5. Keep the checklist at `NO-GO` and stop before migrations, authentication, invitations, evidence upload, notifications, processors, claim submission or release until every Slice 3 blocker is approved.
 
-Repository, CI, submission, and App Store distribution snags are resolved. The interaction repairs and local database/RLS gates pass, but physical iOS and the protected release matrix remain required before release; they do not block the authorized claimant documentation, threat-model, benchmark, and decision work above.
+Repository, protected CI and build-6 submission passed. Physical owner-flow QA found a parked biometric Settings defect. The claimant package has partial product-owner approval but remains `NO-GO` pending specialist approvals and does not enable runtime work.
 
-Authority, legal/privacy, jurisdiction, retention, origin, backup/restore, independent-assurance, and reviewer-separation gates remain unresolved. Discussion, documentation, physical testing, benchmarks, and independent-review preparation are authorized; runtime integration remains blocked.
+No operating company exists yet. Operator/controller, authority, legal/privacy policy packs, dynamic evidence rules, retention, origin, backup/restore, independent-assurance, and reviewer-separation gates remain unresolved. Discussion, documentation, physical testing, benchmarks, and independent-review preparation are authorized; runtime integration remains blocked.
 
 Do not deploy the protected vault, attach production domains, publish draft legal content, change Supabase Auth globally, collect real claimant data, or enable claimant runtime or release behavior without the approvals in `CLAIM_HANDOFF.md` and `SECURITY_HANDOFF.md`.
 

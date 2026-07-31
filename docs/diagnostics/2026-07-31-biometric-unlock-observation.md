@@ -2,7 +2,7 @@
 
 Date: 2026-07-31 (Asia/Dubai)
 
-Status: diagnosis only; no application fix or biometric configuration change was made.
+Status: Android repair verified; physical-iOS build 6 verification failed and remains under diagnosis.
 
 ## Scope
 
@@ -114,4 +114,18 @@ Later on 2026-07-31, the owner authorized the biometric repair.
 
 ### Remaining platform gate
 
-Android emulator verification is green. The original physical-iOS regression still requires a new native/TestFlight build and a real iPhone test covering Face ID enablement, in-process lock/unlock, cancellation, failed authentication, background/foreground lock, and password fallback. A Windows Android run cannot prove the iOS Keychain/Face ID behavior.
+Android emulator verification is green. On 2026-07-31, the owner tested TestFlight build 6 on a physical iPhone and reported that biometric unlock still did not work. This falsifies the earlier working assumption that the merged repair plus a fresh native build would resolve the iOS regression.
+
+The owner then clarified that the tapped control was the `Biometric unlock` row/card in Settings and that tapping it produced no error or transition. Source inspection confirms that the row is rendered as a plain `View` containing `Text`; it has no `onPress` handler and is not an accessibility button. Only the conditional `Enable biometric unlock` and `Disable biometric unlock` controls are pressable. A tap on the row therefore cannot invoke Face ID and intentionally produces no log or visible error under the current implementation.
+
+This confirms a Settings interaction/affordance defect. It does not by itself prove that the protected-key unlock action on the lock screen fails on iOS. Physical-iOS Face ID verification remains incomplete until the user can enable the preference through an actionable control and then test `Lock` -> `Unlock`.
+
+No physical-device console log has yet been captured. After the Settings interaction defect is repaired, the next diagnostic must distinguish these pre-prompt and post-prompt states before iOS biometric readiness is claimed:
+
+1. `biometric_unlock_enabled` is absent or false;
+2. `biometric_mek_cache` is absent or its authenticated Keychain read fails;
+3. Face ID is not authorized/enrolled for Sanduqkin;
+4. Face ID succeeds but the Supabase session has expired;
+5. Face ID succeeds and session restoration begins, but vault initialization fails.
+
+The Windows Android run cannot prove iOS Keychain/Face ID behavior. Claiming iOS biometric readiness remains blocked until a physical-device run captures the visible error and, where possible, an Xcode device-console trace.

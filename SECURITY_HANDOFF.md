@@ -4,15 +4,16 @@ Last updated: 2026-07-31 (Asia/Dubai)
 
 ## Security Status
 
-The mobile vault is in controlled TestFlight testing. The protected owner web vault, mobile redesign, build-4 QA repairs, claimant protocol vectors, and hard-disabled custody feasibility work are merged on `main`. Build 5 is installed for controlled physical QA. The hosted web preview is the earlier static SSO-protected build. Public legal publication and all claimant runtime functionality remain disabled.
+The mobile vault is in controlled TestFlight testing. PR #51 and the runtime-disconnected claimant protocol/custody work are merged on `main`. Build 5 remains installed; build 6 was submitted successfully and is processing at Apple before internal assignment and physical QA. The hosted web preview remains protected. Public legal publication and all claimant runtime functionality remain disabled.
 
 Claimant security, protocol, evidence, review, and encrypted-release slices are governed by `CLAIM_HANDOFF.md`; its stop gates apply before any claimant implementation.
 
 Current security reference points:
 
 - Current installed TestFlight build: app `1.0.0`, build `5`, EAS build `4a39030c-6345-440a-9aca-780fe9cdabd1`, submission `ffc74175-ea27-4201-b273-8486df020fc9`.
-- Protected release run: `30570280096`.
-- Current session-close branch: `main`; current `origin/main` is `306c18f` from PR #49.
+- Processing TestFlight candidate: app `1.0.0` (6), EAS build `905cf43a-369e-42fa-a9ba-1bc8d6bf787a`, submission `16464bb5-6ef9-4b24-b891-a664255c963f`.
+- Protected release run: `30647817586`.
+- Current session-close branch: `main`; current `origin/main` is `9a903f2` from PR #51.
 - Supabase: existing Free project in `eu-central-1`; local stack is used for migrations and attack tests.
 - Web preview: `sanduqkin-web`, SSO protected, no custom domain, no hosted environment variables, and still serving the earlier static Phase 3 preview.
 
@@ -134,6 +135,12 @@ Android Kotlin compilation confirms hardware-backed P-256 ECDH support, but the 
 
 Before any registered-recipient runtime work, approve a revised Android transaction-binding design or minimum platform baseline and obtain independent review. Before pilot, product must also accept the single-device loss risk or require multi-device enrollment or a claimant-held recovery protocol. Offline-code V2 production KDF parameters remain unapproved until representative iOS, Android, desktop, and low-memory worker benchmarks pass security review.
 
+The owner approved resolving loss risk through at least two independently enrolled device-bound claimant keys before pilot, with no server recovery, plus registered-recipient first, a death-only invitation pilot, verified notice with a provisional 30-day cooldown, no automatic release for non-response, and two independent reviewers. The owner also required a safe claimant journey dashboard, comprehensive append-only internal audit/journey ledger, and a nationality-neutral global architecture with signed/versioned document-specific jurisdiction policy packs. No operating company exists yet. Legal/privacy, security, operations and independent approvals remain outstanding; current status is `NO-GO` for Slice 3.
+
+The owner-described manual retrieval journey is recorded in `docs/superpowers/specs/2026-07-31-claimant-mvp-manual-review-retrieval-flow.md`. Ordinary shared-drive evidence, emailed retrieval secrets and backend/browser-readable PDFs would expand plaintext trust and are not approved. The current boundary is private evidence quarantine, two-reviewer authorization, value-free notification, ciphertext-only package delivery, native local decryption/export and precise receipt events.
+
+The owner explicitly approved this native local decryption/PDF-export boundary; browser-readable PDF delivery and system-known PDF passwords are out of scope.
+
 The Docker-backed Supabase database catalog check and hostile RLS attack suite passed after the checked-in local stack was started. No migration, schema, RLS, Storage, or runtime API code changed in this slice.
 
 ### Release status at session close
@@ -143,10 +150,13 @@ The Docker-backed Supabase database catalog check and hostile RLS attack suite p
 - PR #49 merged as `306c18f` after the full Android, iOS, security, Supabase, CodeQL, ZAP, GitGuardian, and preview matrix passed. Post-merge Security CI run `30566745549`, CodeQL run `30566745741`, and OWASP ZAP run `30566745473` all passed.
 - Protected release run `30570280096` passed SBOM generation, protected credential materialization/cleanup, EAS build, and automatic submission for app `1.0.0` (5).
 - App Store compliance and `GCC Internal Testers` assignment completed, and build 5 was installed. Physical QA passed the footer, Emergency Readiness heading, invalid/valid save, and sealed-code creation. Biometric unlock and the owner-side `Pre-authorize Kin` card are inert and require focused repair before the next release.
+- TestFlight build 6 physical-iPhone feedback identified a Settings affordance defect: the `Biometric unlock` row/card has no press handler, so tapping it silently does nothing. This blocks discoverable setup but does not yet prove failure of the lock-screen protected-key path. The iOS release gate remains failed until the interaction is repaired and physical Face ID setup plus `Lock` -> `Unlock` are verified.
 - The 2026-07-31 repair securely sequences MEK storage before biometric enablement, defers authenticated key access until explicit Unlock, maps native outcomes, rejects remote restoration without a live Supabase session, and exposes password fallback. The assembled APK passed a Pixel-emulator system-prompt/fingerprint smoke with no app crash or React Native error.
 - The trusted-person control now opens a static owner-side requirements page only. Claimant vector, runtime-isolation, and custody-isolation guards pass; no claimant persistence or capability was enabled.
-- Sealed-code regeneration persisted one active encrypted grant with previous versions revoked. Marriage/death certificate locations reuse the existing encrypted owner-vault envelope and CRUD path. Both synthetic certificate rows were permanently removed after hosted persistence verification.
+- Sealed-code regeneration persisted one active encrypted grant with previous versions revoked. Marriage/divorce certificate locations reuse the existing encrypted owner-vault envelope and CRUD path. The earlier synthetic rows were permanently removed after hosted persistence verification; the corrected divorce-certificate value still needs fresh focused verification.
 - The release SBOM contains 662 production components, the production dependency audit reports zero vulnerabilities, and the local database catalog and hostile RLS suites pass. This slice contains no database, migration, RLS, Storage, or API change; protected CI must repeat the release matrix.
+- PR #51 merged as `9a903f2` after the full protected matrix passed. Release run `30647817586` built and submitted app `1.0.0` (6), removed transient credentials, and is waiting on Apple processing/compliance/internal assignment before physical security QA.
+- The Slice 2 decision register, threat/control matrix and approval checklist are documentation-only. No claimant authentication, persistence, migration, API, evidence, notification, processor, release or decryption capability was enabled.
 
 ## Standard Security Verification
 
