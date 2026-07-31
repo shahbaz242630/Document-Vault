@@ -206,9 +206,8 @@ function useStartupSession({
 
       const storage = createBiometricStorage(ExpoSecureStore);
       const biometricEnabled = await storage.isEnabled();
-      const cachedKey = await storage.getKey();
 
-      if (biometricEnabled && cachedKey) {
+      if (biometricEnabled) {
         if (isMounted) {
           setters.setIsLocked(true);
         }
@@ -219,20 +218,13 @@ function useStartupSession({
       if (!key) {
         return;
       }
-      const [{ toBase64 }, { createVaultSession }] = await Promise.all([
-        import("@/shared/crypto/vault-crypto"),
-        import("./vault-session"),
-      ]);
+      const { createVaultSession } = await import("./vault-session");
       const newSession = createVaultSession({ key });
 
       if (isMounted) {
         setters.setSession(newSession);
         setters.setIsReady(true);
         await refreshAssets(newSession);
-      }
-
-      if (biometricEnabled) {
-        await storage.setKey(await toBase64(key));
       }
     }
 

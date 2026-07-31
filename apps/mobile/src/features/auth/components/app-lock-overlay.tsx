@@ -7,7 +7,10 @@ import type { SupabaseVaultClient } from "@/features/vault/supabase-vault-reposi
 import { useVaultSession } from "@/features/vault/vault-session-context";
 import { createSupabaseClient } from "@/shared/api/supabase-client";
 
-import { shouldLockAfterBackground } from "../app-lock-service";
+import {
+  createAppLockService,
+  shouldLockAfterBackground,
+} from "../app-lock-service";
 import { defaultAuditLog } from "../audit-log";
 import { createBiometricStorage } from "../biometric-storage";
 import { configureDurableAuditLog } from "../durable-audit-log";
@@ -20,7 +23,7 @@ type AppLockOverlayProps = {
 };
 
 export function AppLockOverlay({ children }: AppLockOverlayProps) {
-  const { isLocked, lock, initialize } = useVaultSession();
+  const { isLocked, lock, initialize, signOut } = useVaultSession();
   const router = useRouter();
   const [privacyVisible, setPrivacyVisible] = useState(false);
   const [lockError, setLockError] = useState<string | null>(null);
@@ -52,32 +55,45 @@ export function AppLockOverlay({ children }: AppLockOverlayProps) {
 
   const handleUnlock = useCallback(async () => {
     setLockError(null);
-    const storage = createBiometricStorage(ExpoSecureStore);
-    const enabled = await storage.isEnabled();
-
-    if (!enabled) {
-      setLockError("Biometric unlock is not enabled. Please sign in again.");
-      return;
-    }
 
     try {
-      const key = await storage.getKey();
+      const result = await createAppLockService({
+        biometricStorage: createBiometricStorage(ExpoSecureStore),
+      }).unlock();
 
-      if (key) {
-        const supabaseClient = createSupabaseClient();
-        configureDurableAuditLog({
-          auditLog: defaultAuditLog,
-          client: supabaseClient as unknown as SupabaseAuditClient,
-        });
-        await initialize(key, supabaseClient as unknown as SupabaseVaultClient);
-        router.replace("/vault");
-      } else {
-        setLockError("No cached key found. Please sign in again.");
+      if (!result.success) {
+        setLockError(result.reason);
+        return;
       }
+
+      const supabaseClient = createSupabaseClient();
+      if (!supabaseClient) {
+        setLockError("Sanduqkin could not connect. Check your connection or use your password.");
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error || !data.session) {
+        setLockError("Your sign-in session expired. Use your password to sign in again.");
+        return;
+      }
+
+      configureDurableAuditLog({
+        auditLog: defaultAuditLog,
+        client: supabaseClient as unknown as SupabaseAuditClient,
+      });
+      await initialize(result.key, supabaseClient as unknown as SupabaseVaultClient);
+      router.replace("/vault");
     } catch {
       setLockError("Authentication failed. Try again or use your password.");
     }
   }, [initialize, router]);
+
+  const handleUsePassword = useCallback(() => {
+    setLockError(null);
+    signOut();
+    router.replace("/auth/sign-in");
+  }, [router, signOut]);
 
   return (
     <>
@@ -86,6 +102,7 @@ export function AppLockOverlay({ children }: AppLockOverlayProps) {
       {isLocked ? (
         <LockScreen
           error={lockError ?? undefined}
+          onUsePassword={handleUsePassword}
           onUnlock={handleUnlock}
         />
       ) : null}

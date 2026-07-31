@@ -9,6 +9,8 @@ describe("Emergency access settings route", () => {
 
     expect(source).toContain("EmergencyAccessScreen");
     expect(source).toContain("<Screen>");
+    expect(source).toContain('router.push("/settings/trusted-person"');
+    expect(source).toContain("onOpenTrustedPerson");
   });
 
   it("stores only an interruption marker while the one-time code is visible", () => {

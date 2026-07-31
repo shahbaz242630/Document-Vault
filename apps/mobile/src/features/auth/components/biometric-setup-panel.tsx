@@ -13,8 +13,10 @@ import {
 } from "@/shared/ui";
 
 import { createBiometricAuthService } from "../biometric-auth-service";
+import { createBiometricPreferenceService } from "../biometric-preference-service";
 import { createBiometricStorage } from "../biometric-storage";
 import { createBiometricSetupViewModel } from "../biometric-setup-view-model";
+import { createMekStorage } from "../mek-storage";
 import { createSignupProgressStorage } from "../signup-progress";
 
 type BiometricHardware = {
@@ -49,6 +51,15 @@ export function BiometricSetupPanel({ hardware, storage }: BiometricSetupPanelPr
   const [enabled, setEnabled] = useState(false);
   const biometricAuth = useMemo(() => createBiometricAuthService(hardware), [hardware]);
   const biometricStorage = useMemo(() => createBiometricStorage(storage), [storage]);
+  const biometricPreference = useMemo(
+    () =>
+      createBiometricPreferenceService({
+        biometricAuth,
+        biometricStorage,
+        mekStorage: createMekStorage(storage),
+      }),
+    [biometricAuth, biometricStorage, storage],
+  );
   const router = useRouter();
 
   useEffect(() => {
@@ -109,15 +120,14 @@ export function BiometricSetupPanel({ hardware, storage }: BiometricSetupPanelPr
 
   async function enableBiometrics() {
     setError(null);
-    const result = await biometricAuth.authenticate();
+    const result = await biometricPreference.enable();
 
-    if (result.status === "success") {
-      await biometricStorage.setEnabled(true);
+    if (result.status === "enabled") {
       setEnabled(true);
       setTimeout(() => {
         void finishSetup();
       }, 900);
-    } else if (result.status === "error") {
+    } else {
       setError(result.message);
     }
   }

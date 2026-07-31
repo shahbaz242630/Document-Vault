@@ -32,6 +32,18 @@ describe("VaultSessionProvider auth handoff", () => {
     expect(source).not.toContain("existingClient ?? createSupabaseClient()");
   });
 
+  it("waits for an explicit unlock press before reading the authenticated biometric key", () => {
+    const source = readFileSync(
+      resolve(__dirname, "vault-session-context.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("const biometricEnabled = await storage.isEnabled();");
+    expect(source).toContain("if (biometricEnabled) {");
+    expect(source).not.toContain("const cachedKey = await storage.getKey();");
+    expect(source).not.toContain("await storage.setKey(await toBase64(key));");
+  });
+
   it("exposes encrypted records from the active local vault session", () => {
     const source = readFileSync(
       resolve(__dirname, "vault-session-context.tsx"),

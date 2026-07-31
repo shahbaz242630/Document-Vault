@@ -34,7 +34,10 @@ describe("EmergencyAccessScreen", () => {
       "utf8",
     );
 
-    expect(source).toContain("Set up trusted person");
+    expect(source).toContain("View setup requirements");
+    expect(source).toContain("onOpenTrustedPerson");
+    expect(source).toContain("disabled={!onOpenTrustedPerson}");
+    expect(source).toContain("onPress={onOpenTrustedPerson}");
     expect(source).toContain("Create emergency code");
     expect(source).toContain("Write this code down now. Sanduqkin cannot show it again after you confirm.");
     expect(source).toContain("Regenerate code");

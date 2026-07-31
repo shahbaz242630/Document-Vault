@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createAppLockService,
@@ -45,47 +45,44 @@ describe("shouldLockAfterBackground", () => {
 });
 
 describe("createAppLockService", () => {
-  it("returns success with null key when biometric is not enabled", async () => {
+  it("returns failure without reading the key when biometric is not enabled", async () => {
+    const getKey = vi.fn().mockResolvedValue(null);
     const service = createAppLockService({
-      biometricAuth: {
-        authenticate: async () => ({ status: "success" }),
-      },
       biometricStorage: {
-        getKey: async () => null,
+        getKey,
         isEnabled: async () => false,
       },
     });
 
-    const result = await service.unlock();
-
-    expect(result.success).toBe(true);
-    expect("key" in result ? result.key : null).toBeNull();
+    await expect(service.unlock()).resolves.toEqual({
+      success: false,
+      reason: "Biometric unlock is not enabled. Please sign in again.",
+    });
+    expect(getKey).not.toHaveBeenCalled();
   });
 
-  it("returns failure when biometric auth fails", async () => {
+  it("returns failure when biometric settings cannot be read", async () => {
     const service = createAppLockService({
-      biometricAuth: {
-        authenticate: async () => ({ status: "error", message: "Failed" }),
-      },
       biometricStorage: {
         getKey: async () => "key",
-        isEnabled: async () => true,
+        isEnabled: async () => {
+          throw new Error("Storage unavailable");
+        },
       },
     });
 
-    const result = await service.unlock();
-
-    expect(result.success).toBe(false);
-    expect("reason" in result ? result.reason : "").toBe("Failed");
+    await expect(service.unlock()).resolves.toEqual({
+      success: false,
+      reason: "Biometric unlock settings could not be read. Please sign in again.",
+    });
   });
 
-  it("returns failure when biometric is cancelled", async () => {
+  it("maps a cancelled authenticated key read", async () => {
     const service = createAppLockService({
-      biometricAuth: {
-        authenticate: async () => ({ status: "cancelled" }),
-      },
       biometricStorage: {
-        getKey: async () => "key",
+        getKey: async () => {
+          throw new Error("User canceled the operation");
+        },
         isEnabled: async () => true,
       },
     });
@@ -96,11 +93,8 @@ describe("createAppLockService", () => {
     expect("reason" in result ? result.reason : "").toBe("Unlock was cancelled.");
   });
 
-  it("returns failure when no cached key exists", async () => {
+  it("returns failure when no authenticated cached key exists", async () => {
     const service = createAppLockService({
-      biometricAuth: {
-        authenticate: async () => ({ status: "success" }),
-      },
       biometricStorage: {
         getKey: async () => null,
         isEnabled: async () => true,
@@ -115,9 +109,6 @@ describe("createAppLockService", () => {
 
   it("returns key on successful biometric auth with cached key", async () => {
     const service = createAppLockService({
-      biometricAuth: {
-        authenticate: async () => ({ status: "success" }),
-      },
       biometricStorage: {
         getKey: async () => "cached-mek",
         isEnabled: async () => true,
@@ -128,5 +119,37 @@ describe("createAppLockService", () => {
 
     expect(result.success).toBe(true);
     expect("key" in result ? result.key : "").toBe("cached-mek");
+  });
+
+  it("maps unavailable native biometric storage errors", async () => {
+    const service = createAppLockService({
+      biometricStorage: {
+        getKey: async () => {
+          throw new Error("Biometric authentication not available");
+        },
+        isEnabled: async () => true,
+      },
+    });
+
+    const result = await service.unlock();
+
+    expect(result.success).toBe(false);
+    expect("reason" in result ? result.reason : "").toContain("not available");
+  });
+
+  it("maps unexpected authenticated storage failures", async () => {
+    const service = createAppLockService({
+      biometricStorage: {
+        getKey: async () => {
+          throw new Error("Native keystore failure");
+        },
+        isEnabled: async () => true,
+      },
+    });
+
+    await expect(service.unlock()).resolves.toEqual({
+      success: false,
+      reason: "Authentication failed. Try again or use your password.",
+    });
   });
 });

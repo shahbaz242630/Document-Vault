@@ -10,10 +10,6 @@ export function shouldLockAfterBackground(
   return now - backgroundedAt >= timeoutMs;
 }
 
-type BiometricAuth = {
-  authenticate: () => Promise<{ message?: string; status: string }>;
-};
-
 type BiometricStorage = {
   getKey: () => Promise<string | null>;
   isEnabled: () => Promise<boolean>;
@@ -21,37 +17,44 @@ type BiometricStorage = {
 
 export type AppLockService = {
   unlock: () => Promise<
-    | { key: null; success: true }
     | { key: string; success: true }
     | { reason: string; success: false }
   >;
 };
 
 export function createAppLockService(deps: {
-  biometricAuth: BiometricAuth;
   biometricStorage: BiometricStorage;
 }): AppLockService {
   return {
     async unlock() {
-      const enabled = await deps.biometricStorage.isEnabled();
-
-      if (!enabled) {
-        return { success: true, key: null };
-      }
-
-      const authResult = await deps.biometricAuth.authenticate();
-
-      if (authResult.status !== "success") {
+      let enabled: boolean;
+      try {
+        enabled = await deps.biometricStorage.isEnabled();
+      } catch {
         return {
           success: false,
-          reason:
-            authResult.status === "error"
-              ? (authResult.message ?? "Authentication failed.")
-              : "Unlock was cancelled.",
+          reason: "Biometric unlock settings could not be read. Please sign in again.",
         };
       }
 
-      const key = await deps.biometricStorage.getKey();
+      if (!enabled) {
+        return {
+          success: false,
+          reason: "Biometric unlock is not enabled. Please sign in again.",
+        };
+      }
+
+      let key: string | null;
+      try {
+        // SecureStore's authenticated read owns the single native prompt.
+        // Calling LocalAuthentication first can cause an early or duplicate prompt.
+        key = await deps.biometricStorage.getKey();
+      } catch (error) {
+        return {
+          success: false,
+          reason: mapAuthenticatedStorageError(error),
+        };
+      }
 
       if (!key) {
         return {
@@ -63,4 +66,22 @@ export function createAppLockService(deps: {
       return { success: true, key };
     },
   };
+}
+
+function mapAuthenticatedStorageError(error: unknown): string {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+
+  if (message.includes("cancel")) {
+    return "Unlock was cancelled.";
+  }
+
+  if (
+    message.includes("not available") ||
+    message.includes("not enrolled") ||
+    message.includes("no biometrics")
+  ) {
+    return "Biometric authentication is not available. Check this device's biometric settings or use your password.";
+  }
+
+  return "Authentication failed. Try again or use your password.";
 }

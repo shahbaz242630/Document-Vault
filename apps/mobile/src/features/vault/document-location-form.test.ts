@@ -57,4 +57,26 @@ describe("createDocumentLocationAssetPayload", () => {
       }),
     ).toThrow();
   });
+
+  it.each(["marriage_certificate", "death_certificate"] as const)(
+    "builds an encrypted-vault payload for %s location information",
+    (documentType) => {
+      const payload = createDocumentLocationAssetPayload({
+        country: "United Kingdom",
+        custodian: "Family solicitor",
+        documentType,
+        location: "Solicitor's secure archive",
+        title: documentType === "marriage_certificate"
+          ? "Marriage certificate"
+          : "Death certificate",
+      });
+
+      expect(payload.fields).toMatchObject({
+        country: "United Kingdom",
+        custodian: "Family solicitor",
+        documentType,
+        location: "Solicitor's secure archive",
+      });
+    },
+  );
 });

@@ -25,6 +25,7 @@ type EmergencyAccessScreenProps = {
   oneTimeCode?: string | null;
   onConfirmSealedCodeWritten?: () => void;
   onCreateSealedCode?: () => Promise<void> | void;
+  onOpenTrustedPerson?: () => void;
   onRegenerateSealedCode?: () => Promise<void> | void;
   onRevokeSealedCode?: () => Promise<void> | void;
 };
@@ -35,6 +36,7 @@ export function EmergencyAccessScreen({
   oneTimeCode = null,
   onConfirmSealedCodeWritten,
   onCreateSealedCode,
+  onOpenTrustedPerson,
   onRegenerateSealedCode,
   onRevokeSealedCode,
 }: EmergencyAccessScreenProps) {
@@ -52,7 +54,7 @@ export function EmergencyAccessScreen({
 
       <EmergencyOptionCard
         badge="Highly recommended"
-        buttonLabel="Set up trusted person"
+        buttonLabel="View setup requirements"
         description="Invite your trusted person now. They verify their account in advance, and Sanduqkin can release access only after the emergency review process is approved."
         details={[
           "Most secure option.",
@@ -60,7 +62,8 @@ export function EmergencyAccessScreen({
           "Sanduqkin cannot read your saved information.",
           "You can remove or replace this person anytime.",
         ]}
-        disabled
+        disabled={!onOpenTrustedPerson}
+        onPress={onOpenTrustedPerson}
         title="Pre-Authorized Kin"
       />
 
