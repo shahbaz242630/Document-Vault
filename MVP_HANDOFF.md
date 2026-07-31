@@ -1,17 +1,20 @@
 # Sanduqkin Website, Owner Web Vault, And Claimant MVP Handoff
 
-Last updated: 2026-07-28 (Asia/Dubai)
+Last updated: 2026-07-31 (Asia/Dubai)
 
 ## Current Decision
 
-Complete the protected replacement TestFlight release, then resolve the registered-claimant custody gates; public website publication and live claimant/release behavior remain gated.
+Complete physical-iOS regression of the repaired owner controls, then begin the bounded claimant Slice 2 decision work; public website publication and live claimant/release behavior remain gated.
 
 - API region alignment and the web workspace scaffold are merged on `main`.
 - Static landing/legal content is implemented and protected-preview-verified, but publication is parked pending owner/design/legal approval.
 - The protected owner web vault and shared mobile/web 17-category engine are merged on `main` but are not deployed.
 - The repeatable local browser/mobile-repository smoke, TestFlight build 3 native-UI confirmation, synthetic-data cleanup, and branch PR-readiness review passed.
-- PR #38 merged the verified mobile MVP navigation/dashboard redesign, web sign-in cleanup, claimant vectors, and hard-disabled custody feasibility work. TestFlight build 3 remains the installed baseline.
-- The first replacement release attempt stopped safely at its SBOM gate before signing or EAS. Green PR #48 contains the lockfile-based SBOM repair and must merge before the workflow is retried.
+- PR #38 merged the verified mobile MVP navigation/dashboard redesign, web sign-in cleanup, claimant vectors, and hard-disabled custody feasibility work.
+- PR #48 merged the lockfile-based SBOM repair. Protected run `30520301290` then produced TestFlight build 4.
+- Build-4 physical QA findings were repaired by PR #49 and verified on an authenticated Pixel emulator. PR #49 merged as `306c18f`, and the complete post-merge native/security/Supabase matrix passed.
+- Protected run `30570280096` produced and submitted app `1.0.0` (5). App Store compliance and `GCC Internal Testers` assignment completed, and build 5 is installed for controlled physical QA.
+- Build-5 physical QA passed the fixed footer, Emergency Readiness heading, friendly invalid-data handling, valid save, and sealed emergency-code creation. The Android biometric path and owner-side trusted-person information route are now repaired and emulator-verified; physical iOS regression remains required before another release.
 - `/claim` remains informational and inactive. No real claimant data, evidence intake, entitlement decision, release, or claimant decryption is authorized.
 
 Detailed pre-consolidation phase evidence is preserved in Git at commit `96e89c1` and indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
@@ -39,7 +42,7 @@ The authoritative claimant and encrypted-release playbook is `CLAIM_HANDOFF.md`;
 
 | Surface | Repository | Intended host | Current state |
 | --- | --- | --- | --- |
-| Mobile owner vault | `apps/mobile` | Native app | TestFlight build 3 in controlled QA |
+| Mobile owner vault | `apps/mobile` | Native app | TestFlight build 5 installed; two interaction regressions open |
 | Public website | `apps/web` | `sanduqkin.com` | Protected static preview; publication blocked |
 | Canonical redirect | `apps/web` | `www.sanduqkin.com` | Not configured |
 | Owner web vault | `apps/web` or separate reviewed project | **Decision required** | Implemented locally; not deployed |
@@ -160,6 +163,8 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - Repeatable local protected smoke across card, contact, medical-care, and business-interest records, including bidirectional edit/decrypt, forward-field preservation, ciphertext-only rows, browser deletion lifecycle, offline failure reconciliation, browser storage/key cleanup, protected headers, and full synthetic cleanup.
 - The 2026-07-27 regression passed mobile 377 tests with 3 protected live tests skipped, web 81 tests, repository typecheck and lint, the Next.js `16.2.12` production build, Expo Doctor 21/21, Phase 1/security/mobile-secret guards, and a production dependency audit reporting zero vulnerabilities. The protected web surface remains blocked from deployment for the remaining release-readiness work described in this handoff.
 - PR #38 adds closed claimant protocol contracts and validators, five reproducible synthetic suites, cross-consumer verification, state-release invariants, a hard-disabled native custody probe, and runtime-isolation guards. It adds no claimant authentication, persistence, API, evidence, notification, processor, or release path. Its offline-code V2 Argon2id profile is synthetic-only and not production-approved.
+- PR #49 adds the build-4 QA repairs: fixed vault footer, corrected Emergency Readiness hierarchy, friendly dynamic-form validation and valid-save recovery, biometric availability refresh/native error handling, Face ID native configuration, and a checkout-line-ending-safe claimant-vector check. Authenticated emulator coverage passed the repaired owner flow and permanent synthetic cleanup.
+- Final PR #49 verification passed 391 mobile tests with 3 protected skips, coverage, typecheck, lint, Expo Doctor 21/21, Android native/emulator smoke, iOS simulator smoke, application/security gates, live/hosted Supabase checks, CodeQL, OWASP ZAP, GitGuardian, and Vercel previews.
 
 ### Mobile MVP UI/UX session — 2026-07-26
 
@@ -233,11 +238,13 @@ Each slice must define non-goals, tests, rollback/kill switch, value-free eviden
 
 ## Next Session Opener
 
-First merge green PR #48 and rerun the protected TestFlight workflow from `main`. Obtain `Release` approval and record the resulting EAS build, TestFlight processing state, build number, and value-free physical-device evidence. Do not describe the replacement build as available until App Store processing and tester assignment are confirmed.
+First pass protected CI, then create the next controlled internal TestFlight candidate and run the combined physical-iPhone regression for the repaired biometric path and owner-side trusted-person information route. Cover enablement, background lock, prompt success/cancel/error, expired-session password fallback, returning-user recovery, navigation, Emergency Readiness, encrypted CRUD, and sealed-code status. Keep distribution internal and do not promote the candidate until it passes. The trusted-person page remains informational only; do not add invitations, recipient accounts, key custody, grants, or claimant runtime.
 
 The claimant journey and delivery map are already documented. Both registered recipients and V2 code holders enter the same claimant portal and later converge on application, evidence, review, cooldown, approval, and encrypted read-only retrieval. Neither registration nor code possession authorizes release.
 
-After the release, decide the Android transaction-binding design and minimum platform baseline, complete physical iOS/Android custody evidence and independent review, and explicitly address the MVP's non-recoverable single-device key-loss risk. Only after those gates may a bounded registered/verified-recipient setup slice be approved. That slice stops before claim submission, document intake, review, or release.
+Begin claimant Slice 2 decision closure in parallel with that final physical QA. Use the existing delivery map, and resolve the Android transaction-binding design/minimum platform, physical iOS and representative Android custody evidence, independent review, claimant key recovery/multi-device policy, release authority, jurisdictions, evidence/retention, cooldown/challenge, reviewer separation, and owner/claimant origin boundary. Produce decisions and approval gates only; do not add runtime claimant behavior.
+
+Only after those gates are explicitly approved may a bounded registered/verified-recipient setup slice be authorized. That future slice stops before claim submission, document intake, review, or release.
 
 Authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, and release behavior remain disabled until their specific slice and unresolved approval gates are approved.
 

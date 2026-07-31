@@ -170,7 +170,14 @@ export const subscriptionFormSchema = z.object({
 
 export type SubscriptionFormValues = z.input<typeof subscriptionFormSchema>;
 
-export const documentTypes = ["will", "deed", "passport", "other"] as const;
+export const documentTypes = [
+  "will",
+  "deed",
+  "passport",
+  "marriage_certificate",
+  "death_certificate",
+  "other",
+] as const;
 
 export const documentLocationFormSchema = z.object({
   country: requiredTrimmedTextSchema,

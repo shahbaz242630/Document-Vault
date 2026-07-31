@@ -41,13 +41,17 @@ describe("vault navigation routes", () => {
       "utf8",
     );
 
-    expect(dashboardRoute).toContain(
+    const normalizedDashboardRoute = dashboardRoute.replaceAll("\r\n", "\n");
+    const normalizedAddRoute = addRoute.replaceAll("\r\n", "\n");
+    const normalizedRecordsRoute = recordsRoute.replaceAll("\r\n", "\n");
+
+    expect(normalizedDashboardRoute).toContain(
       'fixedBottom={\n        isReady ? <VaultBottomNavigation active="home" />',
     );
-    expect(addRoute).toContain(
+    expect(normalizedAddRoute).toContain(
       'fixedBottom={\n        isReady ? <VaultBottomNavigation active="add" />',
     );
-    expect(recordsRoute).toContain(
+    expect(normalizedRecordsRoute).toContain(
       'fixedBottom={\n        isReady ? <VaultBottomNavigation active="records" />',
     );
     expect(screen.indexOf("</ScrollView>")).toBeLessThan(

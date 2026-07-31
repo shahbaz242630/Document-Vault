@@ -1,10 +1,10 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-07-28 (Asia/Dubai)
+Last updated: 2026-07-31 (Asia/Dubai)
 
 ## Start Here
 
-Sanduqkin is a zero-knowledge personal-information vault. The mobile Phase 1 vault is in controlled TestFlight testing. The protected owner web vault, mobile MVP redesign, and runtime-disconnected claimant protocol/custody feasibility work are merged on `main` but are not deployed in a replacement TestFlight build. The public website remains a protected draft, and all claimant submission and release functionality is disabled.
+Sanduqkin is a zero-knowledge personal-information vault. The mobile Phase 1 vault is in controlled TestFlight testing. The protected owner web vault, mobile MVP redesign, build-4 QA repairs, and runtime-disconnected claimant protocol/custody feasibility work are merged on `main`. TestFlight build 5 is installed for controlled physical QA. The public website remains a protected draft, and all claimant submission and release functionality is disabled.
 
 Read these active documents before changing the project:
 
@@ -22,10 +22,10 @@ Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its 
 - Repository: `C:\Projects\GitHub\Sandoq Kin`
 - GitHub: `shahbaz242630/Document-Vault`
 - Default/release branch: `main`
-- Current session-close branch: `codex/fix-release-sbom`, PR #48.
-- Current `origin/main`: `ed2a3d6` (`Merge pull request #38 from shahbaz242630/codex/fix-hono-alerts`).
-- PR #38 merged the owner web vault, mobile MVP redesign, claimant protocol vectors, hard-disabled custody feasibility module, isolation guards, and corrected Android smoke navigation.
-- PR #48 repairs the release SBOM gate and has a fully green check matrix; it must merge before the protected TestFlight workflow is retried.
+- Current session-close branch: `main`.
+- Current `origin/main`: `306c18f` (`Fix mobile QA regressions and claimant vector checks (#49)`).
+- PR #48 merged the lockfile-based release SBOM repair and enabled the successful protected build-4 release.
+- PR #49 merged the build-4 mobile QA repairs, Expo SDK 56 alignment, biometric/native Face ID configuration, deterministic claimant-vector line-ending repair, and focused coverage repair.
 - Product requirements: `Vault_BRD_v1.0.md` (document version 1.1)
 - Expected unrelated local-only items include `.playwright-mcp/`, `.codex-runtime/`, and `welcome.png`; do not commit or delete them unless explicitly requested.
 
@@ -33,8 +33,9 @@ Claimant and encrypted-release work is governed by `CLAIM_HANDOFF.md`; read its 
 
 ### Mobile owner vault
 
-- App version `1.0.0`, TestFlight build `3`, is the current Supabase-enabled test build.
-- Build 3 was produced by protected GitHub run `29695865266`, processed by App Store Connect, cleared for the current encryption/distribution scope, assigned manually to `GCC Internal Testers`, installed on an iPhone 12 running iOS 26.5.2, and verified for password sign-in, local vault unlock, web-to-mobile encrypted-record visibility, native edit, web read-back, and permanent synthetic-data cleanup.
+- App version `1.0.0`, TestFlight build `5`, is the current installed Supabase-enabled internal-test build.
+- Build 4 was produced by protected GitHub run `30520301290` from commit `7dab9b7`, processed by App Store Connect, cleared through the manual encryption questionnaire, assigned to `GCC Internal Testers`, and installed on the controlled iPhone.
+- Build 5 was produced and automatically submitted by protected GitHub run `30570280096` from `main` commit `306c18f`. EAS build `4a39030c-6345-440a-9aca-780fe9cdabd1` and submission `ffc74175-ea27-4201-b273-8486df020fc9` completed successfully. App Store compliance and `GCC Internal Testers` assignment were completed, and the controlled tester installed the build.
 - Phase 1 remains a controlled internal test, not a production-readiness declaration. Multi-day physical-device functional and security QA is still open.
 - `main` has a dedicated Dashboard, separate Add and Saved Records pages, explicit Dashboard returns, and an icon-based Home/Add/Records/Settings/Lock footer.
 - Dashboard content now includes live encrypted-record coverage, a safe data-derived next-reference suggestion, and live emergency-readiness status from the existing sealed emergency grant. All cards use one consistent surface treatment.
@@ -93,13 +94,23 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 - The final PR #38 matrix passed Android native compile, Android emulator smoke, iOS simulator smoke, application/security gates, live and hosted Supabase gates, CodeQL, OWASP ZAP, GitGuardian, and Vercel preview checks.
 - Protected TestFlight run `30362667662` stopped at the release SBOM job before credentials or EAS were accessed. npm rejected the intentional dependency overrides as an invalid tree; the build-and-submit job was skipped.
 - PR #48 replaces npm dependency re-resolution with a tested CycloneDX production inventory generated directly from the committed npm v3 lockfile. Local generation produced 662 components, the production audit remained at zero vulnerabilities, and the full PR check matrix passed.
+- Protected TestFlight run `30520301290` produced and submitted build 4. Physical QA confirmed the main navigation and early owner-vault checks, then exposed four reproducible issues: the footer scrolled away, Emergency Readiness hierarchy was awkward, required-field failures exposed raw Zod structures and blocked valid save recovery, and biometric lock/unlock became unavailable.
+- PR #49 fixed those build-4 findings: the vault footer is fixed while content scrolls, `Needs Attention` is a proper Emergency Readiness heading, asset validation emits friendly field messages and permits valid saves, biometric availability refreshes on Settings focus with actionable native errors, and Expo now includes the local-authentication plugin and Face ID usage description.
+- Authenticated Pixel-emulator regression passed footer behavior, emergency-card presentation, invalid and valid contact save, permanent synthetic cleanup, biometric enable, lock, fingerprint unlock, and vault restoration. Final local mobile verification passed 391 tests with 3 protected skips, coverage thresholds, typecheck, targeted lint, and Expo Doctor 21/21.
+- PR #49 and post-merge `main` passed application/coverage/security gates, live and hosted Supabase checks, Android native and emulator smoke, iOS simulator smoke, CodeQL, OWASP ZAP, GitGuardian, and protected Vercel previews. Post-merge Security CI run: `30566745549`.
+- Protected TestFlight run `30570280096` generated the release SBOM, built app `1.0.0` (5), and completed the EAS submission. App Store processing, compliance, internal assignment, and installation completed.
+- Build-5 physical QA passed the fixed footer, Emergency Readiness heading, friendly invalid-data handling, and valid encrypted record save. Sealed emergency-code creation also passed.
+- The two build-5 interaction regressions are repaired locally. Android now shows one native biometric prompt after explicit Unlock, restores only with a live Supabase session, and offers password fallback; the owner Emergency card opens a tested information-only trusted-person requirements page with no claimant runtime. Physical iOS regression is still required before release.
+- Marriage and death certificates are available through the existing encrypted Document Locations CRUD path. Hosted create/edit/persistence and permanent synthetic cleanup passed without a database schema change.
+- Sealed emergency-code regeneration persisted one active complete encrypted grant with prior grants revoked. No raw code was included in logs or evidence.
+- The 2026-07-31 pre-build gate passed 574 workspace tests with 3 protected skips, mobile coverage, typecheck, zero-warning lint, the web production build, Expo Doctor 21/21, Phase 1/security/GitHub Actions/mobile-secret and claimant isolation guards, local database catalog/hostile RLS suites, Android native assembly/install/biometric smoke, a zero-vulnerability production audit, and the 662-component release SBOM.
 
 ## Current Blockers And Technical Debt
 
 ### Before completing mobile Phase 1 readiness
 
 - Complete TestFlight contact/test information and intended initial GCC territory configuration.
-- Complete the open multi-day physical-device QA against the current installed build 3, then rerun the applicable regression set on the replacement build: cold start, authentication/unlock, encrypted CRUD, background/foreground locking, biometrics, screenshot/sensitive-screen behavior, recovery, emergency access, sign-out, and returning-user flow.
+- After protected CI passes, create the next controlled internal TestFlight candidate and rerun the repaired biometric path and trusted-person information route on a physical iPhone. Cover cold start, authentication/unlock, encrypted CRUD including certificate locations, fixed footer, friendly validation, emergency-readiness hierarchy, background/foreground locking, biometric success/cancel/error, screenshot/sensitive-screen behavior, recovery, emergency access, sealed-code status, sign-out, and returning-user flow. Do not promote the candidate until it passes.
 - Record only device model, iOS version, build number, and value-free pass/fail evidence.
 - Finalize the supportable U.S. export-classification rationale before setting persistent iOS compliance metadata.
 - Complete the French ANSSI declaration before enabling France.
@@ -131,12 +142,13 @@ Dynamic API compute is pinned to Vercel `fra1` near the Supabase `eu-central-1` 
 
 ## Next Session Opener
 
-1. Merge green PR #48.
-2. Dispatch `ios-testflight.yml` from the resulting `main` commit with `confirmation=testflight`.
-3. Obtain explicit `Release` environment approval, confirm the EAS build and automatic submission, wait for App Store processing, and record the new build number and value-free evidence.
-4. Keep TestFlight build 3 as the current installed baseline until the replacement build is processed and assigned.
+1. Commit the bounded repair set, open its PR, and pass the protected CI matrix, including database catalog, hostile RLS, native Android, and iOS simulator checks.
+2. After merge and explicit `Release` approval, create the next controlled internal TestFlight candidate. Run biometric, password fallback/recovery, trusted-person information navigation, certificate CRUD, emergency status, and returning-user checks on the physical iPhone; record value-free evidence and do not promote the candidate until it passes.
+3. Open the claimant workstream using `CLAIM_HANDOFF.md` and `docs/superpowers/plans/2026-07-28-claimant-integration-delivery-map.md`; do not repeat the delivery-map exercise.
+4. Begin bounded Slice 2 decision closure: release authority, supported jurisdictions, evidence/retention policy, owner challenge/cooldown, reviewer separation, claimant-key custody/recovery, Android transaction binding/minimum platform, and owner/claimant origin isolation.
+5. Produce a decision register, revised threat/control matrix, and explicit owner/security/legal approval checklist. Stop before migrations, authentication, invitations, evidence upload, notifications, processors, claim submission, or release.
 
-After release completion, the next product decision is the Android transaction-binding design and minimum platform baseline. The current Android 36 client supports hardware-backed P-256 ECDH but cannot bind `KeyAgreement` to a biometric transaction, so the probe fails closed. Physical iOS/Android evidence, independent review, and the single-device recovery decision remain open.
+Repository, CI, submission, and App Store distribution snags are resolved. The interaction repairs and local database/RLS gates pass, but physical iOS and the protected release matrix remain required before release; they do not block the authorized claimant documentation, threat-model, benchmark, and decision work above.
 
 Authority, legal/privacy, jurisdiction, retention, origin, backup/restore, independent-assurance, and reviewer-separation gates remain unresolved. Discussion, documentation, physical testing, benchmarks, and independent-review preparation are authorized; runtime integration remains blocked.
 
@@ -171,6 +183,6 @@ Run database security checks before and after any migration or RLS change. Relea
 1. Read the four documents listed under `Start Here`.
 2. Run `git status --short --branch` and `git log --oneline --decorate -5`.
 3. Preserve unrelated user changes and expected local-only files.
-4. Complete the release opener above before selecting new claimant runtime work.
+4. Start with physical iOS verification and the protected release matrix, then use the claimant opener above; no claimant runtime work is implied.
 5. Recheck time-sensitive provider or security guidance only when the slice depends on it.
 6. State the slice scope and non-goals, implement or verify only that slice, record evidence, update the handoffs, and stop for owner review.

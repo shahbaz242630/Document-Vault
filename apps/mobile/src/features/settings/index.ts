@@ -7,3 +7,4 @@ export {
   type SealedCodeSetupStatus,
 } from "./components/emergency-access-screen";
 export { SettingsScreen } from "./components/settings-screen";
+export { TrustedPersonInformationScreen } from "./components/trusted-person-information-screen";

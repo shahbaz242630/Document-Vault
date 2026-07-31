@@ -7,15 +7,61 @@ import { ErrorText, Padlock } from "@/shared/ui";
 
 type LockScreenProps = {
   error?: string;
+  onUsePassword?: () => void;
   onUnlock: () => void;
 };
+
+type LockActionProps = {
+  isUnlocking: boolean;
+  onUnlock: () => void;
+  setIsUnlocking: (isUnlocking: boolean) => void;
+};
+
+function LockAction({ isUnlocking, onUnlock, setIsUnlocking }: LockActionProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => {
+        if (isUnlocking) return;
+        setIsUnlocking(true);
+        setTimeout(onUnlock, 300);
+      }}
+      style={({ pressed }) => ({
+        backgroundColor: pressed ? colors.actionPressed : colors.action,
+        borderCurve: "continuous",
+        borderRadius: 10,
+        paddingHorizontal: 28,
+        paddingVertical: 14,
+        transform: [{ scale: pressed ? 0.98 : 1 }],
+      })}
+    >
+      <Text style={{ color: colors.actionText, fontFamily: fonts.sans.semibold, fontSize: 16 }}>
+        Unlock
+      </Text>
+    </Pressable>
+  );
+}
+
+function PasswordFallback({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={{ paddingHorizontal: 18, paddingVertical: 8 }}
+    >
+      <Text style={{ color: colors.action, fontFamily: fonts.sans.semibold, fontSize: 15 }}>
+        Use password instead
+      </Text>
+    </Pressable>
+  );
+}
 
 /**
  * Full-screen app lock. Tapping unlock lifts the padlock's shackle before
  * handing off to the real unlock (which may show a biometric prompt); an
  * error settles the shackle shut again.
  */
-export function LockScreen({ error, onUnlock }: LockScreenProps) {
+export function LockScreen({ error, onUnlock, onUsePassword }: LockScreenProps) {
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [fadeIn] = useState(() => new Animated.Value(0));
 
@@ -78,34 +124,13 @@ export function LockScreen({ error, onUnlock }: LockScreenProps) {
 
       {error ? <ErrorText style={{ textAlign: "center" }}>{error}</ErrorText> : null}
 
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => {
-          if (isUnlocking) {
-            return;
-          }
-          setIsUnlocking(true);
-          setTimeout(onUnlock, 300);
-        }}
-        style={({ pressed }) => ({
-          backgroundColor: pressed ? colors.actionPressed : colors.action,
-          borderCurve: "continuous",
-          borderRadius: 10,
-          paddingHorizontal: 28,
-          paddingVertical: 14,
-          transform: [{ scale: pressed ? 0.98 : 1 }],
-        })}
-      >
-        <Text
-          style={{
-            color: colors.actionText,
-            fontFamily: fonts.sans.semibold,
-            fontSize: 16,
-          }}
-        >
-          Unlock
-        </Text>
-      </Pressable>
+      <LockAction
+        isUnlocking={isUnlocking}
+        onUnlock={onUnlock}
+        setIsUnlocking={setIsUnlocking}
+      />
+
+      {onUsePassword ? <PasswordFallback onPress={onUsePassword} /> : null}
     </Animated.View>
   );
 }

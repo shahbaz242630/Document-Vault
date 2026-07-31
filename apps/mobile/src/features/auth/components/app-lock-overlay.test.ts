@@ -8,6 +8,11 @@ describe("AppLockOverlay biometric unlock routing", () => {
     const source = readFileSync(resolve(__dirname, "app-lock-overlay.tsx"), "utf8");
 
     expect(source).toContain("const router = useRouter();");
+    expect(source).toContain("createAppLockService");
+    expect(source).toContain("supabaseClient.auth.getSession()");
+    expect(source).toContain("Your sign-in session expired");
+    expect(source).toContain('router.replace("/auth/sign-in");');
+    expect(source).toContain("onUsePassword={handleUsePassword}");
     expect(source).toContain('router.replace("/vault");');
   });
 });

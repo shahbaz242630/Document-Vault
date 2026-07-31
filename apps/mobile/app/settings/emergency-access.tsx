@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Alert } from "react-native";
+import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
 import { defaultAuditLog } from "@/features/auth/audit-log";
@@ -13,6 +14,7 @@ import {
 import { Screen } from "@/shared/ui";
 
 export default function EmergencyAccessRoute() {
+  const router = useRouter();
   const setupState = useEmergencyAccessSetupState();
 
   return (
@@ -23,6 +25,9 @@ export default function EmergencyAccessRoute() {
         oneTimeCode={setupState.oneTimeCode}
         onConfirmSealedCodeWritten={setupState.confirmSealedCodeWritten}
         onCreateSealedCode={setupState.createSealedCode}
+        onOpenTrustedPerson={() =>
+          router.push("/settings/trusted-person" as unknown as "/settings/re-auth")
+        }
         onRegenerateSealedCode={setupState.regenerateSealedCode}
         onRevokeSealedCode={setupState.revokeSealedCode}
       />

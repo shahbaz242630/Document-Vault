@@ -1,6 +1,6 @@
 # Sanduqkin Claimant And Release Handoff
 
-Last updated: 2026-07-28 (Asia/Dubai)
+Last updated: 2026-07-31 (Asia/Dubai)
 
 ## Purpose And Status
 
@@ -11,6 +11,8 @@ Claim applications and release are not active. The public `/claim` entry is info
 Slice 1 is complete and merged into `main` through PR #34 (`2c82c93`): the public entry exposes two tested informational route pages from one typed capability model, while authentication, intake, code entry, evidence, review, and release remain hard-disabled.
 
 PR #38 merged the owner-approved, runtime-disconnected protocol-vector and custody-feasibility slices into `main` as merge commit `ed2a3d6`. They add closed shared contracts, canonicalization, strict validation, the proposed state-transition evaluator, deterministic synthetic generators, five fixture suites, a hard-disabled native custody module, and isolation guards. They do not add a claimant runtime path. The offline-code V2 Argon2id fixture profile is explicitly synthetic-only and `production_approved: false`; production parameters remain blocked on representative-device benchmarks and security approval.
+
+PR #49 merged as `306c18f` after fixing the claimant-vector check's checkout line-ending sensitivity without changing fixture content or cryptographic semantics. Claimant vector, vector-isolation, custody-isolation, and shared-consumer gates remain green. Build 5 is installed for controlled testing. The owner-side emergency card now opens an information-only trusted-person requirements page; it deliberately creates no invitation, account, key, grant, network request, or claimant runtime. Android biometric unlock is repaired and emulator-verified; physical iOS verification remains required before another release.
 
 ## Non-Negotiable Boundaries
 
@@ -187,13 +189,19 @@ Exit: focused security review or penetration test, restore drill, synthetic E2E,
 
 ## Next Session Opener
 
-Complete the replacement TestFlight release described in `HANDOFF.md` before opening a new claimant implementation slice. The claimant end-to-end delivery map is already recorded in `docs/superpowers/plans/2026-07-28-claimant-integration-delivery-map.md`; do not repeat that planning exercise.
+Use this exact opener:
 
-The next claimant decision is the Android transaction-binding design and minimum platform baseline. Physical iOS and representative Android custody evidence, independent review, and the claimant key recovery/multi-device decision must also be completed.
+> Read `HANDOFF.md`, `SECURITY_HANDOFF.md`, `MVP_HANDOFF.md`, `CLAIM_HANDOFF.md`, `docs/superpowers/plans/2026-07-28-claimant-integration-delivery-map.md`, `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md`, and `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`. Confirm `main` is at or beyond `306c18f` and preserve unrelated local changes. Build 5 is installed. The Android biometric path and owner-side trusted-person information route are repaired and emulator-verified; claimant runtime remains hard-disabled.
+>
+> After protected CI passes, create the next controlled internal TestFlight candidate and rerun the combined regression on a physical iPhone: biometric enablement, background lock, native prompt, successful unlock, cancellation/error handling, password fallback, returning-user recovery, trusted-person information navigation, emergency readiness, and sealed-code status. Record value-free evidence only, keep distribution internal, and do not promote the candidate until it passes. The information route must remain non-operational.
+>
+> Begin claimant Slice 2 decision closure only. Reuse the existing delivery map. Produce a concise decision register and revised threat/control matrix covering: release authority when the owner cannot respond; supported jurisdictions; accepted identity/evidence and retention/deletion; owner notice, challenge/cancel, cooldown, holds, appeals and disputes; dual-reviewer qualifications and separation; operator/data-controller responsibilities; owner/claimant origin isolation; registered-recipient key custody, replacement, recovery and multi-device policy; Android transaction binding/minimum platform; physical iOS and representative Android evidence; independent review; and offline-code V2 benchmark/approval requirements.
+>
+> For each item record the recommended default, alternatives, security/privacy/operational tradeoffs, required approver, evidence needed, and whether it blocks Slice 3. Do not create migrations, tables, RLS or Storage policies, authentication, invitations, API routes, uploads, notifications, processors, claim submission, review transitions, release packages, or decryption UI. Keep all claimant capabilities hard-disabled. Run only relevant documentation/vector/isolation checks, update the handoffs, and stop for owner review.
 
-If those gates are approved, the next bounded runtime slice is registered/verified-recipient setup only: single-use invitation binding, verified normalized-address matching, fresh `aal2`, claimant-local public-key registration/replacement, and owner-local grant finalization/revocation. It must keep claim submission, document intake, evidence review, state progression, and release disabled.
+The next authorized work is therefore Slice 2 documentation, threat-model refinement, physical/benchmark evidence planning, and decision closure—not claimant runtime implementation.
 
-Authentication, persistence, migrations, API routes, invitations, evidence handling, notifications, workflow processors, and release behavior remain blocked until their applicable slice and approval gates are explicitly cleared.
+If every Slice 2 gate is later approved, the next bounded runtime slice is registered/verified-recipient setup only: single-use invitation binding, verified normalized-address matching, fresh `aal2`, claimant-local public-key registration/replacement, and owner-local grant finalization/revocation. It must keep claim submission, document intake, evidence review, state progression, and release disabled.
 
 ## Protocol-Vector Slice Evidence
 
@@ -217,6 +225,27 @@ Authentication, persistence, migrations, API routes, invitations, evidence handl
 - Product understanding was confirmed: registered recipients and V2 code holders use different route assertions but converge on the same controlled claim application, document/evidence, review, cooldown, approval, and encrypted read-only retrieval journey.
 - Registration, MFA, or code possession establishes context only and never authorizes data release.
 - Claimant authentication, invitation delivery, persistence, migrations, APIs, evidence, review processors, notifications, package creation, decryption, and release remain disabled.
+
+## Session Close Evidence — 2026-07-30
+
+- PR #48 merged the release SBOM repair; protected TestFlight run `30520301290` produced app `1.0.0` (4).
+- Build-4 physical QA exposed footer scrolling, Emergency Readiness hierarchy, raw validation/save failure, and biometric availability/unlock defects.
+- PR #49 fixed those defects plus Expo/Face ID native configuration and claimant-vector CRLF sensitivity. It merged as `306c18f`.
+- Authenticated Pixel-emulator regression passed the fixed footer, emergency card, invalid and valid contact save, permanent synthetic cleanup, biometric enable, lock, fingerprint unlock, and vault restoration.
+- Final mobile verification passed 391 tests with 3 protected skips, coverage, typecheck, lint, and Expo Doctor 21/21. PR and post-merge checks passed Android native/emulator, iOS simulator, application/security, live/hosted Supabase, CodeQL, OWASP ZAP, GitGuardian, and Vercel preview gates.
+- Protected run `30570280096` produced and submitted app `1.0.0` (5). EAS build `4a39030c-6345-440a-9aca-780fe9cdabd1` and submission `ffc74175-ea27-4201-b273-8486df020fc9` completed. App Store compliance and internal assignment completed, and build 5 was installed.
+- Build-5 physical QA passed the fixed footer, Emergency Readiness heading, invalid/valid save, and sealed emergency-code creation. Biometric unlock produces no prompt or transition, and the owner-side `Pre-authorize Kin` card produces no navigation or action.
+- Claimant contracts, fixtures, custody probe, and isolation boundaries remain unchanged and runtime-disconnected. No claimant authentication, persistence, migration, API, evidence, notification, processor, claim-state, release, or decryption path was enabled.
+
+## Session Close Evidence — 2026-07-31
+
+- Android biometric setup now securely caches the MEK before enabling the preference. Startup defers authenticated key access until the user taps Unlock, the native prompt is the single unlock prompt, and success/failure/cancellation/unavailable/storage outcomes are mapped without weakening password or recovery fallback.
+- The freshly assembled debug APK was installed over the Pixel emulator. Tapping Unlock displayed the system biometric prompt, fingerprint authentication succeeded, and an expired Supabase session correctly blocked remote restoration and displayed `Use password instead` rather than exposing stale decrypted state.
+- The owner Emergency card now routes to a tested information-only trusted-person requirements page. It has no invitation, recipient persistence, key registration, grant creation, Supabase call, or claimant capability toggle.
+- Sealed-code regeneration and confirmation persisted one active complete encrypted grant while prior grants remained revoked; no raw emergency code was logged or retained in evidence.
+- Marriage and death certificates are supported as encrypted `document_location` kinds through the existing owner-vault CRUD/envelope path. Create, edit, ciphertext update, persistence, and permanent cleanup of two synthetic rows were verified; no schema, table, RLS, or claimant-runtime change was introduced.
+- Local verification passed 400 mobile tests with 3 protected skips and coverage, 83 web tests and the production build, 19 shared-types tests, 42 shared-validation tests, 30 API tests, repository typecheck/lint, Expo Doctor 21/21, Phase 1/security/GitHub Actions/mobile-secret guards, all claimant vector/isolation/custody guards, Android native assembly, a zero-vulnerability production audit, and a 662-component CycloneDX SBOM.
+- After recovering a never-started local container without deleting its database volume, the Supabase database catalog and hostile RLS attack suites both passed. This slice changed no migration, table, policy, Storage, or API code.
 
 ## Slice 1 Evidence
 

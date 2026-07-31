@@ -1,18 +1,18 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-07-28 (Asia/Dubai)
+Last updated: 2026-07-31 (Asia/Dubai)
 
 ## Security Status
 
-The mobile vault is in controlled TestFlight testing. The protected owner web vault, mobile redesign, claimant protocol vectors, and hard-disabled custody feasibility work are merged on `main` but are not deployed in a replacement build. The hosted web preview is the earlier static SSO-protected build. Public legal publication and all claimant runtime functionality remain disabled.
+The mobile vault is in controlled TestFlight testing. The protected owner web vault, mobile redesign, build-4 QA repairs, claimant protocol vectors, and hard-disabled custody feasibility work are merged on `main`. Build 5 is installed for controlled physical QA. The hosted web preview is the earlier static SSO-protected build. Public legal publication and all claimant runtime functionality remain disabled.
 
 Claimant security, protocol, evidence, review, and encrypted-release slices are governed by `CLAIM_HANDOFF.md`; its stop gates apply before any claimant implementation.
 
 Current security reference points:
 
-- Mobile TestFlight build: app `1.0.0`, build `3`, EAS build `9055529c-508a-415d-872a-08708e533613`.
-- Protected release run: `29695865266`.
-- Current session-close branch: `codex/fix-release-sbom`, PR #48; current `origin/main` is merge commit `ed2a3d6` from PR #38.
+- Current installed TestFlight build: app `1.0.0`, build `5`, EAS build `4a39030c-6345-440a-9aca-780fe9cdabd1`, submission `ffc74175-ea27-4201-b273-8486df020fc9`.
+- Protected release run: `30570280096`.
+- Current session-close branch: `main`; current `origin/main` is `306c18f` from PR #49.
 - Supabase: existing Free project in `eu-central-1`; local stack is used for migrations and attack tests.
 - Web preview: `sanduqkin-web`, SSO protected, no custom domain, no hosted environment variables, and still serving the earlier static Phase 3 preview.
 
@@ -102,7 +102,9 @@ Current security reference points:
 
 ### Immediate
 
-- Complete the open multi-day physical-device security QA on the current installed TestFlight build 3, then rerun the applicable regression set on the replacement build, including Keychain/Secure Enclave behavior, biometrics, background locking, screenshot protection, recovery, emergency access, encrypted CRUD, and sign-out/return.
+- After protected CI passes, create the next controlled internal TestFlight candidate and run the repaired biometric path on a physical iPhone: enablement, lifecycle lock, explicit prompt invocation, success/cancel/error mapping, expired-session password fallback, secure-state restoration, and returning-user recovery. Android emulator evidence is complete; do not promote the candidate until physical QA passes.
+- Verify the owner-side trusted-person information route on physical iOS without weakening claimant isolation. It must remain free of invitations, recipient persistence, key registration, grants, network integration, evidence, review, and release.
+- Preserve and rerun the passing checks: fixed footer, Emergency Readiness heading, friendly invalid-data handling, valid encrypted save, certificate-location CRUD, sealed-code status, and synthetic cleanup.
 - The TestFlight build 3 native-UI leg of the protected browser/native synthetic smoke is complete on an iPhone 12 running iOS 26.5.2: the native app displayed and edited a web-created encrypted record, the web read the native edit, and the tagged record was permanently removed.
 - Complete TestFlight metadata and initial GCC territory configuration; keep France disabled until French ANSSI approval.
 - Finalize the U.S. export-classification rationale before setting persistent iOS compliance metadata.
@@ -136,11 +138,15 @@ The Docker-backed Supabase database catalog check and hostile RLS attack suite p
 
 ### Release status at session close
 
-- PR #38 merged as `ed2a3d6` after the full Android, iOS, security, Supabase, CodeQL, ZAP, GitGuardian, and preview matrix passed.
-- Protected TestFlight run `30362667662` failed closed in `Generate release SBOM`; `Build and submit iOS` was skipped, and signing/submission credentials were not accessed.
-- Root cause: npm's built-in SBOM traversal rejects the intentionally overridden PostCSS/Sharp tree and the existing Xcode/UUID range mismatch as `ESBOMPROBLEMS`.
-- PR #48 generates the CycloneDX production inventory directly from the committed npm v3 lockfile, adds no dependency, preserves all security overrides, produced 662 components locally, retained a zero-vulnerability production audit, and has a fully green PR matrix.
-- Next session must merge PR #48 and rerun the protected workflow from `main`. Explicit `Release` approval, EAS/TestFlight submission, App Store processing, and value-free physical QA remain required.
+- PR #48 merged the lockfile-based CycloneDX SBOM repair after its full matrix passed. Protected run `30520301290` then produced and submitted build 4.
+- Build-4 controlled QA exposed footer, validation/save, Emergency Readiness hierarchy, and biometric defects. PR #49 repaired them, added the Expo local-authentication/Face ID native configuration, aligned Expo SDK 56 patch versions, and kept claimant-vector checks deterministic across checkout line endings.
+- PR #49 merged as `306c18f` after the full Android, iOS, security, Supabase, CodeQL, ZAP, GitGuardian, and preview matrix passed. Post-merge Security CI run `30566745549`, CodeQL run `30566745741`, and OWASP ZAP run `30566745473` all passed.
+- Protected release run `30570280096` passed SBOM generation, protected credential materialization/cleanup, EAS build, and automatic submission for app `1.0.0` (5).
+- App Store compliance and `GCC Internal Testers` assignment completed, and build 5 was installed. Physical QA passed the footer, Emergency Readiness heading, invalid/valid save, and sealed-code creation. Biometric unlock and the owner-side `Pre-authorize Kin` card are inert and require focused repair before the next release.
+- The 2026-07-31 repair securely sequences MEK storage before biometric enablement, defers authenticated key access until explicit Unlock, maps native outcomes, rejects remote restoration without a live Supabase session, and exposes password fallback. The assembled APK passed a Pixel-emulator system-prompt/fingerprint smoke with no app crash or React Native error.
+- The trusted-person control now opens a static owner-side requirements page only. Claimant vector, runtime-isolation, and custody-isolation guards pass; no claimant persistence or capability was enabled.
+- Sealed-code regeneration persisted one active encrypted grant with previous versions revoked. Marriage/death certificate locations reuse the existing encrypted owner-vault envelope and CRUD path. Both synthetic certificate rows were permanently removed after hosted persistence verification.
+- The release SBOM contains 662 production components, the production dependency audit reports zero vulnerabilities, and the local database catalog and hostile RLS suites pass. This slice contains no database, migration, RLS, Storage, or API change; protected CI must repeat the release matrix.
 
 ## Standard Security Verification
 

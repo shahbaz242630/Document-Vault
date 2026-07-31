@@ -406,6 +406,16 @@ describe("documentLocationFormSchema", () => {
       documentType: "birth_certificate",
     }).success).toBe(false);
   });
+
+  it.each(["marriage_certificate", "death_certificate"] as const)(
+    "accepts %s as a document-location type",
+    (documentType) => {
+      expect(documentLocationFormSchema.parse({
+        ...completeDocument,
+        documentType,
+      }).documentType).toBe(documentType);
+    },
+  );
 });
 
 describe("contactFormSchema", () => {
