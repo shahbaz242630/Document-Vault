@@ -2,15 +2,41 @@
 
 Last updated: 2026-08-01 (Asia/Dubai)
 
+## Next Session Opener
+
+1. Read `HANDOFF.md`, `CLAIM_HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` completely before making changes.
+2. Check PR #53, `main`/`origin/main`, and the current branch status. PR #52 is already merged. If starting from `main`, merge PR #53 first because the claimant prototype branch is stacked on its biometric-control work.
+3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
+4. Do not push or publish `codex/claimant-synthetic-journey` until its base is merged and the product owner explicitly authorizes publication.
+5. Resume with **Synthetic Slice 12: safe acknowledgement UI**. Keep the implementation modular, run the focused and proportional regression checks, report the result, and wait for approval before starting the next slice.
+6. Do not create a TestFlight build or perform any deployment.
+
+## Synthetic Claimant Prototype Checkpoint
+
+The current local branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-11 are implemented as small, modular, tested increments. The latest local commit is `c7971d4` (`Add synthetic claimant submission handoff`). The branch has not been pushed.
+
+Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, and idempotent synthetic submission handoff. They remain disconnected from production runtime and real claimant data.
+
+Six bounded synthetic slices remain, in this order:
+
+1. **Slice 12 — Safe acknowledgement UI:** present the synthetic submission acknowledgement and duplicate/already-received outcome without exposing internal or sensitive details.
+2. **Slice 13 — Owner-protection/review tracking model:** define the safe public projection for review progress and owner-protection controls, with no reviewer identity, owner-response detail, fraud signals, or release authority.
+3. **Slice 14 — Review tracking UI:** render the synthetic public review projection with fail-closed states and accessible status guidance.
+4. **Slice 15 — Decision/retrieval-readiness model:** model safe claimant-facing decision and retrieval-readiness states without performing release, serving ciphertext, or authorizing decryption.
+5. **Slice 16 — Decision/retrieval UI:** render those synthetic states and blocked/expired/suspended outcomes without any live retrieval capability.
+6. **Slice 17 — End-to-end claimant acceptance suite and handoff refresh:** exercise the complete synthetic journey, run proportional regressions and repository guards, then refresh the handoffs for the next authorization decision.
+
+These six slices finish the synthetic claimant prototype phase only. They do not authorize real authentication, persistence, database work, migrations, RLS, uploads, notifications, review operations, submission runtime, cryptographic retrieval or release, real claimant data, TestFlight, or deployment. Those capabilities remain separately gated.
+
 ## Status And Stop Gate
 
-Current result: `NO-GO` for claimant Slice 3.
+Current result: `GO` only for the six bounded synthetic prototype slices above; `NO-GO` for production claimant runtime.
 
 The public `/claim` routes are informational. Claimant authentication, invitations, key registration, persistence, migrations, RLS/Storage policies, evidence upload, notifications, processors, case transitions, release packages, retrieval, and claimant decryption are disabled.
 
 Product-owner direction is approved, and Shahbaz Malik is the provisionally designated operator/data controller candidate. Legal confirmation, incorporation/contracting-entity details, controller contact details, the processor map, and the remaining legal/privacy, security, operations, native custody, staffing, and independent-review gates are incomplete. No real claimant data may be collected.
 
-Repository reference: PR #52 merged the Slice 2 package into `main`/`origin/main` at `37b05d0`. Current mobile work is isolated on `codex/biometric-settings-control`; claimant runtime remains unchanged.
+Repository reference: PR #52 merged the Slice 2 package into `main`/`origin/main` at `37b05d0`. PR #53 contains the biometric Settings control base. The unpushed `codex/claimant-synthetic-journey` branch is stacked on that base; claimant production runtime remains unchanged.
 
 ## Non-Negotiable Boundaries
 
@@ -63,7 +89,7 @@ V1 has no safe public locator and must never be used for claim lookup. V2 remain
 - Package prepared, served, opened, exported, claimant-confirmed, expired, suspended, and case-closed are distinct events. Do not use one ambiguous `released` event as proof that plaintext was received.
 - Suspension may block future retrieval but cannot recall information already decrypted by the claimant.
 
-## Implementation Order
+## Production Implementation Order (Still Gated)
 
 1. **Slice 1 — complete:** inactive informational routes and hard-disabled capability model.
 2. **Slice 2 — current:** immutable decision/threat/approval package, named specialist review, physical custody evidence, benchmark plans, and assurance closure.
@@ -101,7 +127,7 @@ Android is not a blocker to owner-approved iOS-only preparation, but it remains 
 
 Circulate one immutable version. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
 
-## Next Authorized Work
+## Production Authorization Work (Separate From Synthetic Slices)
 
 1. Merge or otherwise freeze the Slice 2 review package so every specialist reviews the same version.
 2. Legally confirm the provisional Shahbaz Malik operator/data controller designation, complete the contracting-entity/controller record and processor map, and keep all claimant data collection blocked until approval.
