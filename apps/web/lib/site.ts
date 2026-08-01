@@ -21,12 +21,14 @@ export const claimInformationRoutes = [
 ] as const;
 
 export const claimSyntheticPreviewRoute = "/claim/synthetic-preview" as const;
+export const claimSyntheticChecklistRoute = "/claim/synthetic-checklist" as const;
 
 export const publicRoutes = [
   "/",
   ...primaryNavigation.map(({ href }) => href),
   ...claimInformationRoutes,
   claimSyntheticPreviewRoute,
+  claimSyntheticChecklistRoute,
   ...legalNavigation.map(({ href }) => href),
   "/support",
 ] as const;

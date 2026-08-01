@@ -49,6 +49,12 @@ export default function SyntheticClaimantDashboardPage() {
       />
 
       <p className="spaced-content">
+        <Link className="text-link" href="/claim/synthetic-checklist">
+          View the read-only synthetic checklist preview <span aria-hidden="true">→</span>
+        </Link>
+      </p>
+
+      <p className="spaced-content">
         <Link className="text-link" href="/claim">
           Return to the inactive claim overview <span aria-hidden="true">→</span>
         </Link>

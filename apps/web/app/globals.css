@@ -474,6 +474,25 @@ button:hover { background: var(--accent); }
 .claim-progress p { max-width: 38rem; margin-bottom: 0; color: var(--muted); line-height: 1.6; }
 .claim-progress-state { padding: 0.4rem 0.6rem; border: 1px solid rgba(180, 96, 45, 0.3); border-radius: 999px; color: var(--warm); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
 
+.checklist-decision-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.checklist-status,
+.checklist-policy-boundary { padding: 1.35rem; border: 1px solid var(--line); border-radius: 1rem; background: rgba(255, 255, 255, 0.38); }
+.checklist-status h3,
+.checklist-policy-boundary h3 { margin-bottom: 0.55rem; }
+.checklist-status p:last-child,
+.checklist-policy-boundary p:last-child { margin-bottom: 0; color: var(--muted); line-height: 1.55; }
+.checklist-status-ready_for_review { border-color: rgba(23, 107, 84, 0.32); background: rgba(23, 107, 84, 0.06); }
+.checklist-status-manual_review { border-color: rgba(148, 75, 32, 0.32); background: rgba(148, 75, 32, 0.06); }
+.checklist-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 1rem 0 0; border-block: 1px solid var(--line); }
+.checklist-summary div { padding: 1rem; }
+.checklist-summary div + div { border-left: 1px solid var(--line); }
+.checklist-summary dt { color: var(--muted); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.checklist-summary dd { margin: 0.35rem 0 0; font-family: var(--display); font-size: 1.5rem; }
+.checklist-item-source { margin-bottom: 0.35rem !important; color: var(--accent-dark) !important; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.checklist-availability-available { border-color: rgba(23, 107, 84, 0.3); color: var(--accent-dark); }
+.checklist-availability-not_available { border-color: rgba(148, 75, 32, 0.35); color: #713615; }
+.checklist-empty-state { margin-top: 1rem; padding: 1.2rem; border: 1px dashed var(--line-strong); border-radius: 1rem; color: var(--muted); line-height: 1.6; }
+
 .message-page { max-width: 48rem; }
 .message-page > p:not(.eyebrow) { max-width: 39rem; color: var(--muted); font-size: 1.08rem; line-height: 1.7; }
 
@@ -785,6 +804,9 @@ button:hover { background: var(--accent); }
   .document-meta { grid-template-columns: 1fr; }
   .claim-progress li { grid-template-columns: 2.7rem minmax(0, 1fr); }
   .claim-progress-state { grid-column: 2; width: fit-content; }
+  .checklist-decision-grid,
+  .checklist-summary { grid-template-columns: 1fr; }
+  .checklist-summary div + div { border-top: 1px solid var(--line); border-left: 0; }
   .site-footer { grid-template-columns: 1fr 1fr; }
   .footer-brand { grid-column: 1 / -1; }
   .footer-utility { grid-column: 1 / -1; }
