@@ -8,7 +8,10 @@ import { fonts } from "@/shared/theme/fonts";
 
 import { defaultAuditLog } from "../audit-log";
 import { createBiometricAuthService } from "../biometric-auth-service";
-import { runBiometricPreferenceAction } from "../biometric-preference-action";
+import {
+  getBiometricPreferenceControlState,
+  runBiometricPreferenceAction,
+} from "../biometric-preference-action";
 import { createBiometricPreferenceService } from "../biometric-preference-service";
 import { createBiometricStorage } from "../biometric-storage";
 import { createMekStorage } from "../mek-storage";
@@ -25,30 +28,23 @@ type BiometricPreferencesPanelProps = {
 
 export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanelProps) {
   const preferences = useBiometricPreferences(storage);
-  const actionDisabled =
-    preferences.isBusy ||
-    preferences.isCheckingSupport ||
-    (!preferences.enabled && !preferences.canEnable);
-  const actionLabel = preferences.isBusy
-    ? "Updating biometric unlock"
-    : preferences.enabled
-      ? "Disable biometric unlock"
-      : "Enable biometric unlock";
+  const control = getBiometricPreferenceControlState({
+    canEnable: preferences.canEnable,
+    enabled: preferences.enabled,
+    isBusy: preferences.isBusy,
+    isCheckingSupport: preferences.isCheckingSupport,
+  });
 
   return (
     <Pressable
-      accessibilityHint={
-        preferences.enabled
-          ? "Removes biometric unlock from this device."
-          : "Authenticates you before enabling biometric unlock on this device."
-      }
-      accessibilityLabel={actionLabel}
+      accessibilityHint={control.hint}
+      accessibilityLabel={control.label}
       accessibilityRole="button"
       accessibilityState={{
         busy: preferences.isBusy,
-        disabled: actionDisabled,
+        disabled: control.disabled,
       }}
-      disabled={actionDisabled}
+      disabled={control.disabled}
       onPress={() => {
         void runBiometricPreferenceAction({
           enabled: preferences.enabled,
@@ -56,11 +52,7 @@ export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanel
           onEnable: preferences.enable,
         });
       }}
-      style={({ pressed }) => [
-        biometricPanelStyle,
-        pressed ? { opacity: 0.82 } : null,
-        actionDisabled ? { opacity: 0.62 } : null,
-      ]}
+      style={biometricPanelStyle}
     >
       <BiometricPreferenceStatus
         available={preferences.available}
@@ -75,17 +67,15 @@ export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanel
         </Text>
       ) : null}
 
-      {!actionDisabled || preferences.isBusy ? (
-        <Text
-          style={{
-            color: preferences.enabled ? colors.danger : colors.action,
-            fontFamily: fonts.sans.medium,
-            fontSize: 15,
-          }}
-        >
-          {actionLabel}
-        </Text>
-      ) : null}
+      <Text
+        style={{
+          color: colors[control.actionColor],
+          fontFamily: fonts.sans.medium,
+          fontSize: 15,
+        }}
+      >
+        {control.label}
+      </Text>
     </Pressable>
   );
 }

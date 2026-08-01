@@ -12,7 +12,7 @@ describe("BiometricPreferencesPanel interaction", () => {
 
     expect(source).toContain("<Pressable");
     expect(source).toContain('accessibilityRole="button"');
-    expect(source).toContain("accessibilityLabel={actionLabel}");
+    expect(source).toContain("accessibilityLabel={control.label}");
     expect(source).toContain("accessibilityState={{");
     expect(source).toContain("runBiometricPreferenceAction({");
     expect(source).toContain("onDisable: preferences.disable");
