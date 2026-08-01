@@ -3,6 +3,7 @@ export * from "./canonical-json";
 export * from "./checklist/index";
 export * from "./constants";
 export * from "./contracts";
+export * from "./evidence-preparation/index";
 export * from "./journey";
 export * from "./recipient-v2-validation";
 export * from "./scenario";
