@@ -1,5 +1,6 @@
 export * from "./audit";
 export * from "./canonical-json";
+export * from "./checklist/index";
 export * from "./constants";
 export * from "./contracts";
 export * from "./journey";
