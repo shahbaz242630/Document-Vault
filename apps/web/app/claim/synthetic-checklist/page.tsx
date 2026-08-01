@@ -35,6 +35,10 @@ export default function SyntheticClaimantChecklistPage() {
       <SyntheticChecklistPreview fixtures={claimantSyntheticChecklistFixtures} />
 
       <p className="spaced-content">
+        <Link className="text-link" href="/claim/synthetic-evidence">View the read-only synthetic evidence preview <span aria-hidden="true">→</span></Link>
+      </p>
+
+      <p className="spaced-content">
         <Link className="text-link" href="/claim/synthetic-preview">Return to synthetic dashboard states <span aria-hidden="true">→</span></Link>
       </p>
     </main>
