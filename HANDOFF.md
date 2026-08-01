@@ -34,7 +34,7 @@ The next product step is to repair the mobile Settings biometric interaction, pr
 
 - `/claim` is informational only. Authentication, intake, evidence, review, notifications, release, and claimant decryption are disabled.
 - Product-owner direction is recorded, but legal/privacy, security, operations, native custody, and independent approvals remain incomplete.
-- No operating company/controller is named. No real claimant data may be collected.
+- Shahbaz Malik is the provisionally designated operator/data controller candidate. Incorporation, legal confirmation, controller contact details, and the processor map remain incomplete, so no real claimant data may be collected.
 - `CLAIM_HANDOFF.md` is authoritative for claimant scope and stop gates.
 
 ## Non-Negotiable Boundaries
@@ -61,7 +61,7 @@ The next product step is to repair the mobile Settings biometric interaction, pr
 - Production owner/claimant origin decision and deployment review.
 - Public legal approval.
 - Transactional-email provider, operational ownership, second qualified security reviewer, and durable SBOM/license ownership.
-- Claimant operator/controller, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
+- Legal confirmation of Shahbaz Malik as operator/data controller, contracting-entity and processor mapping, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
 
 ## Verification Recorded On 2026-08-01
 

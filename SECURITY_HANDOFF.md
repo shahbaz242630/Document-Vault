@@ -67,7 +67,7 @@ Product-owner direction is approved: registered recipient first; death-only invi
 
 Still required:
 
-- Named operator/controller and processor map.
+- Legal confirmation of the provisional Shahbaz Malik operator/data controller designation, contracting-entity/controller details, and processor map.
 - Legal/privacy authority, jurisdiction, evidence, retention, rights, dispute, and cross-border policies.
 - Physical iOS custody proof and independent native/cryptographic review.
 - Security/operations approval of authentication, origin, notifications, storage, audit integrity, backup/restore, kill switches, and incident response.

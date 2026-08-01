@@ -35,11 +35,12 @@ A chat acknowledgement, unchecked task, passing unit test or owner enthusiasm do
 - [x] O12 Owner requested and approved an append-only internal case audit/journey ledger direction on 2026-07-31; legal/privacy/security/operations design remains pending.
 - [x] O13 Owner superseded the one-jurisdiction assumption on 2026-07-31 and approved a nationality-neutral, global-capable architecture using document-specific jurisdiction policy packs; every activated pack still requires legal/privacy approval.
 - [x] O14 Owner confirmed no operating company exists yet on 2026-07-31; incorporation/operator identity remains a pre-data blocker.
+- [x] O15 Owner provisionally designated Shahbaz Malik as the operator/data controller candidate on 2026-08-01; this does not complete legal confirmation, incorporation/contracting-entity, contact-detail, processor-map, or pre-data gates.
 - [x] O15 Owner approved native local decryption and optional on-device PDF export on 2026-07-31; backend/browser-readable PDFs and system-known PDF passwords are out of scope.
 
 ## B. Legal And Privacy
 
-- [ ] L01 Name the operator, contracting entity, data controller and each processor/subprocessor.
+- [ ] L01 Legally confirm Shahbaz Malik as operator/data controller, name the contracting entity, record controller contact details, and name each processor/subprocessor.
 - [ ] L02 Approve the conflict-of-laws intake and each jurisdiction policy pack before it can authorize progression; define unsupported, conflicting and excluded combinations.
 - [ ] L03 Provide written advice defining lawful release authority after owner death and required owner instruction/grant.
 - [ ] L04 Approve the death, identity and claimant authority/relationship evidence catalogue and sufficiency rules.
@@ -136,4 +137,4 @@ A chat acknowledgement, unchecked task, passing unit test or owner enthusiasm do
 
 `NO-GO` for Slice 3.
 
-The owner has approved the complete product direction, including the journey dashboard, audit ledger and nationality-neutral policy-pack/document-checklist model. No operating company exists yet. Operator/controller formation, legal authority and jurisdiction policy packs, evidence rules, retention/logging schedule, reviewer staffing, multi-device design, physical custody proof, Android transaction binding, authentication/origin design, backup/restore, audit integrity and independent-assurance approvals remain incomplete.
+The owner has approved the complete product direction, including the journey dashboard, audit ledger and nationality-neutral policy-pack/document-checklist model, and provisionally designated Shahbaz Malik as the operator/data controller candidate. No operating company exists yet. Legal confirmation of the designation, contracting-entity/controller details, processor mapping, legal authority and jurisdiction policy packs, evidence rules, retention/logging schedule, reviewer staffing, multi-device design, physical custody proof, Android transaction binding, authentication/origin design, backup/restore, audit integrity and independent-assurance approvals remain incomplete.

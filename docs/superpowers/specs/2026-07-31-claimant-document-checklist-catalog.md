@@ -145,4 +145,4 @@ There is no default global release pack. Missing, expired, conflicting or tamper
 
 ## Implementation Stop Gate
 
-Do not implement upload forms, database tables, policy engines or reviewer decisions from this draft. First name the operator/controller, approve the intake data model, obtain counsel-approved policy packs, complete privacy/security review and authorize the bounded runtime slice.
+Do not implement upload forms, database tables, policy engines or reviewer decisions from this draft. Shahbaz Malik is only the provisional operator/data controller candidate; first legally confirm the controller and contracting entity, complete controller contact details and the processor map, approve the intake data model, obtain counsel-approved policy packs, complete privacy/security review and authorize the bounded runtime slice.

@@ -119,4 +119,4 @@ The backend can prove that it authorized a retrieval session and served encrypte
 
 ## Stop Gate
 
-Do not implement this journey until the operator/controller, policy packs, evidence catalogue, review staffing, iOS custody proof, security/privacy/legal approvals, storage provider and audit design are approved against one immutable review set.
+Do not implement this journey until the provisional Shahbaz Malik operator/data controller designation is legally confirmed with contracting-entity/controller details and a processor map, and the policy packs, evidence catalogue, review staffing, iOS custody proof, security/privacy/legal approvals, storage provider and audit design are approved against one immutable review set.

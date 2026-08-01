@@ -45,7 +45,7 @@ Any material change after circulation creates a new review version and invalidat
 
 ### Legal And Privacy
 
-Name the operator/controller and processors. Approve the conflict-of-laws intake and each policy pack proposed for activation. Provide written answers for release authority, evidence sufficiency, authenticity, translation/attestation, lawful basis, notices, cross-border transfers, claimant/deceased-person rights, retention, deletion, legal hold, disputes, appeals, incident notification and case-history export. Confirm which audit fields are necessary and whether any evidentiary/admissibility language may be used.
+Legally confirm the provisional Shahbaz Malik operator/data controller designation, contracting entity and controller contact details, and name every processor. Approve the conflict-of-laws intake and each policy pack proposed for activation. Provide written answers for release authority, evidence sufficiency, authenticity, translation/attestation, lawful basis, notices, cross-border transfers, claimant/deceased-person rights, retention, deletion, legal hold, disputes, appeals, incident notification and case-history export. Confirm which audit fields are necessary and whether any evidentiary/admissibility language may be used.
 
 Output: completed L01-L13 decisions with counsel/privacy identity, date, expiry, conditions and linked advice.
 
@@ -93,7 +93,8 @@ Informal chat, owner approval, a passing test or a generic vendor statement is n
 
 Before circulation:
 
-- [ ] Incorporate or name the operator/controller candidate.
+- [x] Operator/data controller candidate provisionally named: Shahbaz Malik (2026-08-01).
+- [ ] Legally confirm the controller, contracting entity, controller contact details, and processor map before any claimant-data collection.
 - [ ] Identify the first jurisdiction-policy packs proposed for counsel review; global architecture does not activate blanket global release.
 - [ ] Name the legal/privacy, security/crypto, native iOS, operations and independent reviewers.
 - [ ] Commit the complete review set and record its Git SHA.

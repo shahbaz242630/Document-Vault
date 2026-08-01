@@ -8,7 +8,7 @@ Current result: `NO-GO` for claimant Slice 3.
 
 The public `/claim` routes are informational. Claimant authentication, invitations, key registration, persistence, migrations, RLS/Storage policies, evidence upload, notifications, processors, case transitions, release packages, retrieval, and claimant decryption are disabled.
 
-Product-owner direction is approved. Legal/privacy, security, operations, native custody, staffing, and independent-review gates remain incomplete. No operating company/controller is named, so no real claimant data may be collected.
+Product-owner direction is approved, and Shahbaz Malik is the provisionally designated operator/data controller candidate. Legal confirmation, incorporation/contracting-entity details, controller contact details, the processor map, and the remaining legal/privacy, security, operations, native custody, staffing, and independent-review gates are incomplete. No real claimant data may be collected.
 
 Repository reference: PR #52 merged the Slice 2 package into `main`/`origin/main` at `37b05d0`. Current mobile work is isolated on `codex/biometric-settings-control`; claimant runtime remains unchanged.
 
@@ -76,7 +76,7 @@ Every slice requires explicit scope/non-goals, kill switches, transactional/idem
 
 ## Current Slice 2 Blockers
 
-- Operator/controller identity, processor map, governing law, supported policy packs, and counsel opinion on release authority.
+- Legal confirmation of Shahbaz Malik as operator/data controller, incorporation/contracting-entity details, controller contact details, processor map, governing law, supported policy packs, and counsel opinion on release authority.
 - Evidence sufficiency/authenticity/translation rules, data minimization, consent/legal basis, retention/deletion, rights, legal hold, breach, and cross-border policy.
 - Named reviewer roles, qualifications, conflict checks, staffing, access controls, escalation, appeal, and incident procedures.
 - Physical iOS Secure Enclave proof, two-device enrollment design, loss/replacement/revocation journeys, and independent native/cryptographic review.
@@ -104,7 +104,7 @@ Circulate one immutable version. Every approval record must identify the documen
 ## Next Authorized Work
 
 1. Merge or otherwise freeze the Slice 2 review package so every specialist reviews the same version.
-2. Name the operator/controller or keep all claimant data collection blocked.
+2. Legally confirm the provisional Shahbaz Malik operator/data controller designation, complete the contracting-entity/controller record and processor map, and keep all claimant data collection blocked until approval.
 3. Obtain physical iOS custody evidence and complete the multi-device/loss/replacement design.
 4. Route the immutable package to named legal/privacy, security, operations, native, and independent reviewers.
 5. Resolve every blocking checklist item and record conditions/evidence/expiry.
