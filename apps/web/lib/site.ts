@@ -23,6 +23,7 @@ export const claimInformationRoutes = [
 export const claimSyntheticPreviewRoute = "/claim/synthetic-preview" as const;
 export const claimSyntheticChecklistRoute = "/claim/synthetic-checklist" as const;
 export const claimSyntheticEvidenceRoute = "/claim/synthetic-evidence" as const;
+export const claimSyntheticSubmissionRoute = "/claim/synthetic-submission" as const;
 
 export const publicRoutes = [
   "/",
@@ -31,6 +32,7 @@ export const publicRoutes = [
   claimSyntheticPreviewRoute,
   claimSyntheticChecklistRoute,
   claimSyntheticEvidenceRoute,
+  claimSyntheticSubmissionRoute,
   ...legalNavigation.map(({ href }) => href),
   "/support",
 ] as const;

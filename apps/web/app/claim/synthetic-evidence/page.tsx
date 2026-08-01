@@ -35,6 +35,10 @@ export default function SyntheticClaimantEvidencePage() {
       <SyntheticEvidencePreview fixtures={claimantSyntheticEvidenceFixtures} />
 
       <p className="spaced-content">
+        <Link className="text-link" href="/claim/synthetic-submission">View the read-only synthetic submission preview <span aria-hidden="true">→</span></Link>
+      </p>
+
+      <p className="spaced-content">
         <Link className="text-link" href="/claim/synthetic-checklist">Return to synthetic checklist states <span aria-hidden="true">→</span></Link>
       </p>
     </main>
