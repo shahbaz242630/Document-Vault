@@ -1,300 +1,86 @@
-# Sanduqkin Website, Owner Web Vault, And Claimant MVP Handoff
+# Sanduqkin MVP Handoff
 
-Last updated: 2026-07-31 (Asia/Dubai)
+Last updated: 2026-08-01 (Asia/Dubai)
 
 ## Current Decision
 
-Complete build-6 physical-iOS regression and review the drafted claimant Slice 2 decision package; public website publication and live claimant/release behavior remain gated.
-
-- API region alignment and the web workspace scaffold are merged on `main`.
-- Static landing/legal content is implemented and protected-preview-verified, but publication is parked pending owner/design/legal approval.
-- The protected owner web vault and shared mobile/web 17-category engine are merged on `main` but are not deployed.
-- The repeatable local browser/mobile-repository smoke, TestFlight build 3 native-UI confirmation, synthetic-data cleanup, and branch PR-readiness review passed.
-- PR #38 merged the verified mobile MVP navigation/dashboard redesign, web sign-in cleanup, claimant vectors, and hard-disabled custody feasibility work.
-- PR #48 merged the lockfile-based SBOM repair. Protected run `30520301290` then produced TestFlight build 4.
-- Build-4 physical QA findings were repaired by PR #49 and verified on an authenticated Pixel emulator. PR #49 merged as `306c18f`, and the complete post-merge native/security/Supabase matrix passed.
-- Protected run `30570280096` produced and submitted app `1.0.0` (5). App Store compliance and `GCC Internal Testers` assignment completed, and build 5 is installed for controlled physical QA.
-- Build-5 physical QA passed the fixed footer, Emergency Readiness heading, friendly invalid-data handling, valid save, and sealed emergency-code creation. The Android biometric path and owner-side trusted-person information route are now repaired and emulator-verified; physical iOS regression remains required before another release.
-- PR #51 merged as `9a903f2` after the complete protected matrix passed. Protected run `30647817586`, EAS build `905cf43a-369e-42fa-a9ba-1bc8d6bf787a` and submission `16464bb5-6ef9-4b24-b891-a664255c963f` completed for app `1.0.0` (6); Apple processing, compliance, internal assignment and physical QA remain open.
-- Slice 2 decision, threat/control and approval documents are drafted with a current `NO-GO` for Slice 3. They add no claimant runtime or data path.
-- `/claim` remains informational and inactive. No real claimant data, evidence intake, entitlement decision, release, or claimant decryption is authorized.
+Finish the mobile owner-vault release gate first. Public website publication, protected owner-web deployment, and claimant implementation remain separate gated workstreams.
 
-Detailed pre-consolidation phase evidence is preserved in Git at commit `96e89c1` and indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
+Repository reference: PR #52 merged into `main`/`origin/main` at `37b05d0`. The biometric Settings repair is isolated on `codex/biometric-settings-control`.
 
-The authoritative claimant and encrypted-release playbook is `CLAIM_HANDOFF.md`; use its linear slice plan and stop gates for all claimant work.
+## MVP Surfaces
 
-## MVP Scope
+| Surface | Intended host | Current state |
+| --- | --- | --- |
+| Mobile owner vault | Native app | Internal TestFlight testing; iOS biometric gate failed |
+| Public website | `sanduqkin.com` | Protected static preview; legal publication blocked |
+| Owner web vault | `vault.sanduqkin.com` | Implemented locally; not deployed |
+| Claimant portal | `app.sanduqkin.com` | Informational pages only; all runtime disabled |
+| Canonical API | `api.sanduqkin.com` | Hono API deployed in `fra1`; no claimant runtime |
+| Identity/data | Supabase `eu-central-1` | Existing Free project plus local test stack |
 
-### Included
+Production hosts remain subject to final security/privacy approval. Use host-only cookies and exact origin/CORS/redirect allowlists; do not rely on path separation between owner and claimant contexts.
 
-- Public product, security, support, accessibility, privacy, terms, and account-deletion information.
-- A protected owner web vault using the same identity, encrypted records, key material, validation, and envelope format as mobile.
-- A future claimant portal with two designed routes: registered trusted recipient and V2 offline handover code.
-- One canonical Hono API for mobile/web business operations.
-- Client-side encryption/decryption and zero-knowledge vault storage.
+## Included Product
 
-### Excluded until separately approved
+- Mobile owner authentication, recovery continuity, encrypted 17-category CRUD, deletion lifecycle, local PDF export, Emergency Readiness, and sealed emergency-code foundation.
+- Shared mobile/web validation, ciphertext envelope, and Supabase owner-vault records.
+- Protected owner-web authentication and encrypted CRUD implementation, pending deployment gates.
+- Static product, support, security, accessibility, privacy, terms, deletion, and inactive claimant information pages.
+- Runtime-disconnected claimant protocol contracts, synthetic vectors, threat/decision documents, and native custody feasibility probe.
 
-- Public legal publication while `apps/web/LEGAL_CONTENT_REVIEW.md` is unresolved.
-- External authenticated web users before the Supabase Pro, backup, session-displacement, hosted-configuration, and smoke-test gates pass.
-- Real claimant registration, evidence upload, relationship or entitlement decisions, release authorization, and data release.
-- Payments and financial/legal/executor positioning.
+## Explicitly Excluded
 
-## Architecture
+- Public legal publication before owner/counsel approval.
+- External authenticated web users before Supabase, backup, session, origin, configuration, and smoke gates pass.
+- Live claimant accounts, invitations, evidence upload, case processing, notifications, entitlement decisions, release, or claimant decryption.
+- V1 emergency-code lookup, server-side vault decryption, browser-readable release PDFs, automatic release for owner non-response, payments, or financial/legal/executor positioning.
 
-| Surface | Repository | Intended host | Current state |
-| --- | --- | --- | --- |
-| Mobile owner vault | `apps/mobile` | Native app | TestFlight build 5 installed; two interaction regressions open |
-| Public website | `apps/web` | `sanduqkin.com` | Protected static preview; publication blocked |
-| Canonical redirect | `apps/web` | `www.sanduqkin.com` | Not configured |
-| Owner web vault | `apps/web` or separate reviewed project | **Decision required** | Implemented locally; not deployed |
-| Claimant portal | `apps/web` or separate reviewed project | `app.sanduqkin.com` | Informational `/claim` only |
-| Shared API | `services/api` | `api.sanduqkin.com` | Deployed; dynamic function verified in `fra1` |
-| Identity/data | Supabase | Managed service | Existing Free `eu-central-1` project plus local stack |
-| DNS | Hostinger | Domain control | Production web records not configured |
+## Current Mobile Finding
 
-### Required origin decision
+Build 6 was submitted and subsequently tested on a physical iPhone. The Settings biometric card/status is a plain `View`; only the conditional enable/disable buttons are pressable. Tapping the card silently does nothing, so physical Face ID setup and the protected-key `Lock` -> `Unlock` path have not passed.
 
-Before deploying `/login` or `/vault`, choose and document the owner-vault production hostname and enforce host-based routing.
+Code review confirms the underlying enablement, authenticated key retrieval, session validation, and password fallback paths are present. Android emulator evidence passed. A corrected interaction and a new controlled candidate are required.
 
-- The owner vault and future claimant intake are different trust contexts and must not rely only on path separation.
-- Recommended default for review: `vault.sanduqkin.com` for owners and `app.sanduqkin.com` for claimants, with host-only cookies and exact redirect/CORS/origin allowlists. A separate Vercel project may be preferable if it materially reduces routing, cookie, deployment, or operator risk.
-- Public hosts must not accidentally expose protected owner or claimant routes.
-- Do not attach any production domain until this decision and its tests are approved.
+Marriage/divorce certificate options are present in the encrypted Document Locations registry and automated tests. The corrected divorce value has not received fresh hosted persistence evidence.
 
-### Data and compute rules
+## Owner Web Contract
 
-- Mobile and web use the same Supabase user, `vault_key_material`, and `vault_assets`; do not create a second vault or source of truth.
-- Public pages are statically generated and remain usable if Supabase or the API is unavailable.
-- Protected pages are dynamic, private, `no-store`, and `noindex`.
-- The Hono API remains the canonical privileged/business API. Do not move release logic into Next.js page components.
-- API and authenticated dynamic compute must be placed near the Frankfurt data plane.
-- Durable workflow state belongs in Postgres, not Vercel process memory.
+- Mobile and web share one Supabase identity and one encrypted vault; do not create a parallel vault.
+- Passwords, KEKs, MEKs, and plaintext records remain client-side and are not persisted in browser storage.
+- Browser cryptography and the active MEK remain inside the Web Worker.
+- Protected pages are private, `no-store`, and `noindex`; lock, sign-out, timeout, displacement, and fatal failures clear decrypted/key state.
+- The Hono API remains the canonical privileged surface; durable state belongs in Postgres, not page components or process memory.
 
-## Owner Web Vault Contract
+## Claimant Product Direction
 
-- Browser sign-in uses the Supabase publishable client; the password is not submitted to a Sanduqkin server action.
-- The browser derives the KEK and unwraps the MEK locally. Record crypto and active MEK storage remain inside the Web Worker.
-- Passwords, KEKs, MEKs, and plaintext records are not persisted in browser storage or sent to the API.
-- All 17 current asset types are defined by the exhaustive `@vault/shared-validation` registry and shared with mobile.
-- Known fields are replaced or cleared through the current schema while unknown future encrypted fields are preserved.
-- Web supports encrypted list, view, create, update, soft delete, restore, and confirmed permanent delete.
-- Mobile reconciles failed mutations from Supabase or rolls back local state.
-- Lock, sign-out, timeout, displacement, and fatal failures must clear decrypted/key state.
+Status: product-owner approved; specialist approval and evidence pending; runtime `NO-GO`.
 
-## One Active Login
+- Registered-recipient route first; death-only invitation pilot.
+- Claimant authentication/MFA, relationship, documents, or code possession do not authorize release.
+- Verified owner notice, provisional 30-day cooldown, owner cancellation, no automatic release for non-response, and two independent reviewers.
+- At least two independently enrolled device-bound claimant keys; no server recovery.
+- iOS-only preparation is acceptable while Android remains fail-closed. This authorizes documentation, probes, and assurance work only—not runtime integration.
+- Future evidence uses private quarantine storage; future delivery remains ciphertext-only with native local decrypt/read-only presentation and optional local PDF export.
+- Package served, opened, exported, claimant-confirmed, expired, and closed are separate auditable events; none should be represented as confirmed plaintext receipt without evidence.
+- Provisional package availability is 72 hours and retrieval sessions 15 minutes, subject to security/operations approval.
+- A safe claimant journey dashboard and append-only internal audit ledger are required.
+- Architecture is nationality-neutral, but claims proceed only under an approved, signed/versioned document-specific jurisdiction policy pack.
 
-Product intent is that the latest successful sign-in becomes the only active session across mobile and web.
+Detailed decisions and gates live in `CLAIM_HANDOFF.md` and the 2026-07-31 claimant Slice 2 documents.
 
-- The existing Supabase project is Free; managed single-session, inactivity timeout, and time-boxed sessions are not active.
-- Before production readiness, upgrade the existing project to Pro, enable managed single-session-per-user, and select a supportable JWT lifetime.
-- An issued access JWT can remain usable until expiry. Do not claim immediate displacement.
-- Sensitive API operations should verify the user server-side and, where supported, validate the JWT session against the active Auth session.
-- Test mobile-to-web and web-to-mobile displacement, refresh failure, the bounded old-JWT window, and decrypted-state cleanup using dedicated identities.
+## Next Actions
 
-## Claimant Model — Design Only
+1. Repair and test the biometric Settings interaction.
+2. Pass protected CI, create the next internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
+3. Reverify corrected divorce-certificate encrypted CRUD on the hosted test path.
+4. Resolve `apps/web/LEGAL_CONTENT_REVIEW.md` before public publication.
+5. Complete Supabase Pro, backup/restore, single-session, JWT, origin, hosted-configuration, monitoring, rollback, and synthetic smoke gates before protected-web deployment.
+6. Route the immutable claimant package to named specialists; keep all claimant runtime disabled.
 
-### Registered trusted recipient
+## Verification On 2026-08-01
 
-1. Owner nominates a recipient and Sanduqkin sends a value-free invitation.
-2. Recipient authenticates, enrolls MFA, and creates a key pair locally.
-3. Only the public key leaves the client; no claimant private key or server-recoverable private-key package is uploaded.
-4. The unlocked owner client creates a recipient-specific sealed MEK grant.
-5. A later claim still requires identity, evidence, challenge/cooldown, and release authorization.
-6. After authorized release, ciphertext and claimant-specific sealed material decrypt locally into a read-only view.
-
-The existing `pre_authorized_kin` symmetric-key helper is not a finished public-key or account-bound recipient protocol.
-
-Registered-recipient setup is blocked until security and privacy review approve a native, hardware-backed, or otherwise compliant custody design. The current browser policy does not permit persistent claimant private keys.
-
-### V2 offline handover code
-
-Current V1 codes have about 100 bits of generated secret, use Argon2id and XChaCha20-Poly1305, and are not stored raw. They have no public locator and therefore cannot safely locate a grant.
-
-V2 must define:
-
-- a public locator safe to submit;
-- a separate high-entropy client-only secret;
-- a domain-separated possession proof;
-- expiry, attempt limits, throttling, abuse detection, and revocation;
-- no full secret in URLs, requests, logs, analytics, support tools, or database rows; and
-- explicit compatibility or owner-confirmed regeneration for V1 grants.
-
-Do not scan all grants, transmit the full secret, silently lower the current KDF cost, or revoke active V1 grants automatically. Benchmark browser Argon2 in a Web Worker across representative iPhone, Android, desktop, and low-memory devices.
-
-### Unresolved release authority
-
-Live release cannot be designed or implemented until owner/security/legal review decides:
-
-- who authorizes release when the owner cannot respond;
-- accepted evidence, jurisdictions, and qualified reviewers;
-- owner notification, challenge/cancel, cooldown, and restart rules;
-- lost-access-but-living-owner handling;
-- disputes, appeals, audit, incidents, and insider controls;
-- operator/data-controller identity, governing law, retention, and deletion.
-
-Authentication, MFA, relationship claims, evidence, or code possession do not establish entitlement and never authorize release by themselves.
-
-## Claimant Security And Data Boundary
-
-- Claimant identity, claims, evidence, and release state require separate capabilities, schema, RLS, storage, API authorization, and audit paths from the owner vault.
-- Write the protocol and threat model before migrations. Use append-only migrations, explicit API-mediated transitions, database constraints, idempotency, and append-only state events.
-- Require `aal2` for key registration/replacement, claim submission, release approval, and sealed-package retrieval.
-- Prevent account/locator enumeration and apply CAPTCHA, bounded timing, and layered rate limits.
-- Claim evidence, if approved later, is server-visible PII and outside the vault zero-knowledge claim. It requires a private quarantine bucket, claimant/claim-bound Storage RLS, randomized names, content/size/count limits, malware scanning, retention/deletion, and short-lived upload/download capabilities.
-- Claimants must never gain a policy path to `vault_assets`, `vault_key_material`, another claim, or another claimant's evidence.
-- Released information remains ciphertext plus claimant-specific sealed key material and decrypts locally. No server-side vault decryption is permitted.
-
-## Delivery Status
-
-### Completed and integrated
-
-- **API Frankfurt alignment:** merged through PR #32 as `affaef1`; production function verified in `fra1`, health and protected route behavior retained, and rollback recorded.
-- **Web workspace scaffold:** merged through PR #33 as `c4f1f91`; separate `sanduqkin-web` Vercel project, static shell, tests/build, protected preview, no credentials or data paths.
-
-### Completed and merged on `main`, not deployed
-
-- Static landing/legal/support/accessibility/security routes and inactive `/claim` preview.
-- Refined public landing-to-sign-in navigation and a cleaned, aligned web login experience.
-- Supabase web authentication foundation and server-side protected-route claim validation.
-- Deterministic mobile/web crypto compatibility vector and Web Worker key boundary.
-- Live owner-only bank-account proof in both cross-client directions with tagged-row cleanup.
-- Exhaustive schema-driven registry and encrypted CRUD parity for all 17 current asset types.
-- Mobile unknown-field preservation and failed-mutation reconciliation.
-- Protected-route nonce CSP and security headers.
-- Repeatable local protected smoke across card, contact, medical-care, and business-interest records, including bidirectional edit/decrypt, forward-field preservation, ciphertext-only rows, browser deletion lifecycle, offline failure reconciliation, browser storage/key cleanup, protected headers, and full synthetic cleanup.
-- The 2026-07-27 regression passed mobile 377 tests with 3 protected live tests skipped, web 81 tests, repository typecheck and lint, the Next.js `16.2.12` production build, Expo Doctor 21/21, Phase 1/security/mobile-secret guards, and a production dependency audit reporting zero vulnerabilities. The protected web surface remains blocked from deployment for the remaining release-readiness work described in this handoff.
-- PR #38 adds closed claimant protocol contracts and validators, five reproducible synthetic suites, cross-consumer verification, state-release invariants, a hard-disabled native custody probe, and runtime-isolation guards. It adds no claimant authentication, persistence, API, evidence, notification, processor, or release path. Its offline-code V2 Argon2id profile is synthetic-only and not production-approved.
-- PR #49 adds the build-4 QA repairs: fixed vault footer, corrected Emergency Readiness hierarchy, friendly dynamic-form validation and valid-save recovery, biometric availability refresh/native error handling, Face ID native configuration, and a checkout-line-ending-safe claimant-vector check. Authenticated emulator coverage passed the repaired owner flow and permanent synthetic cleanup.
-- The newly added document-location option has been corrected from death certificate to divorce certificate locally; it remains on the existing encrypted CRUD path and needs focused persistence verification before the next release.
-- TestFlight build 6 exposed a physical-iPhone Settings interaction defect: the `Biometric unlock` row/card is non-pressable and silently ignores taps. The conditional enable/disable buttons are the only implemented actions. iOS biometric readiness remains blocked pending repair and a real `Lock` -> `Unlock` Face ID test.
-- Final PR #49 verification passed 391 mobile tests with 3 protected skips, coverage, typecheck, lint, Expo Doctor 21/21, Android native/emulator smoke, iOS simulator smoke, application/security gates, live/hosted Supabase checks, CodeQL, OWASP ZAP, GitGuardian, and Vercel previews.
-
-### Mobile MVP UI/UX session — 2026-07-26
-
-- Verified the controlled test account against Supabase: new TestFlight records reached the encrypted vault path, stored rows did not expose plaintext vault fields, and the owner-selected deleted test item was fully removed as expected.
-- Replaced the mixed landing experience with a dedicated Dashboard, separate Add and Saved Records destinations, explicit return controls, and a five-action Home/Add/Records/Settings/Lock footer.
-- Added safe live vault-coverage guidance and emergency-readiness status backed by existing encrypted-record and sealed-grant state, including a seven-day on-device reminder deferral. No emergency grant was changed.
-- Android emulator checks covered sign-in, Dashboard rendering, all footer destinations, Lock, emergency-access routing, return-time refresh, and final styling.
-- Latest mobile verification after the final styling change: TypeScript passed; Vitest passed 377 tests with 3 protected tests skipped across 100 passed and 3 skipped files.
-
-### Hosted state
-
-- Current hosted web preview is still static deployment `dpl_56CPAxso438Az7z6pmVwisotCiH5`, protected by Vercel SSO.
-- It predates `/login` and `/vault`, has no custom domain, and has no project environment variables.
-- Do not describe the owner web vault as deployed.
-
-## Execution Plan
-
-### 1. Complete protected cross-client smoke and PR review — complete
-
-The repeatable local leg passed with a dedicated identity and synthetic/tagged rows across four representative categories. It covered bidirectional browser/mobile-repository decrypt and edit, optional and multiline fields, forward-field preservation, ciphertext-only rows, browser create/update/delete/restore/permanent-delete, offline failure without a ghost record, protected headers, empty local/session storage, worker relock, and full tagged cleanup.
-
-- The dedicated synthetic identity passed the physical TestFlight build 3 display/edit path: the native app displayed and edited a web-created encrypted record, the web read the native edit, and the tagged record was permanently removed.
-- Value-free device evidence: iPhone 12, iOS 26.5.2, TestFlight build 3 — pass.
-- Only value-free device/build/pass-fail evidence is retained.
-
-The standard verification and complete local branch diff review passed on 2026-07-21. Docker-backed checks require the local stack started with `npx supabase start --workdir supabase`; starting from the repository root creates a different project id than the checked-in harness expects.
-
-Exit gate passed: physical native UI evidence and branch review completed without observed plaintext leakage, cross-client field loss, ghost/local-divergent state, uncleaned tagged data, or unresolved high-severity finding. Stop for owner review.
-
-### 2. Public website publication — parked
-
-- Complete `apps/web/LEGAL_CONTENT_REVIEW.md` and owner/design/counsel review.
-- Configure public domains, TLS, canonical redirect, static caching, headers, monitoring, billing alerts, accessibility/browser checks, and rollback.
-- Keep `/claim` inactive and protected routes off public hosts.
-
-Exit gate: approved static content is securely available on the public domain. This does not make the protected vault or claimant portal production-ready.
-
-### 3. Protected owner-vault deployment — blocked
-
-- Decide the owner hostname/origin and deployment boundary.
-- Upgrade Supabase to Pro; verify backups, session policy, redirect origins, cookies, CORS/origin checks, CSP, monitoring, rollback, and displacement behavior.
-- Deploy protected preview first and rerun authenticated browser/native checks.
-
-Exit gate: hosted configuration and cross-client session/data behavior pass, with no unresolved high-severity security issue, before external authenticated users are considered.
-
-### 4. Native links — future
-
-- Add exact Apple association and Android asset-link files, narrow entitlements/intent filters, safe browser fallback, and path allowlists.
-- Never place emergency secrets in links.
-- Verify installed/not-installed, malformed, and hostile cases on physical iOS and Android devices.
-
-### 5. Claim protocol and threat model — blocked on decisions
-
-- Resolve release authority and legal/privacy/operator responsibilities.
-- Specify V2 code, registered-recipient cryptography and claimant-key custody, route-specific release material, state machine, roles, API, RLS, audit, error, abuse, retention, and compatibility contracts.
-- Produce protocol vectors, property/replay/guessing analysis, browser KDF benchmarks, and RLS attack designs.
-
-Exit gate: written owner/security/legal approval and no unresolved critical threat. No live claim yet.
-
-### 6. Claim implementation — future gated slices
-
-Only after step 5 approval:
-
-1. Registered-recipient invitation, MFA, client keys, owner grant finalization, replacement, and revocation — no release.
-2. V2 offline-code initiation — controlled submitted claim only, no release.
-3. Evidence quarantine, if approved — synthetic documents first, with privacy and operational controls.
-4. Review/challenge/cooldown/release state machine — approved server/database transitions only.
-5. Local read-only claimant viewer and invitation-only pilot — focused security review or penetration test first.
-
-Each slice must define non-goals, tests, rollback/kill switch, value-free evidence, and an owner stop gate.
-
-## Next Session Opener
-
-When Apple finishes processing build 6, complete compliance and internal assignment, install it, and run the combined physical-iPhone regression for biometric handling, password fallback/recovery, trusted-person navigation, certificate CRUD, Emergency Readiness, sealed-code status and returning-user flow. Keep distribution internal and do not promote the candidate until it passes.
-
-The claimant journey and delivery map are already documented. Both registered recipients and V2 code holders enter the same claimant portal and later converge on application, evidence, review, cooldown, approval, and encrypted read-only retrieval. Neither registration nor code possession authorizes release.
-
-The owner approved all owner/product decisions, including iOS-only Slice 3 preparation while Android remains fail-closed, provisional 72-hour package availability and 15-minute retrieval, a claimant journey dashboard, a comprehensive internal audit/journey ledger, and a nationality-neutral global architecture using document-specific jurisdiction policy packs. No operating company exists yet. Obtain an operator/controller plus named legal/privacy, security, operations and independent-review decisions for the same immutable documents. The checklist remains `NO-GO`; do not add runtime claimant behaviour.
-
-The owner described the intended MVP as route verification, checklist upload, manual review, secure notification, claimant retrieval, receipt confirmation and case closure. The safe translation uses private evidence quarantine, two independent reviewers, value-free notifications, fresh authentication, ciphertext-only backend delivery, native local decrypt/PDF export and separate served/open/export/confirmation audit events. A normal backend/browser-readable PDF protected by a system-known password is not approved.
-
-The owner explicitly selected the safer native local decrypt/PDF export option. Browser-readable PDF delivery is out of scope.
-
-Only after those gates are explicitly approved may a bounded registered/verified-recipient setup slice be authorized. That future slice stops before claim submission, document intake, review, or release.
-
-Authentication, persistence, migrations, APIs, invitations, evidence handling, notifications, workflow processors, and release behavior remain disabled until their specific slice and unresolved approval gates are approved.
-
-## Cost, Resilience, And Performance Constraints
-
-- Do not claim multi-region database failover; Supabase has one primary region.
-- Use transactions, bounded retries, idempotency, and outbox/processor patterns for durable claim workflows.
-- Restore testing is mandatory before live claims; select PITR or an explicitly accepted recovery-point strategy.
-- Add indexes and higher-tier infrastructure from measured query/load evidence, not speculation.
-- Paginate and limit response sizes from the first claimant API.
-- Keep public content static, lazy-load crypto, run heavy KDF work in a worker, and benchmark GCC latency and representative devices.
-- Recheck current Vercel, Supabase, domain, messaging, storage, and legal costs before purchasing. Configure billing alerts and deliberate spend controls.
-
-## Standard Verification
-
-```powershell
-npm run typecheck
-npm run lint
-npm test --workspaces --if-present
-npm run build --workspace @vault/web
-npm run test:coverage --workspace @vault/mobile
-npm run doctor --workspace @vault/mobile
-npm run check:phase1
-npm run check:security
-npm run check:github-actions-security
-npm run check:mobile-secrets
-npm run check:supabase-db-security
-npm run check:supabase-rls
-npm run check:claim-vectors
-npm run check:claim-vector-isolation
-npm run check:claim-custody-isolation
-npm run sbom:release
-npm audit --omit=dev --workspaces --audit-level=high
-```
-
-Add phase-specific browser, native, API, database, and deployment checks. Unit tests alone do not prove browser/native flows, and a desktop browser does not prove native associations.
-
-## Startup Checklist
-
-1. Read `HANDOFF.md`, `SECURITY_HANDOFF.md`, this file, and `apps/web/LEGAL_CONTENT_REVIEW.md`.
-2. Inspect branch, status, recent commits, and whether the hosted state changed.
-3. Preserve unrelated changes and expected local-only files.
-4. Confirm the active step above; do not select work from historical phase numbering.
-5. Verify the environment is still protected development. Stop if production readiness or external users are proposed before their gates pass.
-6. Restate scope/non-goals, complete one bounded slice, verify it, update the handoffs, and stop for owner review.
+- Focused mobile tests: 27 passed.
+- Shared validation tests: 42 passed.
+- Inactive claimant web tests: 6 passed.
+- Claim vector, vector-isolation, and custody-isolation guards passed.
