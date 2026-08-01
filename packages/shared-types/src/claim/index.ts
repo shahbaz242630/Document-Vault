@@ -9,4 +9,5 @@ export * from "./recipient-v2-validation";
 export * from "./review-submission/index";
 export * from "./scenario";
 export * from "./state-machine";
+export * from "./submission-handoff/index";
 export * from "./validation";
