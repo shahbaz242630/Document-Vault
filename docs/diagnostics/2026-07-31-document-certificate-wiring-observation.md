@@ -6,7 +6,7 @@ Status: implemented and verified against the authenticated Android development c
 
 ## Scope
 
-Verify that the new `Marriage certificate` and `Death certificate` options use the complete existing encrypted Document Location flow: input, validation, encryption, authenticated persistence, list reload, edit, re-encryption, and remote update.
+Verify that the new `Marriage certificate` and `Divorce certificate` options use the complete existing encrypted Document Location flow: input, validation, encryption, authenticated persistence, list reload, edit, re-encryption, and remote update.
 
 ## Architecture Clarification
 
@@ -21,7 +21,7 @@ This implementation stores information about a certificate and where it is kept.
 Using the disposable authenticated test account, two synthetic records were created through the Android form:
 
 - one marriage-certificate reference;
-- one death-certificate reference.
+- one divorce-certificate reference.
 
 For both records the form accepted and saved:
 
@@ -37,7 +37,7 @@ The authenticated Supabase query showed the document-location row count increase
 
 ## Live Edit Verification
 
-The synthetic death-certificate record was opened through its action menu and edited in the shared dynamic edit form. Its location text was changed and saved.
+The synthetic divorce-certificate record was opened through its action menu and edited in the shared dynamic edit form. Its location text was changed and saved.
 
 Observed:
 
@@ -66,4 +66,4 @@ The full mobile suite reported 394 passed and 3 skipped, plus one unrelated exis
 
 ## Conclusion
 
-Marriage and death certificate references are fully wired through the existing encrypted Document Location create/edit/persist/reload path and the authenticated Supabase repository. The two synthetic QA records remain in the disposable test account for live inspection.
+Marriage and divorce certificate references use the existing encrypted Document Location create/edit/persist/reload path and authenticated Supabase repository. The earlier death-certificate QA record was removed; the corrected divorce-certificate value requires a new focused persistence check.

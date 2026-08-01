@@ -4,7 +4,7 @@ Last updated: 2026-07-31 (Asia/Dubai)
 
 ## Current Decision
 
-Complete physical-iOS regression of the repaired owner controls, then begin the bounded claimant Slice 2 decision work; public website publication and live claimant/release behavior remain gated.
+Complete build-6 physical-iOS regression and review the drafted claimant Slice 2 decision package; public website publication and live claimant/release behavior remain gated.
 
 - API region alignment and the web workspace scaffold are merged on `main`.
 - Static landing/legal content is implemented and protected-preview-verified, but publication is parked pending owner/design/legal approval.
@@ -15,6 +15,8 @@ Complete physical-iOS regression of the repaired owner controls, then begin the 
 - Build-4 physical QA findings were repaired by PR #49 and verified on an authenticated Pixel emulator. PR #49 merged as `306c18f`, and the complete post-merge native/security/Supabase matrix passed.
 - Protected run `30570280096` produced and submitted app `1.0.0` (5). App Store compliance and `GCC Internal Testers` assignment completed, and build 5 is installed for controlled physical QA.
 - Build-5 physical QA passed the fixed footer, Emergency Readiness heading, friendly invalid-data handling, valid save, and sealed emergency-code creation. The Android biometric path and owner-side trusted-person information route are now repaired and emulator-verified; physical iOS regression remains required before another release.
+- PR #51 merged as `9a903f2` after the complete protected matrix passed. Protected run `30647817586`, EAS build `905cf43a-369e-42fa-a9ba-1bc8d6bf787a` and submission `16464bb5-6ef9-4b24-b891-a664255c963f` completed for app `1.0.0` (6); Apple processing, compliance, internal assignment and physical QA remain open.
+- Slice 2 decision, threat/control and approval documents are drafted with a current `NO-GO` for Slice 3. They add no claimant runtime or data path.
 - `/claim` remains informational and inactive. No real claimant data, evidence intake, entitlement decision, release, or claimant decryption is authorized.
 
 Detailed pre-consolidation phase evidence is preserved in Git at commit `96e89c1` and indexed in `docs/handoff/archive/CONSOLIDATION-2026-07-20.md`.
@@ -164,6 +166,8 @@ Authentication, MFA, relationship claims, evidence, or code possession do not es
 - The 2026-07-27 regression passed mobile 377 tests with 3 protected live tests skipped, web 81 tests, repository typecheck and lint, the Next.js `16.2.12` production build, Expo Doctor 21/21, Phase 1/security/mobile-secret guards, and a production dependency audit reporting zero vulnerabilities. The protected web surface remains blocked from deployment for the remaining release-readiness work described in this handoff.
 - PR #38 adds closed claimant protocol contracts and validators, five reproducible synthetic suites, cross-consumer verification, state-release invariants, a hard-disabled native custody probe, and runtime-isolation guards. It adds no claimant authentication, persistence, API, evidence, notification, processor, or release path. Its offline-code V2 Argon2id profile is synthetic-only and not production-approved.
 - PR #49 adds the build-4 QA repairs: fixed vault footer, corrected Emergency Readiness hierarchy, friendly dynamic-form validation and valid-save recovery, biometric availability refresh/native error handling, Face ID native configuration, and a checkout-line-ending-safe claimant-vector check. Authenticated emulator coverage passed the repaired owner flow and permanent synthetic cleanup.
+- The newly added document-location option has been corrected from death certificate to divorce certificate locally; it remains on the existing encrypted CRUD path and needs focused persistence verification before the next release.
+- TestFlight build 6 exposed a physical-iPhone Settings interaction defect: the `Biometric unlock` row/card is non-pressable and silently ignores taps. The conditional enable/disable buttons are the only implemented actions. iOS biometric readiness remains blocked pending repair and a real `Lock` -> `Unlock` Face ID test.
 - Final PR #49 verification passed 391 mobile tests with 3 protected skips, coverage, typecheck, lint, Expo Doctor 21/21, Android native/emulator smoke, iOS simulator smoke, application/security gates, live/hosted Supabase checks, CodeQL, OWASP ZAP, GitGuardian, and Vercel previews.
 
 ### Mobile MVP UI/UX session — 2026-07-26
@@ -238,11 +242,15 @@ Each slice must define non-goals, tests, rollback/kill switch, value-free eviden
 
 ## Next Session Opener
 
-First pass protected CI, then create the next controlled internal TestFlight candidate and run the combined physical-iPhone regression for the repaired biometric path and owner-side trusted-person information route. Cover enablement, background lock, prompt success/cancel/error, expired-session password fallback, returning-user recovery, navigation, Emergency Readiness, encrypted CRUD, and sealed-code status. Keep distribution internal and do not promote the candidate until it passes. The trusted-person page remains informational only; do not add invitations, recipient accounts, key custody, grants, or claimant runtime.
+When Apple finishes processing build 6, complete compliance and internal assignment, install it, and run the combined physical-iPhone regression for biometric handling, password fallback/recovery, trusted-person navigation, certificate CRUD, Emergency Readiness, sealed-code status and returning-user flow. Keep distribution internal and do not promote the candidate until it passes.
 
 The claimant journey and delivery map are already documented. Both registered recipients and V2 code holders enter the same claimant portal and later converge on application, evidence, review, cooldown, approval, and encrypted read-only retrieval. Neither registration nor code possession authorizes release.
 
-Begin claimant Slice 2 decision closure in parallel with that final physical QA. Use the existing delivery map, and resolve the Android transaction-binding design/minimum platform, physical iOS and representative Android custody evidence, independent review, claimant key recovery/multi-device policy, release authority, jurisdictions, evidence/retention, cooldown/challenge, reviewer separation, and owner/claimant origin boundary. Produce decisions and approval gates only; do not add runtime claimant behavior.
+The owner approved all owner/product decisions, including iOS-only Slice 3 preparation while Android remains fail-closed, provisional 72-hour package availability and 15-minute retrieval, a claimant journey dashboard, a comprehensive internal audit/journey ledger, and a nationality-neutral global architecture using document-specific jurisdiction policy packs. No operating company exists yet. Obtain an operator/controller plus named legal/privacy, security, operations and independent-review decisions for the same immutable documents. The checklist remains `NO-GO`; do not add runtime claimant behaviour.
+
+The owner described the intended MVP as route verification, checklist upload, manual review, secure notification, claimant retrieval, receipt confirmation and case closure. The safe translation uses private evidence quarantine, two independent reviewers, value-free notifications, fresh authentication, ciphertext-only backend delivery, native local decrypt/PDF export and separate served/open/export/confirmation audit events. A normal backend/browser-readable PDF protected by a system-known password is not approved.
+
+The owner explicitly selected the safer native local decrypt/PDF export option. Browser-readable PDF delivery is out of scope.
 
 Only after those gates are explicitly approved may a bounded registered/verified-recipient setup slice be authorized. That future slice stops before claim submission, document intake, review, or release.
 

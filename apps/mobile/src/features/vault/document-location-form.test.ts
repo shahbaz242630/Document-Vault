@@ -58,7 +58,7 @@ describe("createDocumentLocationAssetPayload", () => {
     ).toThrow();
   });
 
-  it.each(["marriage_certificate", "death_certificate"] as const)(
+  it.each(["marriage_certificate", "divorce_certificate"] as const)(
     "builds an encrypted-vault payload for %s location information",
     (documentType) => {
       const payload = createDocumentLocationAssetPayload({
@@ -68,7 +68,7 @@ describe("createDocumentLocationAssetPayload", () => {
         location: "Solicitor's secure archive",
         title: documentType === "marriage_certificate"
           ? "Marriage certificate"
-          : "Death certificate",
+          : "Divorce certificate",
       });
 
       expect(payload.fields).toMatchObject({

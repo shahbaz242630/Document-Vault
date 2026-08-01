@@ -127,7 +127,7 @@ function createPersonalCategories(schemas: VaultCategorySchemas) {
         { label: "Will", value: "will" }, { label: "Deed", value: "deed" },
         { label: "Passport", value: "passport" },
         { label: "Marriage certificate", value: "marriage_certificate" },
-        { label: "Death certificate", value: "death_certificate" },
+        { label: "Divorce certificate", value: "divorce_certificate" },
         { label: "Other", summaryLabel: "Other document", value: "other" },
       ]), text("location", "Where is it kept?", true), text("country", "Country", true),
       text("custodian", "Who has custody?"), notes(),

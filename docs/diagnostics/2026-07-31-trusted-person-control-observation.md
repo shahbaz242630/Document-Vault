@@ -116,7 +116,7 @@ The root cause and missing layers are identified. No fix was attempted. The emul
 
 ## Approved Follow-Up Implemented
 
-Later on 2026-07-31, the owner requested implementation together with marriage/death certificate support. The implemented trusted-person scope follows option 2 above:
+Later on 2026-07-31, the owner requested implementation together with marriage/divorce certificate support. The implemented trusted-person scope follows option 2 above:
 
 - The Emergency Access card now exposes an enabled `View setup requirements` action.
 - The action navigates to `/settings/trusted-person`.

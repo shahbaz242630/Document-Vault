@@ -1,12 +1,23 @@
 # Claimant Integration And End-To-End Delivery Map
 
-Last updated: 2026-07-28 (Asia/Dubai)
+Last updated: 2026-07-31 (Asia/Dubai)
 
 ## Status
 
 Owner-approved delivery map. This document does not by itself authorize claimant authentication, persistence, migrations, API routes, evidence intake, notifications, review processing, release packaging, or claimant decryption.
 
-Stage 1 protocol contracts/vectors and the later hard-disabled custody feasibility slice are complete and merged through PR #38. All claimant capabilities remain hard-disabled. Stage 2 registered-recipient runtime preparation is blocked on the Android transaction-binding/platform decision, physical custody evidence, independent review, and claimant key recovery/multi-device decision.
+Stage 1 protocol contracts/vectors and the later hard-disabled custody feasibility slice are complete and merged through PR #38. All claimant capabilities remain hard-disabled. The owner permits iOS-only Stage 2 preparation with Android fail-closed, but Stage 2 remains blocked on physical iOS custody evidence, operator and specialist approvals, independent review, and an approved multi-device implementation design.
+
+The Slice 2 decision-closure package is now drafted:
+
+- `docs/superpowers/specs/2026-07-31-claimant-slice-2-decision-register.md`;
+- `docs/superpowers/specs/2026-07-31-claimant-threat-control-matrix.md`;
+- `docs/superpowers/specs/2026-07-31-claimant-slice-2-approval-checklist.md`;
+- `docs/superpowers/specs/2026-07-31-claimant-slice-2-specialist-review-pack.md`;
+- `docs/superpowers/specs/2026-07-31-claimant-document-checklist-catalog.md`; and
+- `docs/superpowers/specs/2026-07-31-claimant-mvp-manual-review-retrieval-flow.md`.
+
+Its current result is `NO-GO` for Stage 2/Slice 3 runtime preparation. Owner/product decisions are approved, including a nationality-neutral global architecture with versioned document/jurisdiction policy packs. The documents identify outstanding operator, legal, privacy, security, operations and independent-review evidence; owner approval cannot substitute for those specialist decisions.
 
 ## Product Outcome
 
@@ -88,6 +99,8 @@ No runtime integration.
 - Register and replace claimant public keys only after custody approval.
 - Let the unlocked owner client finalize, replace, and revoke recipient-addressed grants.
 - Keep claim submission and release disabled.
+- Establish the approved append-only audit-event baseline before the first claimant invitation, account binding, or key-registration mutation; events are server-authored and value-free.
+- Establish the signed/versioned jurisdiction-policy and dynamic-document-checklist contracts with no active release policy and no universal fallback.
 
 Exit requires hostile authentication, RLS, cryptographic, invitation-replay, and cross-account tests.
 
@@ -96,6 +109,7 @@ Exit requires hostile authentication, RLS, cryptographic, invitation-replay, and
 - Add V2 locator challenges, possession proofs, enumeration resistance, and layered rate limits.
 - Create only a controlled claim draft/assertion after successful possession.
 - If policy has been approved, add synthetic evidence quarantine, scanning, retention, deletion, and reviewer-bound access.
+- Render the minimum common checklist plus an approved policy-pack overlay from claim facts; unsupported or conflicting combinations enter hold/manual review.
 - Keep review progression and release disabled.
 
 Exit requires abuse, Storage RLS, malware, privacy, backup, restore, and cleanup tests.
@@ -103,6 +117,8 @@ Exit requires abuse, Storage RLS, malware, privacy, backup, restore, and cleanup
 ### Stage 4 — controlled review workflow
 
 - Add the allowlisted state machine, append-only events, idempotent transitions, and transactional outbox.
+- Add a read-only claimant journey dashboard as a safe public-state projection, separate from reviewer, owner-notice, fraud, and security state.
+- Reconcile case state, append-only events, notification outbox, and dashboard projection; gaps or divergence fail to hold/manual review.
 - Add verified owner notice, cancellation, cooldown, holds, disputes, and two independent approvals.
 - Prevent non-response, delivery failure, timers, or one reviewer from approving or releasing.
 - Keep package build and retrieval disabled.
