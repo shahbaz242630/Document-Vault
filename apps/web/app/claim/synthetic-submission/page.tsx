@@ -26,6 +26,7 @@ export default function SyntheticClaimantSubmissionPage() {
 
       <SyntheticSubmissionPreview fixtures={claimantSyntheticSubmissionFixtures} />
 
+      <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-acknowledgement">View the read-only synthetic acknowledgement preview <span aria-hidden="true">→</span></Link></p>
       <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-evidence">Return to synthetic evidence states <span aria-hidden="true">→</span></Link></p>
     </main>
   );
