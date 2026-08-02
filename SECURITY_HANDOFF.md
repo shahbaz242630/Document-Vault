@@ -4,7 +4,7 @@ Last updated: 2026-08-01 (Asia/Dubai)
 
 ## Security Status
 
-Owner-vault controls are implemented and under controlled internal testing. The iOS release gate is open because biometric setup is not discoverable from the Settings card and the full physical Face ID path has not passed. Public legal publication, external protected-web access, and all claimant runtime remain disabled.
+Owner-vault controls are implemented and under controlled internal testing. Draft PR #53 repairs the Settings biometric interaction, but the iOS release gate remains open until the repair is merged and the full physical Face ID path passes in a new controlled candidate. Public legal publication, external protected-web access, and all claimant runtime remain disabled.
 
 Repository reference: PR #52 merged the claimant Slice 2 package into `main`/`origin/main` at `37b05d0`. The biometric Settings repair is isolated on `codex/biometric-settings-control`.
 
@@ -49,7 +49,7 @@ Repository reference: PR #52 merged the claimant Slice 2 package into `main`/`or
 
 ### Mobile release
 
-- Repair the biometric Settings interaction and add focused interaction/accessibility coverage.
+- Review and merge draft PR #53, which repairs the biometric Settings interaction and adds focused interaction/accessibility coverage.
 - Produce the next internal candidate and physically verify Face ID enablement, `Lock` -> `Unlock`, background lock, cancel/error handling, expired-session fallback, and returning-user recovery.
 - Reverify corrected divorce-certificate encrypted persistence and cleanup.
 

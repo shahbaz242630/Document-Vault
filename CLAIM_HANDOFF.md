@@ -10,7 +10,7 @@ The public `/claim` routes are informational. Claimant authentication, invitatio
 
 Product-owner direction is approved. Legal/privacy, security, operations, native custody, staffing, and independent-review gates remain incomplete. No operating company/controller is named, so no real claimant data may be collected.
 
-Repository reference: PR #52 merged the Slice 2 package into `main`/`origin/main` at `37b05d0`. Current mobile work is isolated on `codex/biometric-settings-control`; claimant runtime remains unchanged.
+Repository reference: PR #52 merged the Slice 2 package into `main`/`origin/main` at `37b05d0`. Draft PR #53 contains the isolated biometric Settings repair; claimant runtime remains unchanged.
 
 ## Non-Negotiable Boundaries
 

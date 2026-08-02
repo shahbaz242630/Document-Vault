@@ -4,7 +4,7 @@ Last updated: 2026-08-01 (Asia/Dubai)
 
 ## Current Decision
 
-The next product step is to repair the mobile Settings biometric interaction, produce the next controlled TestFlight candidate, and complete physical-iPhone regression. Claimant runtime remains `NO-GO`.
+The biometric Settings interaction repair is implemented in draft PR #53. The next product steps are to merge the repair, produce the next controlled TestFlight candidate, and complete physical-iPhone regression. Claimant runtime remains `NO-GO`.
 
 ## Repository Snapshot
 
@@ -18,7 +18,7 @@ The next product step is to repair the mobile Settings biometric interaction, pr
 ### Mobile owner vault
 
 - App version is `1.0.0`; TestFlight build 6 was submitted from `9a903f2` and was subsequently exercised on a physical iPhone.
-- Build 6 did not complete the iOS release gate. The `Biometric unlock` status/card is non-interactive; only its conditional enable/disable buttons have press handlers. A tap on the card therefore appears to do nothing.
+- Build 6 did not complete the iOS release gate because its `Biometric unlock` status/card was non-interactive. Draft PR #53 makes the card a discoverable, accessible enable/disable action with focused coverage; it is not yet merged or physically verified in a new candidate.
 - The underlying flow is implemented: enablement authenticates before caching the MEK, lock-screen restoration uses one authenticated SecureStore read, stale remote restoration requires a live Supabase session, and password fallback remains available.
 - Android emulator evidence passed. Physical Face ID enablement and `Lock` -> `Unlock` remain unverified.
 - Marriage and divorce certificate values exist in the encrypted Document Locations registry and automated tests. The corrected divorce value still needs fresh hosted create/edit/reload/delete verification.
@@ -48,7 +48,7 @@ The next product step is to repair the mobile Settings biometric interaction, pr
 
 ## Next Actions
 
-1. Make the biometric Settings control discoverable and accessible; test the actual enable/disable action rather than treating the whole card as inert status.
+1. Review and merge draft PR #53, then verify the repaired biometric Settings interaction in the next controlled candidate.
 2. Run focused mobile tests, the protected CI matrix, and create the next controlled internal TestFlight candidate.
 3. Complete value-free physical-iPhone QA: enablement, background lock, Face ID success/cancel/error, password fallback, returning-user recovery, trusted-person information navigation, Emergency Readiness, sealed-code state, and encrypted certificate CRUD.
 4. Route one immutable claimant review set to named legal/privacy, security, operations, native, and independent reviewers. Capture approver, version, decision, conditions, evidence, and expiry.
