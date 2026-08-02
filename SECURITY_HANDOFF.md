@@ -4,7 +4,7 @@ Last updated: 2026-08-02 (Asia/Dubai)
 
 ## Security Status
 
-Owner-vault controls are implemented and under controlled internal testing. Draft PR #53 repairs the Settings biometric interaction, but the iOS release gate remains open until the repair is merged and the full physical Face ID path passes in a new controlled candidate. Public legal publication, external protected-web access, and all claimant runtime remain disabled.
+Owner-vault controls are implemented and under controlled internal testing. Draft PR #53 repairs the Settings biometric interaction, but the iOS release gate remains open until the repair is merged and the full physical Face ID path passes in a new controlled candidate. The bounded synthetic claimant prototype is complete, while public legal publication, external protected-web access, and all claimant runtime remain disabled.
 
 Repository reference: PR #52 merged the claimant Slice 2 package into `main`/`origin/main` at `37b05d0`. Draft PR #53 contains the biometric Settings repair and is the base of the local claimant prototype branch.
 
@@ -42,6 +42,8 @@ Repository reference: PR #52 merged the claimant Slice 2 package into `main`/`or
 - Owner authentication, wrapped-MEK continuity, encrypted CRUD, deletion lifecycle, local PDF export, sealed emergency grant, audit processors, secret guards, CodeQL/ZAP workflows, SBOM generation, and Supabase database/RLS test harnesses exist.
 - Browser crypto and active MEK state remain in a Web Worker and are not persisted in browser storage.
 - Claim contracts, canonical validation, deterministic synthetic vectors, state invariants, and cross-consumer tests are runtime-disconnected.
+- End-to-end claimant acceptance covers the synthetic submission-to-closure ledger, every safe public projection, all seven read-only preview surfaces, hard-disabled runtime capabilities, truthful receipt language, and collapsed private outcomes.
+- Claimant contract isolation recursively scans nested production modules; its regression test prevents a return to top-level-only coverage.
 - The offline-code V2 KDF profile is synthetic-only and not production-approved.
 - Biometric enablement authenticates before storing the MEK; lock-screen restoration uses the authenticated SecureStore read as the single native prompt; password fallback remains available.
 
@@ -75,7 +77,16 @@ Still required:
 - Android remains fail-closed until transaction-bound key agreement and the required device/attestation baseline are independently approved. Owner approval permits iOS-only preparation; it does not authorize runtime implementation.
 - Offline-code V2 remains disabled pending protocol review and representative KDF benchmarks.
 
-## Focused Verification On 2026-08-01
+## Verification
+
+### Claimant prototype acceptance on 2026-08-02
+
+- Full web suite: 141 passed; shared claimant: 96 passed; shared validation: 42 passed.
+- All workspace typechecks, root lint, production web build, Phase 1, GitHub Actions security, static security/migration, mobile secret, and claimant isolation guards passed.
+- Claimant capabilities remain hard-disabled, the custody probe remains hard-disabled, and no runtime, database, native custody, TestFlight, or deployment action was added or performed.
+- Live Supabase attack/restore and physical-device gates remain required at their production release gates; passing synthetic acceptance is not specialist approval.
+
+### Focused baseline on 2026-08-01
 
 - Mobile biometric/settings/certificate/custody tests: 27 passed.
 - Shared validation: 42 passed.

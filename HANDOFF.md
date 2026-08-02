@@ -4,7 +4,7 @@ Last updated: 2026-08-02 (Asia/Dubai)
 
 ## Current Decision
 
-The biometric Settings repair is implemented in draft PR #53. The next mobile release steps are merge review, a controlled TestFlight candidate, and physical-iPhone regression. Separately, the local claimant branch may continue only through its explicitly approved synthetic slices; claimant runtime remains `NO-GO`.
+The biometric Settings repair is implemented in draft PR #53. The next mobile release steps are merge review, a controlled TestFlight candidate, and physical-iPhone regression. Separately, the bounded synthetic claimant prototype is complete; no additional claimant slice is authorized and claimant runtime remains `NO-GO`.
 
 ## Repository Snapshot
 
@@ -33,6 +33,7 @@ The biometric Settings repair is implemented in draft PR #53. The next mobile re
 ### Claimant work
 
 - `/claim` is informational only. Authentication, intake, evidence, review, notifications, release, and claimant decryption are disabled.
+- Synthetic Slices 1-17 and the end-to-end acceptance suite are complete locally. All seven synthetic preview surfaces remain read-only, non-indexed, runtime-disconnected, and based only on deterministic fixtures.
 - Product-owner direction is recorded, but legal/privacy, security, operations, native custody, and independent approvals remain incomplete.
 - Shahbaz Malik is the provisionally designated operator/data controller candidate. Incorporation, legal confirmation, controller contact details, and the processor map remain incomplete, so no real claimant data may be collected.
 - `CLAIM_HANDOFF.md` is authoritative for claimant scope and stop gates.
@@ -63,7 +64,15 @@ The biometric Settings repair is implemented in draft PR #53. The next mobile re
 - Transactional-email provider, operational ownership, second qualified security reviewer, and durable SBOM/license ownership.
 - Legal confirmation of Shahbaz Malik as operator/data controller, contracting-entity and processor mapping, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
 
-## Verification Recorded On 2026-08-01
+## Verification
+
+### Claimant prototype acceptance on 2026-08-02
+
+- Full web suite: 141 passed; shared claimant: 96 passed; shared validation: 42 passed.
+- All workspace typechecks, root lint, production web build, Phase 1, GitHub Actions security, static security/migration, mobile secret, and claimant isolation guards passed.
+- The recursive contract isolation guard covers nested claimant modules. Live database attack/restore, physical native, TestFlight, and deployment gates were not run for the runtime-disconnected synthetic slice.
+
+### Baseline recorded on 2026-08-01
 
 - Focused mobile security/settings/certificate/custody tests: 27 passed.
 - Shared validation tests: 42 passed.

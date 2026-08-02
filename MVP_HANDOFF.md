@@ -27,7 +27,7 @@ Production hosts remain subject to final security/privacy approval. Use host-onl
 - Shared mobile/web validation, ciphertext envelope, and Supabase owner-vault records.
 - Protected owner-web authentication and encrypted CRUD implementation, pending deployment gates.
 - Static product, support, security, accessibility, privacy, terms, deletion, and inactive claimant information pages.
-- Runtime-disconnected claimant protocol contracts, synthetic vectors, threat/decision documents, and native custody feasibility probe.
+- Completed runtime-disconnected claimant synthetic prototype, protocol contracts, vectors, end-to-end acceptance suite, threat/decision documents, and native custody feasibility probe.
 
 ## Explicitly Excluded
 
@@ -56,7 +56,7 @@ Marriage/divorce certificate options are present in the encrypted Document Locat
 
 ## Claimant Product Direction
 
-Status: product-owner approved; specialist approval and evidence pending; runtime `NO-GO`.
+Status: synthetic prototype complete; product direction approved; specialist approval and evidence pending; runtime `NO-GO`.
 
 - Registered-recipient route first; death-only invitation pilot.
 - Claimant authentication/MFA, relationship, documents, or code possession do not authorize release.
@@ -80,7 +80,15 @@ Detailed decisions and gates live in `CLAIM_HANDOFF.md` and the 2026-07-31 claim
 5. Complete Supabase Pro, backup/restore, single-session, JWT, origin, hosted-configuration, monitoring, rollback, and synthetic smoke gates before protected-web deployment.
 6. Route the immutable claimant package to named specialists; keep all claimant runtime disabled.
 
-## Verification On 2026-08-01
+## Verification
+
+### Claimant prototype acceptance on 2026-08-02
+
+- Full web suite: 141 passed; shared claimant: 96 passed; shared validation: 42 passed.
+- All workspace typechecks, root lint, production web build, Phase 1, security, secret, and claimant isolation guards passed.
+- All claimant runtime capabilities remain disabled. Synthetic completion does not authorize claimant runtime or real claimant data.
+
+### Baseline on 2026-08-01
 
 - Focused mobile tests: 27 passed.
 - Shared validation tests: 42 passed.

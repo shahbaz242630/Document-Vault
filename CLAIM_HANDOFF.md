@@ -8,24 +8,20 @@ Last updated: 2026-08-02 (Asia/Dubai)
 2. Check PR #53, `main`/`origin/main`, and the current branch status. PR #52 is already merged. If starting from `main`, merge PR #53 first because the claimant prototype branch is stacked on its biometric-control work.
 3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
 4. Do not push or publish `codex/claimant-synthetic-journey` until its base is merged and the product owner explicitly authorizes publication.
-5. Resume with **Synthetic Slice 17: end-to-end claimant acceptance suite and handoff refresh**. Exercise the complete synthetic journey, run the full proportional regression and repository guards, refresh the handoffs for the next authorization decision, report the result, and stop.
+5. The synthetic claimant prototype is complete. Do not begin another claimant slice until the product owner makes and records the next exact authorization decision. Production Slice 3 remains `NO-GO`.
 6. Do not create a TestFlight build or perform any deployment.
 
 ## Synthetic Claimant Prototype Checkpoint
 
-The current local branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-16 are implemented as small, modular, tested increments. Slice 16 is commit `425b026` (`Add synthetic claimant decision readiness UI`), followed by the current handoff refresh. The branch has not been pushed.
+The current local branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-17 are implemented as small, modular, tested increments. Slice 17 is commit `c607923` (`Add synthetic claimant acceptance suite`), followed by the current handoff refresh. The branch has not been pushed.
 
-Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, idempotent synthetic submission handoff, safe acknowledgement UI, fail-closed owner-protection/review tracking projection and UI, and truthful decision/retrieval-readiness modelling and UI. They remain disconnected from production runtime and real claimant data.
+Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, idempotent synthetic submission handoff, safe acknowledgement UI, fail-closed owner-protection/review tracking projection and UI, truthful decision/retrieval-readiness modelling and UI, and an end-to-end acceptance suite spanning the full synthetic journey and all seven read-only preview surfaces. They remain disconnected from production runtime and real claimant data.
 
-One bounded synthetic slice remains:
-
-1. **Slice 17 — End-to-end claimant acceptance suite and handoff refresh:** exercise the complete synthetic journey, run proportional regressions and repository guards, then refresh the handoffs for the next authorization decision.
-
-This final slice finishes the synthetic claimant prototype phase only. It does not authorize real authentication, persistence, database work, migrations, RLS, uploads, notifications, review operations, submission runtime, cryptographic retrieval or release, real claimant data, TestFlight, or deployment. Those capabilities remain separately gated.
+The bounded synthetic claimant prototype phase is complete. Completion does not authorize real authentication, persistence, database work, migrations, RLS, uploads, notifications, review operations, submission runtime, cryptographic retrieval or release, real claimant data, TestFlight, or deployment. Those capabilities remain separately gated.
 
 ## Status And Stop Gate
 
-Current result: `GO` only for the final bounded synthetic prototype slice above; `NO-GO` for production claimant runtime.
+Current result: synthetic prototype `COMPLETE`; `NO-GO` for production claimant runtime and for any additional claimant slice without a new exact authorization.
 
 The public `/claim` routes are informational. Claimant authentication, invitations, key registration, persistence, migrations, RLS/Storage policies, evidence upload, notifications, processors, case transitions, release packages, retrieval, and claimant decryption are disabled.
 
@@ -132,6 +128,16 @@ Circulate one immutable, accessible version only after recording its Git SHA. Th
 6. Stop for an explicit `GO` decision before any Slice 3 runtime change.
 
 ## Verification
+
+### Slice 17 and prototype acceptance on 2026-08-02
+
+- End-to-end synthetic acceptance: 5 passed; focused acceptance/dashboard remediation: 9 passed.
+- Full web suite: 141 passed; full shared claimant suite: 96 passed; shared validation: 42 passed.
+- All workspace typechecks and root lint passed; the production web build passed with all seven synthetic routes statically prerendered.
+- Phase 1, GitHub Actions security, static security/migration, mobile secret, claim-vector reproducibility, claimant-vector isolation, and claimant-custody isolation guards passed.
+- Claimant-vector isolation now scans nested claimant contract modules recursively and has its own regression test.
+- Acceptance drives submission through closure with a reconciled ten-event synthetic ledger, verifies all claimant capabilities remain `false`, and confirms delivery never proves local open or plaintext receipt. Dashboard owner-response leakage and overclaimed closure/receipt language were removed.
+- Live Supabase attack/restore, native device, TestFlight, and deployment gates were not run because this slice changes no production runtime, database, native custody, or release candidate.
 
 ### Slice 16 on 2026-08-02
 
