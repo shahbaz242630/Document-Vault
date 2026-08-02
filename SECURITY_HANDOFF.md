@@ -1,12 +1,12 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-08-01 (Asia/Dubai)
+Last updated: 2026-08-02 (Asia/Dubai)
 
 ## Security Status
 
-Owner-vault controls are implemented and under controlled internal testing. The iOS release gate is open because biometric setup is not discoverable from the Settings card and the full physical Face ID path has not passed. Public legal publication, external protected-web access, and all claimant runtime remain disabled.
+Owner-vault controls are implemented and under controlled internal testing. Draft PR #53 repairs the Settings biometric interaction, but the iOS release gate remains open until the repair is merged and the full physical Face ID path passes in a new controlled candidate. Public legal publication, external protected-web access, and all claimant runtime remain disabled.
 
-Repository reference: PR #52 merged the claimant Slice 2 package into `main`/`origin/main` at `37b05d0`. The biometric Settings repair is isolated on `codex/biometric-settings-control`.
+Repository reference: PR #52 merged the claimant Slice 2 package into `main`/`origin/main` at `37b05d0`. Draft PR #53 contains the biometric Settings repair and is the base of the local claimant prototype branch.
 
 ## Enforced Boundaries
 
@@ -49,7 +49,7 @@ Repository reference: PR #52 merged the claimant Slice 2 package into `main`/`or
 
 ### Mobile release
 
-- Repair the biometric Settings interaction and add focused interaction/accessibility coverage.
+- Review and merge draft PR #53, which repairs the biometric Settings interaction and adds focused interaction/accessibility coverage.
 - Produce the next internal candidate and physically verify Face ID enablement, `Lock` -> `Unlock`, background lock, cancel/error handling, expired-session fallback, and returning-user recovery.
 - Reverify corrected divorce-certificate encrypted persistence and cleanup.
 
@@ -81,6 +81,6 @@ Still required:
 - Shared validation: 42 passed.
 - Inactive claimant web: 6 passed.
 - Claim-vector reproducibility, vector isolation, and custody isolation guards passed.
-- Code inspection confirmed that the biometric card/status is not pressable, claimant portal capabilities are all `false`, and `CLAIMANT_CUSTODY_PROBE_ENABLED` is `false`.
+- Code inspection confirmed the Build 6 biometric interaction defect and the draft PR #53 repair; claimant portal capabilities are all `false`, and `CLAIMANT_CUSTODY_PROBE_ENABLED` is `false`.
 
 Before any release candidate, run the full application, security, database/RLS, native, dependency, SBOM, and protected TestFlight gates defined in `HANDOFF.md` and the repository scripts.

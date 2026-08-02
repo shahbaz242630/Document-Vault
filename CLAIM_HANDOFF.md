@@ -1,6 +1,6 @@
 # Sanduqkin Claimant And Release Handoff
 
-Last updated: 2026-08-01 (Asia/Dubai)
+Last updated: 2026-08-02 (Asia/Dubai)
 
 ## Next Session Opener
 
@@ -8,29 +8,28 @@ Last updated: 2026-08-01 (Asia/Dubai)
 2. Check PR #53, `main`/`origin/main`, and the current branch status. PR #52 is already merged. If starting from `main`, merge PR #53 first because the claimant prototype branch is stacked on its biometric-control work.
 3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
 4. Do not push or publish `codex/claimant-synthetic-journey` until its base is merged and the product owner explicitly authorizes publication.
-5. Resume with **Synthetic Slice 12: safe acknowledgement UI**. Keep the implementation modular, run the focused and proportional regression checks, report the result, and wait for approval before starting the next slice.
+5. Resume with **Synthetic Slice 13: owner-protection/review tracking model**. Keep the implementation modular, run the focused and proportional regression checks, report the result, and wait for approval before starting the next slice.
 6. Do not create a TestFlight build or perform any deployment.
 
 ## Synthetic Claimant Prototype Checkpoint
 
-The current local branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-11 are implemented as small, modular, tested increments. The latest local commit is `c7971d4` (`Add synthetic claimant submission handoff`). The branch has not been pushed.
+The current local branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-12 are implemented as small, modular, tested increments. Slice 12 is commit `cad7ccd` (`Add safe synthetic claimant acknowledgement`), followed by the current handoff refresh. The branch has not been pushed.
 
 Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, and idempotent synthetic submission handoff. They remain disconnected from production runtime and real claimant data.
 
-Six bounded synthetic slices remain, in this order:
+Five bounded synthetic slices remain, in this order:
 
-1. **Slice 12 — Safe acknowledgement UI:** present the synthetic submission acknowledgement and duplicate/already-received outcome without exposing internal or sensitive details.
-2. **Slice 13 — Owner-protection/review tracking model:** define the safe public projection for review progress and owner-protection controls, with no reviewer identity, owner-response detail, fraud signals, or release authority.
-3. **Slice 14 — Review tracking UI:** render the synthetic public review projection with fail-closed states and accessible status guidance.
-4. **Slice 15 — Decision/retrieval-readiness model:** model safe claimant-facing decision and retrieval-readiness states without performing release, serving ciphertext, or authorizing decryption.
-5. **Slice 16 — Decision/retrieval UI:** render those synthetic states and blocked/expired/suspended outcomes without any live retrieval capability.
-6. **Slice 17 — End-to-end claimant acceptance suite and handoff refresh:** exercise the complete synthetic journey, run proportional regressions and repository guards, then refresh the handoffs for the next authorization decision.
+1. **Slice 13 — Owner-protection/review tracking model:** define the safe public projection for review progress and owner-protection controls, with no reviewer identity, owner-response detail, fraud signals, or release authority.
+2. **Slice 14 — Review tracking UI:** render the synthetic public review projection with fail-closed states and accessible status guidance.
+3. **Slice 15 — Decision/retrieval-readiness model:** model safe claimant-facing decision and retrieval-readiness states without performing release, serving ciphertext, or authorizing decryption.
+4. **Slice 16 — Decision/retrieval UI:** render those synthetic states and blocked/expired/suspended outcomes without any live retrieval capability.
+5. **Slice 17 — End-to-end claimant acceptance suite and handoff refresh:** exercise the complete synthetic journey, run proportional regressions and repository guards, then refresh the handoffs for the next authorization decision.
 
-These six slices finish the synthetic claimant prototype phase only. They do not authorize real authentication, persistence, database work, migrations, RLS, uploads, notifications, review operations, submission runtime, cryptographic retrieval or release, real claimant data, TestFlight, or deployment. Those capabilities remain separately gated.
+These five slices finish the synthetic claimant prototype phase only. They do not authorize real authentication, persistence, database work, migrations, RLS, uploads, notifications, review operations, submission runtime, cryptographic retrieval or release, real claimant data, TestFlight, or deployment. Those capabilities remain separately gated.
 
 ## Status And Stop Gate
 
-Current result: `GO` only for the six bounded synthetic prototype slices above; `NO-GO` for production claimant runtime.
+Current result: `GO` only for the five bounded synthetic prototype slices above; `NO-GO` for production claimant runtime.
 
 The public `/claim` routes are informational. Claimant authentication, invitations, key registration, persistence, migrations, RLS/Storage policies, evidence upload, notifications, processors, case transitions, release packages, retrieval, and claimant decryption are disabled.
 
@@ -125,7 +124,7 @@ Android is not a blocker to owner-approved iOS-only preparation, but it remains 
 - `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md`
 - `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`
 
-Circulate one immutable version. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
+Circulate one immutable, accessible version only after recording its Git SHA. The current claimant branch changes parts of the PR #52 review set and is still local-only, so neither PR #52 nor the working tree should be described as the final circulated version. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
 
 ## Production Authorization Work (Separate From Synthetic Slices)
 
@@ -136,7 +135,16 @@ Circulate one immutable version. Every approval record must identify the documen
 5. Resolve every blocking checklist item and record conditions/evidence/expiry.
 6. Stop for an explicit `GO` decision before any Slice 3 runtime change.
 
-## Verification On 2026-08-01
+## Verification
+
+### Slice 12 on 2026-08-02
+
+- Safe acknowledgement UI focused suite: 13 passed.
+- Web typecheck and lint passed.
+- Claim vectors, vector isolation, and custody isolation guards passed.
+- The public acknowledgement projection is explicitly allowlisted and excludes protocol references, case versions, internal reason codes, reviewer identity, owner-response detail, fraud signals, runtime controls, and network or persistence integration.
+
+### Baseline on 2026-08-01
 
 - Inactive claimant web tests: 6 passed.
 - Mobile custody/settings/certificate/security-focused suite: 27 passed.

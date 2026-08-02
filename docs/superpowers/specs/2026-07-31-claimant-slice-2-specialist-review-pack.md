@@ -1,6 +1,6 @@
 # Claimant Slice 2 Specialist Review Pack
 
-Last updated: 2026-07-31 (Asia/Dubai)
+Last updated: 2026-08-02 (Asia/Dubai)
 
 Status: Ready to identify reviewers and circulate after the documents are committed to one immutable Git SHA. `NO-GO` for claimant runtime.
 
@@ -97,7 +97,7 @@ Before circulation:
 - [ ] Legally confirm the controller, contracting entity, controller contact details, and processor map before any claimant-data collection.
 - [ ] Identify the first jurisdiction-policy packs proposed for counsel review; global architecture does not activate blanket global release.
 - [ ] Name the legal/privacy, security/crypto, native iOS, operations and independent reviewers.
-- [ ] Commit the complete review set and record its Git SHA.
+- [ ] Commit the complete review set, publish an accessible immutable ref, and record its Git SHA. A local-only or subsequently amended commit is not the circulated review version.
 - [ ] Confirm documents contain no credentials, claimant evidence, raw device identifiers or other unnecessary personal data.
 - [ ] Attach only value-free technical evidence.
 

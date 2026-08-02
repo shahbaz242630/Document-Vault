@@ -1,6 +1,6 @@
 # Claimant Slice 2 Approval Checklist
 
-Last updated: 2026-07-31 (Asia/Dubai)
+Last updated: 2026-08-02 (Asia/Dubai)
 
 Status: Unapproved checklist. Completion authorizes only the specifically named next slice; it never authorizes claim submission or release by implication.
 
@@ -36,7 +36,7 @@ A chat acknowledgement, unchecked task, passing unit test or owner enthusiasm do
 - [x] O13 Owner superseded the one-jurisdiction assumption on 2026-07-31 and approved a nationality-neutral, global-capable architecture using document-specific jurisdiction policy packs; every activated pack still requires legal/privacy approval.
 - [x] O14 Owner confirmed no operating company exists yet on 2026-07-31; incorporation/operator identity remains a pre-data blocker.
 - [x] O15 Owner provisionally designated Shahbaz Malik as the operator/data controller candidate on 2026-08-01; this does not complete legal confirmation, incorporation/contracting-entity, contact-detail, processor-map, or pre-data gates.
-- [x] O15 Owner approved native local decryption and optional on-device PDF export on 2026-07-31; backend/browser-readable PDFs and system-known PDF passwords are out of scope.
+- [x] O16 Owner approved native local decryption and optional on-device PDF export on 2026-07-31; backend/browser-readable PDFs and system-known PDF passwords are out of scope.
 
 ## B. Legal And Privacy
 
