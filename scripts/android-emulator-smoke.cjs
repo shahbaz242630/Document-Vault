@@ -261,6 +261,10 @@ function createEncryptedBankRecord(title) {
   fillField("lastFourDigits field", "4242");
   waitForNode("4242");
   tapNodeAfterScroll("Save to vault");
+  waitForNode("Everything important, in one place.", 120_000);
+  tapNode("Records");
+  waitForNode("Saved records");
+  tapNodeAfterScroll("Bank accounts");
   waitForNode(title, 120_000);
 }
 

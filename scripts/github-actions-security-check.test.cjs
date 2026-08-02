@@ -175,6 +175,11 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
     assert.match(smokeScript, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
 
+  assert.match(
+    smokeScript,
+    /tapNodeAfterScroll\("Save to vault"\);[\s\S]*?waitForNode\("Everything important, in one place\.", 120_000\);[\s\S]*?tapNode\("Records"\);[\s\S]*?tapNodeAfterScroll\("Bank accounts"\);[\s\S]*?waitForNode\(title, 120_000\);/,
+  );
+
   const bootstrapScript = fs.readFileSync(
     path.resolve(__dirname, "android-recovery-e2e-bootstrap.cjs"),
     "utf8",

@@ -4,7 +4,7 @@ Last updated: 2026-08-02 (Asia/Dubai)
 
 ## Current Decision
 
-PR #53 and the biometric Settings repair are merged. The next mobile release steps are a controlled TestFlight candidate and physical-iPhone regression. Separately, the bounded synthetic claimant prototype is complete, internally accepted, and owner-authorized for merge through PR #54 after its final handoff-only head passes protected CI. This publication does not authorize another claimant slice or production claimant runtime, which remains `NO-GO`.
+PR #53 and the biometric Settings repair are merged. The next mobile release steps are a controlled TestFlight candidate and physical-iPhone regression. Separately, the bounded synthetic claimant prototype is complete, internally accepted, and owner-authorized for merge through PR #54 after its final protected CI head passes. This publication does not authorize another claimant slice or production claimant runtime, which remains `NO-GO`.
 
 ## Repository Snapshot
 

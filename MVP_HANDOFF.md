@@ -6,7 +6,7 @@ Last updated: 2026-08-02 (Asia/Dubai)
 
 Finish the mobile owner-vault release gate first. PR #53 merged the biometric Settings repair, but a controlled candidate and physical-iPhone regression remain. Public website publication, protected owner-web deployment, and production claimant implementation remain separate gated workstreams.
 
-Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The synthetic claimant prototype was internally accepted, and the product owner authorized PR #54 for merge after the final handoff-only head passes protected CI. The next session must fetch `main` and record the resulting merge commit.
+Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The synthetic claimant prototype was internally accepted, and the product owner authorized PR #54 for merge after the final protected CI head passes. The next session must fetch `main` and record the resulting merge commit.
 
 ## MVP Surfaces
 
