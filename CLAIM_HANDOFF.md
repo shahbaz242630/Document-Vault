@@ -43,6 +43,17 @@ After the final CI result is green, work in this order:
 6. Keep the claimant pull request in draft unless Shahbaz Malik gives exact authorization to change its review state.
 7. Keep production claimant runtime at `NO-GO` until genuine legal/privacy, security, operations, native custody, staffing, and independent-review gates are completed.
 
+## Internal Review Decision — 2026-08-02
+
+- Reviewed implementation: `a21830487f38c1d6ee3771780be454da6f20b982` on draft PR #54.
+- Project owner and decision-maker: Shahbaz Malik.
+- Technical reviewer and evidence checker: Codex.
+- Technical result: post-remediation review passed with no remaining actionable internal findings; all protected CI checks passed.
+- Product-owner decision: accepted for bounded synthetic-prototype circulation.
+- Recorded decision: **Internally reviewed and provisionally accepted for synthetic-prototype circulation. External specialist approvals remain outstanding.**
+- Conditions: PR #54 remains draft; this decision does not authorize marking ready, merging, production claimant runtime, real claimant data, deployment, TestFlight, release, retrieval, or decryption.
+- Re-review is required after any implementation change, base-branch change, scope expansion, failed security/CI gate, or change to a documented runtime, privacy, custody, or release boundary.
+
 ## Non-Negotiable Boundaries
 
 - Authentication, MFA, code possession, relationship, identity proofing, evidence review, release authority, and cryptographic possession are separate controls.
