@@ -1,13 +1,17 @@
 import { useCallback, useMemo, useState } from "react";
 import * as ExpoLocalAuthentication from "expo-local-authentication";
 import { useFocusEffect } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text } from "react-native";
 
 import { colors } from "@/shared/theme/colors";
 import { fonts } from "@/shared/theme/fonts";
 
 import { defaultAuditLog } from "../audit-log";
 import { createBiometricAuthService } from "../biometric-auth-service";
+import {
+  getBiometricPreferenceControlState,
+  runBiometricPreferenceAction,
+} from "../biometric-preference-action";
 import { createBiometricPreferenceService } from "../biometric-preference-service";
 import { createBiometricStorage } from "../biometric-storage";
 import { createMekStorage } from "../mek-storage";
@@ -24,9 +28,32 @@ type BiometricPreferencesPanelProps = {
 
 export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanelProps) {
   const preferences = useBiometricPreferences(storage);
+  const control = getBiometricPreferenceControlState({
+    canEnable: preferences.canEnable,
+    enabled: preferences.enabled,
+    isBusy: preferences.isBusy,
+    isCheckingSupport: preferences.isCheckingSupport,
+  });
 
   return (
-    <View style={biometricPanelStyle}>
+    <Pressable
+      accessibilityHint={control.hint}
+      accessibilityLabel={control.label}
+      accessibilityRole="button"
+      accessibilityState={{
+        busy: preferences.isBusy,
+        disabled: control.disabled,
+      }}
+      disabled={control.disabled}
+      onPress={() => {
+        void runBiometricPreferenceAction({
+          enabled: preferences.enabled,
+          onDisable: preferences.disable,
+          onEnable: preferences.enable,
+        });
+      }}
+      style={biometricPanelStyle}
+    >
       <BiometricPreferenceStatus
         available={preferences.available}
         canEnable={preferences.canEnable}
@@ -40,18 +67,16 @@ export function BiometricPreferencesPanel({ storage }: BiometricPreferencesPanel
         </Text>
       ) : null}
 
-      {preferences.enabled ? (
-        <DisableBiometricButton
-          disabled={preferences.isBusy}
-          onDisable={preferences.disable}
-        />
-      ) : preferences.canEnable ? (
-        <EnableBiometricButton
-          disabled={preferences.isBusy}
-          onEnable={preferences.enable}
-        />
-      ) : null}
-    </View>
+      <Text
+        style={{
+          color: colors[control.actionColor],
+          fontFamily: fonts.sans.medium,
+          fontSize: 15,
+        }}
+      >
+        {control.label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -228,59 +253,6 @@ function getBiometricPreferenceBody({
   if (canEnable) return "Use this device's enrolled biometrics for app unlock.";
   if (available) return "No biometrics are enrolled on this device.";
   return "Biometric authentication is not available on this device.";
-}
-
-function DisableBiometricButton({
-  disabled,
-  onDisable,
-}: {
-  disabled: boolean;
-  onDisable: () => Promise<void>;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={disabled}
-      onPress={() => {
-        void onDisable();
-      }}
-      style={{ alignItems: "center", paddingHorizontal: 18, paddingVertical: 14 }}
-    >
-      <Text style={{ color: colors.danger, fontSize: 17, textAlign: "center" }}>
-        Disable biometric unlock
-      </Text>
-    </Pressable>
-  );
-}
-
-function EnableBiometricButton({
-  disabled,
-  onEnable,
-}: {
-  disabled: boolean;
-  onEnable: () => Promise<void>;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={disabled}
-      onPress={() => {
-        void onEnable();
-      }}
-      style={{
-        alignItems: "center",
-        backgroundColor: colors.action,
-        borderCurve: "continuous",
-        borderRadius: 8,
-        paddingHorizontal: 18,
-        paddingVertical: 14,
-      }}
-    >
-      <Text style={{ color: colors.actionText, fontSize: 17, fontWeight: "700" }}>
-        Enable biometric unlock
-      </Text>
-    </Pressable>
-  );
 }
 
 const biometricPanelStyle = {
