@@ -53,6 +53,27 @@ describe("synthetic review submission validation", () => {
     ).toEqual(["evidence_not_ready", "evidence_binding_mismatch"]);
   });
 
+  it("rejects altered canonical evidence-preparation metadata", () => {
+    const input = createSyntheticReviewSubmissionInput();
+    const preparation = {
+      ...input.preparation,
+      items: input.preparation.items.map((item, index) =>
+        index === 0
+          ? {
+              ...item,
+              label: "Altered synthetic label",
+              explanation: "Altered synthetic explanation",
+              source: item.source === "common" ? "conditional" as const : "common" as const,
+            }
+          : item,
+      ),
+    };
+
+    expect(
+      validateSyntheticReviewSubmission({ ...input, preparation }).issues,
+    ).toEqual(["evidence_binding_mismatch"]);
+  });
+
   it("rejects stale and replayed drafts", () => {
     const draft = createSyntheticReviewSubmissionDraft();
     const result = validateSyntheticReviewSubmission(

@@ -38,11 +38,23 @@ function preparationsMatch(
     supplied.policy_id === recomputed.policy_id &&
     supplied.policy_version === recomputed.policy_version &&
     supplied.issues.length === recomputed.issues.length &&
+    supplied.issues.every((issue, index) => {
+      const expected = recomputed.issues[index];
+      return (
+        issue.code === expected?.code &&
+        issue.item_key === expected.item_key &&
+        issue.placeholder_ref === expected.placeholder_ref
+      );
+    }) &&
     supplied.items.length === recomputed.items.length &&
     supplied.items.every((item, index) => {
       const expected = recomputed.items[index];
       return (
         item.key === expected?.key &&
+        item.label === expected.label &&
+        item.explanation === expected.explanation &&
+        item.category === expected.category &&
+        item.source === expected.source &&
         item.availability === expected.availability &&
         item.placeholder_ref === expected.placeholder_ref
       );

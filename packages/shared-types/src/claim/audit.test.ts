@@ -90,6 +90,24 @@ describe("synthetic claimant audit ledger", () => {
     expect(retry.event).toEqual(first.event);
   });
 
+  it("rejects a new event that crosses the ledger case boundary", () => {
+    const first = appendSyntheticClaimAuditEvent([], input());
+
+    expect(() =>
+      appendSyntheticClaimAuditEvent(
+        first.ledger,
+        input({
+          tenant_id: "synthetic_tenant_other",
+          case_id: "synthetic_case_other",
+          event_id: "synthetic_event_002",
+          event_hash: "synthetic_hash_002",
+          idempotency_key: "synthetic_idempotency_002",
+          request_id: "synthetic_request_002",
+        }),
+      ),
+    ).toThrow("crosses the case boundary");
+  });
+
   it("rejects an idempotency-key collision with changed content", () => {
     const first = appendSyntheticClaimAuditEvent([], input());
 

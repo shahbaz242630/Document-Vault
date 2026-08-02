@@ -68,8 +68,8 @@ PR #53 and the biometric Settings repair are merged. The next mobile release ste
 
 ### Claimant prototype acceptance on 2026-08-02
 
-- Full web suite: 141 passed; shared claimant: 107 passed; shared validation: 42 passed.
-- Formal-review remediation now enforces complete audit-input idempotency, binds audit event types to transitions, and keeps synthetic review routes out of public navigation and the sitemap.
+- Full web suite: 141 passed; shared claimant: 110 passed; shared validation: 42 passed.
+- Formal-review remediation now enforces complete audit-input idempotency and case binding, validates canonical snapshot projections and evidence-preparation metadata, binds audit event types to transitions, and keeps synthetic review routes out of public navigation and the sitemap.
 - All workspace typechecks, root lint, production web build, Phase 1, GitHub Actions security, static security/migration, mobile secret, and claimant isolation guards passed.
 - The recursive contract isolation guard covers nested claimant modules. Live database attack/restore, physical native, TestFlight, and deployment gates were not run for the runtime-disconnected synthetic slice.
 

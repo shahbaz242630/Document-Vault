@@ -130,7 +130,7 @@ Android is not a blocker to owner-approved iOS-only preparation, but it remains 
 - `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md`
 - `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`
 
-Circulate one immutable, accessible version only after recording its Git SHA. The current claimant branch changes parts of the PR #52 review set and is still local-only, so neither PR #52 nor the working tree should be described as the final circulated version. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
+The complete claimant review set is published in draft PR #54 on `codex/claimant-synthetic-journey`. Circulate only its final verified head commit, record that exact Git SHA in the PR publication metadata and internal review record, and never substitute the working tree or a superseded commit. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
 
 ## Production Authorization Work (Separate From Synthetic Slices)
 
@@ -146,8 +146,8 @@ Circulate one immutable, accessible version only after recording its Git SHA. Th
 ### Slice 17 and prototype acceptance on 2026-08-02
 
 - End-to-end synthetic acceptance: 5 passed; focused acceptance/dashboard remediation: 9 passed.
-- Full web suite: 141 passed; full shared claimant suite: 107 passed; shared validation: 42 passed.
-- Formal-review remediation now requires complete audit-input equality for replay, binds every allowed transition to an event type, and separates all seven synthetic review routes from public navigation and the sitemap.
+- Full web suite: 141 passed; full shared claimant suite: 110 passed; shared validation: 42 passed.
+- Formal-review remediation now requires complete replay equality, rejects cross-case audit appends, validates canonical snapshot projections and complete evidence-preparation binding, binds every allowed transition to an event type, and separates all seven synthetic review routes from public navigation and the sitemap.
 - All workspace typechecks and root lint passed; the production web build passed with all seven synthetic routes statically prerendered.
 - Phase 1, GitHub Actions security, static security/migration, mobile secret, claim-vector reproducibility, claimant-vector isolation, and claimant-custody isolation guards passed.
 - Claimant-vector isolation now scans nested claimant contract modules recursively and has its own regression test.

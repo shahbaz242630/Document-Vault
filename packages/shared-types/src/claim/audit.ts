@@ -175,6 +175,14 @@ export function appendSyntheticClaimAuditEvent(
     return { status: "duplicate", event: duplicate, ledger: [...ledger] };
   }
 
+  const first = ledger[0];
+  if (
+    first &&
+    (input.tenant_id !== first.tenant_id || input.case_id !== first.case_id)
+  ) {
+    throw new Error("Synthetic audit event crosses the case boundary.");
+  }
+
   if (ledger.some(({ event_id }) => event_id === input.event_id)) {
     throw new Error("Duplicate synthetic audit event ID.");
   }

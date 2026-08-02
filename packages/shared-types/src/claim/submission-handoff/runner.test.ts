@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { projectClaimantPublicJourney } from "../journey";
 import {
   applySyntheticSubmissionHandoff,
   createSyntheticSubmissionHandoffInput,
@@ -48,6 +49,27 @@ describe("synthetic submission handoff runner", () => {
     expect(duplicate.snapshot.ledger).toHaveLength(3);
     expect(duplicate.acknowledgement.status).toBe("already_received");
     expect(duplicate.acknowledgement.release_authorized).toBe(false);
+  });
+
+  it("rejects a retry whose stored public projection was altered", () => {
+    const input = createSyntheticSubmissionHandoffInput();
+    const first = applySyntheticSubmissionHandoff(input);
+    expect(first.status).toBe("applied");
+    if (first.status !== "applied") throw new Error("Expected applied handoff.");
+
+    const replay = applySyntheticSubmissionHandoff({
+      ...input,
+      snapshot: {
+        ...first.snapshot,
+        projection: projectClaimantPublicJourney("release_ready"),
+      },
+    });
+
+    expect(replay).toMatchObject({
+      status: "denied",
+      reason: "invalid_step",
+      acknowledgement: null,
+    });
   });
 
   it("denies a changed retry instead of acknowledging it as already received", () => {

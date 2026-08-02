@@ -84,8 +84,8 @@ Detailed decisions and gates live in `CLAIM_HANDOFF.md` and the 2026-07-31 claim
 
 ### Claimant prototype acceptance on 2026-08-02
 
-- Full web suite: 141 passed; shared claimant: 107 passed; shared validation: 42 passed.
-- Formal-review remediation now enforces complete audit-input idempotency, binds audit event types to transitions, and keeps synthetic review routes out of public navigation and the sitemap.
+- Full web suite: 141 passed; shared claimant: 110 passed; shared validation: 42 passed.
+- Formal-review remediation now enforces complete audit-input idempotency and case binding, validates canonical snapshot projections and evidence-preparation metadata, binds audit event types to transitions, and keeps synthetic review routes out of public navigation and the sitemap.
 - All workspace typechecks, root lint, production web build, Phase 1, security, secret, and claimant isolation guards passed.
 - All claimant runtime capabilities remain disabled. Synthetic completion does not authorize claimant runtime or real claimant data.
 

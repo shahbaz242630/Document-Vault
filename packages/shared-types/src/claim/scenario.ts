@@ -224,6 +224,44 @@ function assertValidSnapshot(snapshot: SyntheticClaimScenarioSnapshotV1): void {
   if ((lastEvent?.target_state ?? null) !== snapshot.current_state) {
     throw new Error("Synthetic claimant scenario state is inconsistent.");
   }
+  const firstEvent = snapshot.ledger[0];
+  if (
+    firstEvent &&
+    (firstEvent.tenant_id !== snapshot.tenant_id ||
+      firstEvent.case_id !== snapshot.case_id)
+  ) {
+    throw new Error("Synthetic claimant scenario case binding is inconsistent.");
+  }
+  const expectedProjection = snapshot.current_state
+    ? projectClaimantPublicJourney(snapshot.current_state)
+    : null;
+  if (!publicJourneyProjectionsEqual(snapshot.projection, expectedProjection)) {
+    throw new Error("Synthetic claimant scenario projection is inconsistent.");
+  }
+}
+
+function publicJourneyProjectionsEqual(
+  left: ClaimantPublicJourneyProjectionV1 | null,
+  right: ClaimantPublicJourneyProjectionV1 | null,
+): boolean {
+  if (!left || !right) return left === right;
+  return (
+    left.protocol === right.protocol &&
+    left.stage === right.stage &&
+    left.title === right.title &&
+    left.summary === right.summary &&
+    left.next_action === right.next_action &&
+    left.claimant_action_required === right.claimant_action_required &&
+    left.milestones.length === right.milestones.length &&
+    left.milestones.every((milestone, index) => {
+      const expected = right.milestones[index];
+      return (
+        milestone.key === expected?.key &&
+        milestone.label === expected.label &&
+        milestone.status === expected.status
+      );
+    })
+  );
 }
 
 function assertSyntheticIdentifier(
