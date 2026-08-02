@@ -7,6 +7,7 @@ export * from "./evidence-preparation/index";
 export * from "./journey";
 export * from "./recipient-v2-validation";
 export * from "./review-submission/index";
+export * from "./review-tracking/index";
 export * from "./scenario";
 export * from "./state-machine";
 export * from "./submission-handoff/index";
