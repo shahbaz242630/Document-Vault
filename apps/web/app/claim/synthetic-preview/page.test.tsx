@@ -15,11 +15,12 @@ describe("synthetic claimant dashboard preview", () => {
       "completed",
       "on-hold",
       "rejected",
-      "owner-cancelled",
+      "case-ended",
     ]);
-    expect(markup).toContain("Retrieval confirmed and case closed");
+    expect(markup).toContain("Case closed");
     expect(markup).toContain("More information needed or on hold");
-    expect(markup).toContain("Owner cancellation recorded");
+    expect(markup).toContain("Case outcome recorded");
+    expect(markup).not.toContain("Owner cancellation recorded");
     expect(markup).toContain("Synthetic only");
   });
 

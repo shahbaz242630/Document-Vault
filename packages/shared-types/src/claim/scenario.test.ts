@@ -141,7 +141,7 @@ describe("synthetic claimant journey scenarios", () => {
     expect(snapshot.current_state).toBe("closed");
     expect(snapshot.version).toBe(10);
     expect(snapshot.ledger).toHaveLength(10);
-    expect(snapshot.projection?.stage).toBe("retrieval_confirmed_closed");
+    expect(snapshot.projection?.stage).toBe("case_closed");
   });
 
   it("moves a submitted case to a safe hold without advancing release", () => {

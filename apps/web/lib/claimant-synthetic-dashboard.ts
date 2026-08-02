@@ -5,7 +5,7 @@ import {
 } from "@vault/shared-types";
 
 export type ClaimantSyntheticDashboardFixture = {
-  key: "completed" | "on-hold" | "rejected" | "owner-cancelled";
+  key: "completed" | "on-hold" | "rejected" | "case-ended";
   label: string;
   description: string;
   synthetic_only: true;
@@ -15,9 +15,9 @@ export type ClaimantSyntheticDashboardFixture = {
 const fixtureDefinitions = [
   {
     key: "completed",
-    label: "Completed journey",
+    label: "Closed journey",
     description:
-      "Demonstrates explicit retrieval confirmation followed by policy-controlled case closure.",
+      "Demonstrates policy-controlled case closure without claiming that information was opened, read, exported, or retained.",
     state: "closed",
   },
   {
@@ -35,10 +35,10 @@ const fixtureDefinitions = [
     state: "rejected",
   },
   {
-    key: "owner-cancelled",
-    label: "Owner cancellation recorded",
+    key: "case-ended",
+    label: "Case outcome recorded",
     description:
-      "Demonstrates a protected cancellation outcome without revealing owner-response details.",
+      "Demonstrates a stopped outcome without revealing its private cause or any owner-response detail.",
     state: "cancelled_by_owner",
   },
 ] as const satisfies readonly {

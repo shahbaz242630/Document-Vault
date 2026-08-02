@@ -9,7 +9,7 @@ export const claimantPublicJourneyStages = [
   "owner_protection_in_progress",
   "decision_recorded",
   "secure_retrieval_available",
-  "retrieval_confirmed_closed",
+  "case_closed",
 ] as const;
 
 export type ClaimantPublicJourneyStage =
@@ -104,20 +104,20 @@ const publicStageContent = {
       "A time-limited encrypted package is available for approved local retrieval.",
     title: "Secure retrieval available",
   },
-  retrieval_confirmed_closed: {
+  case_closed: {
     claimant_action_required: false,
     label: "Case closed",
     next_action: "No further action is currently required.",
     summary:
-      "Retrieval was explicitly confirmed and the case is closed under the applicable policy.",
-    title: "Retrieval confirmed and case closed",
+      "The case is closed under the applicable policy. Closure does not prove that information was opened, read, exported, or retained.",
+    title: "Case closed",
   },
 } as const satisfies Record<ClaimantPublicJourneyStage, PublicStageContent>;
 
 const internalToPublicStage = {
   approved: "decision_recorded",
   cancelled_by_owner: "decision_recorded",
-  closed: "retrieval_confirmed_closed",
+  closed: "case_closed",
   cooldown: "owner_protection_in_progress",
   draft: "route_verification_needed",
   expired: "decision_recorded",

@@ -32,7 +32,10 @@ describe("claimant public journey projection", () => {
       "secure_retrieval_available",
     );
     expect(projectClaimantPublicJourney("closed").stage).toBe(
-      "retrieval_confirmed_closed",
+      "case_closed",
+    );
+    expect(projectClaimantPublicJourney("closed").summary).toContain(
+      "does not prove",
     );
   });
 
