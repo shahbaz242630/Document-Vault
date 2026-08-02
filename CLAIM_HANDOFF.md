@@ -8,27 +8,26 @@ Last updated: 2026-08-02 (Asia/Dubai)
 2. Check PR #53, `main`/`origin/main`, and the current branch status. PR #52 is already merged. If starting from `main`, merge PR #53 first because the claimant prototype branch is stacked on its biometric-control work.
 3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
 4. Do not push or publish `codex/claimant-synthetic-journey` until its base is merged and the product owner explicitly authorizes publication.
-5. Resume with **Synthetic Slice 14: review tracking UI**. Keep the implementation modular, run the focused and proportional regression checks, report the result, and wait for approval before starting the next slice.
+5. Resume with **Synthetic Slice 15: decision/retrieval-readiness model**. Keep the implementation modular, run the focused and proportional regression checks, report the result, and wait for approval before starting the next slice.
 6. Do not create a TestFlight build or perform any deployment.
 
 ## Synthetic Claimant Prototype Checkpoint
 
-The current local branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-13 are implemented as small, modular, tested increments. Slice 13 is commit `36754a2` (`Add synthetic claimant review tracking`), followed by the current handoff refresh. The branch has not been pushed.
+The current local branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-14 are implemented as small, modular, tested increments. Slice 14 is commit `56e03a2` (`Add synthetic claimant review tracking UI`), followed by the current handoff refresh. The branch has not been pushed.
 
-Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, idempotent synthetic submission handoff, safe acknowledgement UI, and fail-closed owner-protection/review tracking projection. They remain disconnected from production runtime and real claimant data.
+Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, idempotent synthetic submission handoff, safe acknowledgement UI, and fail-closed owner-protection/review tracking projection and UI. They remain disconnected from production runtime and real claimant data.
 
-Four bounded synthetic slices remain, in this order:
+Three bounded synthetic slices remain, in this order:
 
-1. **Slice 14 — Review tracking UI:** render the synthetic public review projection with fail-closed states and accessible status guidance.
-2. **Slice 15 — Decision/retrieval-readiness model:** model safe claimant-facing decision and retrieval-readiness states without performing release, serving ciphertext, or authorizing decryption.
-3. **Slice 16 — Decision/retrieval UI:** render those synthetic states and blocked/expired/suspended outcomes without any live retrieval capability.
-4. **Slice 17 — End-to-end claimant acceptance suite and handoff refresh:** exercise the complete synthetic journey, run proportional regressions and repository guards, then refresh the handoffs for the next authorization decision.
+1. **Slice 15 — Decision/retrieval-readiness model:** model safe claimant-facing decision and retrieval-readiness states without performing release, serving ciphertext, or authorizing decryption.
+2. **Slice 16 — Decision/retrieval UI:** render those synthetic states and blocked/expired/suspended outcomes without any live retrieval capability.
+3. **Slice 17 — End-to-end claimant acceptance suite and handoff refresh:** exercise the complete synthetic journey, run proportional regressions and repository guards, then refresh the handoffs for the next authorization decision.
 
-These four slices finish the synthetic claimant prototype phase only. They do not authorize real authentication, persistence, database work, migrations, RLS, uploads, notifications, review operations, submission runtime, cryptographic retrieval or release, real claimant data, TestFlight, or deployment. Those capabilities remain separately gated.
+These three slices finish the synthetic claimant prototype phase only. They do not authorize real authentication, persistence, database work, migrations, RLS, uploads, notifications, review operations, submission runtime, cryptographic retrieval or release, real claimant data, TestFlight, or deployment. Those capabilities remain separately gated.
 
 ## Status And Stop Gate
 
-Current result: `GO` only for the four bounded synthetic prototype slices above; `NO-GO` for production claimant runtime.
+Current result: `GO` only for the three bounded synthetic prototype slices above; `NO-GO` for production claimant runtime.
 
 The public `/claim` routes are informational. Claimant authentication, invitations, key registration, persistence, migrations, RLS/Storage policies, evidence upload, notifications, processors, case transitions, release packages, retrieval, and claimant decryption are disabled.
 
@@ -135,6 +134,14 @@ Circulate one immutable, accessible version only after recording its Git SHA. Th
 6. Stop for an explicit `GO` decision before any Slice 3 runtime change.
 
 ## Verification
+
+### Slice 14 on 2026-08-02
+
+- Review-tracking UI focused suite: 9 passed.
+- Complete claimant web suite: 50 passed; complete shared claimant suite: 89 passed.
+- Web typecheck and targeted review-tracking lint passed; production web build passed with the route statically prerendered.
+- Claim vectors, vector isolation, and custody isolation guards passed.
+- The accessible public UI uses neutral example identities, renders stopped and invalid inputs identically, omits raw states and sensitive control details, has no interactive/runtime integration, and explicitly states that no decision or release is authorized.
 
 ### Slice 13 on 2026-08-02
 
