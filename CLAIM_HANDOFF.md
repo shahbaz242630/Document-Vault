@@ -29,6 +29,20 @@ Product-owner direction is approved, and Shahbaz Malik is the provisionally desi
 
 Repository reference: PR #53 and its biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The claimant prototype branch is reconciled with that base; claimant production runtime remains unchanged.
 
+## Two-Person Internal Review Process
+
+For the current project stage, Shahbaz Malik is the project owner and decision-maker, and Codex acts as the technical reviewer and evidence checker. Do not invent independent reviewers, specialist approvals, or signatures. Record a successful internal outcome as: **Internally reviewed and provisionally accepted for synthetic-prototype circulation. External specialist approvals remain outstanding.**
+
+After the final CI result is green, work in this order:
+
+1. Codex performs a fresh technical and security review against the exact final commit.
+2. Shahbaz Malik and Codex walk through the claimant flow as the product-owner review.
+3. Codex prepares a findings and risk register supported by the review evidence.
+4. Shahbaz Malik explicitly accepts, rejects, or defers each finding.
+5. Record an internal review decision naming only the actual participants; do not represent it as independent or specialist approval.
+6. Keep the claimant pull request in draft unless Shahbaz Malik gives exact authorization to change its review state.
+7. Keep production claimant runtime at `NO-GO` until genuine legal/privacy, security, operations, native custody, staffing, and independent-review gates are completed.
+
 ## Non-Negotiable Boundaries
 
 - Authentication, MFA, code possession, relationship, identity proofing, evidence review, release authority, and cryptographic possession are separate controls.
