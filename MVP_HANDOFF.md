@@ -4,9 +4,9 @@ Last updated: 2026-08-02 (Asia/Dubai)
 
 ## Current Decision
 
-Finish the mobile owner-vault release gate first. The biometric Settings repair is implemented in draft PR #53, but merge review, a controlled candidate, and physical-iPhone regression remain. Public website publication, protected owner-web deployment, and claimant implementation remain separate gated workstreams.
+Finish the mobile owner-vault release gate first. PR #53 merged the biometric Settings repair, but a controlled candidate and physical-iPhone regression remain. Public website publication, protected owner-web deployment, and production claimant implementation remain separate gated workstreams.
 
-Repository reference: PR #52 merged into `main`/`origin/main` at `37b05d0`. Draft PR #53 contains the biometric Settings repair and is the base of the local claimant prototype branch.
+Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The synthetic claimant prototype review branch is reconciled with that base.
 
 ## MVP Surfaces
 
@@ -40,7 +40,7 @@ Production hosts remain subject to final security/privacy approval. Use host-onl
 
 Build 6 was submitted and subsequently tested on a physical iPhone. Its Settings biometric card/status was a plain `View`; only the conditional enable/disable buttons were pressable, so physical Face ID setup and the protected-key `Lock` -> `Unlock` path did not pass.
 
-Draft PR #53 implements a discoverable and accessible Settings action with focused coverage. That repair has not yet been merged into `main` or verified in a new physical-iPhone candidate, so the release gate remains open.
+PR #53 merged a discoverable and accessible Settings action with focused coverage. The repair has not yet been verified in a new physical-iPhone candidate, so the release gate remains open.
 
 Code review confirms the underlying enablement, authenticated key retrieval, session validation, and password fallback paths are present. Android emulator evidence passed. A corrected interaction and a new controlled candidate are required.
 
@@ -73,9 +73,9 @@ Detailed decisions and gates live in `CLAIM_HANDOFF.md` and the 2026-07-31 claim
 
 ## Next Actions
 
-1. Review and merge draft PR #53, then verify the repaired biometric Settings interaction in the next controlled candidate.
-2. Pass protected CI, create the next internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
-3. Reverify corrected divorce-certificate encrypted CRUD on the hosted test path.
+1. Pass protected CI, create the next internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
+2. Reverify corrected divorce-certificate encrypted CRUD on the hosted test path.
+3. Formally review the published synthetic claimant prototype; keep all claimant runtime disabled.
 4. Resolve `apps/web/LEGAL_CONTENT_REVIEW.md` before public publication.
 5. Complete Supabase Pro, backup/restore, single-session, JWT, origin, hosted-configuration, monitoring, rollback, and synthetic smoke gates before protected-web deployment.
 6. Route the immutable claimant package to named specialists; keep all claimant runtime disabled.

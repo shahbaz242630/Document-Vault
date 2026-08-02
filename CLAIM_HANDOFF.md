@@ -5,15 +5,15 @@ Last updated: 2026-08-02 (Asia/Dubai)
 ## Next Session Opener
 
 1. Read `HANDOFF.md`, `CLAIM_HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` completely before making changes.
-2. Check PR #53, `main`/`origin/main`, and the current branch status. PR #52 is already merged. If starting from `main`, merge PR #53 first because the claimant prototype branch is stacked on its biometric-control work.
+2. Check `main`/`origin/main` and the current claimant review branch status. PR #53 is merged at `d736eb8`.
 3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
-4. Do not push or publish `codex/claimant-synthetic-journey` until its base is merged and the product owner explicitly authorizes publication.
+4. `codex/claimant-synthetic-journey` is authorized for draft formal review publication only. Do not mark it ready, merge it, deploy it, or enable claimant runtime without a new exact authorization.
 5. The synthetic claimant prototype is complete. Do not begin another claimant slice until the product owner makes and records the next exact authorization decision. Production Slice 3 remains `NO-GO`.
 6. Do not create a TestFlight build or perform any deployment.
 
 ## Synthetic Claimant Prototype Checkpoint
 
-The current local branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-17 are implemented as small, modular, tested increments. Slice 17 is commit `c607923` (`Add synthetic claimant acceptance suite`), followed by the current handoff refresh. The branch has not been pushed.
+The current review branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-17 are implemented as small, modular, tested increments. Slice 17 is commit `c607923` (`Add synthetic claimant acceptance suite`), followed by the current handoff refresh. The branch is published only for draft formal review.
 
 Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, idempotent synthetic submission handoff, safe acknowledgement UI, fail-closed owner-protection/review tracking projection and UI, truthful decision/retrieval-readiness modelling and UI, and an end-to-end acceptance suite spanning the full synthetic journey and all seven read-only preview surfaces. They remain disconnected from production runtime and real claimant data.
 
@@ -27,7 +27,7 @@ The public `/claim` routes are informational. Claimant authentication, invitatio
 
 Product-owner direction is approved, and Shahbaz Malik is the provisionally designated operator/data controller candidate. Legal confirmation, incorporation/contracting-entity details, controller contact details, the processor map, and the remaining legal/privacy, security, operations, native custody, staffing, and independent-review gates are incomplete. No real claimant data may be collected.
 
-Repository reference: PR #52 merged the Slice 2 package into `main`/`origin/main` at `37b05d0`. PR #53 contains the biometric Settings control base. The unpushed `codex/claimant-synthetic-journey` branch is stacked on that base; claimant production runtime remains unchanged.
+Repository reference: PR #53 and its biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The claimant prototype branch is reconciled with that base; claimant production runtime remains unchanged.
 
 ## Non-Negotiable Boundaries
 

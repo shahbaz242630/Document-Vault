@@ -4,13 +4,13 @@ Last updated: 2026-08-02 (Asia/Dubai)
 
 ## Current Decision
 
-The biometric Settings repair is implemented in draft PR #53. The next mobile release steps are merge review, a controlled TestFlight candidate, and physical-iPhone regression. Separately, the bounded synthetic claimant prototype is complete; no additional claimant slice is authorized and claimant runtime remains `NO-GO`.
+PR #53 and the biometric Settings repair are merged. The next mobile release steps are a controlled TestFlight candidate and physical-iPhone regression. Separately, the bounded synthetic claimant prototype is complete and authorized for draft formal review publication only; no additional claimant slice is authorized and claimant runtime remains `NO-GO`.
 
 ## Repository Snapshot
 
-- Current local working branch: `codex/claimant-synthetic-journey`, stacked on `codex/biometric-settings-control` and merged `main` at `37b05d0`.
-- Base/release branch: `main` and `origin/main` at `37b05d0` (PR #52).
-- PR #52 merged the claimant Slice 2 review package and divorce-certificate correction into `main`.
+- Current review branch: `codex/claimant-synthetic-journey`, reconciled with merged `main` at `d736eb8`.
+- Base/release branch: `main` and `origin/main` at `d736eb8` (PR #53).
+- PR #52 merged the claimant Slice 2 review package and divorce-certificate correction; PR #53 merged the biometric Settings repair.
 - Preserve unrelated local-only items such as `.codex-runtime/`.
 
 ## Verified Product State
@@ -18,7 +18,7 @@ The biometric Settings repair is implemented in draft PR #53. The next mobile re
 ### Mobile owner vault
 
 - App version is `1.0.0`; TestFlight build 6 was submitted from `9a903f2` and was subsequently exercised on a physical iPhone.
-- Build 6 did not complete the iOS release gate because its `Biometric unlock` status/card was non-interactive. Draft PR #53 implements the discoverable, accessible enable/disable action and focused coverage, but the repair is not yet merged or physically verified in a new candidate.
+- Build 6 did not complete the iOS release gate because its `Biometric unlock` status/card was non-interactive. PR #53 merged the discoverable, accessible enable/disable action and focused coverage, but the repair has not been physically verified in a new candidate.
 - The underlying flow is implemented: enablement authenticates before caching the MEK, lock-screen restoration uses one authenticated SecureStore read, stale remote restoration requires a live Supabase session, and password fallback remains available.
 - Android emulator evidence passed. Physical Face ID enablement and `Lock` -> `Unlock` remain unverified.
 - Marriage and divorce certificate values exist in the encrypted Document Locations registry and automated tests. The corrected divorce value still needs fresh hosted create/edit/reload/delete verification.
@@ -49,9 +49,9 @@ The biometric Settings repair is implemented in draft PR #53. The next mobile re
 
 ## Next Actions
 
-1. Review and merge draft PR #53; preserve its discoverable, accessible enable/disable action and focused coverage.
-2. Run focused mobile tests, the protected CI matrix, and create the next controlled internal TestFlight candidate.
-3. Complete value-free physical-iPhone QA: enablement, background lock, Face ID success/cancel/error, password fallback, returning-user recovery, trusted-person information navigation, Emergency Readiness, sealed-code state, and encrypted certificate CRUD.
+1. Run focused mobile tests, the protected CI matrix, and create the next controlled internal TestFlight candidate.
+2. Complete value-free physical-iPhone QA: enablement, background lock, Face ID success/cancel/error, password fallback, returning-user recovery, trusted-person information navigation, Emergency Readiness, sealed-code state, and encrypted certificate CRUD.
+3. Review the published synthetic claimant prototype without enabling runtime or using real claimant data.
 4. Route one immutable claimant review set to named legal/privacy, security, operations, native, and independent reviewers. Capture approver, version, decision, conditions, evidence, and expiry.
 5. Keep claimant Slice 3 at `NO-GO` until every blocking checklist item is approved.
 
@@ -78,6 +78,6 @@ The biometric Settings repair is implemented in draft PR #53. The next mobile re
 - Shared validation tests: 42 passed.
 - Inactive claimant web tests: 6 passed.
 - Claim vectors, claimant-vector isolation, and claimant-custody isolation guards passed.
-- Code inspection confirmed the Build 6 biometric interaction defect and the draft PR #53 repair; claimant capabilities and the custody probe remain hard-disabled.
+- Code inspection confirmed the Build 6 biometric interaction defect and the merged PR #53 repair; claimant capabilities and the custody probe remain hard-disabled.
 
 For a release candidate, also run the repository verification matrix and the protected `iOS TestFlight release` workflow from `main`; record only value-free device/build/pass-fail evidence.
