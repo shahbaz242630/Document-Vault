@@ -26,6 +26,7 @@ export default function SyntheticClaimantAcknowledgementPage() {
 
       <SyntheticAcknowledgementPreview fixtures={claimantSyntheticAcknowledgementFixtures} />
 
+      <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-review-tracking">View the read-only synthetic review-tracking preview <span aria-hidden="true">→</span></Link></p>
       <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-submission">Return to synthetic submission states <span aria-hidden="true">→</span></Link></p>
     </main>
   );
