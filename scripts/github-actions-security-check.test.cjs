@@ -161,6 +161,7 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
     "runEncryptedRecordCrudSmoke",
     "runEmergencyCodeHidingSmoke",
     "runRecoveryResetContinuitySmoke",
+    "waitForAnyNode",
     "swipeUntilNode",
     'fillField("title field"',
     'waitForNode("Stored sealed on this device")',
@@ -177,7 +178,7 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
 
   assert.match(
     smokeScript,
-    /tapNodeAfterScroll\("Save to vault"\);[\s\S]*?waitForNode\("Everything important, in one place\.", 120_000\);[\s\S]*?tapNode\("Records"\);[\s\S]*?tapNodeAfterScroll\("Bank accounts"\);[\s\S]*?waitForNode\(title, 120_000\);/,
+    /tapNodeAfterScroll\("Save to vault"\);[\s\S]*?waitForAnyNode\(\[homeHeading, "Bank accounts", title\], 120_000\);[\s\S]*?postSaveDestination\.label === homeHeading[\s\S]*?tapNode\("Records"\);[\s\S]*?tapNodeAfterScroll\("Bank accounts"\);[\s\S]*?postSaveDestination\.label !== title[\s\S]*?waitForNode\(title, 120_000\);/,
   );
 
   const bootstrapScript = fs.readFileSync(

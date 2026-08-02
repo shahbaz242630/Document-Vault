@@ -65,6 +65,28 @@ function waitForNode(label, timeoutMs = waitTimeoutMs) {
   throw new Error(`Timed out waiting for Android UI text: ${label}\n${sanitizeUiXml(lastXml).slice(0, 2_000)}`);
 }
 
+function waitForAnyNode(labels, timeoutMs = waitTimeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let lastXml = "";
+
+  while (Date.now() < deadline) {
+    try {
+      lastXml = dumpUi();
+      for (const label of labels) {
+        const bounds = findNode(lastXml, label);
+        if (bounds) return { bounds, label };
+      }
+    } catch {
+      // The destination may still be rendering; retry until the bounded deadline.
+    }
+    sleep(1_000);
+  }
+
+  throw new Error(
+    `Timed out waiting for Android UI text: ${labels.join(" or ")}\n${sanitizeUiXml(lastXml).slice(0, 2_000)}`,
+  );
+}
+
 function waitForNodeOptional(label, timeoutMs = 5_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -246,6 +268,7 @@ function clearAndSignIn(email, password, timeoutMs = 120_000) {
 }
 
 function createEncryptedBankRecord(title) {
+  const homeHeading = "Everything important, in one place.";
   tapNodeAfterScroll("Add");
   waitForNode("Add something new");
   tapNodeAfterScroll("Bank account");
@@ -261,11 +284,13 @@ function createEncryptedBankRecord(title) {
   fillField("lastFourDigits field", "4242");
   waitForNode("4242");
   tapNodeAfterScroll("Save to vault");
-  waitForNode("Everything important, in one place.", 120_000);
-  tapNode("Records");
-  waitForNode("Saved records");
-  tapNodeAfterScroll("Bank accounts");
-  waitForNode(title, 120_000);
+  const postSaveDestination = waitForAnyNode([homeHeading, "Bank accounts", title], 120_000);
+  if (postSaveDestination.label === homeHeading) {
+    tapNode("Records");
+    waitForNode("Saved records");
+    tapNodeAfterScroll("Bank accounts");
+  }
+  if (postSaveDestination.label !== title) waitForNode(title, 120_000);
 }
 
 function openEncryptedBankRecord(title) {
