@@ -17,7 +17,12 @@ import SecurityPage from "./security/page";
 import sitemap from "./sitemap";
 import SupportPage from "./support/page";
 import TermsPage from "./terms/page";
-import { contentVersion, publicRoutes, siteUrl } from "../lib/site";
+import {
+  claimSyntheticReviewRoutes,
+  contentVersion,
+  publicRoutes,
+  siteUrl,
+} from "../lib/site";
 
 const pages = [
   HomePage,
@@ -87,6 +92,9 @@ describe("Phase 3 public content", () => {
     expect(sitemap()).toHaveLength(publicRoutes.length);
     expect(sitemap().map(({ url }) => url)).toContain(siteUrl);
     expect(sitemap().map(({ url }) => url)).toContain(`${siteUrl}/privacy`);
+    for (const route of claimSyntheticReviewRoutes) {
+      expect(sitemap().map(({ url }) => url)).not.toContain(`${siteUrl}${route}`);
+    }
   });
 
   it("contains no direct browser-storage, raw-network, analytics, or tracking integration", () => {

@@ -169,11 +169,7 @@ export function appendSyntheticClaimAuditEvent(
   );
 
   if (duplicate) {
-    if (
-      duplicate.event_id !== input.event_id ||
-      duplicate.event_hash !== input.event_hash ||
-      duplicate.event_type !== input.event_type
-    ) {
+    if (!syntheticClaimAuditEventInputsEqual(duplicate, input)) {
       throw new Error("Conflicting synthetic audit idempotency key.");
     }
     return { status: "duplicate", event: duplicate, ledger: [...ledger] };
@@ -249,6 +245,13 @@ export function parseSyntheticClaimAuditEventInput(
   assertExactKeys(value, inputKeys);
   assertCommonEventFields(value);
   return value as SyntheticClaimAuditEventInputV1;
+}
+
+export function syntheticClaimAuditEventInputsEqual(
+  left: SyntheticClaimAuditEventInputV1,
+  right: SyntheticClaimAuditEventInputV1,
+): boolean {
+  return inputKeys.every((key) => left[key] === right[key]);
 }
 
 function parseSyntheticClaimAuditEvent(value: unknown): SyntheticClaimAuditEventV1 {

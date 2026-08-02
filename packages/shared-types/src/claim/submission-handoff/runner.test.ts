@@ -50,6 +50,32 @@ describe("synthetic submission handoff runner", () => {
     expect(duplicate.acknowledgement.release_authorized).toBe(false);
   });
 
+  it("denies a changed retry instead of acknowledging it as already received", () => {
+    const input = createSyntheticSubmissionHandoffInput();
+    const first = applySyntheticSubmissionHandoff(input);
+    expect(first.status).toBe("applied");
+    if (first.status !== "applied") throw new Error("Expected applied handoff.");
+
+    const changed = applySyntheticSubmissionHandoff({
+      ...input,
+      snapshot: first.snapshot,
+      step: {
+        ...input.step,
+        audit_event: {
+          ...input.step.audit_event,
+          actor_ref: "synthetic_actor_processor_changed",
+        },
+      },
+    });
+
+    expect(changed).toMatchObject({
+      status: "denied",
+      reason: "idempotency_conflict",
+      acknowledgement: null,
+    });
+    expect(changed.snapshot).toBe(first.snapshot);
+  });
+
   it("denies a predicate failure without changing state or acknowledging receipt", () => {
     const input = createSyntheticSubmissionHandoffInput();
     const step = {

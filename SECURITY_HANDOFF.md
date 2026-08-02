@@ -81,7 +81,8 @@ Still required:
 
 ### Claimant prototype acceptance on 2026-08-02
 
-- Full web suite: 141 passed; shared claimant: 96 passed; shared validation: 42 passed.
+- Full web suite: 141 passed; shared claimant: 107 passed; shared validation: 42 passed.
+- Formal-review remediation now rejects partial-match audit replays, rejects event/transition mismatches, and keeps synthetic review routes out of public discovery surfaces.
 - All workspace typechecks, root lint, production web build, Phase 1, GitHub Actions security, static security/migration, mobile secret, and claimant isolation guards passed.
 - Claimant capabilities remain hard-disabled, the custody probe remains hard-disabled, and no runtime, database, native custody, TestFlight, or deployment action was added or performed.
 - Live Supabase attack/restore and physical-device gates remain required at their production release gates; passing synthetic acceptance is not specialist approval.

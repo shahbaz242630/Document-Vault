@@ -1,8 +1,10 @@
 import {
   appendSyntheticClaimAuditEvent,
   parseSyntheticClaimAuditEventInput,
+  syntheticClaimAuditEventInputsEqual,
   reconcileSyntheticClaimAuditLedger,
   type SyntheticClaimAuditEventInputV1,
+  type SyntheticClaimAuditEventType,
   type SyntheticClaimAuditEventV1,
 } from "./audit";
 import type {
@@ -101,13 +103,12 @@ export function applySyntheticClaimScenarioStep(
   if (step.transition.expected_version !== snapshot.version + 1) {
     return denied(snapshot, "version_conflict");
   }
-  if (!auditMatchesTransition(snapshot, step)) {
-    return denied(snapshot, "audit_transition_mismatch");
-  }
-
   const transitionResult = evaluateClaimTransition(step.transition);
   if (!transitionResult.allowed) {
     return denied(snapshot, transitionResult.result_class);
+  }
+  if (!auditMatchesTransition(snapshot, step)) {
+    return denied(snapshot, "audit_transition_mismatch");
   }
 
   const appendResult = appendSyntheticClaimAuditEvent(
@@ -143,8 +144,49 @@ function auditMatchesTransition(
     auditEvent.actor_class === transition.actor_role &&
     auditEvent.server_time === transition.server_time &&
     auditEvent.source_state === transition.previous_state &&
-    auditEvent.target_state === transition.requested_state
+    auditEvent.target_state === transition.requested_state &&
+    auditEventTypeMatchesTransition(
+      transition.previous_state,
+      transition.requested_state,
+      auditEvent.event_type,
+    )
   );
+}
+
+const primaryAuditEventByTransition = {
+  "none->draft": "route_selected",
+  "draft->identity_pending": "checklist_selected",
+  "identity_pending->submitted": "upload_received",
+  "submitted->owner_notified": "owner_notice_attempted",
+  "owner_notified->cooldown": "cooldown_started",
+  "cooldown->review_pending": "review_assigned",
+  "review_pending->approved": "review_approved",
+  "approved->release_ready": "package_created",
+  "release_ready->released": "encrypted_package_served",
+  "released->closed": "case_closed",
+} as const satisfies Record<string, SyntheticClaimAuditEventType>;
+
+function auditEventTypeMatchesTransition(
+  previousState: ClaimantState | null,
+  requestedState: ClaimantState,
+  eventType: SyntheticClaimAuditEventType,
+): boolean {
+  const key = `${previousState ?? "none"}->${requestedState}`;
+  const primaryEvent = (primaryAuditEventByTransition as Record<
+    string,
+    SyntheticClaimAuditEventType
+  >)[key];
+  if (primaryEvent) return eventType === primaryEvent;
+
+  if (requestedState === "cancelled_by_owner") return eventType === "claim_cancelled";
+  if (requestedState === "withdrawn_by_claimant") return eventType === "claim_cancelled";
+  if (requestedState === "on_hold") return eventType === "claim_held";
+  if (requestedState === "manual_review") return eventType === "review_escalated";
+  if (requestedState === "rejected") return eventType === "review_rejected";
+  if (requestedState === "expired") return eventType === "route_expired";
+  if (requestedState === "release_suspended") return eventType === "package_suspended";
+  if (previousState === "manual_review") return eventType === "review_escalated";
+  return false;
 }
 
 function isExactReplay(
@@ -153,9 +195,7 @@ function isExactReplay(
 ): boolean {
   const { audit_event: auditEvent, transition } = step;
   return (
-    existing.event_id === auditEvent.event_id &&
-    existing.event_hash === auditEvent.event_hash &&
-    existing.event_type === auditEvent.event_type &&
+    syntheticClaimAuditEventInputsEqual(existing, auditEvent) &&
     existing.source_state === transition.previous_state &&
     existing.target_state === transition.requested_state &&
     existing.actor_class === transition.actor_role &&

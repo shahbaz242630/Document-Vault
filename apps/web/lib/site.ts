@@ -28,10 +28,7 @@ export const claimSyntheticAcknowledgementRoute = "/claim/synthetic-acknowledgem
 export const claimSyntheticReviewTrackingRoute = "/claim/synthetic-review-tracking" as const;
 export const claimSyntheticDecisionReadinessRoute = "/claim/synthetic-decision-readiness" as const;
 
-export const publicRoutes = [
-  "/",
-  ...primaryNavigation.map(({ href }) => href),
-  ...claimInformationRoutes,
+export const claimSyntheticReviewRoutes = [
   claimSyntheticPreviewRoute,
   claimSyntheticChecklistRoute,
   claimSyntheticEvidenceRoute,
@@ -39,6 +36,12 @@ export const publicRoutes = [
   claimSyntheticAcknowledgementRoute,
   claimSyntheticReviewTrackingRoute,
   claimSyntheticDecisionReadinessRoute,
+] as const;
+
+export const publicRoutes = [
+  "/",
+  ...primaryNavigation.map(({ href }) => href),
+  ...claimInformationRoutes,
   ...legalNavigation.map(({ href }) => href),
   "/support",
 ] as const;

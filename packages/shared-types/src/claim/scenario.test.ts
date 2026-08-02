@@ -134,6 +134,33 @@ function runPrimaryPath(steps: number = primaryPath.length) {
   return snapshot;
 }
 
+function runManualReviewPath() {
+  const submitted = runPrimaryPath(3);
+  const held = applySyntheticClaimScenarioStep(
+    submitted,
+    step({
+      index: 4,
+      previous: "submitted",
+      requested: "on_hold",
+      actor: "security",
+      eventType: "claim_held",
+    }),
+  );
+  expect(held.status).toBe("applied");
+  const manualReview = applySyntheticClaimScenarioStep(
+    held.snapshot,
+    step({
+      index: 5,
+      previous: "on_hold",
+      requested: "manual_review",
+      actor: "case_lead",
+      eventType: "review_escalated",
+    }),
+  );
+  expect(manualReview.status).toBe("applied");
+  return manualReview.snapshot;
+}
+
 describe("synthetic claimant journey scenarios", () => {
   it("runs the complete protected path and closes only after confirmation policy", () => {
     const snapshot = runPrimaryPath();
@@ -240,6 +267,65 @@ describe("synthetic claimant journey scenarios", () => {
     expect(replay.snapshot.version).toBe(1);
     expect(replay.snapshot.ledger).toHaveLength(1);
   });
+
+  it("denies a changed audit event that reuses an idempotency key", () => {
+    const initial = scenario();
+    const firstStep = step({
+      index: 1,
+      previous: null,
+      requested: "draft",
+      actor: "claimant",
+      eventType: "route_selected",
+    });
+    const applied = applySyntheticClaimScenarioStep(initial, firstStep);
+    const replay = applySyntheticClaimScenarioStep(applied.snapshot, {
+      ...firstStep,
+      audit_event: {
+        ...firstStep.audit_event,
+        actor_ref: "synthetic_actor_claimant_changed",
+      },
+    });
+
+    expect(replay).toMatchObject({ status: "denied", reason: "idempotency_conflict" });
+    expect(replay.snapshot).toBe(applied.snapshot);
+  });
+
+  it("denies an audit event type that does not match its transition", () => {
+    const draft = runPrimaryPath(1);
+    const mismatched = step({
+      index: 2,
+      previous: "draft",
+      requested: "identity_pending",
+      actor: "claimant",
+      eventType: "case_closed",
+    });
+
+    expect(applySyntheticClaimScenarioStep(draft, mismatched)).toMatchObject({
+      status: "denied",
+      reason: "audit_transition_mismatch",
+    });
+  });
+
+  it.each([
+    ["rejected", "review_rejected"],
+    ["expired", "route_expired"],
+  ] as const)(
+    "preserves %s event semantics when leaving manual review",
+    (requested, eventType) => {
+      const snapshot = runManualReviewPath();
+      const transition = step({
+        index: 6,
+        previous: "manual_review",
+        requested,
+        actor: requested === "rejected" ? "reviewer" : "processor",
+        eventType,
+      });
+
+      expect(applySyntheticClaimScenarioStep(snapshot, transition)).toMatchObject({
+        status: "applied",
+      });
+    },
+  );
 
   it("denies stale versions, mismatched state, and mismatched audit bindings", () => {
     const draft = runPrimaryPath(1);

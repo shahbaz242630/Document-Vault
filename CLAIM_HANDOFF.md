@@ -132,7 +132,8 @@ Circulate one immutable, accessible version only after recording its Git SHA. Th
 ### Slice 17 and prototype acceptance on 2026-08-02
 
 - End-to-end synthetic acceptance: 5 passed; focused acceptance/dashboard remediation: 9 passed.
-- Full web suite: 141 passed; full shared claimant suite: 96 passed; shared validation: 42 passed.
+- Full web suite: 141 passed; full shared claimant suite: 107 passed; shared validation: 42 passed.
+- Formal-review remediation now requires complete audit-input equality for replay, binds every allowed transition to an event type, and separates all seven synthetic review routes from public navigation and the sitemap.
 - All workspace typechecks and root lint passed; the production web build passed with all seven synthetic routes statically prerendered.
 - Phase 1, GitHub Actions security, static security/migration, mobile secret, claim-vector reproducibility, claimant-vector isolation, and claimant-custody isolation guards passed.
 - Claimant-vector isolation now scans nested claimant contract modules recursively and has its own regression test.

@@ -41,13 +41,6 @@ export default function ClaimPage() {
           <ol className="steps">
             {claimantPortalStages.map((stage) => <li key={stage.title}><h3>{stage.title}</h3><p>{stage.description}</p></li>)}
           </ol>
-          <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-decision-readiness">View the read-only synthetic decision and retrieval preview <span aria-hidden="true">→</span></Link></p>
-          <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-review-tracking">View the read-only synthetic review-tracking preview <span aria-hidden="true">→</span></Link></p>
-          <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-acknowledgement">View the read-only synthetic acknowledgement preview <span aria-hidden="true">→</span></Link></p>
-          <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-submission">View the read-only synthetic submission preview <span aria-hidden="true">→</span></Link></p>
-          <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-evidence">View the read-only synthetic evidence preview <span aria-hidden="true">→</span></Link></p>
-          <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-checklist">View the read-only synthetic checklist preview <span aria-hidden="true">→</span></Link></p>
-          <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-preview">View the read-only synthetic dashboard preview <span aria-hidden="true">→</span></Link></p>
         </div>
       </section>
 

@@ -104,6 +104,21 @@ describe("synthetic claimant audit ledger", () => {
     ).toThrow("Conflicting synthetic audit idempotency key");
   });
 
+  it.each([
+    ["tenant_id", "synthetic_tenant_changed"],
+    ["case_id", "synthetic_case_changed"],
+    ["actor_ref", "synthetic_actor_changed"],
+    ["reason_class", "security_hold"],
+    ["object_ref", "synthetic_object_changed"],
+    ["policy_version", "synthetic_policy_changed"],
+  ] as const)("rejects an idempotent retry when %s changes", (field, value) => {
+    const first = appendSyntheticClaimAuditEvent([], input());
+
+    expect(() =>
+      appendSyntheticClaimAuditEvent(first.ledger, input({ [field]: value })),
+    ).toThrow("Conflicting synthetic audit idempotency key");
+  });
+
   it.each(["raw_secret", "document_body", "unsafe_filename", "owner_email"])(
     "rejects the forbidden field %s",
     (field) => {

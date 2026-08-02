@@ -16,7 +16,7 @@ import {
   type SyntheticClaimScenarioStepV1,
 } from "@vault/shared-types";
 import { claimantPortalCapabilities } from "@/lib/claimant-portal";
-import { publicRoutes } from "@/lib/site";
+import { claimSyntheticReviewRoutes, publicRoutes } from "@/lib/site";
 
 import SyntheticAcknowledgementPage, {
   metadata as acknowledgementMetadata,
@@ -163,7 +163,7 @@ describe("synthetic claimant end-to-end acceptance", () => {
     });
   });
 
-  it("registers every synthetic route exactly once", () => {
+  it("keeps every synthetic route in the review-only registry", () => {
     const expectedRoutes = [
       "/claim/synthetic-preview",
       "/claim/synthetic-checklist",
@@ -174,7 +174,8 @@ describe("synthetic claimant end-to-end acceptance", () => {
       "/claim/synthetic-decision-readiness",
     ];
     for (const route of expectedRoutes) {
-      expect(publicRoutes.filter((candidate) => candidate === route), route).toHaveLength(1);
+      expect(claimSyntheticReviewRoutes.filter((candidate) => candidate === route), route).toHaveLength(1);
+      expect(publicRoutes, route).not.toContain(route);
     }
   });
 });
