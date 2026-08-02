@@ -6,7 +6,7 @@ Last updated: 2026-08-02 (Asia/Dubai)
 
 Finish the mobile owner-vault release gate first. PR #53 merged the biometric Settings repair, but a controlled candidate and physical-iPhone regression remain. Public website publication, protected owner-web deployment, and production claimant implementation remain separate gated workstreams.
 
-Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The synthetic claimant prototype review branch is reconciled with that base.
+Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The synthetic claimant prototype was internally accepted, and the product owner authorized PR #54 for merge after the final handoff-only head passes protected CI. The next session must fetch `main` and record the resulting merge commit.
 
 ## MVP Surfaces
 
@@ -71,11 +71,13 @@ Status: synthetic prototype complete; product direction approved; specialist app
 
 Detailed decisions and gates live in `CLAIM_HANDOFF.md` and the 2026-07-31 claimant Slice 2 documents.
 
+The explicit production-code backlog is recorded under `Pending Claimant Integration Code` in `CLAIM_HANDOFF.md`. None of that integration is built or authorized by the synthetic prototype merge; Production Slice 3 remains `NO-GO`.
+
 ## Next Actions
 
 1. Pass protected CI, create the next internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
 2. Reverify corrected divorce-certificate encrypted CRUD on the hosted test path.
-3. Formally review the published synthetic claimant prototype; keep all claimant runtime disabled.
+3. Treat the merged synthetic claimant prototype as the closed review baseline; keep all claimant runtime disabled and require a new exact authorization before production integration.
 4. Resolve `apps/web/LEGAL_CONTENT_REVIEW.md` before public publication.
 5. Complete Supabase Pro, backup/restore, single-session, JWT, origin, hosted-configuration, monitoring, rollback, and synthetic smoke gates before protected-web deployment.
 6. Route the immutable claimant package to named specialists; keep all claimant runtime disabled.

@@ -4,9 +4,9 @@ Last updated: 2026-08-02 (Asia/Dubai)
 
 ## Security Status
 
-Owner-vault controls are implemented and under controlled internal testing. PR #53 merged the Settings biometric interaction repair, but the iOS release gate remains open until the full physical Face ID path passes in a new controlled candidate. The bounded synthetic claimant prototype is complete and authorized for draft formal review publication only, while public legal publication, external protected-web access, and all claimant runtime remain disabled.
+Owner-vault controls are implemented and under controlled internal testing. PR #53 merged the Settings biometric interaction repair, but the iOS release gate remains open until the full physical Face ID path passes in a new controlled candidate. The bounded synthetic claimant prototype is complete, internally accepted, and owner-authorized for merge through PR #54 after final protected CI; public legal publication, external protected-web access, real claimant data, and all claimant runtime remain disabled.
 
-Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The synthetic claimant prototype review branch is reconciled with that base.
+Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. PR #54 closes the synthetic claimant review branch and is owner-authorized to merge after its final protected CI result is green.
 
 ## Enforced Boundaries
 
@@ -76,6 +76,8 @@ Still required:
 - Named, trained, separated reviewers and operational evidence.
 - Android remains fail-closed until transaction-bound key agreement and the required device/attestation baseline are independently approved. Owner approval permits iOS-only preparation; it does not authorize runtime implementation.
 - Offline-code V2 remains disabled pending protocol review and representative KDF benchmarks.
+
+`CLAIM_HANDOFF.md` now records the full pending production integration-code backlog. PR #54 supplies synthetic contracts, projections, fixtures, previews, and tests only; it supplies no production claimant authentication, persistence, RLS/Storage policy, evidence pipeline, case processor, reviewer operations, notification delivery, native custody, or release runtime.
 
 ## Verification
 

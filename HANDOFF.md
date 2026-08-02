@@ -4,11 +4,11 @@ Last updated: 2026-08-02 (Asia/Dubai)
 
 ## Current Decision
 
-PR #53 and the biometric Settings repair are merged. The next mobile release steps are a controlled TestFlight candidate and physical-iPhone regression. Separately, the bounded synthetic claimant prototype is complete and authorized for draft formal review publication only; no additional claimant slice is authorized and claimant runtime remains `NO-GO`.
+PR #53 and the biometric Settings repair are merged. The next mobile release steps are a controlled TestFlight candidate and physical-iPhone regression. Separately, the bounded synthetic claimant prototype is complete, internally accepted, and owner-authorized for merge through PR #54 after its final handoff-only head passes protected CI. This publication does not authorize another claimant slice or production claimant runtime, which remains `NO-GO`.
 
 ## Repository Snapshot
 
-- Current review branch: `codex/claimant-synthetic-journey`, reconciled with merged `main` at `d736eb8`.
+- Closing review branch: `codex/claimant-synthetic-journey`; PR #54 is owner-authorized to merge after its final protected CI result is green.
 - Base/release branch: `main` and `origin/main` at `d736eb8` (PR #53).
 - PR #52 merged the claimant Slice 2 review package and divorce-certificate correction; PR #53 merged the biometric Settings repair.
 - Preserve unrelated local-only items such as `.codex-runtime/`.
@@ -37,6 +37,7 @@ PR #53 and the biometric Settings repair are merged. The next mobile release ste
 - Product-owner direction is recorded, but legal/privacy, security, operations, native custody, and independent approvals remain incomplete.
 - Shahbaz Malik is the provisionally designated operator/data controller candidate. Incorporation, legal confirmation, controller contact details, and the processor map remain incomplete, so no real claimant data may be collected.
 - `CLAIM_HANDOFF.md` is authoritative for claimant scope and stop gates.
+- Its `Pending Claimant Integration Code` section is the explicit fresh-session backlog. Every listed production capability remains unbuilt or incomplete and unauthorized by PR #54.
 
 ## Non-Negotiable Boundaries
 
@@ -51,7 +52,7 @@ PR #53 and the biometric Settings repair are merged. The next mobile release ste
 
 1. Run focused mobile tests, the protected CI matrix, and create the next controlled internal TestFlight candidate.
 2. Complete value-free physical-iPhone QA: enablement, background lock, Face ID success/cancel/error, password fallback, returning-user recovery, trusted-person information navigation, Emergency Readiness, sealed-code state, and encrypted certificate CRUD.
-3. Review the published synthetic claimant prototype without enabling runtime or using real claimant data.
+3. At the next session start, fetch `main`, verify and record PR #54's merge commit, and treat the synthetic claimant prototype as a closed review baseline.
 4. Route one immutable claimant review set to named legal/privacy, security, operations, native, and independent reviewers. Capture approver, version, decision, conditions, evidence, and expiry.
 5. Keep claimant Slice 3 at `NO-GO` until every blocking checklist item is approved.
 

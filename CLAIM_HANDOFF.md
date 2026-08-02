@@ -5,15 +5,15 @@ Last updated: 2026-08-02 (Asia/Dubai)
 ## Next Session Opener
 
 1. Read `HANDOFF.md`, `CLAIM_HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` completely before making changes.
-2. Check `main`/`origin/main` and the current claimant review branch status. PR #53 is merged at `d736eb8`.
+2. Fetch `origin`, check that PR #54 is merged into `main`, and record its merge commit before making changes. The reviewed implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`.
 3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
-4. `codex/claimant-synthetic-journey` is authorized for draft formal review publication only. Do not mark it ready, merge it, deploy it, or enable claimant runtime without a new exact authorization.
-5. The synthetic claimant prototype is complete. Do not begin another claimant slice until the product owner makes and records the next exact authorization decision. Production Slice 3 remains `NO-GO`.
+4. PR #54 was internally accepted and the product owner authorized its merge into `main` after the final handoff-only head passed protected CI. Treat the merged synthetic prototype as a closed review baseline, not as production claimant runtime.
+5. Do not restart synthetic slices or begin production integration until the product owner makes and records a new exact authorization decision. Production Slice 3 remains `NO-GO`.
 6. Do not create a TestFlight build or perform any deployment.
 
 ## Synthetic Claimant Prototype Checkpoint
 
-The current review branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-17 are implemented as small, modular, tested increments. Slice 17 is commit `c607923` (`Add synthetic claimant acceptance suite`), followed by the current handoff refresh. The branch is published only for draft formal review.
+The closing review branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-17 are implemented as small, modular, tested increments. Slice 17 is commit `c607923` (`Add synthetic claimant acceptance suite`), followed by formal-review remediation, acceptance, and this final session handoff. PR #54 is authorized to merge after the final protected CI result is green.
 
 Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, idempotent synthetic submission handoff, safe acknowledgement UI, fail-closed owner-protection/review tracking projection and UI, truthful decision/retrieval-readiness modelling and UI, and an end-to-end acceptance suite spanning the full synthetic journey and all seven read-only preview surfaces. They remain disconnected from production runtime and real claimant data.
 
@@ -45,13 +45,13 @@ After the final CI result is green, work in this order:
 
 ## Internal Review Decision — 2026-08-02
 
-- Reviewed implementation: `a21830487f38c1d6ee3771780be454da6f20b982` on draft PR #54.
+- Reviewed implementation: `a21830487f38c1d6ee3771780be454da6f20b982` on PR #54.
 - Project owner and decision-maker: Shahbaz Malik.
 - Technical reviewer and evidence checker: Codex.
 - Technical result: post-remediation review passed with no remaining actionable internal findings; all protected CI checks passed.
 - Product-owner decision: accepted for bounded synthetic-prototype circulation.
 - Recorded decision: **Internally reviewed and provisionally accepted for synthetic-prototype circulation. External specialist approvals remain outstanding.**
-- Conditions: PR #54 remains draft; this decision does not authorize marking ready, merging, production claimant runtime, real claimant data, deployment, TestFlight, release, retrieval, or decryption.
+- Subsequent owner authorization: merge PR #54 into `main` after the final handoff-only head passes protected CI. This changes repository publication status only; it does not authorize production claimant runtime, real claimant data, deployment, TestFlight, release, retrieval, or decryption.
 - Re-review is required after any implementation change, base-branch change, scope expansion, failed security/CI gate, or change to a documented runtime, privacy, custody, or release boundary.
 
 ## Non-Negotiable Boundaries
@@ -116,6 +116,33 @@ V1 has no safe public locator and must never be used for claim lookup. V2 remain
 
 Every slice requires explicit scope/non-goals, kill switches, transactional/idempotent processing, hostile authorization/race/replay tests, rollback, value-free evidence, and recorded approval before proceeding.
 
+## Pending Claimant Integration Code (Unbuilt And Not Authorized)
+
+PR #54 does **not** build or authorize any of the production integration below. This is the fresh-session backlog, not an instruction to start coding:
+
+1. Runtime feature/config flags, environment validation, and independently operable kill switches, all defaulting to disabled.
+2. Claimant and registered-recipient authentication, value-free invitations, MFA, account recovery, session assurance, and owner/claimant origin isolation.
+3. Transactional claimant database schema and migrations for cases, versioned state, grants/routes, idempotency, audit/outbox records, and server-owned transition functions.
+4. RLS/API/Storage isolation with hostile cross-owner, cross-claimant, cross-case, replay, stale-version, and race-condition tests.
+5. Private evidence-quarantine storage with randomized case-bound paths, short-lived upload capabilities, signature/type/size/page/count/decompression checks, malware scanning, retention, deletion, backup, and legal-hold behavior.
+6. Server-side case-transition and audit processing with same-transaction append, integrity/tamper evidence, canonical projection, idempotency, retry, reconciliation, and rollback behavior.
+7. Value-free notification and owner-protection workflows covering notice, cooldown, cancellation, dispute, hold, outbox delivery, retry, abuse handling, and kill switches.
+8. Reviewer operations for assignment, conflict/recusal, two independent approvals, access control, audit, escalation, and appeal; no reviewer may approve twice or review a conflicted case.
+9. Native claimant key enrollment for at least two independent devices, plus replacement, loss, revocation, downgrade handling, and physical custody evidence.
+10. Claimant-addressed encrypted release packages, bounded retrieval sessions, native local decryption, read-only presentation, optional local export, expiry, and suspension. No browser or backend plaintext.
+11. Monitoring, alerting, incident response, backup/restore drills, stale-state reconciliation, deletion verification, operational ownership, and emergency shutdown exercises.
+12. Authenticated end-to-end and hostile integration tests, independent assurance evidence, controlled pilot approval, and release evidence.
+
+The earliest possible next implementation is **Production Slice 3: registered-recipient setup only**. It still requires explicit `GO` plus completion of its external legal/privacy, security, operations, native-custody, staffing, and independent-review gates. Slice 3 must not include claim submission, evidence intake, case review, notifications about case substance, release packages, retrieval, or decryption.
+
+## Session Close Record — 2026-08-02
+
+- Synthetic Slices 1-17 are complete, technically reviewed, and provisionally accepted for bounded synthetic-prototype circulation.
+- Reviewed implementation: `a21830487f38c1d6ee3771780be454da6f20b982`; acceptance-record head: `8ce2b675cfe50d097049fb08d869d86a97da59ba`.
+- The product owner authorized PR #54 for merge after the final handoff-only commit passes protected CI.
+- No claimant runtime, real claimant data, deployment, TestFlight build, production database/storage change, release, retrieval, or decryption was authorized by this closure.
+- Start the next session from a clean, fetched `main`; verify and record PR #54's merge commit, read all four handoffs, select one explicitly bounded task, and stop for exact authorization before changing production claimant code.
+
 ## Current Slice 2 Blockers
 
 - Legal confirmation of Shahbaz Malik as operator/data controller, incorporation/contracting-entity details, controller contact details, processor map, governing law, supported policy packs, and counsel opinion on release authority.
@@ -141,7 +168,7 @@ Android is not a blocker to owner-approved iOS-only preparation, but it remains 
 - `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md`
 - `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`
 
-The complete claimant review set is published in draft PR #54 on `codex/claimant-synthetic-journey`. Circulate only its final verified head commit, record that exact Git SHA in the PR publication metadata and internal review record, and never substitute the working tree or a superseded commit. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
+The complete claimant review set is published in PR #54 on `codex/claimant-synthetic-journey`. After merge, circulate only the verified `main` merge commit while retaining the reviewed implementation and acceptance-record SHAs in the review metadata; never substitute the working tree or a superseded commit. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
 
 ## Production Authorization Work (Separate From Synthetic Slices)
 
