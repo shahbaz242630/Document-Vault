@@ -26,6 +26,7 @@ export default function SyntheticClaimantReviewTrackingPage() {
 
       <SyntheticReviewTrackingPreview views={claimantSyntheticReviewTrackingViews} />
 
+      <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-decision-readiness">View the read-only synthetic decision and retrieval preview <span aria-hidden="true">→</span></Link></p>
       <p className="spaced-content"><Link className="text-link" href="/claim/synthetic-acknowledgement">Return to synthetic acknowledgement states <span aria-hidden="true">→</span></Link></p>
     </main>
   );
