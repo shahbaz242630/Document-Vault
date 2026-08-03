@@ -58,6 +58,7 @@ Research snapshot: 2026-08-03. This baseline applies before any external access 
 - The unlocked web vault currently holds decrypted records in React state and has a manual lock only. Automatic inactivity/background lock, session-displacement lock, a complete sign-out path, and browser-data clearing are not yet evidenced.
 - The browser talks directly to Supabase. This keeps plaintext out of Sanduqkin servers, but requires JavaScript-readable session material; the resulting XSS/session-theft risk needs an explicit architecture decision and compensating controls before deployment.
 - CI actions are pinned to immutable commit SHAs, protected checks include CodeQL/ZAP/dependency/security guards, and release SBOM generation exists. Signed build provenance and verification before deployment are not yet evidenced.
+- This research pass surfaced same-day high-severity availability advisory [GHSA-rgw5-rvv9-x895](https://github.com/advisories/GHSA-rgw5-rvv9-x895) in two production `brace-expansion` 5.0.8 paths. Both paths are narrowly overridden to patched 5.0.9; the focused security guards pass and the production dependency audit reports zero known vulnerabilities at this snapshot.
 
 ### P0 — required before external owner-web access
 
