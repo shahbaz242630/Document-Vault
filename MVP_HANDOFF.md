@@ -6,7 +6,7 @@ Last updated: 2026-08-03 (Asia/Dubai)
 
 Finish the mobile owner-vault release gate first. PR #53 merged the biometric Settings repair, but a controlled candidate and physical-iPhone regression remain. Public website publication, protected owner-web deployment, and production claimant implementation remain separate gated workstreams.
 
-Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The synthetic claimant prototype was internally accepted, and the product owner authorized PR #54 for merge after the final protected CI head passes. The next session must fetch `main` and record the resulting merge commit.
+Repository reference: PR #54 and the bounded synthetic claimant prototype are merged into `main`/`origin/main` at `aa84031be93b460c9addada6d2fb3b09286595de`. This publication does not authorize claimant runtime or real claimant data.
 
 ## MVP Surfaces
 
@@ -75,7 +75,7 @@ The explicit production-code backlog is recorded under `Pending Claimant Integra
 
 ## Next Actions
 
-1. After closing PR #54, run the owner-vault release verification from fetched `main`, create the next separately gated internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
+1. From fetched `main` at or after `aa84031be93b460c9addada6d2fb3b09286595de`, run the owner-vault release verification, create the next separately gated internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
 2. Reverify corrected divorce-certificate encrypted CRUD on the hosted test path.
 3. Treat the merged synthetic claimant prototype as the closed review baseline; keep all claimant runtime disabled and require a new exact authorization before production integration.
 4. Resolve `apps/web/LEGAL_CONTENT_REVIEW.md` before public publication.

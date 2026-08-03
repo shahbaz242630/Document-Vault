@@ -1,12 +1,12 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-08-02 (Asia/Dubai)
+Last updated: 2026-08-03 (Asia/Dubai)
 
 ## Security Status
 
-Owner-vault controls are implemented and under controlled internal testing. PR #53 merged the Settings biometric interaction repair, but the iOS release gate remains open until the full physical Face ID path passes in a new controlled candidate. The bounded synthetic claimant prototype is complete, internally accepted, and owner-authorized for merge through PR #54 after final protected CI; public legal publication, external protected-web access, real claimant data, and all claimant runtime remain disabled.
+Owner-vault controls are implemented and under controlled internal testing. PR #53 merged the Settings biometric interaction repair, but the iOS release gate remains open until the full physical Face ID path passes in a new controlled candidate. The bounded synthetic claimant prototype passed final protected CI and merged through PR #54 at `aa84031be93b460c9addada6d2fb3b09286595de`; public legal publication, external protected-web access, real claimant data, and all claimant runtime remain disabled.
 
-Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. PR #54 closes the synthetic claimant review branch and is owner-authorized to merge after its final protected CI result is green.
+Repository reference: PR #54 is merged into `main`/`origin/main` at `aa84031be93b460c9addada6d2fb3b09286595de`, closing the synthetic claimant review branch without enabling claimant runtime.
 
 ## Enforced Boundaries
 
