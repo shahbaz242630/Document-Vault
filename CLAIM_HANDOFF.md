@@ -1,15 +1,15 @@
 # Sanduqkin Claimant And Release Handoff
 
-Last updated: 2026-08-02 (Asia/Dubai)
+Last updated: 2026-08-03 (Asia/Dubai)
 
 ## Next Session Opener
 
 1. Read `HANDOFF.md`, `CLAIM_HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` completely before making changes.
-2. Fetch `origin`, check that PR #54 is merged into `main`, and record its merge commit before making changes. The reviewed implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`.
+2. Fetch `origin`, check that PR #54 is merged into `main`, and record its merge commit before making changes. The original reviewed claimant implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`. The later bounded functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc` received the focused review recorded below.
 3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
 4. PR #54 was internally accepted and the product owner authorized its merge into `main` after the final protected CI head passes. Treat the merged synthetic prototype as a closed review baseline, not as production claimant runtime.
 5. Do not restart synthetic slices or begin production integration until the product owner makes and records a new exact authorization decision. Production Slice 3 remains `NO-GO`.
-6. Do not create a TestFlight build or perform any deployment.
+6. Do not create a TestFlight build or perform any deployment as part of claimant work. The separately gated owner-vault release flow remains governed by `MVP_HANDOFF.md` and `HANDOFF.md`.
 
 ## Synthetic Claimant Prototype Checkpoint
 
@@ -53,6 +53,15 @@ After the final CI result is green, work in this order:
 - Recorded decision: **Internally reviewed and provisionally accepted for synthetic-prototype circulation. External specialist approvals remain outstanding.**
 - Subsequent owner authorization: merge PR #54 into `main` after the final protected CI head passes. This changes repository publication status only; it does not authorize production claimant runtime, real claimant data, deployment, TestFlight, release, retrieval, or decryption.
 - Re-review is required after any implementation change, base-branch change, scope expansion, failed security/CI gate, or change to a documented runtime, privacy, custody, or release boundary.
+
+## Final-Head Focused Review — 2026-08-03
+
+- Review range: acceptance-record head `8ce2b675cfe50d097049fb08d869d86a97da59ba` through functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc` on PR #54.
+- Scope: session-close documentation plus bounded Android recovery/record-persistence smoke-harness navigation and its GitHub Actions regression assertions.
+- Technical result: no actionable findings. The smoke change uses bounded polling, sanitizes diagnostic UI output, accepts only an expected post-save destination, and still verifies the unique persisted record title before continuing.
+- Verification: JavaScript syntax check passed; all 23 focused GitHub Actions security regression tests passed; focused ESLint passed; PR #54 reported no failing or pending checks at the reviewed functional head.
+- Boundary result: no claimant contract, capability, authentication, persistence, database, RLS/Storage, evidence, notification, review, custody, retrieval, release, TestFlight, or deployment behavior changed.
+- Decision: the original internal acceptance and owner merge authorization remain applicable to the reviewed functional head. Claimant production Slice 3 remains `NO-GO`.
 
 ## Non-Negotiable Boundaries
 

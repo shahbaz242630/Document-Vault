@@ -1,6 +1,6 @@
 # Sanduqkin MVP Handoff
 
-Last updated: 2026-08-02 (Asia/Dubai)
+Last updated: 2026-08-03 (Asia/Dubai)
 
 ## Current Decision
 
@@ -12,7 +12,7 @@ Repository reference: PR #53 and the biometric Settings repair are merged into `
 
 | Surface | Intended host | Current state |
 | --- | --- | --- |
-| Mobile owner vault | Native app | Internal TestFlight testing; iOS biometric gate failed |
+| Mobile owner vault | Native app | Build 6 biometric gate failed; merged repair awaits a controlled candidate and physical verification |
 | Public website | `sanduqkin.com` | Protected static preview; legal publication blocked |
 | Owner web vault | `vault.sanduqkin.com` | Implemented locally; not deployed |
 | Claimant portal | `app.sanduqkin.com` | Informational pages only; all runtime disabled |
@@ -75,7 +75,7 @@ The explicit production-code backlog is recorded under `Pending Claimant Integra
 
 ## Next Actions
 
-1. Pass protected CI, create the next internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
+1. After closing PR #54, run the owner-vault release verification from fetched `main`, create the next separately gated internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
 2. Reverify corrected divorce-certificate encrypted CRUD on the hosted test path.
 3. Treat the merged synthetic claimant prototype as the closed review baseline; keep all claimant runtime disabled and require a new exact authorization before production integration.
 4. Resolve `apps/web/LEGAL_CONTENT_REVIEW.md` before public publication.

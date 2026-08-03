@@ -1,6 +1,6 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-08-02 (Asia/Dubai)
+Last updated: 2026-08-03 (Asia/Dubai)
 
 ## Current Decision
 
@@ -50,7 +50,7 @@ PR #53 and the biometric Settings repair are merged. The next mobile release ste
 
 ## Next Actions
 
-1. Run focused mobile tests, the protected CI matrix, and create the next controlled internal TestFlight candidate.
+1. After closing PR #54, run focused mobile tests and the protected release matrix from fetched `main`, then create the next separately gated controlled internal TestFlight candidate.
 2. Complete value-free physical-iPhone QA: enablement, background lock, Face ID success/cancel/error, password fallback, returning-user recovery, trusted-person information navigation, Emergency Readiness, sealed-code state, and encrypted certificate CRUD.
 3. At the next session start, fetch `main`, verify and record PR #54's merge commit, and treat the synthetic claimant prototype as a closed review baseline.
 4. Route one immutable claimant review set to named legal/privacy, security, operations, native, and independent reviewers. Capture approver, version, decision, conditions, evidence, and expiry.
