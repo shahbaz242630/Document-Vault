@@ -5,7 +5,7 @@ Last updated: 2026-08-03 (Asia/Dubai)
 ## Next Session Opener
 
 1. Read `HANDOFF.md`, `CLAIM_HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` completely before making changes.
-2. Fetch `origin`, check that PR #54 is merged into `main`, and record its merge commit before making changes. The original reviewed claimant implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`. The later bounded functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc` received the focused review recorded below.
+2. Fetch `origin`, check that PR #54 is merged into `main`, and record its merge commit before making changes. The original reviewed claimant implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`. The later bounded functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc` received the focused review recorded at `058e66a4813cf3306db82316b64ff1f160154953`.
 3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
 4. PR #54 was internally accepted and the product owner authorized its merge into `main` after the final protected CI head passes. Treat the merged synthetic prototype as a closed review baseline, not as production claimant runtime.
 5. Do not restart synthetic slices or begin production integration until the product owner makes and records a new exact authorization decision. Production Slice 3 remains `NO-GO`.
@@ -148,6 +148,7 @@ The earliest possible next implementation is **Production Slice 3: registered-re
 
 - Synthetic Slices 1-17 are complete, technically reviewed, and provisionally accepted for bounded synthetic-prototype circulation.
 - Reviewed implementation: `a21830487f38c1d6ee3771780be454da6f20b982`; acceptance-record head: `8ce2b675cfe50d097049fb08d869d86a97da59ba`.
+- Final-head focused review: functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc`; focused-review record `058e66a4813cf3306db82316b64ff1f160154953`.
 - The product owner authorized PR #54 for merge after the final protected CI head passes. A follow-up smoke-harness correction makes successful record persistence deterministic by verifying it through `Records` -> `Bank accounts`; it does not change claimant product or runtime behavior.
 - No claimant runtime, real claimant data, deployment, TestFlight build, production database/storage change, release, retrieval, or decryption was authorized by this closure.
 - Start the next session from a clean, fetched `main`; verify and record PR #54's merge commit, read all four handoffs, select one explicitly bounded task, and stop for exact authorization before changing production claimant code.
