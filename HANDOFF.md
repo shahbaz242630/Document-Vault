@@ -4,12 +4,12 @@ Last updated: 2026-08-03 (Asia/Dubai)
 
 ## Current Decision
 
-PR #53 and the biometric Settings repair are merged. The next mobile release steps are a controlled TestFlight candidate and physical-iPhone regression. Separately, the bounded synthetic claimant prototype is complete, internally accepted, and owner-authorized for merge through PR #54 after its final protected CI head passes. This publication does not authorize another claimant slice or production claimant runtime, which remains `NO-GO`.
+PR #54 and the bounded synthetic claimant prototype are merged into `main` at `aa84031be93b460c9addada6d2fb3b09286595de`. The next mobile release steps are a separately gated controlled TestFlight candidate and physical-iPhone regression. The claimant merge does not authorize another claimant slice or production claimant runtime, which remains `NO-GO`.
 
 ## Repository Snapshot
 
-- Closing review branch: `codex/claimant-synthetic-journey`; PR #54 is owner-authorized to merge after its final protected CI result is green.
-- Base/release branch: `main` and `origin/main` at `d736eb8` (PR #53).
+- Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
+- Base/release branch: `main` and `origin/main` at `aa84031be93b460c9addada6d2fb3b09286595de` (PR #54).
 - PR #52 merged the claimant Slice 2 review package and divorce-certificate correction; PR #53 merged the biometric Settings repair.
 - Preserve unrelated local-only items such as `.codex-runtime/`.
 
@@ -50,9 +50,9 @@ PR #53 and the biometric Settings repair are merged. The next mobile release ste
 
 ## Next Actions
 
-1. After closing PR #54, run focused mobile tests and the protected release matrix from fetched `main`, then create the next separately gated controlled internal TestFlight candidate.
+1. Run focused mobile tests and the protected release matrix from fetched `main` at or after `aa84031be93b460c9addada6d2fb3b09286595de`, then create the next separately gated controlled internal TestFlight candidate.
 2. Complete value-free physical-iPhone QA: enablement, background lock, Face ID success/cancel/error, password fallback, returning-user recovery, trusted-person information navigation, Emergency Readiness, sealed-code state, and encrypted certificate CRUD.
-3. At the next session start, fetch `main`, verify and record PR #54's merge commit, and treat the synthetic claimant prototype as a closed review baseline.
+3. Treat PR #54 merge commit `aa84031be93b460c9addada6d2fb3b09286595de` as the closed synthetic claimant review baseline.
 4. Route one immutable claimant review set to named legal/privacy, security, operations, native, and independent reviewers. Capture approver, version, decision, conditions, evidence, and expiry.
 5. Keep claimant Slice 3 at `NO-GO` until every blocking checklist item is approved.
 

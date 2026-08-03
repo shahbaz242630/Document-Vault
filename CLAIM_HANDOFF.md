@@ -5,15 +5,15 @@ Last updated: 2026-08-03 (Asia/Dubai)
 ## Next Session Opener
 
 1. Read `HANDOFF.md`, `CLAIM_HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` completely before making changes.
-2. Fetch `origin`, check that PR #54 is merged into `main`, and record its merge commit before making changes. The original reviewed claimant implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`. The later bounded functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc` received the focused review recorded at `058e66a4813cf3306db82316b64ff1f160154953`.
+2. Fetch `origin` and verify `main` contains PR #54 merge commit `aa84031be93b460c9addada6d2fb3b09286595de` before making changes. The original reviewed claimant implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`. The later bounded functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc` received the focused review recorded at `058e66a4813cf3306db82316b64ff1f160154953`.
 3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
-4. PR #54 was internally accepted and the product owner authorized its merge into `main` after the final protected CI head passes. Treat the merged synthetic prototype as a closed review baseline, not as production claimant runtime.
+4. PR #54 passed final protected CI and merged into `main` at `aa84031be93b460c9addada6d2fb3b09286595de`. Treat this merged synthetic prototype as a closed review baseline, not as production claimant runtime.
 5. Do not restart synthetic slices or begin production integration until the product owner makes and records a new exact authorization decision. Production Slice 3 remains `NO-GO`.
 6. Do not create a TestFlight build or perform any deployment as part of claimant work. The separately gated owner-vault release flow remains governed by `MVP_HANDOFF.md` and `HANDOFF.md`.
 
 ## Synthetic Claimant Prototype Checkpoint
 
-The closing review branch is `codex/claimant-synthetic-journey`. Synthetic Slices 1-17 are implemented as small, modular, tested increments. Slice 17 is commit `c607923` (`Add synthetic claimant acceptance suite`), followed by formal-review remediation, acceptance, and this final session handoff. PR #54 is authorized to merge after the final protected CI result is green.
+The closed review branch is `codex/claimant-synthetic-journey`, merged through PR #54 at `aa84031be93b460c9addada6d2fb3b09286595de`. Synthetic Slices 1-17 are implemented as small, modular, tested increments. Slice 17 is commit `c607923` (`Add synthetic claimant acceptance suite`), followed by formal-review remediation, acceptance, final-head review, protected CI, and merge.
 
 Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, idempotent synthetic submission handoff, safe acknowledgement UI, fail-closed owner-protection/review tracking projection and UI, truthful decision/retrieval-readiness modelling and UI, and an end-to-end acceptance suite spanning the full synthetic journey and all seven read-only preview surfaces. They remain disconnected from production runtime and real claimant data.
 
@@ -27,7 +27,7 @@ The public `/claim` routes are informational. Claimant authentication, invitatio
 
 Product-owner direction is approved, and Shahbaz Malik is the provisionally designated operator/data controller candidate. Legal confirmation, incorporation/contracting-entity details, controller contact details, the processor map, and the remaining legal/privacy, security, operations, native custody, staffing, and independent-review gates are incomplete. No real claimant data may be collected.
 
-Repository reference: PR #53 and its biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The claimant prototype branch is reconciled with that base; claimant production runtime remains unchanged.
+Repository reference: PR #54 and the bounded synthetic claimant prototype are merged into `main`/`origin/main` at `aa84031be93b460c9addada6d2fb3b09286595de`. Claimant production runtime remains unchanged and disabled.
 
 ## Two-Person Internal Review Process
 
@@ -150,8 +150,9 @@ The earliest possible next implementation is **Production Slice 3: registered-re
 - Reviewed implementation: `a21830487f38c1d6ee3771780be454da6f20b982`; acceptance-record head: `8ce2b675cfe50d097049fb08d869d86a97da59ba`.
 - Final-head focused review: functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc`; focused-review record `058e66a4813cf3306db82316b64ff1f160154953`.
 - The product owner authorized PR #54 for merge after the final protected CI head passes. A follow-up smoke-harness correction makes successful record persistence deterministic by verifying it through `Records` -> `Bank accounts`; it does not change claimant product or runtime behavior.
+- Final protected CI passed at head `c126cb17565e3b9803f10af5f35d4b0a753ba92f`, and PR #54 merged into `main` as `aa84031be93b460c9addada6d2fb3b09286595de` on 2026-08-03.
 - No claimant runtime, real claimant data, deployment, TestFlight build, production database/storage change, release, retrieval, or decryption was authorized by this closure.
-- Start the next session from a clean, fetched `main`; verify and record PR #54's merge commit, read all four handoffs, select one explicitly bounded task, and stop for exact authorization before changing production claimant code.
+- Start the next session from a clean, fetched `main`; verify merge commit `aa84031be93b460c9addada6d2fb3b09286595de`, read all four handoffs, select one explicitly bounded task, and stop for exact authorization before changing production claimant code.
 
 ## Current Slice 2 Blockers
 
@@ -178,7 +179,7 @@ Android is not a blocker to owner-approved iOS-only preparation, but it remains 
 - `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md`
 - `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`
 
-The complete claimant review set is published in PR #54 on `codex/claimant-synthetic-journey`. After merge, circulate only the verified `main` merge commit while retaining the reviewed implementation and acceptance-record SHAs in the review metadata; never substitute the working tree or a superseded commit. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
+The complete claimant review set is published on `main` at PR #54 merge commit `aa84031be93b460c9addada6d2fb3b09286595de`. Circulate only that verified merge commit while retaining the reviewed implementation and acceptance-record SHAs in the review metadata; never substitute the working tree or a superseded commit. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
 
 ## Production Authorization Work (Separate From Synthetic Slices)
 
