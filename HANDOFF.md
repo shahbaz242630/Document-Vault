@@ -4,12 +4,12 @@ Last updated: 2026-08-03 (Asia/Dubai)
 
 ## Current Decision
 
-PR #54 and the bounded synthetic claimant prototype are merged into `main` at `aa84031be93b460c9addada6d2fb3b09286595de`. The next mobile release steps are a separately gated controlled TestFlight candidate and physical-iPhone regression. The claimant merge does not authorize another claimant slice or production claimant runtime, which remains `NO-GO`.
+The controlled owner-vault TestFlight candidate is now Sanduqkin `1.0.0` Build 7, produced and submitted successfully from exact `main` commit `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`. Apple processing/export-compliance confirmation and the physical-iPhone regression remain open, so the mobile release gate has not passed. The claimant merge does not authorize another claimant slice or production claimant runtime, which remains `NO-GO`.
 
 ## Repository Snapshot
 
 - Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
-- Base/release branch: `main` and `origin/main` at `aa84031be93b460c9addada6d2fb3b09286595de` (PR #54).
+- Base/release branch at candidate dispatch: `main` and `origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56).
 - PR #52 merged the claimant Slice 2 review package and divorce-certificate correction; PR #53 merged the biometric Settings repair.
 - Preserve unrelated local-only items such as `.codex-runtime/`.
 
@@ -17,8 +17,9 @@ PR #54 and the bounded synthetic claimant prototype are merged into `main` at `a
 
 ### Mobile owner vault
 
-- App version is `1.0.0`; TestFlight build 6 was submitted from `9a903f2` and was subsequently exercised on a physical iPhone.
-- Build 6 did not complete the iOS release gate because its `Biometric unlock` status/card was non-interactive. PR #53 merged the discoverable, accessible enable/disable action and focused coverage, but the repair has not been physically verified in a new candidate.
+- App version is `1.0.0`; Build 7 was built and uploaded to App Store Connect from `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` by protected workflow run `30830865138` on 2026-08-03. EAS build ID: `0d8fce13-9ec8-46c9-a4de-6c9224523856`.
+- Build 6 did not complete the iOS release gate because its `Biometric unlock` status/card was non-interactive. PR #53 merged the discoverable, accessible enable/disable action; Build 7 contains the repair but has not yet been physically verified.
+- Apple processing and the App Store Connect export-compliance answer remain required before Build 7 can be assigned for internal device testing. The workflow warned that `ios.infoPlist.ITSAppUsesNonExemptEncryption` is not declared in `app.json`; do not infer or record the legal answer without owner confirmation.
 - The underlying flow is implemented: enablement authenticates before caching the MEK, lock-screen restoration uses one authenticated SecureStore read, stale remote restoration requires a live Supabase session, and password fallback remains available.
 - Android emulator evidence passed. Physical Face ID enablement and `Lock` -> `Unlock` remain unverified.
 - Marriage and divorce certificate values exist in the encrypted Document Locations registry and automated tests. The corrected divorce value still needs fresh hosted create/edit/reload/delete verification.
@@ -50,15 +51,15 @@ PR #54 and the bounded synthetic claimant prototype are merged into `main` at `a
 
 ## Next Actions
 
-1. Run focused mobile tests and the protected release matrix from fetched `main` at or after `aa84031be93b460c9addada6d2fb3b09286595de`, then create the next separately gated controlled internal TestFlight candidate.
-2. Complete value-free physical-iPhone QA: enablement, background lock, Face ID success/cancel/error, password fallback, returning-user recovery, trusted-person information navigation, Emergency Readiness, sealed-code state, and encrypted certificate CRUD.
+1. In App Store Connect, complete the Build 7 export-compliance answer, wait for Apple processing, and assign the build only to the intended internal TestFlight group/testers.
+2. Complete value-free physical-iPhone QA on Build 7: enablement, background lock, Face ID success/cancel/error, password fallback, returning-user recovery, trusted-person information navigation, Emergency Readiness, sealed-code state, and encrypted certificate CRUD.
 3. Treat PR #54 merge commit `aa84031be93b460c9addada6d2fb3b09286595de` as the closed synthetic claimant review baseline.
 4. Route one immutable claimant review set to named legal/privacy, security, operations, native, and independent reviewers. Capture approver, version, decision, conditions, evidence, and expiry.
 5. Keep claimant Slice 3 at `NO-GO` until every blocking checklist item is approved.
 
 ## Current Release Blockers
 
-- Physical iOS biometric regression and corrected divorce-certificate persistence evidence.
+- Build 7 Apple processing/export-compliance confirmation, physical iOS biometric regression, and corrected divorce-certificate persistence evidence.
 - Supabase Pro, backup/restore drill, single-session policy, JWT lifetime, and displacement testing before external protected-web use.
 - Production owner/claimant origin decision and deployment review.
 - Public legal approval.
@@ -66,6 +67,13 @@ PR #54 and the bounded synthetic claimant prototype are merged into `main` at `a
 - Legal confirmation of Shahbaz Malik as operator/data controller, contracting-entity and processor mapping, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
 
 ## Verification
+
+### Owner-vault candidate on 2026-08-03
+
+- Exact-main Security CI run `30828358898` passed the application security, CodeQL, ZAP, Android native compile, live Supabase/RLS, Android emulator, hosted Supabase integration, and iOS simulator jobs.
+- Protected TestFlight workflow run `30830865138` passed, including release SBOM generation, EAS iOS production build, App Store Connect upload, and transient credential removal.
+- Candidate evidence: Sanduqkin `1.0.0` Build 7; source `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`; EAS build `0d8fce13-9ec8-46c9-a4de-6c9224523856`.
+- This is build/submission evidence only. Apple processing/export compliance and physical-iPhone regression remain pending.
 
 ### Claimant prototype acceptance on 2026-08-02
 

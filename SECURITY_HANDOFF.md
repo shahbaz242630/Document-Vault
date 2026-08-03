@@ -4,9 +4,9 @@ Last updated: 2026-08-03 (Asia/Dubai)
 
 ## Security Status
 
-Owner-vault controls are implemented and under controlled internal testing. PR #53 merged the Settings biometric interaction repair, but the iOS release gate remains open until the full physical Face ID path passes in a new controlled candidate. The bounded synthetic claimant prototype passed final protected CI and merged through PR #54 at `aa84031be93b460c9addada6d2fb3b09286595de`; public legal publication, external protected-web access, real claimant data, and all claimant runtime remain disabled.
+Owner-vault controls are implemented and under controlled internal testing. Sanduqkin `1.0.0` Build 7, containing the PR #53 biometric interaction repair, was built and uploaded successfully from exact `main` commit `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`; Apple processing/export-compliance confirmation and the full physical Face ID path remain open. Public legal publication, external protected-web access, real claimant data, and all claimant runtime remain disabled.
 
-Repository reference: PR #54 is merged into `main`/`origin/main` at `aa84031be93b460c9addada6d2fb3b09286595de`, closing the synthetic claimant review branch without enabling claimant runtime.
+Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 remains the closed synthetic claimant review baseline and did not enable claimant runtime.
 
 ## Enforced Boundaries
 
@@ -51,9 +51,10 @@ Repository reference: PR #54 is merged into `main`/`origin/main` at `aa84031be93
 
 ### Mobile release
 
-- Verify the merged PR #53 biometric Settings repair in the next controlled physical-iPhone candidate.
-- Produce the next internal candidate and physically verify Face ID enablement, `Lock` -> `Unlock`, background lock, cancel/error handling, expired-session fallback, and returning-user recovery.
+- Complete Build 7 Apple processing and export-compliance confirmation, then assign it only to the intended internal TestFlight group/testers.
+- On Build 7, physically verify Face ID enablement, `Lock` -> `Unlock`, background lock, cancel/error handling, expired-session fallback, and returning-user recovery.
 - Reverify corrected divorce-certificate encrypted persistence and cleanup.
+- Resolve the workflow warning that `ios.infoPlist.ITSAppUsesNonExemptEncryption` is absent by recording the owner-confirmed App Store Connect answer; do not infer the legal classification.
 
 ### Protected web
 
@@ -80,6 +81,13 @@ Still required:
 `CLAIM_HANDOFF.md` now records the full pending production integration-code backlog. PR #54 supplies synthetic contracts, projections, fixtures, previews, and tests only; it supplies no production claimant authentication, persistence, RLS/Storage policy, evidence pipeline, case processor, reviewer operations, notification delivery, native custody, or release runtime.
 
 ## Verification
+
+### Owner-vault candidate on 2026-08-03
+
+- Exact-main Security CI run `30828358898` passed the application security, CodeQL, ZAP, Android native compile, live Supabase/RLS, Android emulator, hosted Supabase integration, and iOS simulator jobs.
+- Protected TestFlight workflow run `30830865138` passed release SBOM generation, EAS production build, App Store Connect upload, and transient credential cleanup.
+- Candidate: Sanduqkin `1.0.0` Build 7; source `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`; EAS build `0d8fce13-9ec8-46c9-a4de-6c9224523856`.
+- Apple processing/export compliance and physical-device verification remain open; claimant runtime remains `NO-GO`.
 
 ### Claimant prototype acceptance on 2026-08-02
 

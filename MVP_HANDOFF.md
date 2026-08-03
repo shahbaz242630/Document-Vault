@@ -4,15 +4,15 @@ Last updated: 2026-08-03 (Asia/Dubai)
 
 ## Current Decision
 
-Finish the mobile owner-vault release gate first. PR #53 merged the biometric Settings repair, but a controlled candidate and physical-iPhone regression remain. Public website publication, protected owner-web deployment, and production claimant implementation remain separate gated workstreams.
+Finish the mobile owner-vault release gate first. Sanduqkin `1.0.0` Build 7 was built and uploaded successfully from exact `main` commit `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`; Apple processing/export-compliance confirmation and physical-iPhone regression remain. Public website publication, protected owner-web deployment, and production claimant implementation remain separate gated workstreams.
 
-Repository reference: PR #54 and the bounded synthetic claimant prototype are merged into `main`/`origin/main` at `aa84031be93b460c9addada6d2fb3b09286595de`. This publication does not authorize claimant runtime or real claimant data.
+Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. The earlier claimant publication does not authorize claimant runtime or real claimant data.
 
 ## MVP Surfaces
 
 | Surface | Intended host | Current state |
 | --- | --- | --- |
-| Mobile owner vault | Native app | Build 6 biometric gate failed; merged repair awaits a controlled candidate and physical verification |
+| Mobile owner vault | Native app | Build 7 submitted with the biometric repair; Apple processing/export compliance and physical verification remain |
 | Public website | `sanduqkin.com` | Protected static preview; legal publication blocked |
 | Owner web vault | `vault.sanduqkin.com` | Implemented locally; not deployed |
 | Claimant portal | `app.sanduqkin.com` | Informational pages only; all runtime disabled |
@@ -40,9 +40,11 @@ Production hosts remain subject to final security/privacy approval. Use host-onl
 
 Build 6 was submitted and subsequently tested on a physical iPhone. Its Settings biometric card/status was a plain `View`; only the conditional enable/disable buttons were pressable, so physical Face ID setup and the protected-key `Lock` -> `Unlock` path did not pass.
 
-PR #53 merged a discoverable and accessible Settings action with focused coverage. The repair has not yet been verified in a new physical-iPhone candidate, so the release gate remains open.
+PR #53 merged a discoverable and accessible Settings action with focused coverage. Build 7 contains the repair and was uploaded successfully, but it has not yet been verified on a physical iPhone, so the release gate remains open.
 
-Code review confirms the underlying enablement, authenticated key retrieval, session validation, and password fallback paths are present. Android emulator evidence passed. A corrected interaction and a new controlled candidate are required.
+Protected TestFlight workflow run `30830865138` produced Sanduqkin `1.0.0` Build 7 from `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`; EAS build ID `0d8fce13-9ec8-46c9-a4de-6c9224523856`. Apple processing and the App Store Connect export-compliance answer remain required before internal assignment. The build warned that `ios.infoPlist.ITSAppUsesNonExemptEncryption` is not declared; the owner must confirm the correct legal answer.
+
+Code review confirms the underlying enablement, authenticated key retrieval, session validation, and password fallback paths are present. Android emulator evidence passed. Build 7 now requires the controlled physical-iPhone verification.
 
 Marriage/divorce certificate options are present in the encrypted Document Locations registry and automated tests. The corrected divorce value has not received fresh hosted persistence evidence.
 
@@ -75,7 +77,7 @@ The explicit production-code backlog is recorded under `Pending Claimant Integra
 
 ## Next Actions
 
-1. From fetched `main` at or after `aa84031be93b460c9addada6d2fb3b09286595de`, run the owner-vault release verification, create the next separately gated internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
+1. Complete Build 7 processing/export compliance in App Store Connect, assign it only to the intended internal testers, and complete the physical-iPhone owner-flow regression.
 2. Reverify corrected divorce-certificate encrypted CRUD on the hosted test path.
 3. Treat the merged synthetic claimant prototype as the closed review baseline; keep all claimant runtime disabled and require a new exact authorization before production integration.
 4. Resolve `apps/web/LEGAL_CONTENT_REVIEW.md` before public publication.
@@ -83,6 +85,13 @@ The explicit production-code backlog is recorded under `Pending Claimant Integra
 6. Route the immutable claimant package to named specialists; keep all claimant runtime disabled.
 
 ## Verification
+
+### Owner-vault candidate on 2026-08-03
+
+- Exact-main Security CI run `30828358898` passed the full protected matrix, including live Supabase/RLS, hosted integration, Android emulator, and iOS simulator jobs.
+- Protected TestFlight workflow run `30830865138` passed release SBOM, EAS production build, App Store Connect upload, and transient credential cleanup.
+- Candidate: Sanduqkin `1.0.0` Build 7; source `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`; EAS build `0d8fce13-9ec8-46c9-a4de-6c9224523856`.
+- Submission success does not satisfy the physical-device release gate.
 
 ### Claimant prototype acceptance on 2026-08-02
 
