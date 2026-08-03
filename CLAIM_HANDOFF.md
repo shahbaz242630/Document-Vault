@@ -5,11 +5,21 @@ Last updated: 2026-08-03 (Asia/Dubai)
 ## Next Session Opener
 
 1. Read `HANDOFF.md`, `CLAIM_HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` completely before making changes.
-2. Fetch `origin` and verify `main` contains PR #54 merge commit `aa84031be93b460c9addada6d2fb3b09286595de` before making changes. The original reviewed claimant implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`. The later bounded functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc` received the focused review recorded at `058e66a4813cf3306db82316b64ff1f160154953`.
+2. Fetch `origin` and verify `main` contains PR #59 merge commit `887abd0459197c5123b8972e1b8c5bed14ec5528` before making changes. The closed claimant baseline remains PR #54 merge commit `aa84031be93b460c9addada6d2fb3b09286595de`; the original reviewed claimant implementation is `a21830487f38c1d6ee3771780be454da6f20b982`, and its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`.
 3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
 4. PR #54 passed final protected CI and merged into `main` at `aa84031be93b460c9addada6d2fb3b09286595de`. Treat this merged synthetic prototype as a closed review baseline, not as production claimant runtime.
-5. Do not restart synthetic slices or begin production integration until the product owner makes and records a new exact authorization decision. Production Slice 3 remains `NO-GO`.
-6. Do not create a TestFlight build or perform any deployment as part of claimant work. The separately gated owner-vault release flow remains governed by `MVP_HANDOFF.md` and `HANDOFF.md`.
+5. Start by asking Shahbaz Malik for the Build 7 App Store Connect/export-compliance status and the completed physical-iPhone test results. Build 7 is Sanduqkin `1.0.0`, source `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`, EAS build `0d8fce13-9ec8-46c9-a4de-6c9224523856`. Do not infer the export-compliance legal answer, repeat testing already evidenced, or declare the mobile gate passed without recorded results.
+6. After recording Build 7 results, the next separate security decision is the edge provider and service plan for `EDGE-01` through `EDGE-03`: full-ingress WAF/origin shielding, genuine adaptive anomaly mitigation, and the pre-approved DDoS response/recovery playbook. PR #59 documented these P0 gates; it did not authorize DNS, hosting, provider-account, deployment, or runtime changes.
+7. Do not restart synthetic claimant slices or begin production integration until the product owner makes and records a new exact authorization decision. Production Slice 3 remains `NO-GO`; no real claimant data may be collected.
+8. Do not create another TestFlight build or perform a deployment as part of claimant work. The separately gated owner-vault release flow remains governed by `MVP_HANDOFF.md` and `HANDOFF.md`.
+
+## Session Close Record — 2026-08-03 (Build 7 And Edge Security)
+
+- Build 7 was successfully built and uploaded from exact source commit `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`. Apple processing/export-compliance confirmation and the value-free physical-iPhone regression remain owner-reported open items at session close.
+- PR #58 merged the owner-web security baseline and the `brace-expansion` remediation into `main` at `c0a14e1`. PR #59 then merged the documented WAF, adaptive mitigation, and DDoS response gates into `main` at `887abd0459197c5123b8972e1b8c5bed14ec5528`; all protected checks passed.
+- No WAF/provider account was configured, no DNS or origin route changed, and no public or protected web surface was deployed. Provider selection, plan capability, privacy/legal review, configuration, validation, and activation remain separately authorized work.
+- The claimant synthetic baseline and production boundary did not change during this session. Claimant production Slice 3 remains `NO-GO`, with no authorization for claimant authentication, persistence, evidence, review, release, retrieval, decryption, real claimant data, TestFlight work, or deployment.
+- Next session should first capture Build 7 evidence, then either close/remediate the mobile release gate or obtain an exact owner decision on the bounded edge-security planning task. Keep claimant production work stopped unless separately and explicitly authorized.
 
 ## Synthetic Claimant Prototype Checkpoint
 
