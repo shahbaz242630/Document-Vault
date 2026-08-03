@@ -20,6 +20,24 @@ export const claimInformationRoutes = [
   "/claim/emergency-code",
 ] as const;
 
+export const claimSyntheticPreviewRoute = "/claim/synthetic-preview" as const;
+export const claimSyntheticChecklistRoute = "/claim/synthetic-checklist" as const;
+export const claimSyntheticEvidenceRoute = "/claim/synthetic-evidence" as const;
+export const claimSyntheticSubmissionRoute = "/claim/synthetic-submission" as const;
+export const claimSyntheticAcknowledgementRoute = "/claim/synthetic-acknowledgement" as const;
+export const claimSyntheticReviewTrackingRoute = "/claim/synthetic-review-tracking" as const;
+export const claimSyntheticDecisionReadinessRoute = "/claim/synthetic-decision-readiness" as const;
+
+export const claimSyntheticReviewRoutes = [
+  claimSyntheticPreviewRoute,
+  claimSyntheticChecklistRoute,
+  claimSyntheticEvidenceRoute,
+  claimSyntheticSubmissionRoute,
+  claimSyntheticAcknowledgementRoute,
+  claimSyntheticReviewTrackingRoute,
+  claimSyntheticDecisionReadinessRoute,
+] as const;
+
 export const publicRoutes = [
   "/",
   ...primaryNavigation.map(({ href }) => href),

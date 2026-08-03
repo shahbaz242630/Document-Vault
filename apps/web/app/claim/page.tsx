@@ -37,9 +37,11 @@ export default function ClaimPage() {
 
       <section className="content-section">
         <header><p className="eyebrow">Planned portal structure</p><h2>Release is the final controlled state.</h2><p>The portal will separate account control, identity, evidence, review, owner protection, and cryptographic release.</p></header>
-        <ol className="steps">
-          {claimantPortalStages.map((stage) => <li key={stage.title}><h3>{stage.title}</h3><p>{stage.description}</p></li>)}
-        </ol>
+        <div>
+          <ol className="steps">
+            {claimantPortalStages.map((stage) => <li key={stage.title}><h3>{stage.title}</h3><p>{stage.description}</p></li>)}
+          </ol>
+        </div>
       </section>
 
       <section className="content-section">

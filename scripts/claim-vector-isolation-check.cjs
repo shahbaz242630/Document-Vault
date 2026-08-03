@@ -29,21 +29,26 @@ const forbiddenContractTokens = [
   "release_packages",
 ];
 
-for (const filename of readdirSync(contractDirectory)) {
-  if (
-    !filename.endsWith(".ts") ||
-    filename.endsWith(".test.ts")
-  ) {
-    continue;
-  }
-  const source = readFileSync(join(contractDirectory, filename), "utf8");
+for (const contractPath of collectContractFiles(contractDirectory)) {
+  const source = readFileSync(contractPath, "utf8");
   for (const token of forbiddenContractTokens) {
     if (source.includes(token)) {
       throw new Error(
-        `Claim protocol contract ${filename} contains forbidden runtime token ${token}.`,
+        `Claim protocol contract ${contractPath} contains forbidden runtime token ${token}.`,
       );
     }
   }
+}
+
+function collectContractFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = join(directory, entry.name);
+    if (entry.isDirectory()) return collectContractFiles(entryPath);
+    if (!entry.isFile() || !entry.name.endsWith(".ts") || entry.name.endsWith(".test.ts")) {
+      return [];
+    }
+    return [entryPath];
+  });
 }
 
 const expectedVectors = [
@@ -92,3 +97,5 @@ for (const capability of [
     throw new Error(`Claimant capability ${capability} is not hard-disabled.`);
   }
 }
+
+module.exports = { collectContractFiles };

@@ -1,18 +1,18 @@
 # Sanduqkin MVP Handoff
 
-Last updated: 2026-08-01 (Asia/Dubai)
+Last updated: 2026-08-03 (Asia/Dubai)
 
 ## Current Decision
 
-Finish the mobile owner-vault release gate first. The biometric Settings repair is implemented in draft PR #53, but merge review, a controlled candidate, and physical-iPhone regression remain. Public website publication, protected owner-web deployment, and claimant implementation remain separate gated workstreams.
+Finish the mobile owner-vault release gate first. PR #53 merged the biometric Settings repair, but a controlled candidate and physical-iPhone regression remain. Public website publication, protected owner-web deployment, and production claimant implementation remain separate gated workstreams.
 
-Repository reference: PR #52 merged into `main`/`origin/main` at `37b05d0`. The biometric Settings repair is isolated on `codex/biometric-settings-control`.
+Repository reference: PR #53 and the biometric Settings repair are merged into `main`/`origin/main` at `d736eb8`. The synthetic claimant prototype was internally accepted, and the product owner authorized PR #54 for merge after the final protected CI head passes. The next session must fetch `main` and record the resulting merge commit.
 
 ## MVP Surfaces
 
 | Surface | Intended host | Current state |
 | --- | --- | --- |
-| Mobile owner vault | Native app | Internal TestFlight testing; iOS biometric gate failed |
+| Mobile owner vault | Native app | Build 6 biometric gate failed; merged repair awaits a controlled candidate and physical verification |
 | Public website | `sanduqkin.com` | Protected static preview; legal publication blocked |
 | Owner web vault | `vault.sanduqkin.com` | Implemented locally; not deployed |
 | Claimant portal | `app.sanduqkin.com` | Informational pages only; all runtime disabled |
@@ -27,7 +27,7 @@ Production hosts remain subject to final security/privacy approval. Use host-onl
 - Shared mobile/web validation, ciphertext envelope, and Supabase owner-vault records.
 - Protected owner-web authentication and encrypted CRUD implementation, pending deployment gates.
 - Static product, support, security, accessibility, privacy, terms, deletion, and inactive claimant information pages.
-- Runtime-disconnected claimant protocol contracts, synthetic vectors, threat/decision documents, and native custody feasibility probe.
+- Completed runtime-disconnected claimant synthetic prototype, protocol contracts, vectors, end-to-end acceptance suite, threat/decision documents, and native custody feasibility probe.
 
 ## Explicitly Excluded
 
@@ -38,7 +38,9 @@ Production hosts remain subject to final security/privacy approval. Use host-onl
 
 ## Current Mobile Finding
 
-Build 6 was submitted and subsequently tested on a physical iPhone. The Settings biometric card/status is a plain `View`; only the conditional enable/disable buttons are pressable. Tapping the card silently does nothing, so physical Face ID setup and the protected-key `Lock` -> `Unlock` path have not passed.
+Build 6 was submitted and subsequently tested on a physical iPhone. Its Settings biometric card/status was a plain `View`; only the conditional enable/disable buttons were pressable, so physical Face ID setup and the protected-key `Lock` -> `Unlock` path did not pass.
+
+PR #53 merged a discoverable and accessible Settings action with focused coverage. The repair has not yet been verified in a new physical-iPhone candidate, so the release gate remains open.
 
 Code review confirms the underlying enablement, authenticated key retrieval, session validation, and password fallback paths are present. Android emulator evidence passed. A corrected interaction and a new controlled candidate are required.
 
@@ -54,7 +56,7 @@ Marriage/divorce certificate options are present in the encrypted Document Locat
 
 ## Claimant Product Direction
 
-Status: product-owner approved; specialist approval and evidence pending; runtime `NO-GO`.
+Status: synthetic prototype complete; product direction approved; specialist approval and evidence pending; runtime `NO-GO`.
 
 - Registered-recipient route first; death-only invitation pilot.
 - Claimant authentication/MFA, relationship, documents, or code possession do not authorize release.
@@ -69,16 +71,27 @@ Status: product-owner approved; specialist approval and evidence pending; runtim
 
 Detailed decisions and gates live in `CLAIM_HANDOFF.md` and the 2026-07-31 claimant Slice 2 documents.
 
+The explicit production-code backlog is recorded under `Pending Claimant Integration Code` in `CLAIM_HANDOFF.md`. None of that integration is built or authorized by the synthetic prototype merge; Production Slice 3 remains `NO-GO`.
+
 ## Next Actions
 
-1. Review and merge draft PR #53, then verify the repaired biometric Settings interaction in the next controlled candidate.
-2. Pass protected CI, create the next internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
-3. Reverify corrected divorce-certificate encrypted CRUD on the hosted test path.
+1. After closing PR #54, run the owner-vault release verification from fetched `main`, create the next separately gated internal TestFlight candidate, and complete physical-iPhone owner-flow regression.
+2. Reverify corrected divorce-certificate encrypted CRUD on the hosted test path.
+3. Treat the merged synthetic claimant prototype as the closed review baseline; keep all claimant runtime disabled and require a new exact authorization before production integration.
 4. Resolve `apps/web/LEGAL_CONTENT_REVIEW.md` before public publication.
 5. Complete Supabase Pro, backup/restore, single-session, JWT, origin, hosted-configuration, monitoring, rollback, and synthetic smoke gates before protected-web deployment.
 6. Route the immutable claimant package to named specialists; keep all claimant runtime disabled.
 
-## Verification On 2026-08-01
+## Verification
+
+### Claimant prototype acceptance on 2026-08-02
+
+- Full web suite: 141 passed; shared claimant: 110 passed; shared validation: 42 passed.
+- Formal-review remediation now enforces complete audit-input idempotency and case binding, validates canonical snapshot projections and evidence-preparation metadata, binds audit event types to transitions, and keeps synthetic review routes out of public navigation and the sitemap.
+- All workspace typechecks, root lint, production web build, Phase 1, security, secret, and claimant isolation guards passed.
+- All claimant runtime capabilities remain disabled. Synthetic completion does not authorize claimant runtime or real claimant data.
+
+### Baseline on 2026-08-01
 
 - Focused mobile tests: 27 passed.
 - Shared validation tests: 42 passed.

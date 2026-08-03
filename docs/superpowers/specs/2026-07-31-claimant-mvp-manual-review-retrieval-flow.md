@@ -1,6 +1,6 @@
 # Claimant MVP Manual Review And Retrieval Flow
 
-Last updated: 2026-07-31 (Asia/Dubai)
+Last updated: 2026-08-02 (Asia/Dubai)
 
 Status: Owner-approved product journey and native local PDF boundary; `NO-GO` for runtime implementation pending specialist gates.
 
@@ -87,7 +87,7 @@ The dashboard uses safe public states:
 6. Owner-protection checks in progress.
 7. Decision recorded.
 8. Secure retrieval available.
-9. Retrieval confirmed and case closed.
+9. Case closed. Closure does not by itself prove local open, reading, export or retention.
 
 It does not expose reviewer identity, owner response, fraud signals, internal notes, evidence-verification methods, exact security timers or release-control logic.
 
@@ -119,4 +119,4 @@ The backend can prove that it authorized a retrieval session and served encrypte
 
 ## Stop Gate
 
-Do not implement this journey until the operator/controller, policy packs, evidence catalogue, review staffing, iOS custody proof, security/privacy/legal approvals, storage provider and audit design are approved against one immutable review set.
+Do not implement this journey until the provisional Shahbaz Malik operator/data controller designation is legally confirmed with contracting-entity/controller details and a processor map, and the policy packs, evidence catalogue, review staffing, iOS custody proof, security/privacy/legal approvals, storage provider and audit design are approved against one immutable review set.
