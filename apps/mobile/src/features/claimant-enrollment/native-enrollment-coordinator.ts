@@ -24,7 +24,7 @@ export type EnrollmentCustodyAdapterV1 = Readonly<{
   deleteKey(keyAliasReference: string): Promise<void>;
 }>;
 
-type AttemptPersistenceV1 = Readonly<{
+export type AttemptPersistenceV1 = Readonly<{
   accountId: string;
   approved?: boolean;
   createAttemptId: () => string;
