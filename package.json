@@ -57,6 +57,7 @@
     "check:claimant-evidence-preparation-db": "node scripts/claimant-evidence-preparation-db-test.cjs",
     "check:claimant-private-quarantine-db": "node scripts/claimant-private-quarantine-db-test.cjs",
     "check:claimant-submission-db": "node scripts/claimant-submission-db-test.cjs",
+    "check:claimant-submission-controller-isolation": "node scripts/claimant-submission-controller-isolation-check.cjs",
     "check:claimant-upload-controller-isolation": "node scripts/claimant-upload-controller-isolation-check.cjs",
     "check:claimant-upload-client-isolation": "node scripts/claimant-upload-client-isolation-check.cjs",
     "check:claimant-dashboard-client-isolation": "node scripts/claimant-dashboard-client-isolation-check.cjs",

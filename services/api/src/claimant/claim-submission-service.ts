@@ -14,8 +14,8 @@ export function createClaimSubmissionServiceV1(input: Readonly<{
   approved?: boolean; serverTime: () => string; transactions: ClaimSubmissionTransactionClientV1;
 }>) {
   return { async submit(value: Readonly<{
-    claimantUserId: string; envelope: unknown; expectedIntakeVersion: number;
-    expectedPreparationVersion: number; portalSessionId: string;
+    caseId: string; claimantUserId: string; envelope: unknown; expectedIntakeVersion: number;
+    expectedPreparationVersion: number; idempotencyKey: string; portalSessionId: string;
   }>) {
     if (!(input.approved ?? CLAIMANT_SUBMISSION_APPROVED)) {
       throw new ClaimSubmissionServiceError("disabled");
@@ -23,7 +23,8 @@ export function createClaimSubmissionServiceV1(input: Readonly<{
     const parsed = envelopeSchema.safeParse(value.envelope);
     const serverTime = Date.parse(input.serverTime());
     if (!parsed.success || !Number.isFinite(serverTime)
-      || Date.parse(parsed.data.created_at) > serverTime
+      || Date.parse(parsed.data.created_at) > serverTime || parsed.data.case_ref !== value.caseId
+      || parsed.data.idempotency_key !== value.idempotencyKey
       || new Set(parsed.data.declarations).size !== syntheticReviewSubmissionDeclarationKeys.length
       || syntheticReviewSubmissionDeclarationKeys.some((key) => !parsed.data.declarations.includes(key))) {
       throw new ClaimSubmissionServiceError("invalid_submission");
@@ -36,13 +37,13 @@ export function createClaimSubmissionServiceV1(input: Readonly<{
       seenItems.add(item.item_key); seenRefs.add(item.placeholder_ref);
     }
     return input.transactions.submit({ bundleRef: parsed.data.evidence_bundle_ref,
-      caseId: parsed.data.case_ref, claimantUserId: value.claimantUserId,
+      caseId: value.caseId, claimantUserId: value.claimantUserId,
       createdAt: parsed.data.created_at, declarations: parsed.data.declarations,
       evidenceManifest: parsed.data.evidence_manifest.map((item) => ({ itemKey: item.item_key,
         placeholderRef: item.placeholder_ref })), expectedCaseVersion: parsed.data.expected_case_version,
       expectedIntakeVersion: value.expectedIntakeVersion,
       expectedPreparationVersion: value.expectedPreparationVersion,
-      idempotencyKey: parsed.data.idempotency_key, policyPackId: parsed.data.policy_id,
+      idempotencyKey: value.idempotencyKey, policyPackId: parsed.data.policy_id,
       policyPackVersion: parsed.data.policy_version, portalSessionId: value.portalSessionId,
       submissionRef: parsed.data.submission_ref });
   } };

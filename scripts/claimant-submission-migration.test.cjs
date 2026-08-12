@@ -29,13 +29,13 @@ test("binds submission to server-owned case, portal, key, preparation, and clean
   assert.match(migration, /insert into public\.claimant_submission_receipts[\s\S]*insert into public\.claimant_audit_events[\s\S]*insert into public\.claimant_outbox[\s\S]*insert into public\.claimant_idempotency_records/);
 });
 
-test("returns only safe acknowledgement state and remains unmounted and disabled", () => {
+test("returns only safe acknowledgement state and remains service-disabled behind its controller", () => {
   assert.match(service, /CLAIMANT_SUBMISSION_APPROVED\s*=\s*false\s+as\s+const/);
   assert.match(migration, /'review_started', false/);
   assert.match(migration, /'release_authorized', false/);
   for (const forbidden of ["reviewer_id", "owner_response", "fraud_signal", "risk_score",
     "internal_note", "filename", "object_path", "content_digest"]) assert.doesNotMatch(service, new RegExp(forbidden));
-  assert.doesNotMatch(apiIndex, /claim-submission|submit-claim/);
+  assert.doesNotMatch(apiIndex, /claim-submission-service|claim-submission-transaction-client/);
   assert.doesNotMatch(service, /fetch\(|createClient\(|process\.env/);
 });
 

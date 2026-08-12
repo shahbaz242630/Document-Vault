@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 supplied the synthetic claimant baseline only; the 2026-08-04 owner decision separately authorizes production-shaped engineering while external runtime and real claimant data remain blocked.
 
-Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 2F has local checkpoint `9b59916` and Slice 2G has local checkpoint `4e4d5c5`. Phase 2 Slice 2H is code-complete locally on `codex/claimant-submission-transaction`; all claimant capabilities remain disabled.
+Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 2F has local checkpoint `9b59916`, Slice 2G has local checkpoint `4e4d5c5`, and Slice 2H has local checkpoint `0215f30`. Phase 2 Slice 2I is checkpointed at the local head of `codex/claimant-submission-controller`; all claimant capabilities remain disabled.
 
 Deployment safety checkpoint: the 2026-08-12 Vercel workspace-package tracing failure is fixed by compiling and bundling an explicit `@vault/shared-types` Node runtime entry while retaining source types/mobile resolution. The function-bundle guard imports the exact packaged entry. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated health and route/security probes with no exception logs. Production remains deliberately on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; the preview was not promoted.
 
@@ -119,7 +119,9 @@ Slice 2F claimant upload client coordination is code-complete locally, immutable
 
 Slice 2G claimant dashboard read-model coordination is code-complete locally, immutable-false, and absent from normal web runtime imports. It accepts only coherent canonical safe-projection triplets bound to one case/version, rejects private fields and stale/divergent/cross-case responses, clears prior case state when switching, and retains only a frozen memory snapshot. No API route, database projection, browser persistence, deployment, or external behavior exists.
 
-Slice 2H claimant submission and safe acknowledgement are code-complete locally, immutable-false, and unmounted. One service-only transaction reasserts portal/current-key/case/intake/latest-preparation/clean-object authority, advances only to `submitted`, and atomically writes an append-only safe receipt, value-free audit/outbox events, and idempotency state. Replay is stable; late failures fully roll back; review and release remain explicitly false. No route, hosted migration, notification delivery, deployment, or external behavior exists.
+Slice 2H claimant submission and safe acknowledgement are code-complete locally and immutable-false. The service-only transaction was directly unmounted at that checkpoint and is now reachable only through Slice 2I's independently concealed controller. It reasserts portal/current-key/case/intake/latest-preparation/clean-object authority, advances only to `submitted`, and atomically writes an append-only safe receipt, value-free audit/outbox events, and idempotency state. Replay is stable; late failures fully roll back; review and release remain explicitly false. No hosted migration, notification delivery, deployment, or external behavior exists.
+
+Slice 2I claimant submission control is code-complete locally and immutable-false. The mounted route is concealed before configuration/CORS while disabled; its test-only enabled path enforces exact API/claimant origins, JSON/body/idempotency bounds, route/header-to-envelope binding, bearer-derived fresh AAL2 without recovery, active portal authority, bounded claimant-case concurrency, safe acknowledgement output, and generic failures. No notification provider, hosted migration, deployment, or external behavior was added.
 
 The returned review reproduced both original aggregates and every manifested file. On 2026-08-12 the owner explicitly accepted it as closing the Slice 1B/1C review gate and authorized bounded remediation and later disabled implementation slices. This does not authorize production activation or real claimant data.
 
@@ -144,14 +146,21 @@ The engineering target, readiness definition, and phased implementation order ar
 
 ## Next Actions
 
-1. Review Slice 2H and `docs/verification/2026-08-12-claimant-slice-2h-submission-acknowledgement-transaction.md`; publish only with explicit authorization.
-2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H approvals immutable false and do not deploy the local claimant/Storage migrations.
+1. Review Slice 2I and `docs/verification/2026-08-12-claimant-slice-2i-submission-controller.md`; publish only with explicit authorization.
+2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I approvals immutable false and do not deploy the local claimant/Storage migrations.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
-4. Continue with a concealed immutable-false submission/acknowledgement controller, then owner protection/review and encrypted release/native retrieval before the safe V2 route. Keep hosted migration, real files/providers, notifications, and external access separately gated.
+4. Continue with a hard-disabled runtime-disconnected web submission coordinator, then owner protection/review and encrypted release/native retrieval before the safe V2 route. Keep hosted migration, real files/providers, notifications, and external access separately gated.
 5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.
 6. Treat Build 7 as closed and passed; public App Store release and another build remain separately gated.
 
 ## Verification
+
+### Claimant Slice 2I closing baseline on 2026-08-12
+
+- All workspaces: 969 tests passed; 3 established environment-gated mobile tests skipped.
+- All workspace typechecks, zero-warning root lint, the 24-route production web build, and the API Vercel bundle guard passed.
+- The rollback-only submission database exercise, controller isolation, repository security, GitHub Actions security, claimant-custody isolation, and 31 combined static regressions passed.
+- Slice 2I was not deployed. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` and production rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr` remain unchanged.
 
 ### Build 7 owner-reported gate closure on 2026-08-04
 

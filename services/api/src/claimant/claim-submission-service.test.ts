@@ -64,7 +64,8 @@ function validEnvelope() { return { protocol: "sanduqkin:claim:review-submission
   evidence_manifest: [{ item_key: "claimant_photo_identity", placeholder_ref: "synthetic_evidence_001" }],
   declarations: [...declarations], created_at: "2026-08-12T12:00:00.000Z" }; }
 function context(envelope: unknown = validEnvelope()) { return { claimantUserId: ids.claimant,
-  envelope, expectedIntakeVersion: 3, expectedPreparationVersion: 2,
+  caseId: ids.case, envelope, expectedIntakeVersion: 3, expectedPreparationVersion: 2,
+  idempotencyKey: ids.attempt,
   portalSessionId: ids.session }; }
 function enabledService() { return createClaimSubmissionServiceV1({ approved: true,
   serverTime: () => "2026-08-12T12:01:00.000Z", transactions: { submit: vi.fn() } }); }

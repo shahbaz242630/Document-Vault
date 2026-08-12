@@ -28,6 +28,8 @@ import {
 } from "./claimant/native-enrollment-routes.js";
 import { createClaimantUploadControllerV1, createClaimantUploadPreflightControllerV1 }
   from "./claimant/claimant-upload-controller.js";
+import { createClaimSubmissionControllerV1, createClaimSubmissionPreflightControllerV1 }
+  from "./claimant/claim-submission-controller.js";
 import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
 
 export const app = new Hono();
@@ -133,3 +135,7 @@ for (const [path, action, method] of [
   app[method](path, createClaimantUploadControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
   app.options(path, createClaimantUploadPreflightControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
 }
+const claimSubmissionPath = "/claimant/cases/:caseId/submissions";
+app.post(claimSubmissionPath, createClaimSubmissionControllerV1({ runtimeConfig: claimantRuntimeConfig }));
+app.options(claimSubmissionPath,
+  createClaimSubmissionPreflightControllerV1({ runtimeConfig: claimantRuntimeConfig }));
