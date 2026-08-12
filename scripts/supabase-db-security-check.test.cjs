@@ -23,6 +23,7 @@ const expectedTables = [
   ["claimant_native_enrollment_challenges", []],
   ["claimant_native_enrollment_rate_limits", []],
   ["claimant_outbox", []],
+  ["claimant_submission_receipts", []],
   ["claimant_checklist_items", []],
   ["claimant_portal_eligibilities", []],
   ["claimant_portal_session_controls", []],
@@ -137,6 +138,7 @@ function createCatalog() {
     { functionName: "claimant_confirm_evidence_deleted", securityDefiner: false },
     { functionName: "claimant_get_evidence_upload_reconciliation", securityDefiner: false },
     { functionName: "claimant_abandon_evidence_upload", securityDefiner: false },
+    { functionName: "claimant_submit_claim_for_review", securityDefiner: false },
   ];
 
   return {

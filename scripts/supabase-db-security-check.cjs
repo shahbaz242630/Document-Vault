@@ -22,6 +22,7 @@ const EXPECTED_AUTHENTICATED_PRIVILEGES = {
   claimant_native_enrollment_challenges: [],
   claimant_native_enrollment_rate_limits: [],
   claimant_outbox: [],
+  claimant_submission_receipts: [],
   claimant_checklist_items: [],
   claimant_portal_eligibilities: [],
   claimant_portal_session_controls: [],
@@ -67,6 +68,7 @@ const EXPECTED_SERVER_ONLY_FUNCTIONS = new Set([
   "claimant_confirm_evidence_deleted",
   "claimant_get_evidence_upload_reconciliation",
   "claimant_abandon_evidence_upload",
+  "claimant_submit_claim_for_review",
 ]);
 
 const CATALOG_SQL = `
