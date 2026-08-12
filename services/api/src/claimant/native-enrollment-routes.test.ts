@@ -122,10 +122,26 @@ describe("native enrollment HTTP controller", () => {
     } });
     expect(rejected.status).toBe(403);
   });
+
+  it("reconciles an exact attempt through server authority", async () => {
+    const transactions = transactionClient();
+    vi.mocked(transactions.reconcileNativeEnrollment).mockResolvedValueOnce({ status: "not_committed" });
+    const app = routeApp("reconcile", approved({ transactions }));
+    const attemptId = "71000000-0000-4000-8000-000000000004";
+    const response = await request(app, `/attempts/${attemptId}/reconcile`, {
+      app_attest_challenge_id: "71000000-0000-4000-8000-000000000002",
+      native_challenge_id: "71000000-0000-4000-8000-000000000001",
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ result: { status: "not_committed" } });
+    expect(transactions.reconcileNativeEnrollment).toHaveBeenCalledWith(expect.objectContaining({ attemptId,
+      claimantUserId: ids.claimant, portalSessionId: ids.session }));
+  });
 });
 
 function routeApp(action: NativeEnrollmentRouteAction, deps: Parameters<typeof createNativeEnrollmentRouteV1>[1]) {
-  const app = new Hono(); const path = action === "nativeComplete" ? "/native/:nativeChallengeId/complete"
+  const app = new Hono(); const path = action === "reconcile" ? "/attempts/:attemptId/reconcile"
+    : action === "nativeComplete" ? "/native/:nativeChallengeId/complete"
     : action.startsWith("registration") ? "/registration" : "/native";
   app.post(path, createNativeEnrollmentRouteV1(action, deps)); return app;
 }
@@ -157,7 +173,8 @@ function transactionClient(): NativeEnrollmentTransactionClientV1 { const unexpe
       expiresAt: input.material.nativeChallenge.expires_at,
       nativeChallengeId: input.material.nativeChallenge.challenge_id, replayed: false })),
     issueRegistrationChallenge: vi.fn(async (input) => ({ challengeId: input.material.challenge.challenge_id,
-      expiresAt: input.material.challenge.expires_at, replayed: false })) } as NativeEnrollmentTransactionClientV1; }
+      expiresAt: input.material.challenge.expires_at, replayed: false })),
+    reconcileNativeEnrollment: vi.fn(async () => ({ status: "unknown" as const })) } as NativeEnrollmentTransactionClientV1; }
 function baseHeaders(extra: Record<string, string> = {}) { return { Authorization: "Bearer header.payload.signature",
   "Content-Type": "application/json", "Idempotency-Key": "71000000-0000-4000-8000-000000000004",
   Origin: "https://claimant.sanduqkin.test", ...extra }; }

@@ -118,6 +118,18 @@ const enrollmentCoordinatorSource = readFileSync(
 if (!/CLAIMANT_NATIVE_ENROLLMENT_COORDINATOR_APPROVED\s*=\s*false\s+as\s+const/.test(enrollmentCoordinatorSource)) {
   throw new Error("Claimant native enrollment coordinator is not hard-disabled.");
 }
+const enrollmentAttemptStoreSource = readFileSync(
+  join(enrollmentDirectory, "native-enrollment-attempt-store.ts"),
+  "utf8",
+);
+if (!/CLAIMANT_NATIVE_ENROLLMENT_ATTEMPT_PERSISTENCE_APPROVED\s*=\s*false\s+as\s+const/.test(enrollmentAttemptStoreSource)) {
+  throw new Error("Claimant native enrollment attempt persistence is not hard-disabled.");
+}
+for (const prohibitedAttemptField of ["bearer_token", "recovery_phrase", "private_key", "proof_mac", "assertion_object", "attestation_object"]) {
+  if (enrollmentAttemptStoreSource.includes(`${prohibitedAttemptField}:`)) {
+    throw new Error(`Claimant enrollment attempt persistence declares prohibited field ${prohibitedAttemptField}.`);
+  }
+}
 for (const prohibitedProbeBinding of [
   "claimant-key-custody",
   "app-attest-adapter",

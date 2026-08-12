@@ -122,6 +122,7 @@ function createCatalog() {
     { functionName: "claimant_accept_native_enrollment", securityDefiner: false },
     { functionName: "claimant_take_native_enrollment_rate_limit", securityDefiner: false },
     { functionName: "claimant_get_native_enrollment_authority", securityDefiner: false },
+    { functionName: "claimant_reconcile_native_enrollment", securityDefiner: false },
   ];
 
   return {

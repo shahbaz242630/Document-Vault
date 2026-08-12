@@ -52,6 +52,7 @@ const EXPECTED_SERVER_ONLY_FUNCTIONS = new Set([
   "claimant_accept_native_enrollment",
   "claimant_take_native_enrollment_rate_limit",
   "claimant_get_native_enrollment_authority",
+  "claimant_reconcile_native_enrollment",
 ]);
 
 const CATALOG_SQL = `

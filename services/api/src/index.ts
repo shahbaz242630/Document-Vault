@@ -117,6 +117,7 @@ for (const [path, action] of [
   ["/claimant/native-enrollment/app-attest/registration/challenges/:challengeId/complete", "registrationComplete"],
   ["/claimant/native-enrollment/challenges", "nativeIssue"],
   ["/claimant/native-enrollment/challenges/:nativeChallengeId/complete", "nativeComplete"],
+  ["/claimant/native-enrollment/attempts/:attemptId/reconcile", "reconcile"],
 ] as const) {
   app.post(path, createNativeEnrollmentRouteV1(action, { runtimeConfig: claimantRuntimeConfig }));
   app.options(path, createNativeEnrollmentPreflightRouteV1({ runtimeConfig: claimantRuntimeConfig }));

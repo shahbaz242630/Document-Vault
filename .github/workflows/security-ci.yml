@@ -397,6 +397,9 @@ jobs:
       - name: Claimant native enrollment controller authority test
         run: npm run check:claimant-native-enrollment-controller-db
 
+      - name: Claimant native enrollment reconciliation test
+        run: npm run check:claimant-native-enrollment-reconciliation-db
+
       - name: Live RLS attack test
         run: npm run check:supabase-rls
 
