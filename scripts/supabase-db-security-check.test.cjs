@@ -135,6 +135,8 @@ function createCatalog() {
     { functionName: "claimant_record_evidence_scan", securityDefiner: false },
     { functionName: "claimant_plan_evidence_deletion", securityDefiner: false },
     { functionName: "claimant_confirm_evidence_deleted", securityDefiner: false },
+    { functionName: "claimant_get_evidence_upload_reconciliation", securityDefiner: false },
+    { functionName: "claimant_abandon_evidence_upload", securityDefiner: false },
   ];
 
   return {

@@ -10,6 +10,30 @@ const ids = { case: "30000000-0000-4000-8000-000000000001",
   object: "30000000-0000-4000-8000-000000000005" };
 
 describe("private quarantine transaction client", () => {
+  it("maps atomic upload abandonment", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: { case_id: ids.case, object_id: ids.object,
+      object_path: `v1/${ids.case}/${ids.object}`, replayed: false, status: "abandoned" }, error: null });
+    const result = await createPrivateQuarantineTransactionClientV1(rpc).abandon({
+      capabilityDigest: "a".repeat(64), idempotencyKey: ids.attempt,
+      objectId: ids.object, processorUserId: ids.claimant });
+    expect(result.status).toBe("abandoned");
+    expect(rpc).toHaveBeenCalledWith("claimant_abandon_evidence_upload", {
+      p_capability_digest: "a".repeat(64), p_idempotency_key: ids.attempt,
+      p_object_id: ids.object, p_processor_user_id: ids.claimant });
+  });
+  it("maps strict upload reconciliation authority", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: { authority: "object_recorded",
+      capability_status: "consumed", case_id: ids.case, expected_media_type: "application/pdf",
+      expected_size_bytes: 1024, object_id: ids.object,
+      object_path: `v1/${ids.case}/${ids.object}`, object_status: "scan_failed", object_version: 2 },
+      error: null });
+    const result = await createPrivateQuarantineTransactionClientV1(rpc)
+      .reconcile({ capabilityDigest: "a".repeat(64), objectId: ids.object });
+    expect(result).toMatchObject({ authority: "object_recorded", objectStatus: "scan_failed",
+      objectVersion: 2 });
+    expect(rpc).toHaveBeenCalledWith("claimant_get_evidence_upload_reconciliation",
+      { p_capability_digest: "a".repeat(64), p_object_id: ids.object });
+  });
   it("maps capability issuance without sending the raw secret", async () => {
     const path = `v1/${ids.case}/${ids.object}`;
     const rpc = vi.fn().mockResolvedValue({ data: { case_id: ids.case,

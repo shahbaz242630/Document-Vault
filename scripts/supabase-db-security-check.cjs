@@ -65,6 +65,8 @@ const EXPECTED_SERVER_ONLY_FUNCTIONS = new Set([
   "claimant_record_evidence_scan",
   "claimant_plan_evidence_deletion",
   "claimant_confirm_evidence_deleted",
+  "claimant_get_evidence_upload_reconciliation",
+  "claimant_abandon_evidence_upload",
 ]);
 
 const CATALOG_SQL = `

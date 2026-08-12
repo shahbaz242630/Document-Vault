@@ -7,6 +7,11 @@ type Rpc = (name: string, input: Record<string, unknown>) => RpcResult;
 
 export type QuarantineScanResult = "clean" | "malicious" | "error" | "timeout";
 export type PrivateQuarantineTransactionClientV1 = Readonly<{
+  abandon(input: Readonly<{ capabilityDigest: string; idempotencyKey: string; objectId: string;
+    processorUserId: string }>): Promise<Readonly<{ caseId: string; objectId: string;
+      objectPath: string; replayed: boolean; status: "abandoned" }>>;
+  reconcile(input: Readonly<{ capabilityDigest: string; objectId: string }> ):
+    Promise<UploadReconciliationAuthorityV1>;
   issue(input: Readonly<{ capabilityDigest: string; caseId: string; claimantUserId: string;
     expectedCaseVersion: number; expectedIntakeVersion: number; expiresAt: string;
     idempotencyKey: string; itemKey: ClaimantChecklistItemKey; objectId: string;
@@ -23,6 +28,18 @@ export type PrivateQuarantineTransactionClientV1 = Readonly<{
     processorUserId: string }>): Promise<LifecycleResult>;
   confirmDeleted(input: Readonly<{ expectedVersion: number; idempotencyKey: string; objectId: string;
     processorUserId: string }>): Promise<LifecycleResult>;
+}>;
+
+export type UploadReconciliationAuthorityV1 = Readonly<{
+  authority: "upload_pending" | "upload_uncommitted" | "object_recorded";
+  capabilityStatus: "issued" | "consumed" | "revoked";
+  caseId: string;
+  expectedMediaType: SyntheticEvidenceMediaType;
+  expectedSizeBytes: number;
+  objectId: string;
+  objectPath: string;
+  objectStatus: "quarantined" | "clean" | "rejected" | "scan_failed" | "deletion_pending" | "deleted" | null;
+  objectVersion: number | null;
 }>;
 
 type LifecycleResult = Readonly<{ caseId: string; objectId: string; replayed: boolean;
@@ -44,6 +61,28 @@ export function createPrivateQuarantineTransactionClientV1(rpc: Rpc): PrivateQua
     return parsed.data as Record<string, unknown>;
   };
   return {
+    async abandon(value) {
+      const data = await call("claimant_abandon_evidence_upload", {
+        p_capability_digest: value.capabilityDigest, p_idempotency_key: value.idempotencyKey,
+        p_object_id: value.objectId, p_processor_user_id: value.processorUserId,
+      }, abandonmentSchema);
+      return { caseId: data.case_id as string, objectId: data.object_id as string,
+        objectPath: data.object_path as string, replayed: data.replayed as boolean,
+        status: data.status as "abandoned" };
+    },
+    async reconcile(value) {
+      const data = await call("claimant_get_evidence_upload_reconciliation", {
+        p_capability_digest: value.capabilityDigest, p_object_id: value.objectId,
+      }, reconciliationSchema);
+      return { authority: data.authority as UploadReconciliationAuthorityV1["authority"],
+        capabilityStatus: data.capability_status as UploadReconciliationAuthorityV1["capabilityStatus"],
+        caseId: data.case_id as string,
+        expectedMediaType: data.expected_media_type as SyntheticEvidenceMediaType,
+        expectedSizeBytes: data.expected_size_bytes as number, objectId: data.object_id as string,
+        objectPath: data.object_path as string,
+        objectStatus: data.object_status as UploadReconciliationAuthorityV1["objectStatus"],
+        objectVersion: data.object_version as number | null };
+    },
     async issue(value) {
       const data = await call("claimant_issue_evidence_upload_capability", {
         p_capability_digest: value.capabilityDigest, p_case_id: value.caseId,
@@ -111,3 +150,16 @@ const lifecycleSchema = z.strictObject({ case_id: z.string().uuid(), object_id: 
   replayed: z.boolean(), status: z.enum(["quarantined", "clean", "rejected", "scan_failed",
     "deletion_pending", "deleted"]),
   version: z.number().int().positive() });
+const reconciliationSchema = z.strictObject({ authority: z.enum(["upload_pending", "upload_uncommitted",
+  "object_recorded"]), capability_status: z.enum(["issued", "consumed", "revoked"]),
+  case_id: z.string().uuid(), expected_media_type: z.enum(["application/pdf", "image/jpeg", "image/png"]),
+  expected_size_bytes: z.number().int().min(1).max(25 * 1024 * 1024), object_id: z.string().uuid(),
+  object_path: z.string().regex(/^v1\/[0-9a-f-]{36}\/[0-9a-f-]{36}$/u),
+  object_status: z.enum(["quarantined", "clean", "rejected", "scan_failed", "deletion_pending",
+    "deleted"]).nullable(), object_version: z.number().int().positive().nullable() })
+  .refine((value) => value.authority === "object_recorded"
+    ? value.capability_status === "consumed" && value.object_status !== null && value.object_version !== null
+    : value.object_status === null && value.object_version === null);
+const abandonmentSchema = z.strictObject({ case_id: z.string().uuid(), object_id: z.string().uuid(),
+  object_path: z.string().regex(/^v1\/[0-9a-f-]{36}\/[0-9a-f-]{36}$/u), replayed: z.boolean(),
+  status: z.literal("abandoned") });

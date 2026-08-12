@@ -6,7 +6,8 @@ const { join } = require("node:path");
 const DEFAULT_CONTAINER = "supabase_db_supabase";
 const migrations = ["20260812210000_claimant_intake_checklist_foundation.sql",
   "20260812220000_claimant_evidence_preparation_metadata.sql",
-  "20260812230000_claimant_private_evidence_quarantine.sql"]
+  "20260812230000_claimant_private_evidence_quarantine.sql",
+  "20260813000000_claimant_upload_reconciliation_authority.sql"]
   .map((name) => readFileSync(join(__dirname, "../supabase/migrations", name), "utf8")).join("\n");
 
 function runClaimantPrivateQuarantineDbTest(options = {}) {
@@ -85,7 +86,6 @@ begin
     raise exception 'unbound object path was accepted';
   exception when invalid_parameter_value then null;
   end;
-
   v_result := public.claimant_issue_evidence_upload_capability('${id.claimant}', '${id.session}', '${id.case}',
     2, 2, 2, 'claimant_photo_identity', 'synthetic_evidence_001', '${id.object}', '${objectPath}',
     '${capabilityDigest}', v_capability_expires, '${id.issueAttempt}');
@@ -94,6 +94,15 @@ begin
   end if;
   if (select capability_digest from public.claimant_evidence_upload_capabilities where id = '${id.object}')
       <> '${capabilityDigest}' then raise exception 'capability digest was not stored'; end if;
+  v_result := public.claimant_get_evidence_upload_reconciliation('${id.object}', '${capabilityDigest}');
+  if v_result ->> 'authority' <> 'upload_pending' or v_result ->> 'object_status' is not null then
+    raise exception 'pending upload reconciliation authority was invalid';
+  end if;
+  begin
+    perform public.claimant_get_evidence_upload_reconciliation('${id.object}', '${"e".repeat(64)}');
+    raise exception 'wrong capability digest reconciled upload';
+  exception when insufficient_privilege then null;
+  end;
   v_result := public.claimant_issue_evidence_upload_capability('${id.claimant}', '${id.session}', '${id.case}',
     2, 2, 2, 'claimant_photo_identity', 'synthetic_evidence_001', '${id.object}', '${objectPath}',
     '${capabilityDigest}', v_capability_expires, '${id.issueAttempt}');
@@ -105,6 +114,18 @@ begin
     raise exception 'changed-input capability replay was accepted';
   exception when invalid_parameter_value then null;
   end;
+  begin
+    v_result := public.claimant_abandon_evidence_upload('${id.processor}', '${id.object}',
+      '${capabilityDigest}', '${id.invalidAttempt}');
+    if v_result ->> 'status' <> 'abandoned' then
+      raise exception 'upload abandonment result was invalid' using errcode = '22023';
+    end if;
+    raise no_data_found;
+  exception when no_data_found then null;
+  end;
+  if (select status from public.claimant_evidence_upload_capabilities where id = '${id.object}') <> 'issued' then
+    raise exception 'abandonment rollback did not restore capability';
+  end if;
 
   begin
     perform public.claimant_record_evidence_quarantine('${id.processor}', '${id.object}', '${capabilityDigest}',
@@ -122,6 +143,11 @@ begin
     now() + interval '29 days', '${id.quarantineAttempt}');
   if v_result ->> 'status' <> 'quarantined' or (v_result ->> 'version')::integer <> 1 then
     raise exception 'quarantine result was invalid';
+  end if;
+  v_result := public.claimant_get_evidence_upload_reconciliation('${id.object}', '${capabilityDigest}');
+  if v_result ->> 'authority' <> 'object_recorded' or v_result ->> 'object_status' <> 'quarantined'
+    or (v_result ->> 'object_version')::integer <> 1 then
+    raise exception 'recorded upload reconciliation authority was invalid';
   end if;
   begin
     perform public.claimant_record_evidence_quarantine('${id.processor}', '${id.object}', '${capabilityDigest}',
@@ -191,6 +217,17 @@ do $denied$ begin
   begin
     perform public.claimant_record_evidence_scan('${id.processor}', '${id.object}', 5, 'clean', gen_random_uuid());
     raise exception 'authenticated role executed quarantine function';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    perform public.claimant_get_evidence_upload_reconciliation('${id.object}', '${capabilityDigest}');
+    raise exception 'authenticated role executed upload reconciliation authority';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    perform public.claimant_abandon_evidence_upload('${id.processor}', '${id.object}',
+      '${capabilityDigest}', gen_random_uuid());
+    raise exception 'authenticated role executed upload abandonment';
   exception when insufficient_privilege then null;
   end;
 end $denied$;
