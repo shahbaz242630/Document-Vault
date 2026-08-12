@@ -16,6 +16,7 @@ describe("protected web security headers", () => {
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
+      "X-Robots-Tag": "noindex, nofollow, noarchive",
     });
     expect(headers["Content-Security-Policy"]).toContain("script-src 'self' 'nonce-test-nonce' 'strict-dynamic'");
     expect(headers["Content-Security-Policy"]).toContain("connect-src 'self' https://example.supabase.co wss://example.supabase.co");

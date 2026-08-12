@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import sodium from "libsodium-wrappers-sumo";
 
 import { createRecipientV2Vector } from "./claim-vector-generator/recipient-v2-vector.mjs";
+import { createNativeEnrollmentProofVector } from "./claim-vector-generator/native-enrollment-proof-vector.mjs";
+import { createAppAttestBindingVector } from "./claim-vector-generator/app-attest-binding-vector.mjs";
 import { createClaimStateVector } from "./claim-vector-generator/state-vector.mjs";
 
 await sodium.ready;
@@ -238,6 +240,19 @@ const recipientV2Vector = createRecipientV2Vector({
   timestamps,
 });
 
+const nativeEnrollmentProofVector = createNativeEnrollmentProofVector({
+  base64url,
+  canonicalJson,
+  syntheticMeta,
+});
+
+const appAttestBindingVector = createAppAttestBindingVector({
+  base64url,
+  canonicalJson,
+  nativeEnrollmentProofVector,
+  syntheticMeta,
+});
+
 const locatorBytes = bytesFromRange(161, 16);
 const secretBytes = bytesFromRange(177, 24);
 const locator = formatHandoverValue("SK2-L-", locatorBytes);
@@ -450,6 +465,8 @@ if (!checkOnly) {
 await Promise.all([
   writeVector("recipient-grant-v1.json", recipientVector),
   writeVector("recipient-grant-v2.json", recipientV2Vector),
+  writeVector("native-enrollment-proof-v1.json", nativeEnrollmentProofVector),
+  writeVector("app-attest-binding-v1.json", appAttestBindingVector),
   writeVector("offline-code-v2.json", offlineVector),
   writeVector("claim-state-v1.json", stateVector),
   writeVector("release-package-v1.json", releaseVector),

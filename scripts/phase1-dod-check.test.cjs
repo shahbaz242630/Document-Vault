@@ -23,6 +23,20 @@ test("passes clean production files while ignoring docs and tests", () => {
   }
 });
 
+test("recognizes repository integration-test and deterministic-vector script conventions", () => {
+  const longBody = Array.from({ length: 110 }, (_, index) => `  void ${index};`).join("\n");
+  const workspace = createWorkspace({
+    "scripts/claimant-boundary-db-test.cjs": `async function run() {\n${longBody}\n}\n`,
+    "scripts/claim-vector-generator/example-vector.mjs": `export function generate() {\n${longBody}\n}\n`,
+  });
+
+  try {
+    assert.equal(runPhase1DodCheck({ cwd: workspace }).ok, true);
+  } finally {
+    rmSync(workspace, { force: true, recursive: true });
+  }
+});
+
 test("fails production TODO, oversized file, and long function violations", () => {
   const longFunctionBody = Array.from({ length: 101 }, (_, index) => `  return ${index};`).join("\n");
   const longFile = Array.from({ length: 501 }, (_, index) => `export const line${index} = ${index};`).join("\n");

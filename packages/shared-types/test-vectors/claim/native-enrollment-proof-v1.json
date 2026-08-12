@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "generated_by": "scripts/generate-claim-test-vectors.mjs",
+    "production_data": false,
+    "synthetic_only": true,
+    "warning": "Private scalars exist only for deterministic reference testing and must never be imported into native custody."
+  },
+  "protocol": "sanduqkin:claim:native-enrollment:v1",
+  "profile": "ios_secure_enclave_possession_v1",
+  "algorithms": {
+    "key_agreement": "p256_ecdh",
+    "public_key_encoding": "ansi_x9_63_uncompressed_base64url_no_padding",
+    "digest": "sha256",
+    "kdf": "hkdf_sha256",
+    "possession_proof": "hmac_sha256"
+  },
+  "domain_separation": {
+    "public_key_fingerprint": "sanduqkin:claim:native-enrollment:public-key:v1",
+    "proof_key": "sanduqkin:claim:native-enrollment:proof-key:v1",
+    "proof_mac": "sanduqkin:claim:native-enrollment:proof-mac:v1",
+    "separator_hex": "00"
+  },
+  "synthetic_key_material": {
+    "claimant_private_scalar": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ",
+    "claimant_public_key": "BOJTSjUy0I-7oC3eZZ7mK9ADH-LbeFWW71CTAkRrAwhS4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY",
+    "server_ephemeral_private_scalar": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU"
+  },
+  "challenge_request": {
+    "capability": {
+      "claimed_hardware_security_level": "secure_enclave",
+      "key_algorithm": "p256_ecdh",
+      "platform": "ios",
+      "claimed_private_key_exportable": false,
+      "protocol": "sanduqkin:claim:native-enrollment:v1",
+      "public_key_encoding": "ansi_x9_63_uncompressed",
+      "claimed_user_presence_binding": "transaction_bound"
+    },
+    "invitation_reference": "51000000-0000-4000-8000-000000000005",
+    "policy_pack_id": "death-only-v1",
+    "policy_pack_version": 4,
+    "protocol": "sanduqkin:claim:native-enrollment:v1",
+    "public_key": "BOJTSjUy0I-7oC3eZZ7mK9ADH-LbeFWW71CTAkRrAwhS4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+  },
+  "challenge": {
+    "protocol": "sanduqkin:claim:native-enrollment:v1",
+    "challenge_id": "61000000-0000-4000-8000-000000000016",
+    "claimant_id": "21000000-0000-4000-8000-000000000002",
+    "claimant_key_id": "31000000-0000-4000-8000-000000000013",
+    "claimant_key_version": 1,
+    "device_binding_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "eligibility_version": 3,
+    "expires_at": "2026-07-28T08:05:00.000Z",
+    "invitation_reference": "51000000-0000-4000-8000-000000000005",
+    "invitation_version": 2,
+    "issued_at": "2026-07-28T08:00:00.000Z",
+    "kdf_salt": "ERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzA",
+    "nonce": "MTIzNDU2Nzg5Ojs8PT4_QEFCQ0RFRkdISUpLTE1OT1A",
+    "origin": "https://api.sanduqkin.test",
+    "policy_pack_id": "death-only-v1",
+    "policy_pack_version": 4,
+    "public_key_fingerprint": "Vg3N0myu8j92y2q7HRooneBJYEGM7xeUbabp2liJ42M",
+    "server_ephemeral_public_key": "BFFZC3pRUUDS14TIVghmj9_vjIL9H1vlJCFVSg3D0DPt4MF9qJBKcn2K4b82v4p5Jg0BLwDU2AiI0dC7RP2hbaQ"
+  },
+  "challenge_bytes": "eyJjaGFsbGVuZ2VfaWQiOiI2MTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMTYiLCJjbGFpbWFudF9pZCI6IjIxMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMiIsImNsYWltYW50X2tleV9pZCI6IjMxMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAxMyIsImNsYWltYW50X2tleV92ZXJzaW9uIjoxLCJkZXZpY2VfYmluZGluZ19kaWdlc3QiOiIxMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExIiwiZWxpZ2liaWxpdHlfdmVyc2lvbiI6MywiZXhwaXJlc19hdCI6IjIwMjYtMDctMjhUMDg6MDU6MDAuMDAwWiIsImludml0YXRpb25fcmVmZXJlbmNlIjoiNTEwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDA1IiwiaW52aXRhdGlvbl92ZXJzaW9uIjoyLCJpc3N1ZWRfYXQiOiIyMDI2LTA3LTI4VDA4OjAwOjAwLjAwMFoiLCJrZGZfc2FsdCI6IkVSSVRGQlVXRnhnWkdoc2NIUjRmSUNFaUl5UWxKaWNvS1NvckxDMHVMekEiLCJub25jZSI6Ik1USXpORFUyTnpnNU9qczhQVDRfUUVGQ1EwUkZSa2RJU1VwTFRFMU9UMUEiLCJvcmlnaW4iOiJodHRwczovL2FwaS5zYW5kdXFraW4udGVzdCIsInBvbGljeV9wYWNrX2lkIjoiZGVhdGgtb25seS12MSIsInBvbGljeV9wYWNrX3ZlcnNpb24iOjQsInByb3RvY29sIjoic2FuZHVxa2luOmNsYWltOm5hdGl2ZS1lbnJvbGxtZW50OnYxIiwicHVibGljX2tleV9maW5nZXJwcmludCI6IlZnM04wbXl1OGo5MnkycTdIUm9vbmVCSllFR003eGVVYmFicDJsaUo0Mk0iLCJzZXJ2ZXJfZXBoZW1lcmFsX3B1YmxpY19rZXkiOiJCRkZaQzNwUlVVRFMxNFRJVmdobWo5X3ZqSUw5SDF2bEpDRlZTZzNEMERQdDRNRjlxSkJLY24ySzRiODJ2NHA1SmcwQkx3RFUyQWlJMGRDN1JQMmhiYVEifQ",
+  "challenge_digest": "AEBArphRs3mWVrpsUwgLY2SMA1hGNqriJmtDDYGAJvA",
+  "proof_key_info": "c2FuZHVxa2luOmNsYWltOm5hdGl2ZS1lbnJvbGxtZW50OnByb29mLWtleTp2MQAAQECumFGzeZZWumxTCAtjZIwDWEY2quIma0MNgYAm8A",
+  "expected_shared_secret": "g6Aak3g5W6ubzWoK0DzFbVbmsZJQRlqUojTcTGso2po",
+  "expected_proof_key": "9ofkDhD6PgjSWky75QdUu3BP8QLVFoEx9CE2CpAq7kc",
+  "proof_mac_input": "c2FuZHVxa2luOmNsYWltOm5hdGl2ZS1lbnJvbGxtZW50OnByb29mLW1hYzp2MQB7ImNoYWxsZW5nZV9pZCI6IjYxMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAxNiIsImNsYWltYW50X2lkIjoiMjEwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAyIiwiY2xhaW1hbnRfa2V5X2lkIjoiMzEwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDEzIiwiY2xhaW1hbnRfa2V5X3ZlcnNpb24iOjEsImRldmljZV9iaW5kaW5nX2RpZ2VzdCI6IjExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTEiLCJlbGlnaWJpbGl0eV92ZXJzaW9uIjozLCJleHBpcmVzX2F0IjoiMjAyNi0wNy0yOFQwODowNTowMC4wMDBaIiwiaW52aXRhdGlvbl9yZWZlcmVuY2UiOiI1MTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDUiLCJpbnZpdGF0aW9uX3ZlcnNpb24iOjIsImlzc3VlZF9hdCI6IjIwMjYtMDctMjhUMDg6MDA6MDAuMDAwWiIsImtkZl9zYWx0IjoiRVJJVEZCVVdGeGdaR2hzY0hSNGZJQ0VpSXlRbEppY29LU29yTEMwdUx6QSIsIm5vbmNlIjoiTVRJek5EVTJOemc1T2pzOFBUNF9RRUZDUTBSRlJrZElTVXBMVEUxT1QxQSIsIm9yaWdpbiI6Imh0dHBzOi8vYXBpLnNhbmR1cWtpbi50ZXN0IiwicG9saWN5X3BhY2tfaWQiOiJkZWF0aC1vbmx5LXYxIiwicG9saWN5X3BhY2tfdmVyc2lvbiI6NCwicHJvdG9jb2wiOiJzYW5kdXFraW46Y2xhaW06bmF0aXZlLWVucm9sbG1lbnQ6djEiLCJwdWJsaWNfa2V5X2ZpbmdlcnByaW50IjoiVmczTjBteXU4ajkyeTJxN0hSb29uZUJKWUVHTTd4ZVViYWJwMmxpSjQyTSIsInNlcnZlcl9lcGhlbWVyYWxfcHVibGljX2tleSI6IkJGRlpDM3BSVVVEUzE0VElWZ2htajlfdmpJTDlIMXZsSkNGVlNnM0QwRFB0NE1GOXFKQktjbjJLNGI4MnY0cDVKZzBCTHdEVTJBaUkwZEM3UlAyaGJhUSJ9",
+  "possession_proof": {
+    "protocol": "sanduqkin:claim:native-enrollment:v1",
+    "challenge_id": "61000000-0000-4000-8000-000000000016",
+    "claimant_id": "21000000-0000-4000-8000-000000000002",
+    "claimant_key_id": "31000000-0000-4000-8000-000000000013",
+    "claimant_key_version": 1,
+    "device_binding_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "invitation_reference": "51000000-0000-4000-8000-000000000005",
+    "public_key_fingerprint": "Vg3N0myu8j92y2q7HRooneBJYEGM7xeUbabp2liJ42M",
+    "proof_mac": "2wRBOPVz3MM19DhyoV6E-mdV4UjoRHRksbdZhPOXybw"
+  },
+  "negative_cases": [
+    "wrong_claimant_private_key",
+    "changed_claimant_binding",
+    "changed_invitation_binding",
+    "changed_invitation_version",
+    "changed_key_binding",
+    "changed_key_version",
+    "changed_public_key_fingerprint",
+    "changed_device_binding",
+    "changed_eligibility_version",
+    "changed_policy_pack",
+    "changed_policy_pack_version",
+    "changed_origin",
+    "changed_nonce",
+    "changed_kdf_salt",
+    "changed_issued_at",
+    "changed_expires_at",
+    "changed_server_ephemeral_key",
+    "replayed_consumed_challenge",
+    "unsupported_protocol_version"
+  ]
+}

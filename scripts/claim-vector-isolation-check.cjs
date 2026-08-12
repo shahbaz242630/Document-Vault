@@ -54,6 +54,8 @@ function collectContractFiles(directory) {
 const expectedVectors = [
   "recipient-grant-v1.json",
   "recipient-grant-v2.json",
+  "native-enrollment-proof-v1.json",
+  "app-attest-binding-v1.json",
   "offline-code-v2.json",
   "claim-state-v1.json",
   "release-package-v1.json",
