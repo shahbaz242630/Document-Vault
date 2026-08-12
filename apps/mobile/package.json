@@ -43,7 +43,7 @@
     "expo-constants": "~56.0.23",
     "expo-crypto": "~56.0.4",
     "expo-dev-client": "~56.0.24",
-    "expo-font": "~56.0.7",
+    "expo-font": "~57.0.1",
     "expo-linking": "~56.0.16",
     "expo-local-authentication": "~56.0.5",
     "expo-print": "~56.0.4",
