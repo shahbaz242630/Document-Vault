@@ -55,6 +55,7 @@
     "check:claimant-native-enrollment-reconciliation-db": "node scripts/claimant-native-enrollment-reconciliation-db-test.cjs",
     "check:claimant-intake-foundation-db": "node scripts/claimant-intake-foundation-db-test.cjs",
     "check:claimant-evidence-preparation-db": "node scripts/claimant-evidence-preparation-db-test.cjs",
+    "check:claimant-private-quarantine-db": "node scripts/claimant-private-quarantine-db-test.cjs",
     "check:claim-vectors": "node scripts/generate-claim-test-vectors.mjs --check",
     "check:claim-vector-isolation": "node scripts/claim-vector-isolation-check.cjs",
     "check:claim-custody-isolation": "node scripts/claim-custody-isolation-check.cjs",

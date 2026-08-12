@@ -14,6 +14,8 @@ const expectedTables = [
   ["claimant_cases", []],
   ["claimant_device_keys", []],
   ["claimant_evidence_preparation_items", []],
+  ["claimant_evidence_upload_capabilities", []],
+  ["claimant_evidence_objects", []],
   ["claimant_identities", []],
   ["claimant_idempotency_records", []],
   ["claimant_intake_snapshots", []],
@@ -128,6 +130,11 @@ function createCatalog() {
     { functionName: "claimant_reconcile_native_enrollment", securityDefiner: false },
     { functionName: "claimant_initialize_claim_intake", securityDefiner: false },
     { functionName: "claimant_record_evidence_preparation", securityDefiner: false },
+    { functionName: "claimant_issue_evidence_upload_capability", securityDefiner: false },
+    { functionName: "claimant_record_evidence_quarantine", securityDefiner: false },
+    { functionName: "claimant_record_evidence_scan", securityDefiner: false },
+    { functionName: "claimant_plan_evidence_deletion", securityDefiner: false },
+    { functionName: "claimant_confirm_evidence_deleted", securityDefiner: false },
   ];
 
   return {

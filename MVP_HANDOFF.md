@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 supplied the synthetic claimant baseline only; the 2026-08-04 owner decision separately authorizes production-shaped engineering while external runtime and real claimant data remain blocked.
 
-Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 1J has local checkpoint `9cb50b2` and Slice 2A has local checkpoint `2c73a33`. Phase 2 Slice 2B is code-complete locally on `codex/claimant-evidence-metadata`; all claimant capabilities remain disabled.
+Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 2A has local checkpoint `2c73a33` and Slice 2B has local checkpoint `2b4f748`. Phase 2 Slice 2C is code-complete locally on `codex/claimant-private-quarantine`; all claimant capabilities remain disabled.
 
 ## MVP Surfaces
 
@@ -107,6 +107,8 @@ Slice 2A claim-intake/checklist persistence is code-complete locally, hard-disab
 
 Slice 2B evidence-preparation metadata is code-complete locally, hard-disabled, and unmounted. One append-only forced-RLS table plus an idempotent transaction retain versioned synthetic placeholder metadata or unavailable declarations under exact claimant/case/checklist/policy binding. Prepared metadata remains pending and does not claim upload, receipt, scanning, review readiness, or a case transition.
 
+Slice 2C private evidence quarantine is code-complete locally, hard-disabled, and unmounted. A private bounded bucket denies all direct client object access; server-keyed five-minute capabilities are replay-stable and stored only as digests; validation/scanner/Storage contracts fail closed; and service-only lifecycle state covers quarantine, scanning, retention/legal hold, and two-phase deletion. No upload route, real provider, hosted migration, or real evidence exists.
+
 The returned review reproduced both original aggregates and every manifested file. On 2026-08-12 the owner explicitly accepted it as closing the Slice 1B/1C review gate and authorized bounded remediation and later disabled implementation slices. This does not authorize production activation or real claimant data.
 
 The hard-disabled iOS probe harness is implemented with a disposable `probe-only.v3` alias and the exact frozen transcript. Signed internal EAS Build 1 compiled successfully as a separate bundle/router, and the full requested value-free physical-iPhone matrix passed.
@@ -130,10 +132,10 @@ The engineering target, readiness definition, and phased implementation order ar
 
 ## Next Actions
 
-1. Review Slice 2B and `docs/verification/2026-08-12-claimant-slice-2b-evidence-preparation-metadata.md`; publish only with explicit authorization.
-2. Keep Slice 1G/1H/1I/1J/2A/2B approvals immutable false and do not deploy the local claimant migrations.
+1. Review Slice 2C and `docs/verification/2026-08-12-claimant-slice-2c-private-quarantine-foundation.md`; publish only with explicit authorization.
+2. Keep Slice 1G/1H/1I/1J/2A/2B/2C approvals immutable false and do not deploy the local claimant/Storage migrations.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
-4. Continue only after bounding the separate private-quarantine upload capability, Storage RLS, validation/scanning, retention/deletion, and hostile authorization slice; then proceed to dashboard, owner protection/review, and encrypted release/native retrieval before the safe V2 route.
+4. Continue with a hard-disabled streaming upload/reconciliation processor using only injected Storage/scanner adapters, then dashboard, owner protection/review, and encrypted release/native retrieval before the safe V2 route.
 5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.
 6. Treat Build 7 as closed and passed; public App Store release and another build remain separately gated.
 
