@@ -15,7 +15,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@hono/node-server": "2.0.6",
+    "@hono/node-server": "2.0.10",
     "@types/node": "24.10.1",
     "@vault/shared-types": "0.1.0",
     "tsx": "4.22.4",
