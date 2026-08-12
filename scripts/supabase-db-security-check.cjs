@@ -12,6 +12,7 @@ const EXPECTED_AUTHENTICATED_PRIVILEGES = {
   claimant_case_device_keys: [],
   claimant_cases: [],
   claimant_device_keys: [],
+  claimant_evidence_preparation_items: [],
   claimant_identities: [],
   claimant_idempotency_records: [],
   claimant_intake_snapshots: [],
@@ -56,6 +57,7 @@ const EXPECTED_SERVER_ONLY_FUNCTIONS = new Set([
   "claimant_get_native_enrollment_authority",
   "claimant_reconcile_native_enrollment",
   "claimant_initialize_claim_intake",
+  "claimant_record_evidence_preparation",
 ]);
 
 const CATALOG_SQL = `
