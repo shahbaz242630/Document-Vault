@@ -41,7 +41,9 @@ function findNode(xml, label) {
     const bounds = tag.match(/\bbounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"/);
 
     if ((text.includes(label) || description.includes(label)) && bounds) {
-      return bounds.slice(1).map(Number);
+      const coordinates = bounds.slice(1).map(Number);
+      const [left, top, right, bottom] = coordinates;
+      if (right > left && bottom > top) return coordinates;
     }
   }
   return null;
@@ -370,7 +372,19 @@ function resetPasswordWithRecoveryPhrase(phrase, newPassword) {
   fillField("New password input", newPassword);
   fillField("Confirm new password input", newPassword);
   tapNodeAfterScroll("Reset password");
-  waitForNode("Your vault has a new password.", 180_000);
+  const outcome = waitForAnyNode(
+    [
+      "Your vault has a new password.",
+      "Could not recover vault.",
+      "Could not update password.",
+      "Recovery phrase must have exactly 12 words.",
+      "Password must be at least 12 characters.",
+    ],
+    180_000,
+  );
+  if (outcome.label !== "Your vault has a new password.") {
+    throw new Error(`Android recovery reset failed with UI state: ${outcome.label}`);
+  }
 }
 
 function ensureOriginalRecoveryPassword(credentials) {
@@ -460,4 +474,6 @@ function main() {
   runRecoveryResetContinuitySmoke();
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = { findNode };
