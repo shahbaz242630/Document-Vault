@@ -14,10 +14,12 @@ const EXPECTED_AUTHENTICATED_PRIVILEGES = {
   claimant_device_keys: [],
   claimant_identities: [],
   claimant_idempotency_records: [],
+  claimant_intake_snapshots: [],
   claimant_invitations: [],
   claimant_native_enrollment_challenges: [],
   claimant_native_enrollment_rate_limits: [],
   claimant_outbox: [],
+  claimant_checklist_items: [],
   claimant_portal_eligibilities: [],
   claimant_portal_session_controls: [],
   claimant_portal_session_events: [],
@@ -53,6 +55,7 @@ const EXPECTED_SERVER_ONLY_FUNCTIONS = new Set([
   "claimant_take_native_enrollment_rate_limit",
   "claimant_get_native_enrollment_authority",
   "claimant_reconcile_native_enrollment",
+  "claimant_initialize_claim_intake",
 ]);
 
 const CATALOG_SQL = `

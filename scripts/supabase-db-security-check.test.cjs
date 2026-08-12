@@ -15,10 +15,12 @@ const expectedTables = [
   ["claimant_device_keys", []],
   ["claimant_identities", []],
   ["claimant_idempotency_records", []],
+  ["claimant_intake_snapshots", []],
   ["claimant_invitations", []],
   ["claimant_native_enrollment_challenges", []],
   ["claimant_native_enrollment_rate_limits", []],
   ["claimant_outbox", []],
+  ["claimant_checklist_items", []],
   ["claimant_portal_eligibilities", []],
   ["claimant_portal_session_controls", []],
   ["claimant_portal_session_events", []],
@@ -123,6 +125,7 @@ function createCatalog() {
     { functionName: "claimant_take_native_enrollment_rate_limit", securityDefiner: false },
     { functionName: "claimant_get_native_enrollment_authority", securityDefiner: false },
     { functionName: "claimant_reconcile_native_enrollment", securityDefiner: false },
+    { functionName: "claimant_initialize_claim_intake", securityDefiner: false },
   ];
 
   return {

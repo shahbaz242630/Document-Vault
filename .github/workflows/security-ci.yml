@@ -400,6 +400,9 @@ jobs:
       - name: Claimant native enrollment reconciliation test
         run: npm run check:claimant-native-enrollment-reconciliation-db
 
+      - name: Claimant intake foundation test
+        run: npm run check:claimant-intake-foundation-db
+
       - name: Live RLS attack test
         run: npm run check:supabase-rls
 
