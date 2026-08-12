@@ -36,7 +36,7 @@ recovery phrases, raw emergency codes, signing material, or protected logs.
 
 ## Dependency and artifact evidence
 
-- [ ] `npm audit --omit=dev --workspaces --audit-level=high` passed.
+- [ ] `npm run check:production-dependencies` passed, including verification of any documented temporary patch.
 - [ ] The release SBOM artifact is attached to the protected release run.
 - [ ] SBOM artifact name includes the release commit SHA and uses the approved retention period.
 - [ ] The resolved SBOM was reviewed with the documented Expo peer-range compatibility condition in mind.

@@ -378,7 +378,7 @@ test("configures weekly Dependabot updates for npm and GitHub Actions", () => {
     /package-ecosystem: "github-actions"[\s\S]*?directory: "\/"[\s\S]*?interval: "weekly"/,
   );
   assert.match(config, /reviewers:\s*\n\s*- "shahbaz242630"/);
-  assert.match(securityWorkflow, /npm audit --omit=dev --workspaces --audit-level=high/);
+  assert.match(securityWorkflow, /npm run check:production-dependencies/);
 });
 
 test("rejects mutable action tags and accepts full commit SHAs", () => {

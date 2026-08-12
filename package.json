@@ -14,6 +14,8 @@
     "@expo/fingerprint": {
       "brace-expansion": "5.0.9"
     },
+    "js-yaml": "5.2.3",
+    "nanoid": "3.3.18",
     "next": {
       "postcss": "8.5.23",
       "sharp": "0.35.3"
@@ -39,6 +41,7 @@
     "check:github-actions-security": "node scripts/github-actions-security-check.cjs",
     "check:security": "node scripts/security-check.cjs",
     "check:mobile-secrets": "node scripts/mobile-secret-scan.cjs",
+    "check:production-dependencies": "node scripts/production-dependency-audit.cjs",
     "check:supabase-db-security": "node scripts/supabase-db-security-check.cjs",
     "check:supabase-rls": "node scripts/supabase-rls-attack-test.cjs",
     "check:claimant-foundation-db": "node scripts/claimant-foundation-db-test.cjs",
