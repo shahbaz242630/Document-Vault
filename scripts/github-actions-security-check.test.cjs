@@ -88,6 +88,7 @@ test("builds and launches an unsigned iOS release in a bounded macOS simulator j
   assert.match(iosJob, /DEVELOPER_DIR: \/Applications\/Xcode_26\.2\.app\/Contents\/Developer/);
   assert.match(iosJob, /\n\s*NODE_ENV: development/);
   assert.match(iosJob, /npx expo prebuild --platform ios --no-install/);
+  assert.match(iosJob, /Verify claimant custody compile contract[\s\S]*?npm run check:claim-custody-isolation/);
   assert.match(iosJob, /Install iOS pods\s*\n\s*working-directory: apps\/mobile\/ios\s*\n\s*run: pod install/);
   assert.match(iosJob, /Compile unsigned iOS simulator release[\s\S]*?NODE_ENV: production[\s\S]*?-configuration Release/);
   assert.match(iosJob, /-sdk iphonesimulator/);
@@ -377,7 +378,7 @@ test("configures weekly Dependabot updates for npm and GitHub Actions", () => {
     /package-ecosystem: "github-actions"[\s\S]*?directory: "\/"[\s\S]*?interval: "weekly"/,
   );
   assert.match(config, /reviewers:\s*\n\s*- "shahbaz242630"/);
-  assert.match(securityWorkflow, /npm audit --omit=dev --workspaces --audit-level=high/);
+  assert.match(securityWorkflow, /npm run check:production-dependencies/);
 });
 
 test("rejects mutable action tags and accepts full commit SHAs", () => {

@@ -1,4 +1,4 @@
-import { requireOptionalNativeModule } from "expo-modules-core";
+import { requireOptionalNativeModule } from "expo";
 
 export type NativeCustodyCapability = {
   result_class: string;
@@ -25,9 +25,11 @@ export type NativeCustodyOperation = {
   result_class: string;
   passed: boolean;
   public_key?: string;
+  public_key_fingerprint?: string;
   public_key_encoding?: "ansi_x9_63_uncompressed";
   hardware_security_level?: string;
   private_key_exportable?: false;
+  protocol_profile?: "native_enrollment_v1";
   user_presence_binding?: string;
   test_alias_only: true;
 };
@@ -43,3 +45,24 @@ export const claimantKeyCustodyNative =
   requireOptionalNativeModule<ClaimantKeyCustodyNativeModule>(
     "ClaimantKeyCustody",
   );
+
+export type NativeAppAttestResult = {
+  result_class: string;
+  passed: boolean;
+  protocol_profile: "app_attest_adapter_v1";
+  test_alias_only: true;
+  app_attest_key_id?: string;
+  attestation_object?: string;
+  assertion_object?: string;
+};
+
+export type ClaimantAppAttestNativeModule = {
+  inspectCapabilityAsync(): Promise<NativeAppAttestResult>;
+  ensureTestKeyAsync(): Promise<NativeAppAttestResult>;
+  attestTestKeyAsync(challengeBytes: string): Promise<NativeAppAttestResult>;
+  generateTestAssertionAsync(challengeBytes: string): Promise<NativeAppAttestResult>;
+  clearTestKeyIdentifierAsync(): Promise<NativeAppAttestResult>;
+};
+
+export const claimantAppAttestNative =
+  requireOptionalNativeModule<ClaimantAppAttestNativeModule>("ClaimantAppAttest");

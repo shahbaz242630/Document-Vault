@@ -11,6 +11,30 @@
         "buildType": "apk"
       }
     },
+    "claimant-custody-probe": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "environment": "preview",
+      "env": {
+        "SANDUQKIN_BUILD_TARGET": "claimant_custody_probe"
+      },
+      "ios": {
+        "credentialsSource": "remote",
+        "simulator": false
+      }
+    },
+    "claimant-app-attest-probe": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "environment": "preview",
+      "env": {
+        "SANDUQKIN_BUILD_TARGET": "claimant_app_attest_probe"
+      },
+      "ios": {
+        "credentialsSource": "remote",
+        "simulator": false
+      }
+    },
     "production": {
       "autoIncrement": true,
       "environment": "production",

@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "generated_by": "scripts/generate-claim-test-vectors.mjs",
+    "production_data": false,
+    "synthetic_only": true,
+    "warning": "Opaque objects are synthetic bytes, not Apple attestations or assertions."
+  },
+  "app_attest_key_id_digest_label": "sanduqkin:claim:native-enrollment:app-attest-key-id:v1",
+  "synthetic_inputs": {
+    "app_id": "ABCDE12345.com.sanduqkin.synthetic",
+    "app_attest_key_id_bytes": "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA",
+    "opaque_objects_are_apple_issued": false
+  },
+  "registration_challenge": {
+    "protocol": "sanduqkin:claim:native-enrollment:app-attest-registration:v1",
+    "api_audience": "https://api.sanduqkin.test",
+    "challenge_id": "71000000-0000-4000-8000-000000000001",
+    "claimant_id": "21000000-0000-4000-8000-000000000002",
+    "portal_session_id": "81000000-0000-4000-8000-000000000018",
+    "app_attest_key_id_digest": "jP4NkV0WjX762GwRU5O2vPj-rjWWDUmYJ2B_xhx1xa8",
+    "app_id_hash": "pBqNY_Of9T6MEL7tai_qACvWZAiKOcCck1SmYmuA2dc",
+    "environment": "production",
+    "required_bundle_version": "1",
+    "required_validation_category": 2,
+    "issued_at": "2026-07-28T08:00:00.000Z",
+    "expires_at": "2026-07-28T08:05:00.000Z",
+    "nonce": "UVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3A"
+  },
+  "registration_client_data": "eyJhcGlfYXVkaWVuY2UiOiJodHRwczovL2FwaS5zYW5kdXFraW4udGVzdCIsImFwcF9hdHRlc3Rfa2V5X2lkX2RpZ2VzdCI6ImpQNE5rVjBXalg3NjJHd1JVNU8ydlBqLXJqV1dEVW1ZSjJCX3hoeDF4YTgiLCJhcHBfaWRfaGFzaCI6InBCcU5ZX09mOVQ2TUVMN3RhaV9xQUN2V1pBaUtPY0NjazFTbVltdUEyZGMiLCJjaGFsbGVuZ2VfaWQiOiI3MTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiLCJjbGFpbWFudF9pZCI6IjIxMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMiIsImVudmlyb25tZW50IjoicHJvZHVjdGlvbiIsImV4cGlyZXNfYXQiOiIyMDI2LTA3LTI4VDA4OjA1OjAwLjAwMFoiLCJpc3N1ZWRfYXQiOiIyMDI2LTA3LTI4VDA4OjAwOjAwLjAwMFoiLCJub25jZSI6IlVWSlRWRlZXVjFoWldsdGNYVjVmWUdGaVkyUmxabWRvYVdwcmJHMXViM0EiLCJwb3J0YWxfc2Vzc2lvbl9pZCI6IjgxMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAxOCIsInByb3RvY29sIjoic2FuZHVxa2luOmNsYWltOm5hdGl2ZS1lbnJvbGxtZW50OmFwcC1hdHRlc3QtcmVnaXN0cmF0aW9uOnYxIiwicmVxdWlyZWRfYnVuZGxlX3ZlcnNpb24iOiIxIiwicmVxdWlyZWRfdmFsaWRhdGlvbl9jYXRlZ29yeSI6Mn0",
+  "registration_client_data_hash": "uVIS-35xKtFoxw-h9xxrmh5-3cQdg9wcgn-MdBcsPHI",
+  "registration_response": {
+    "protocol": "sanduqkin:claim:native-enrollment:app-attest-registration:v1",
+    "challenge_id": "71000000-0000-4000-8000-000000000001",
+    "app_attest_key_id": "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=",
+    "attestation_object": "kZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0A=="
+  },
+  "assertion_challenge": {
+    "protocol": "sanduqkin:claim:native-enrollment:app-attest-assertion:v1",
+    "challenge_id": "71000000-0000-4000-8000-000000000002",
+    "claimant_id": "21000000-0000-4000-8000-000000000002",
+    "claimant_key_id": "31000000-0000-4000-8000-000000000013",
+    "claimant_key_version": 1,
+    "public_key_fingerprint": "Vg3N0myu8j92y2q7HRooneBJYEGM7xeUbabp2liJ42M",
+    "invitation_reference": "51000000-0000-4000-8000-000000000005",
+    "invitation_version": 2,
+    "portal_session_id": "81000000-0000-4000-8000-000000000018",
+    "app_attest_key_id_digest": "jP4NkV0WjX762GwRU5O2vPj-rjWWDUmYJ2B_xhx1xa8",
+    "app_id_hash": "pBqNY_Of9T6MEL7tai_qACvWZAiKOcCck1SmYmuA2dc",
+    "environment": "production",
+    "required_bundle_version": "1",
+    "required_validation_category": 2,
+    "native_enrollment_challenge_digest": "AEBArphRs3mWVrpsUwgLY2SMA1hGNqriJmtDDYGAJvA",
+    "api_audience": "https://api.sanduqkin.test",
+    "issued_at": "2026-07-28T08:10:00.000Z",
+    "expires_at": "2026-07-28T08:15:00.000Z",
+    "nonce": "cXJzdHV2d3h5ent8fX5_gIGCg4SFhoeIiYqLjI2Oj5A"
+  },
+  "assertion_client_data": "eyJhcGlfYXVkaWVuY2UiOiJodHRwczovL2FwaS5zYW5kdXFraW4udGVzdCIsImFwcF9hdHRlc3Rfa2V5X2lkX2RpZ2VzdCI6ImpQNE5rVjBXalg3NjJHd1JVNU8ydlBqLXJqV1dEVW1ZSjJCX3hoeDF4YTgiLCJhcHBfaWRfaGFzaCI6InBCcU5ZX09mOVQ2TUVMN3RhaV9xQUN2V1pBaUtPY0NjazFTbVltdUEyZGMiLCJjaGFsbGVuZ2VfaWQiOiI3MTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLCJjbGFpbWFudF9pZCI6IjIxMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMiIsImNsYWltYW50X2tleV9pZCI6IjMxMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAxMyIsImNsYWltYW50X2tleV92ZXJzaW9uIjoxLCJlbnZpcm9ubWVudCI6InByb2R1Y3Rpb24iLCJleHBpcmVzX2F0IjoiMjAyNi0wNy0yOFQwODoxNTowMC4wMDBaIiwiaW52aXRhdGlvbl9yZWZlcmVuY2UiOiI1MTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDUiLCJpbnZpdGF0aW9uX3ZlcnNpb24iOjIsImlzc3VlZF9hdCI6IjIwMjYtMDctMjhUMDg6MTA6MDAuMDAwWiIsIm5hdGl2ZV9lbnJvbGxtZW50X2NoYWxsZW5nZV9kaWdlc3QiOiJBRUJBcnBoUnMzbVdWcnBzVXdnTFkyU01BMWhHTnFyaUptdEREWUdBSnZBIiwibm9uY2UiOiJjWEp6ZEhWMmQzaDVlbnQ4Zlg1X2dJR0NnNFNGaG9lSWlZcUxqSTJPajVBIiwicG9ydGFsX3Nlc3Npb25faWQiOiI4MTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMTgiLCJwcm90b2NvbCI6InNhbmR1cWtpbjpjbGFpbTpuYXRpdmUtZW5yb2xsbWVudDphcHAtYXR0ZXN0LWFzc2VydGlvbjp2MSIsInB1YmxpY19rZXlfZmluZ2VycHJpbnQiOiJWZzNOMG15dThqOTJ5MnE3SFJvb25lQkpZRUdNN3hlVWJhYnAybGlKNDJNIiwicmVxdWlyZWRfYnVuZGxlX3ZlcnNpb24iOiIxIiwicmVxdWlyZWRfdmFsaWRhdGlvbl9jYXRlZ29yeSI6Mn0",
+  "assertion_client_data_hash": "jLOI-pxFCPIF_8f2GrIwaQr1XebyploQkiarvKwq_cw",
+  "assertion_response": {
+    "protocol": "sanduqkin:claim:native-enrollment:app-attest-assertion:v1",
+    "challenge_id": "71000000-0000-4000-8000-000000000002",
+    "app_attest_key_id": "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=",
+    "assertion_object": "0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8A"
+  },
+  "negative_cases": [
+    "changed_native_enrollment_challenge_digest",
+    "changed_claimant_key_fingerprint",
+    "changed_claimant_or_session",
+    "changed_invitation_or_version",
+    "changed_app_id_hash",
+    "changed_environment",
+    "changed_bundle_version",
+    "changed_validation_category",
+    "changed_api_audience",
+    "changed_nonce_or_expiry",
+    "wrong_app_attest_key_id",
+    "replayed_or_non_increasing_assertion_counter",
+    "invalid_certificate_chain",
+    "wrong_rp_id_or_aaguid",
+    "malformed_cbor",
+    "unsupported_device_fail_closed"
+  ]
+}

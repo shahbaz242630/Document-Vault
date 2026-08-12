@@ -14,6 +14,8 @@
     "@expo/fingerprint": {
       "brace-expansion": "5.0.9"
     },
+    "js-yaml": "5.2.3",
+    "nanoid": "3.3.18",
     "next": {
       "postcss": "8.5.23",
       "sharp": "0.35.3"
@@ -39,8 +41,17 @@
     "check:github-actions-security": "node scripts/github-actions-security-check.cjs",
     "check:security": "node scripts/security-check.cjs",
     "check:mobile-secrets": "node scripts/mobile-secret-scan.cjs",
+    "check:production-dependencies": "node scripts/production-dependency-audit.cjs",
     "check:supabase-db-security": "node scripts/supabase-db-security-check.cjs",
     "check:supabase-rls": "node scripts/supabase-rls-attack-test.cjs",
+    "check:claimant-foundation-db": "node scripts/claimant-foundation-db-test.cjs",
+    "check:claimant-registered-recipient-mutations-db": "node scripts/claimant-registered-recipient-mutations-db-test.cjs",
+    "check:claimant-session-assurance-db": "node scripts/claimant-session-assurance-db-test.cjs",
+    "check:claimant-registered-recipient-lifecycle-db": "node scripts/claimant-registered-recipient-lifecycle-db-test.cjs",
+    "check:claimant-portal-session-boundary-db": "node scripts/claimant-portal-session-boundary-db-test.cjs",
+    "check:claimant-app-attest-persistence-db": "node scripts/claimant-app-attest-persistence-db-test.cjs",
+    "check:claimant-native-enrollment-db": "node scripts/claimant-native-enrollment-db-test.cjs",
+    "check:claimant-native-enrollment-controller-db": "node scripts/claimant-native-enrollment-controller-db-test.cjs",
     "check:claim-vectors": "node scripts/generate-claim-test-vectors.mjs --check",
     "check:claim-vector-isolation": "node scripts/claim-vector-isolation-check.cjs",
     "check:claim-custody-isolation": "node scripts/claim-custody-isolation-check.cjs",
@@ -58,8 +69,8 @@
     "bip39": "3.1.0",
     "eslint": "9.39.3",
     "eslint-config-expo": "56.0.4",
-    "expo": "56.0.18",
-    "expo-router": "56.2.17",
+    "expo": "56.0.19",
+    "expo-router": "56.2.18",
     "libsodium-wrappers-sumo": "0.7.15",
     "patch-package": "^8.0.1"
   },

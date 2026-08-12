@@ -212,7 +212,12 @@ function isIgnoredSourceFile(filePath) {
 }
 
 function isTestFile(filePath) {
-  return /(?:^|[\\/])__tests__[\\/]/.test(filePath) || /\.(test|spec)\.[cm]?[jt]sx?$/.test(filePath);
+  return (
+    /(?:^|[\\/])__tests__[\\/]/.test(filePath) ||
+    /(?:^|[\\/])claim-vector-generator[\\/]/.test(filePath) ||
+    /(?:^|[\\/])[^\\/]+-test\.[cm]?[jt]sx?$/.test(filePath) ||
+    /\.(test|spec)\.[cm]?[jt]sx?$/.test(filePath)
+  );
 }
 
 function toRelativePath(cwd, filePath) {

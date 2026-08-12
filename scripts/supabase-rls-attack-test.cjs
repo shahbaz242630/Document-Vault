@@ -4,11 +4,42 @@ const crypto = require("node:crypto");
 const TABLES = [
   "account_deletion_requests",
   "audit_events",
+  "claimant_audit_events",
+  "claimant_case_device_keys",
+  "claimant_cases",
+  "claimant_device_keys",
+  "claimant_identities",
+  "claimant_idempotency_records",
+  "claimant_invitations",
+  "claimant_outbox",
+  "claimant_portal_eligibilities",
+  "claimant_portal_session_controls",
+  "claimant_portal_session_events",
+  "claimant_recipient_grants",
+  "claimant_session_controls",
+  "claimant_session_events",
   "emergency_contacts",
   "emergency_key_grants",
   "emergency_release_requests",
   "vault_assets",
   "vault_key_material",
+];
+
+const CLAIMANT_FOUNDATION_TABLES = [
+  "claimant_audit_events",
+  "claimant_case_device_keys",
+  "claimant_cases",
+  "claimant_device_keys",
+  "claimant_identities",
+  "claimant_idempotency_records",
+  "claimant_invitations",
+  "claimant_outbox",
+  "claimant_portal_eligibilities",
+  "claimant_portal_session_controls",
+  "claimant_portal_session_events",
+  "claimant_recipient_grants",
+  "claimant_session_controls",
+  "claimant_session_events",
 ];
 
 async function main() {
@@ -88,6 +119,12 @@ async function main() {
     await assertOwnerCanRead(owner, rows);
     await assertAttackerCannotRead(attacker, rows);
     await assertAnonCannotAccess(config);
+    await assertAuthenticatedCannotAccessClaimantFoundation(attacker);
+    await assertClientsCannotExecuteClaimantMutations(
+      config,
+      attacker,
+      attackerSession.userId,
+    );
     await assertAttackerCannotMutateOwnerRows(attacker, rows, ownerSession.userId);
     await assertAttackerCannotSpoofOwnerId(attacker, ownerSession.userId, rows.emergency_key_grants.id);
 
@@ -205,6 +242,12 @@ function createRestClient(config) {
         method: "POST",
       }).then(firstRow(table));
     },
+    rpc(functionName, values) {
+      return request(config, accessToken, `/rest/v1/rpc/${functionName}`, {
+        body: values,
+        method: "POST",
+      });
+    },
   };
 }
 
@@ -272,6 +315,146 @@ async function assertAnonCannotAccess(config) {
     await expectBlocked(
       () => anon.select(table, "select=*&limit=1"),
       `Anon unexpectedly accessed ${table}.`,
+    );
+  }
+}
+
+async function assertAuthenticatedCannotAccessClaimantFoundation(authenticated) {
+  for (const table of CLAIMANT_FOUNDATION_TABLES) {
+    const keyColumn = table === "claimant_identities" || table === "claimant_session_controls" ||
+      table === "claimant_portal_eligibilities" || table === "claimant_portal_session_controls"
+      ? "user_id"
+      : table === "claimant_case_device_keys"
+        ? "case_id"
+      : table === "claimant_idempotency_records"
+        ? "operation"
+        : "id";
+    await expectBlocked(
+      () => authenticated.select(table, "select=*&limit=1"),
+      `Authenticated user unexpectedly read ${table}.`,
+    );
+    await expectBlocked(
+      () => authenticated.insert(table, {}),
+      `Authenticated user unexpectedly inserted into ${table}.`,
+    );
+    await expectBlocked(
+      () => authenticated.patch(table, `${keyColumn}=not.is.null`, {}),
+      `Authenticated user unexpectedly updated ${table}.`,
+    );
+    await expectBlocked(
+      () => authenticated.deleteRows(table, `${keyColumn}=not.is.null`),
+      `Authenticated user unexpectedly deleted from ${table}.`,
+    );
+  }
+}
+
+async function assertClientsCannotExecuteClaimantMutations(
+  config,
+  authenticated,
+  authenticatedUserId,
+) {
+  const anon = createRestClient(config);
+  const clients = [
+    ["Anon", anon],
+    ["Authenticated user", authenticated],
+  ];
+
+  for (const [label, client] of clients) {
+    await expectBlocked(
+      () => client.rpc("claimant_issue_registered_invitation", {
+        p_expires_at: new Date(Date.now() + 86_400_000).toISOString(),
+        p_idempotency_key: crypto.randomUUID(),
+        p_owner_user_id: authenticatedUserId,
+        p_recipient_address_digest: "a".repeat(64),
+      }),
+      `${label} unexpectedly executed claimant_issue_registered_invitation.`,
+    );
+    await expectBlocked(
+      () => client.rpc("claimant_accept_registered_invitation", {
+        p_claimant_user_id: authenticatedUserId,
+        p_device_key_id: crypto.randomUUID(),
+        p_device_public_jwk: {
+          crv: "P-256",
+          kty: "EC",
+          x: "a".repeat(43),
+          y: "b".repeat(43),
+        },
+        p_expected_invitation_version: 0,
+        p_idempotency_key: crypto.randomUUID(),
+        p_invitation_id: crypto.randomUUID(),
+        p_recipient_address_digest: "a".repeat(64),
+      }),
+      `${label} unexpectedly executed claimant_accept_registered_invitation.`,
+    );
+    await expectBlocked(
+      () => client.rpc("claimant_activate_session", {
+        p_authenticated_at: new Date().toISOString(),
+        p_idempotency_key: crypto.randomUUID(),
+        p_session_id: crypto.randomUUID(),
+        p_user_id: authenticatedUserId,
+      }),
+      `${label} unexpectedly executed claimant_activate_session.`,
+    );
+    await expectBlocked(
+      () => client.rpc("claimant_assert_active_session", {
+        p_session_id: crypto.randomUUID(),
+        p_user_id: authenticatedUserId,
+      }),
+      `${label} unexpectedly executed claimant_assert_active_session.`,
+    );
+    await expectBlocked(
+      () => client.rpc("claimant_revoke_session", {
+        p_idempotency_key: crypto.randomUUID(),
+        p_session_id: crypto.randomUUID(),
+        p_user_id: authenticatedUserId,
+      }),
+      `${label} unexpectedly executed claimant_revoke_session.`,
+    );
+    await expectBlocked(
+      () => client.rpc("claimant_activate_portal_session", {
+        p_authenticated_at: new Date().toISOString(),
+        p_idempotency_key: crypto.randomUUID(),
+        p_session_id: crypto.randomUUID(),
+        p_user_id: authenticatedUserId,
+      }),
+      `${label} unexpectedly executed claimant_activate_portal_session.`,
+    );
+    await expectBlocked(
+      () => client.rpc("claimant_assert_portal_session", {
+        p_session_id: crypto.randomUUID(), p_user_id: authenticatedUserId,
+      }),
+      `${label} unexpectedly executed claimant_assert_portal_session.`,
+    );
+    await expectBlocked(
+      () => client.rpc("claimant_revoke_portal_session", {
+        p_idempotency_key: crypto.randomUUID(),
+        p_session_id: crypto.randomUUID(),
+        p_user_id: authenticatedUserId,
+      }),
+      `${label} unexpectedly executed claimant_revoke_portal_session.`,
+    );
+    await expectBlocked(
+      () => client.rpc("claimant_revoke_registered_invitation", {
+        p_expected_version: 1,
+        p_idempotency_key: crypto.randomUUID(),
+        p_invitation_id: crypto.randomUUID(),
+        p_owner_user_id: authenticatedUserId,
+      }),
+      `${label} unexpectedly executed claimant_revoke_registered_invitation.`,
+    );
+    await expectBlocked(
+      () => client.rpc("claimant_manage_registered_recipient", {
+        p_action: "enroll",
+        p_actor_user_id: authenticatedUserId,
+        p_case_id: crypto.randomUUID(),
+        p_device_binding_digest: "a".repeat(64),
+        p_expected_case_version: 1,
+        p_grants: null,
+        p_idempotency_key: crypto.randomUUID(),
+        p_public_key_jwk: { crv: "P-256", kty: "EC", x: "a".repeat(43), y: "b".repeat(43) },
+        p_target_key_id: null,
+      }),
+      `${label} unexpectedly executed claimant_manage_registered_recipient.`,
     );
   }
 }

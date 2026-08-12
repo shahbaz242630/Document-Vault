@@ -1,174 +1,192 @@
-# Sanduqkin Claimant And Release Handoff
+# Sanduqkin Claimant Engineering Handoff
 
-Last updated: 2026-08-03 (Asia/Dubai)
+Last updated: 2026-08-12 (Asia/Dubai)
+
+## Current Owner Decision
+
+The claimant programme is now `GO` for engineering implementation and production-readiness work, but remains `NO-GO` for external access, real claimant data, production activation, or release.
+
+Build, wire, integrate, and test the complete claimant journey before waiting for governance, compliance, staffing, or specialist launch approval. Engineering must use synthetic identities and documents, production-shaped local/test infrastructure, disabled-by-default capabilities, and independently operable kill switches. Governance and administrative closure are launch gates, not reasons to leave the product unbuilt.
+
+Owner decision on 2026-08-04: hosted claimant Supabase MFA client work is parked while the project remains on the Free plan. Do not weaken or remove the existing fresh-AAL2 API/database enforcement. Continue later slices with synthetic verified AAL2 sessions and disabled runtime; Supabase plan approval plus hosted MFA enrollment/challenge/recovery and production-shaped verification are mandatory before external claimant access or final readiness sign-off.
+
+This decision authorizes small, reviewed claimant code slices covering both intended routes:
+
+1. Registered next of kin / registered recipient first.
+2. The safe V2 offline-code route second.
+
+It does not authorize the unsafe V1 code as a public claim locator. It also does not authorize provider accounts, DNS, hosting, production environment changes, deployment, TestFlight work, public App Store release, real notifications, real evidence, or real claimant data.
 
 ## Next Session Opener
 
-1. Read `HANDOFF.md`, `CLAIM_HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` completely before making changes.
-2. Fetch `origin` and verify `main` contains PR #54 merge commit `aa84031be93b460c9addada6d2fb3b09286595de` before making changes. The original reviewed claimant implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`. The later bounded functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc` received the focused review recorded at `058e66a4813cf3306db82316b64ff1f160154953`.
-3. Preserve `.codex-runtime/` and `.playwright-cli/`; do not stage, delete, or modify them.
-4. PR #54 passed final protected CI and merged into `main` at `aa84031be93b460c9addada6d2fb3b09286595de`. Treat this merged synthetic prototype as a closed review baseline, not as production claimant runtime.
-5. Do not restart synthetic slices or begin production integration until the product owner makes and records a new exact authorization decision. Production Slice 3 remains `NO-GO`.
-6. Do not create a TestFlight build or perform any deployment as part of claimant work. The separately gated owner-vault release flow remains governed by `MVP_HANDOFF.md` and `HANDOFF.md`.
+1. Read `CLAIM_HANDOFF.md` first, then `HANDOFF.md`, `SECURITY_HANDOFF.md`, `MVP_HANDOFF.md`, and `docs/superpowers/specs/2026-08-04-claimant-code-readiness-gap-matrix.md` completely.
+2. Treat the existing working tree as the authoritative in-progress Phase 0–1 code bundle. Inspect `git status --short` and the focused diffs before editing. Do not fetch, switch branches, reset, clean, discard, stage, commit, or push until every existing change is accounted for.
+3. Preserve `.codex-runtime/` and `.playwright-cli/` exactly; they are unrelated untracked local state. Do not inspect for secrets unnecessarily, modify, delete, or stage them.
+4. Preserve the original private review ZIP at `review-packages/sanduqkin-native-enrollment-review-2026-08-04.zip` unchanged as historical evidence. The reviewer reproduced all 25 files and both original aggregates exactly.
+5. The owner explicitly accepted `docs/verification/2026-08-12-native-enrollment-adversarial-pre-review.md` as closing the Slice 1B/1C review gate, with the reviewer's disclosed status accepted as an owner exception. The authenticated decision and finding dispositions are recorded in `docs/verification/2026-08-12-native-enrollment-review-closure.md`.
+   The remediated aggregates are Slice 1B `c837de44f5da4f71c149d9e90b1a4a79ee39eeda72eb11985063e2838a003bd1` and Slice 1C `7ac6028f4e0fd4475122af264e2e7754e9c88d702cc154a6a8f39627cb07b337`; the remediation ZIP hash is recorded in the closure document.
+6. Preserve every accepted finding and its remediation evidence in the refreshed manifest. Runtime work may proceed only in new bounded, disabled, synthetic slices; passing review does not authorize deployment, external access, real data, or production activation.
+7. Native App Attest adapter and server-verifier work may proceed after this remediation slice is green. Live challenge and invitation acceptance remain separate transactional slices and must include the accepted custody, cool-off, notification, exact-case recovery, privacy, hosted-MFA, and concurrency controls.
+8. Keep **Phase 2 Slice 1A** deliberately parked at the paid-plan gate. Its claimant-host, portal-eligibility, and context-bound server-session foundation is complete; hosted Supabase sign-in/MFA/activation/restoration/sign-out remains incomplete. Do not weaken fresh-AAL2 enforcement or treat synthetic assurance as production evidence.
+9. Confirm the local Supabase stack only if database work is actually authorized. Never reset the verified local stack, link/push migrations, or change hosted Supabase. Before later database/runtime work, preserve the required Phase 1 baseline, clean disposable-stack replay, typechecks, lint, security, vector/custody isolation, and `git diff --check` gates.
+10. The browser must never generate, import, persist, or use a claimant private key. Do not trust self-asserted Secure Enclave metadata, transport the stable invitation reference, call invitation acceptance with an unproven/unattested key, or treat a client-supplied address digest as authority.
+11. Runtime-disconnected Slice 1B/1C, the signed disposable probe evidence, and the 2026-08-12 owner-accepted adversarial review are complete. The accepted remediation snapshot is engineering authority for later disabled slices, not production or launch approval.
+12. Keep every claimant production flag false. Do not deploy, use real identities/data/documents, change provider/DNS/Auth/Apple settings, publish the review snapshot, or perform other external administrative changes without exact authorization.
+13. Do not create a documentation-only or administrative-only commit, push, or pull request. Bundle these handoff changes with the existing authorized code bundle, and do not publish anything without explicit owner authorization.
 
-## Synthetic Claimant Prototype Checkpoint
+### Phase 2 Slice 1A Exit Gate
 
-The closed review branch is `codex/claimant-synthetic-journey`, merged through PR #54 at `aa84031be93b460c9addada6d2fb3b09286595de`. Synthetic Slices 1-17 are implemented as small, modular, tested increments. Slice 17 is commit `c607923` (`Add synthetic claimant acceptance suite`), followed by formal-review remediation, acceptance, final-head review, protected CI, and merge.
+- A pre-provisioned eligible synthetic claimant can sign in, complete approved MFA, activate exactly one context-bound server-owned claimant-portal session, reload safely, and sign out without entering an invitation or creating cryptographic key material.
+- Valid but ineligible, owner-only, arbitrary, and ambiguous dual-role identities fail closed before claimant-portal session activation; a Supabase identity or AAL2 claim alone grants no claimant role.
+- AAL1, recovery-only, stale, expired, malformed, displaced, and revoked sessions fail closed with safe copy and no sensitive error detail.
+- Owner-vault, owner claimant-administration, and claimant-portal modes share no repositories, decrypted state, key aliases, navigation authority, or implicit role inheritance; session displacement behavior is explicit per context.
+- Protected claimant routes are available only on the claimant test hostname, return private/`no-store`/`noindex` responses, and fail closed on public and owner hosts. Public claimant information routes remain unchanged and cannot call protected claimant APIs.
+- Browser storage/cache inspection finds no private key, MEK/plaintext, invitation secret, evidence content, or release material.
+- A value-free Phase 1 baseline manifest identifies the working-tree fingerprint, migration order/history, exact commands/results, and successful clean replay in a disposable local stack without altering the verified container.
+- Focused web/API/browser tests and the full Phase 1 regression baseline pass before Slice 1A is recorded complete.
 
-Completed synthetic capabilities cover journey projection, audit modelling, scenario execution, dashboard projection, checklist modelling and preview, evidence preparation and preview, review submission, submission preview, idempotent synthetic submission handoff, safe acknowledgement UI, fail-closed owner-protection/review tracking projection and UI, truthful decision/retrieval-readiness modelling and UI, and an end-to-end acceptance suite spanning the full synthetic journey and all seven read-only preview surfaces. They remain disconnected from production runtime and real claimant data.
+## Current Verified State
 
-The bounded synthetic claimant prototype phase is complete. Completion does not authorize real authentication, persistence, database work, migrations, RLS, uploads, notifications, review operations, submission runtime, cryptographic retrieval or release, real claimant data, TestFlight, or deployment. Those capabilities remain separately gated.
+- PR #54 merged the closed synthetic claimant baseline at `aa84031be93b460c9addada6d2fb3b09286595de`.
+- The original reviewed claimant implementation is `a21830487f38c1d6ee3771780be454da6f20b982`; its acceptance-record head is `8ce2b675cfe50d097049fb08d869d86a97da59ba`.
+- Synthetic Slices 1-17 provide contracts, validation, deterministic vectors, projections, fixtures, read-only previews, audit modelling, scenario execution, and an end-to-end synthetic acceptance suite.
+- All public `/claim` routes remain informational or deterministic engineering previews. Claimant authentication, persistence, uploads, notifications, review operations, release, retrieval, and decryption are not currently wired as a complete runtime journey.
+- Claimant web capability flags and `CLAIMANT_CUSTODY_PROBE_ENABLED` remain false.
+- Sanduqkin `1.0.0` Build 7 was produced from `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`; EAS build `0d8fce13-9ec8-46c9-a4de-6c9224523856`.
+- On 2026-08-04, Shahbaz Malik reported successful Apple processing, approval of the App Store Connect export-compliance answer, and a complete passing value-free physical-iPhone regression. The controlled internal TestFlight mobile gate is `PASS`; public release remains separately gated.
+- The existing owner-vault Hono API/processor is deployed at `https://sanduqkin-api.vercel.app` in Vercel `fra1`. It has no claimant runtime. Any claimant deployment or expanded external use remains separately gated and must be included in `EDGE-01`.
+- The 2026-08-04 code-readiness audit is recorded in `docs/superpowers/specs/2026-08-04-claimant-code-readiness-gap-matrix.md`. Phase 0 Slice 1 adds a canonical API startup-validated claimant capability graph with a master shutdown, independent kill switches, fail-closed dependency propagation, strict flag parsing, and an absolute production activation lock. No claimant route is mounted.
+- Phase 0 Slice 1 verification: 39 API tests passed, API typecheck passed, focused ESLint passed, claimant vector and custody isolation passed, and the repository security guard passed.
+- Phase 1 Slice 1 adds the default-deny registered-recipient database foundation: claimant identities, expiring single-use invitations with address digests only, public device keys that reject private JWK material, and cases bound to the accepted invitation/owner/claimant/key tuple. Forced RLS, explicit deny-all client policies, zero client grants, catalog enforcement, live invariant tests, and hostile REST tests pass. No claimant endpoint is mounted and hosted Supabase is unchanged.
+- Phase 1 Slice 2 adds service-only idempotency, append-only audit, value-free outbox, and transactional invitation issue/accept functions. Replay, changed-input, stale-version, digest mismatch, self-acceptance, private-key, and partial-failure paths are tested in rollback-only local transactions; anonymous and authenticated RPC access is blocked. No claimant endpoint is mounted and hosted Supabase is unchanged.
+- Phase 1 Slice 3 mounts a disabled-by-default protected API boundary for those mutations. It verifies Supabase bearer sessions, derives owner/claimant actors server-side, enforces exact allowlisted origin/CORS/content-type/idempotency/body and strict request/response schemas, and redacts database failures. All 49 API tests pass; the endpoints remain concealed while disabled and no external runtime or hosted Supabase state changed.
+- Phase 1 Slice 4 adds fresh AAL2 enforcement and server-owned session activation, displacement, assertion, and revocation. Nine claimant tables and five claimant/session RPCs remain client-inaccessible; recovery/AAL1/stale/expired/future/unknown assurance and displaced/revoked sessions fail closed. All 62 API and 61 static security tests pass; hosted Supabase and external runtime remain unchanged.
+- Phase 1 Slice 5 completes the registered-recipient platform API: case-scoped second-device enrollment, replacement/revocation, pending-invitation revocation, two-key V2 ciphertext-grant finalization, and automatic invalidation/re-finalization after key change. Eleven tables remain default-deny; all 68 API and 64 static security tests pass. No client UI, hosted migration, or external runtime was activated.
+- Phase 2 Slice 1A boundary sub-slice adds three more default-deny tables for synthetic portal eligibility, claimant-portal-specific session control, and append-only value-free portal session events. Three service-only functions enforce eligibility before context-bound activation/assertion/revocation. Protected `/claimant/**` routes are concealed unless a non-production web capability and exact claimant hostname are both approved; public `/claim/**` remains unchanged. The API has 73 passing tests, the static security set has 67, focused host/config/header/page tests pass, live catalog/RLS/portal database checks pass, and all workspace typechecks/lint pass. The full client sign-in/MFA flow and clean disposable-stack replay remain incomplete. Evidence: `docs/verification/2026-08-04-claimant-portal-session-boundary.md`.
+- Phase 2 Slice 1B contract increment defines strict iOS Secure Enclave native enrollment capability, public-key challenge request, server challenge, and possession-proof bindings. Runtime validators reject Android/software custody, private material, raw/client-asserted address or identity/role/eligibility/acceptance fields, and altered cross-object bindings. Shared, mobile, web, and API consume one deterministic fixture with all runtime flags false; 113 shared, 409 mobile, 149 web, and 74 API tests pass. No live route, database, native production alias, or invitation acceptance was added. Evidence: `docs/verification/2026-08-04-native-enrollment-contract.md`.
+- The second runtime-disconnected Slice 1B increment freezes the exact domain-separated P-256 ECDH/HKDF-SHA-256/HMAC-SHA-256 possession transcript and a reproducible synthetic vector. The challenge now binds server-derived claimant, invitation/version, eligibility/version, policy/version, origin, issue/expiry, nonce, KDF salt, device digest, key/version/fingerprint, and server ephemeral key. Hostile tests mutate every bound field. Invitation bootstrap uses server-side `email-ascii-v1` normalization and a keyed HMAC address index; the Phase 1 client-supplied digest is explicitly insufficient for live production. Full shared/mobile/web/API/shared-validation tests, all workspace typechecks, lint, and security/isolation checks pass. No runtime was added. Evidence: `docs/verification/2026-08-04-native-enrollment-possession-proof-review-pack.md`.
+- The internal adversarial Slice 1B review corrected exact-case email handling, canonical encodings, UUIDv4 locator validation, safe versions, the exact 300-second TTL, stable-reference transport, and the AES-256-GCM server-ephemeral profile. It added server-only normalization/keyed-index conformance and RFC 5869/off-curve tests. Production still requires independently approved App Attest binding, point validation, key management, delivery-token expiry/retention, and native adapter evidence. Evidence: `docs/verification/2026-08-04-slice-1b-internal-adversarial-review.md`.
+- Slice 1C supplies the strict runtime-disconnected App Attest registration/assertion contract, deterministic vectors, and hostile consumers. The owner-accepted review gate is closed; separate native/server/persistence/runtime evidence remains required. Evidence: `docs/verification/2026-08-04-app-attest-contract.md` and `docs/verification/2026-08-12-native-enrollment-review-closure.md`.
+- Phase 2 Slice 1D now has a code-complete hard-disabled iOS App Attest adapter behind an exact isolated bundle-ID gate, a dedicated iOS 27 development-entitled build profile, opaque-byte hashing, device-only key-ID persistence, strict output allowlists, safe errors, and a value-free evidence coordinator/UI. All local tests/typechecks/lint/isolation/security gates pass. Apple compile and physical-iPhone evidence remain pending exact external-action authorization, so Slice 1D is not yet recorded complete. Evidence: `docs/verification/2026-08-12-claimant-slice-1d-native-app-attest-adapter.md`.
+- Phase 2 Slice 1E now has a code-complete, unmounted server verifier and default-deny persistence boundary. It strictly parses CBOR/DER, validates registration/assertion cryptographic bindings through an offline caller-pinned Apple-root adapter, enforces the iOS 27 bundle/category extensions and monotonic counters, and persists verified public state through service-role-only idempotent transactions. Local hostile/API/database/security checks pass. Apple-issued fixture/Slice 1D integration and independent Apple-side review remain required before any route. Evidence: `docs/verification/2026-08-12-claimant-slice-1e-server-app-attest-verifier.md`.
+- Phase 2 Slice 1F now has a code-complete, unmounted native-enrollment transaction boundary. It generates and persists exact single-use registration/native/App-Attest challenges, seals the server ephemeral scalar under context-bound AES-256-GCM custody, verifies native ECDH/HKDF/HMAC possession plus Slice 1E App Attest evidence, and atomically consumes both challenges while accepting the invitation, creating the exact pre-bound claimant key/case, advancing the assertion counter, and appending audit/outbox state. Hostile and rollback tests pass. No HTTP route or external runtime exists. Evidence: `docs/verification/2026-08-12-claimant-slice-1f-native-enrollment-transaction.md`.
+- Phase 2 Slice 1G now mounts the four native-enrollment controller operations behind an immutable compile-time approval set to `false`. The enabled path derives confirmed-address, claimant/session, eligibility, invitation, App Attest key/device, policy, and app authority server-side; enforces exact origin/schema/size/idempotency/fresh-AAL2 boundaries; and applies forced-RLS per-account throttling. Disabled requests are concealed before configuration or CORS. All 114 API tests and the live controller database test pass. Apple-native, hosted MFA, edge abuse, hosted migration, and activation gates remain open. Evidence: `docs/verification/2026-08-12-claimant-slice-1g-native-enrollment-controller.md`.
+- Phase 2 Slice 1H adds a hard-disabled, runtime-disconnected mobile HTTPS transport and enrollment coordinator. It validates canonical server transcripts and cross-bindings, sends no client authority, orchestrates registration/native proofs through injected adapters, cleans up keys before finalization failures, and preserves keys after ambiguous final commit for reconciliation. It does not import or promote the disposable probe aliases, and normal mobile runtime cannot import it. All 439 mobile tests pass with 3 environment-gated skips. Evidence: `docs/verification/2026-08-12-claimant-slice-1h-mobile-enrollment-coordinator.md`.
+- The iOS Secure Enclave probe harness now uses only `probe-only.v3`, passcode-set device-only Keychain accessibility, `.privateKeyUsage` plus `.userPresence`, canonical unpadded Base64URL, the frozen V1 fingerprint/HKDF/HMAC labels, secure random salt/nonce, and creation/exercise fingerprint continuity. Normal application runtime does not import it. Separate internal EAS Build 1 compiled successfully, and the owner-reported physical pass/cancel/retry/cleanup matrix passed. Evidence: `docs/verification/2026-08-04-ios-secure-enclave-probe-harness.md` and `docs/verification/2026-08-04-physical-iphone-custody-probe-build.md`.
+- The physical-iPhone evidence coordinator freezes exact non-production/iOS/operator/passcode/value-free preconditions and emits only generic result classes, timestamps, continuity/pass booleans, and a run ID. It has no entry point in normal application runtime. The separate signed probe host compiled and the owner-reported authenticated pass, cancellation/cleanup, and retry matrix passed. Evidence: `docs/verification/2026-08-04-physical-iphone-evidence-runner.md` and `docs/verification/2026-08-04-physical-iphone-custody-probe-build.md`.
 
-## Status And Stop Gate
+## Engineering Target
 
-Current result: synthetic prototype `COMPLETE`; `NO-GO` for production claimant runtime and for any additional claimant slice without a new exact authorization.
+Deliver a production-ready-but-disabled claimant system that supports the complete user journey with synthetic data in a production-shaped environment:
 
-The public `/claim` routes are informational. Claimant authentication, invitations, key registration, persistence, migrations, RLS/Storage policies, evidence upload, notifications, processors, case transitions, release packages, retrieval, and claimant decryption are disabled.
+- Registered-recipient invitation, account creation, verified binding, MFA, recovery, and claimant key enrollment.
+- Safe V2 code initiation using a split public locator and client-only secret; never use V1 for public lookup.
+- Claim creation, relationship and authority details, document checklist selection, resumable evidence preparation, upload, submission, and safe acknowledgement.
+- Persisted claimant dashboard states that expose only approved public information.
+- Owner notice, cooldown, cancellation, dispute, hold, and value-free notification processing.
+- Reviewer assignment, conflict/recusal handling, two distinct approvals, escalation, and appeal modelling.
+- Server-controlled case transitions, idempotency, audit/outbox processing, reconciliation, and rollback.
+- Claimant-addressed encrypted release packages, bounded retrieval sessions, native local decryption, read-only presentation, optional local export, expiry, and suspension.
+- Complete monitoring, alerting, backup/restore, deletion, incident, and kill-switch behavior required to operate the code safely.
 
-Product-owner direction is approved, and Shahbaz Malik is the provisionally designated operator/data controller candidate. Legal confirmation, incorporation/contracting-entity details, controller contact details, the processor map, and the remaining legal/privacy, security, operations, native custody, staffing, and independent-review gates are incomplete. No real claimant data may be collected.
+## Definition Of Engineering Production Ready
 
-Repository reference: PR #54 and the bounded synthetic claimant prototype are merged into `main`/`origin/main` at `aa84031be93b460c9addada6d2fb3b09286595de`. Claimant production runtime remains unchanged and disabled.
+The claimant code may be described as engineering production ready only when all of the following are evidenced against one immutable candidate commit:
 
-## Two-Person Internal Review Process
+- Both claimant routes complete end to end using synthetic data in a production-shaped environment.
+- Every production capability defaults to disabled and can be stopped independently without a deployment.
+- Authentication, fresh assurance, database/API/RLS/Storage authorization, and claimant/case binding fail closed.
+- No claimant has a path to owner vault rows, owner key material, another claim, or another claimant's evidence.
+- Uploads enforce randomized case-bound paths, bounded capabilities, signature/type/size/page/count/decompression rules, and a malware-scanning adapter with deterministic test behavior.
+- Case transitions, audit append, outbox creation, and idempotency decisions are transactional or have tested reconciliation and rollback.
+- Dashboard projections cannot reveal reviewer identity, owner-response detail, fraud signals, internal notes, exact sensitive timers, or release predicates.
+- Release infrastructure serves ciphertext plus exactly one claimant-addressed material profile; browser/backend plaintext is impossible by design.
+- Native claimant clients prove local key custody, local decryption, expiry/suspension handling, and deterministic plaintext/key clearing.
+- Hostile cross-owner, cross-claimant, cross-case, replay, race, stale-version, duplicate-delivery, partial-failure, and restore tests pass.
+- Production-shaped configuration validation, observability, privacy-safe logs, SBOM/dependency review, rollback, backup/restore, and disaster exercises pass.
+- Known limitations and provisional policy values are configurable and documented rather than silently hard-coded.
 
-For the current project stage, Shahbaz Malik is the project owner and decision-maker, and Codex acts as the technical reviewer and evidence checker. Do not invent independent reviewers, specialist approvals, or signatures. Record a successful internal outcome as: **Internally reviewed and provisionally accepted for synthetic-prototype circulation. External specialist approvals remain outstanding.**
+Engineering production readiness is not launch authorization. External access remains blocked until the launch gates below are complete.
 
-After the final CI result is green, work in this order:
+## Implementation Order
 
-1. Codex performs a fresh technical and security review against the exact final commit.
-2. Shahbaz Malik and Codex walk through the claimant flow as the product-owner review.
-3. Codex prepares a findings and risk register supported by the review evidence.
-4. Shahbaz Malik explicitly accepts, rejects, or defers each finding.
-5. Record an internal review decision naming only the actual participants; do not represent it as independent or specialist approval.
-6. Keep the claimant pull request in draft unless Shahbaz Malik gives exact authorization to change its review state.
-7. Keep production claimant runtime at `NO-GO` until genuine legal/privacy, security, operations, native custody, staffing, and independent-review gates are completed.
+### Phase 0 — Code-readiness audit and safe foundations
 
-## Internal Review Decision — 2026-08-02
+- Map every synthetic contract and preview to its required runtime producer and consumer.
+- Add disabled-by-default feature/config flags, environment validation, and independent kill switches.
+- Confirm owner, claimant, public, API, evidence, reviewer, and native-client trust boundaries.
+- Establish production-shaped local/test environments and synthetic seed/reset tooling.
 
-- Reviewed implementation: `a21830487f38c1d6ee3771780be454da6f20b982` on PR #54.
-- Project owner and decision-maker: Shahbaz Malik.
-- Technical reviewer and evidence checker: Codex.
-- Technical result: post-remediation review passed with no remaining actionable internal findings; all protected CI checks passed.
-- Product-owner decision: accepted for bounded synthetic-prototype circulation.
-- Recorded decision: **Internally reviewed and provisionally accepted for synthetic-prototype circulation. External specialist approvals remain outstanding.**
-- Subsequent owner authorization: merge PR #54 into `main` after the final protected CI head passes. This changes repository publication status only; it does not authorize production claimant runtime, real claimant data, deployment, TestFlight, release, retrieval, or decryption.
-- Re-review is required after any implementation change, base-branch change, scope expansion, failed security/CI gate, or change to a documented runtime, privacy, custody, or release boundary.
+### Phase 1 — Shared claimant platform
 
-## Final-Head Focused Review — 2026-08-03
+- Claimant identity, invitation, public device-key, and registered-recipient case foundation: complete in Phase 1 Slice 1, default-deny and server-only.
+- Transactional invitation issuance/acceptance, idempotency, audit, and value-free outbox records: complete in Phase 1 Slice 2, service-role-only.
+- Authenticated, capability-guarded issue/accept API adapter with exact origin/content-type/CORS, server-derived actors, strict allowlists, and hostile tests: complete in Phase 1 Slice 3; mounted but concealed while disabled.
+- Fresh timestamped AAL2, bounded recovery restrictions, server-owned session activation/displacement/revocation, and active-session enforcement on both mutations: complete in Phase 1 Slice 4.
+- Case-scoped second-device enrollment, key replacement/revocation, invitation revocation, strict V2 ciphertext grants, invalidation, and owner finalization: complete in Phase 1 Slice 5.
+- Phase 1 registered-recipient platform foundations are complete locally.
+- Slice 1A hosted sign-in/MFA client wiring is parked at the paid-plan gate without weakening server enforcement. Slice 1B/1C, Apple probe evidence, and the owner-accepted 2026-08-12 adversarial review/remediation are complete. Slice 1D-1H code is complete locally but still requires the recorded Apple/native integration evidence. Slice 1G server approval and Slice 1H mobile approval remain immutable false. The next local slice is encrypted attempt persistence/reconciliation; production native adapters, hosted MFA, and edge abuse controls remain activation gates.
 
-- Review range: acceptance-record head `8ce2b675cfe50d097049fb08d869d86a97da59ba` through functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc` on PR #54.
-- Scope: session-close documentation plus bounded Android recovery/record-persistence smoke-harness navigation and its GitHub Actions regression assertions.
-- Technical result: no actionable findings. The smoke change uses bounded polling, sanitizes diagnostic UI output, accepts only an expected post-save destination, and still verifies the unique persisted record title before continuing.
-- Verification: JavaScript syntax check passed; all 23 focused GitHub Actions security regression tests passed; focused ESLint passed; PR #54 reported no failing or pending checks at the reviewed functional head.
-- Boundary result: no claimant contract, capability, authentication, persistence, database, RLS/Storage, evidence, notification, review, custody, retrieval, release, TestFlight, or deployment behavior changed.
-- Decision: the original internal acceptance and owner merge authorization remain applicable to the reviewed functional head. Claimant production Slice 3 remains `NO-GO`.
+### Phase 2 — Registered-recipient journey
 
-## Non-Negotiable Boundaries
+- Wire invitation acceptance, account/key enrollment, claim initiation, checklist, evidence preparation, upload, submission, acknowledgement, and persisted dashboard tracking.
+- Add server-owned intake/submission transition functions and hostile RLS/API/Storage isolation tests as their Phase 2 schemas and routes are introduced.
+- Keep evidence synthetic and notifications captured by test adapters.
+
+### Phase 3 — Review and owner-protection journey
+
+- Wire owner notice, provisional cooldown, cancellation, dispute, hold, reviewer assignment, conflict/recusal, two-person approval, escalation, and appeal.
+- Enforce server/database authority and value-free public projections.
+
+### Phase 4 — Encrypted release and native retrieval
+
+- Wire package preparation, claimant-addressed encryption, bounded sessions, native local opening, read-only presentation, optional local export, expiry, suspension, and closure.
+- Prove that delivery does not claim local open or plaintext receipt.
+
+### Phase 5 — Safe V2 offline-code journey
+
+- Implement the split locator/client-secret protocol, domain-separated proof, enumeration resistance, throttling, attempt controls, expiry, revocation, and explicit V1 rejection.
+- Add representative-device KDF benchmarks and reproducible protocol vectors.
+- Reuse the common intake, evidence, dashboard, review, and release platform after safe case binding.
+
+### Phase 6 — Production-hardening acceptance
+
+- Run complete end-to-end, hostile authorization, race/replay, outage, reconciliation, backup/restore, deletion, observability, and rollback suites.
+- Freeze one immutable engineering candidate and produce a value-free readiness report and residual-risk register.
+- Keep runtime flags disabled and stop for launch governance.
+
+Each phase must be delivered in small reviewable code changes with exact scope, non-goals, tests, rollback, and updated handoffs. Passing one phase does not authorize deployment or activation.
+
+## Non-Negotiable Technical Boundaries
 
 - Authentication, MFA, code possession, relationship, identity proofing, evidence review, release authority, and cryptographic possession are separate controls.
 - No individual control—and no owner non-response—authorizes release.
 - Never submit, log, email, place in a URL, or store a complete emergency secret.
 - Claimants never receive a policy path to owner vault rows, key material, another claim, or another claimant's evidence.
-- Infrastructure serves ciphertext plus exactly one claimant-addressed release-material profile. Decryption and optional readable PDF export occur only in the native claimant client.
+- Infrastructure stores and serves ciphertext plus approved metadata only for owner vault material.
+- Claimant evidence is separate server-visible sensitive PII and must remain in an isolated private quarantine.
 - Browser-readable release PDFs, server-side decryption, system-known PDF passwords, and server-recoverable claimant private keys are prohibited.
 - Claim-sensitive actions require fresh authenticated sessions and enforced `aal2` in UI, API, and database policy.
 - Case state, authority, approvals, deadlines, and release eligibility are server/database controlled; client values are untrusted.
-- Evidence, if approved, is sensitive server-visible PII outside the owner-vault zero-knowledge claim and must use an isolated private quarantine.
-- Development uses dedicated identities and synthetic records/documents only.
+- Owner clients seal claimant-addressed ciphertext locally; servers never perform that encryption but remain authoritative for validation, authorization, persistence, case transitions, and finalization.
+- Package prepared, served, opened, exported, claimant-confirmed, expired, suspended, and closed are distinct events.
+- Suspension can block future retrieval but cannot recall information already decrypted locally.
+- Development and engineering acceptance use dedicated synthetic identities, records, documents, notifications, and release material only.
 
-## Approved Product Direction
+## Governance And Launch Gates
 
-These are product-owner decisions, not specialist authorization:
+These items do not block the engineering programme, but every applicable item blocks external access or production activation:
 
-- Registered-recipient route before V2 offline-code initiation.
-- Invitation-only death-claim pilot; other claim types remain deferred.
-- Verified value-free owner notice, provisional 30-day cooldown, owner cancellation, and no automatic release for non-response.
-- Two distinct trained human reviewers; no self-review, duplicate approval, or conflicted reviewer.
-- At least two independently enrolled, device-bound claimant keys before pilot; no server recovery.
-- iOS-only preparation while Android remains fail-closed. Preparation means documentation, physical probes, benchmarks, tests, and assurance review—not runtime integration.
-- Private evidence quarantine and value-free notifications.
-- Claimant-addressed ciphertext delivery with native local read-only decryption and optional local PDF export.
-- Provisional 72-hour package availability and 15-minute retrieval sessions, subject to security/operations approval.
-- Safe claimant journey dashboard using public states that exclude reviewer identity, owner-response detail, fraud signals, exact timers, and internal notes.
-- Append-only server-authored case ledger with integrity evidence and value-free metadata.
-- Nationality-neutral architecture using signed/versioned document-specific jurisdiction policy packs. A claim without an approved applicable pack remains on hold.
+- Confirm the operating/contracting entity, controller details, processor map, governing law, and supported jurisdiction policy packs.
+- Approve evidence authority, sufficiency, translation, minimization, legal basis, retention/deletion, rights, legal hold, breach, dispute, appeal, and cross-border rules.
+- Name and train operational reviewers; approve qualifications, separation, conflicts, access, escalation, staffing, and incident procedures.
+- Complete independent legal/privacy, security, native/cryptographic, operational, and application assurance against the immutable engineering candidate.
+- Approve production providers, plans, DPAs/subprocessors, origin architecture, WAF/DDoS controls, monitoring, support, backup/restore, and incident response.
+- Complete `EDGE-01` through `EDGE-03`, the owner-web P0 controls in `SECURITY_HANDOFF.md`, production configuration evidence, and controlled launch approval.
 
-## Route Boundaries
+No real claimant data may be collected and no external claimant capability may be enabled until these launch gates are recorded as complete or an explicit documented exception is approved by the actual accountable owner and required specialists.
 
-### Registered recipient
-
-The intended route is: value-free single-use invitation; verified normalized-address binding; mandatory MFA; hardware-backed claimant public-key registration; owner-local sealed-grant finalization; revocation/replacement; and later independent claim review.
-
-Runtime remains blocked until physical iOS custody evidence, multi-device protocol, key replacement/loss journeys, origin/auth design, security review, and independent cryptographic/native approval pass.
-
-### V2 offline handover code
-
-V1 has no safe public locator and must never be used for claim lookup. V2 remains disabled until it has a split public locator/client-only secret, domain-separated proof, enumeration resistance, throttling/attempt controls, revocation/expiry, explicit V1 compatibility policy, and approved representative-device KDF benchmarks. The current V2 fixture KDF profile is synthetic-only and `production_approved: false`.
-
-## Evidence And Release Rules
-
-- Evidence storage requires randomized case-bound paths, short-lived capabilities, allowlisted formats, signature/type verification, strict size/page/count/decompression limits, malware scanning, and claimant/case-bound authorization.
-- Define reviewer access, workstation controls, retention, deletion, legal hold, breach response, database backup, Storage backup, and restore behavior before implementation.
-- Notifications contain no evidence, owner identity, secret, countdown detail, or release material.
-- Release requires a current owner grant, approved authority policy, completed review, elapsed cooldown, no cancellation/hold, two independent approvals, fresh `aal2`, and an unexpired bounded retrieval session.
-- Package prepared, served, opened, exported, claimant-confirmed, expired, suspended, and case-closed are distinct events. Do not use one ambiguous `released` event as proof that plaintext was received.
-- Suspension may block future retrieval but cannot recall information already decrypted by the claimant.
-
-## Production Implementation Order (Still Gated)
-
-1. **Slice 1 — complete:** inactive informational routes and hard-disabled capability model.
-2. **Slice 2 — current:** immutable decision/threat/approval package, named specialist review, physical custody evidence, benchmark plans, and assurance closure.
-3. **Slice 3 — blocked:** registered-recipient setup only; no claim submission, evidence, review, or release.
-4. **Slice 4 — blocked:** V2 initiation and synthetic evidence quarantine; no release.
-5. **Slice 5 — blocked:** controlled review/cooldown/hold/approval state machine; release disabled.
-6. **Slice 6 — blocked:** encrypted packages, bounded retrieval, native local decryption, read-only viewer, expiry, suspension, restore drill, penetration review, and invitation-only pilot approval.
-
-Every slice requires explicit scope/non-goals, kill switches, transactional/idempotent processing, hostile authorization/race/replay tests, rollback, value-free evidence, and recorded approval before proceeding.
-
-## Pending Claimant Integration Code (Unbuilt And Not Authorized)
-
-PR #54 does **not** build or authorize any of the production integration below. This is the fresh-session backlog, not an instruction to start coding:
-
-1. Runtime feature/config flags, environment validation, and independently operable kill switches, all defaulting to disabled.
-2. Claimant and registered-recipient authentication, value-free invitations, MFA, account recovery, session assurance, and owner/claimant origin isolation.
-3. Transactional claimant database schema and migrations for cases, versioned state, grants/routes, idempotency, audit/outbox records, and server-owned transition functions.
-4. RLS/API/Storage isolation with hostile cross-owner, cross-claimant, cross-case, replay, stale-version, and race-condition tests.
-5. Private evidence-quarantine storage with randomized case-bound paths, short-lived upload capabilities, signature/type/size/page/count/decompression checks, malware scanning, retention, deletion, backup, and legal-hold behavior.
-6. Server-side case-transition and audit processing with same-transaction append, integrity/tamper evidence, canonical projection, idempotency, retry, reconciliation, and rollback behavior.
-7. Value-free notification and owner-protection workflows covering notice, cooldown, cancellation, dispute, hold, outbox delivery, retry, abuse handling, and kill switches.
-8. Reviewer operations for assignment, conflict/recusal, two independent approvals, access control, audit, escalation, and appeal; no reviewer may approve twice or review a conflicted case.
-9. Native claimant key enrollment for at least two independent devices, plus replacement, loss, revocation, downgrade handling, and physical custody evidence.
-10. Claimant-addressed encrypted release packages, bounded retrieval sessions, native local decryption, read-only presentation, optional local export, expiry, and suspension. No browser or backend plaintext.
-11. Monitoring, alerting, incident response, backup/restore drills, stale-state reconciliation, deletion verification, operational ownership, and emergency shutdown exercises.
-12. Authenticated end-to-end and hostile integration tests, independent assurance evidence, controlled pilot approval, and release evidence.
-
-The earliest possible next implementation is **Production Slice 3: registered-recipient setup only**. It still requires explicit `GO` plus completion of its external legal/privacy, security, operations, native-custody, staffing, and independent-review gates. Slice 3 must not include claim submission, evidence intake, case review, notifications about case substance, release packages, retrieval, or decryption.
-
-## Session Close Record — 2026-08-02
-
-- Synthetic Slices 1-17 are complete, technically reviewed, and provisionally accepted for bounded synthetic-prototype circulation.
-- Reviewed implementation: `a21830487f38c1d6ee3771780be454da6f20b982`; acceptance-record head: `8ce2b675cfe50d097049fb08d869d86a97da59ba`.
-- Final-head focused review: functional head `2ee5a6922af98c362cbab89f2fd845b3ea1f4ebc`; focused-review record `058e66a4813cf3306db82316b64ff1f160154953`.
-- The product owner authorized PR #54 for merge after the final protected CI head passes. A follow-up smoke-harness correction makes successful record persistence deterministic by verifying it through `Records` -> `Bank accounts`; it does not change claimant product or runtime behavior.
-- Final protected CI passed at head `c126cb17565e3b9803f10af5f35d4b0a753ba92f`, and PR #54 merged into `main` as `aa84031be93b460c9addada6d2fb3b09286595de` on 2026-08-03.
-- No claimant runtime, real claimant data, deployment, TestFlight build, production database/storage change, release, retrieval, or decryption was authorized by this closure.
-- Start the next session from a clean, fetched `main`; verify merge commit `aa84031be93b460c9addada6d2fb3b09286595de`, read all four handoffs, select one explicitly bounded task, and stop for exact authorization before changing production claimant code.
-
-## Current Slice 2 Blockers
-
-- Legal confirmation of Shahbaz Malik as operator/data controller, incorporation/contracting-entity details, controller contact details, processor map, governing law, supported policy packs, and counsel opinion on release authority.
-- Evidence sufficiency/authenticity/translation rules, data minimization, consent/legal basis, retention/deletion, rights, legal hold, breach, and cross-border policy.
-- Named reviewer roles, qualifications, conflict checks, staffing, access controls, escalation, appeal, and incident procedures.
-- Physical iOS Secure Enclave proof, two-device enrollment design, loss/replacement/revocation journeys, and independent native/cryptographic review.
-- Final claimant authentication/recovery/session design and owner/claimant origin isolation.
-- Evidence Storage provider/design, malware controls, backup/restore drill, stale-state reconciliation, and deletion limits.
-- Notification provider, value-free templates, delivery/retry/abuse handling, monitoring, and kill switches.
-- Audit event catalogue, public-state vocabulary, integrity/tamper evidence, access/retention/export policy, and hostile omission/mutation tests.
-- Independent assurance and recorded acceptance of residual risks.
-
-Android is not a blocker to owner-approved iOS-only preparation, but it remains ineligible for runtime enrollment until transaction-bound P-256 key agreement, accepted hardware security/attestation, per-use authentication, downgrade handling, representative devices, and independent Android review pass.
-
-## Authoritative Review Set
+## Authoritative Design Set
 
 - `docs/superpowers/specs/2026-07-31-claimant-slice-2-decision-register.md`
 - `docs/superpowers/specs/2026-07-31-claimant-threat-control-matrix.md`
@@ -179,73 +197,16 @@ Android is not a blocker to owner-approved iOS-only preparation, but it remains 
 - `docs/superpowers/specs/2026-07-28-claimant-key-custody-client-boundary.md`
 - `docs/superpowers/specs/2026-07-28-claimant-custody-probe-evidence.md`
 
-The complete claimant review set is published on `main` at PR #54 merge commit `aa84031be93b460c9addada6d2fb3b09286595de`. Circulate only that verified merge commit while retaining the reviewed implementation and acceptance-record SHAs in the review metadata; never substitute the working tree or a superseded commit. Every approval record must identify the document version/hash, approver and role, decision, conditions, supporting evidence, date, and expiry/re-review trigger. Chat acknowledgement or passing tests do not substitute for specialist approval.
+Use these as current design inputs, not as proof of implemented runtime or launch approval. Update superseded assumptions alongside the code slice that changes them.
 
-## Production Authorization Work (Separate From Synthetic Slices)
+## Historical Evidence Retained
 
-1. Merge or otherwise freeze the Slice 2 review package so every specialist reviews the same version.
-2. Legally confirm the provisional Shahbaz Malik operator/data controller designation, complete the contracting-entity/controller record and processor map, and keep all claimant data collection blocked until approval.
-3. Obtain physical iOS custody evidence and complete the multi-device/loss/replacement design.
-4. Route the immutable package to named legal/privacy, security, operations, native, and independent reviewers.
-5. Resolve every blocking checklist item and record conditions/evidence/expiry.
-6. Stop for an explicit `GO` decision before any Slice 3 runtime change.
+- PR #54 passed protected CI and was internally accepted for bounded synthetic-prototype circulation. External specialist approvals remained outstanding.
+- Prototype acceptance recorded 141 web tests, 110 shared claimant tests, and 42 shared validation tests passing, plus workspace typechecks, lint, production web build, security guards, vector isolation, and custody isolation.
+- The synthetic acceptance suite proved deterministic modelling and safe projections only; it did not prove production authentication, persistence, uploads, operations, native release, or deployment.
+- PR #58 merged the owner-web security baseline and `brace-expansion` production-path remediation at `c0a14e1`.
+- PR #59 merged documented edge/WAF/DDoS gates at `887abd0459197c5123b8972e1b8c5bed14ec5528`; it made no provider, DNS, hosting, or runtime change.
 
-## Verification
+## Repository Publishing Rule
 
-### Slice 17 and prototype acceptance on 2026-08-02
-
-- End-to-end synthetic acceptance: 5 passed; focused acceptance/dashboard remediation: 9 passed.
-- Full web suite: 141 passed; full shared claimant suite: 110 passed; shared validation: 42 passed.
-- Formal-review remediation now requires complete replay equality, rejects cross-case audit appends, validates canonical snapshot projections and complete evidence-preparation binding, binds every allowed transition to an event type, and separates all seven synthetic review routes from public navigation and the sitemap.
-- All workspace typechecks and root lint passed; the production web build passed with all seven synthetic routes statically prerendered.
-- Phase 1, GitHub Actions security, static security/migration, mobile secret, claim-vector reproducibility, claimant-vector isolation, and claimant-custody isolation guards passed.
-- Claimant-vector isolation now scans nested claimant contract modules recursively and has its own regression test.
-- Acceptance drives submission through closure with a reconciled ten-event synthetic ledger, verifies all claimant capabilities remain `false`, and confirms delivery never proves local open or plaintext receipt. Dashboard owner-response leakage and overclaimed closure/receipt language were removed.
-- Live Supabase attack/restore, native device, TestFlight, and deployment gates were not run because this slice changes no production runtime, database, native custody, or release candidate.
-
-### Slice 16 on 2026-08-02
-
-- Decision/retrieval UI focused suite: 9 passed.
-- Complete claimant web suite: 59 passed; complete shared claimant suite: 96 passed.
-- Web typecheck and targeted decision-readiness UI lint passed; production web build passed with the route statically prerendered.
-- Claim vectors, vector isolation, and custody isolation guards passed.
-- Neutral example identities keep delivery and blocked variants indistinguishable; the accessible read-only UI exposes no raw states or private reasons, has no controls/downloads/runtime/crypto integration, and explicitly reports zero runtime action and no release or decryption authority.
-
-### Slice 15 on 2026-08-02
-
-- Decision/retrieval-readiness focused suite: 7 passed.
-- Complete shared claimant suite: 96 passed; claimant web regression: 50 passed.
-- Shared-types and web typechecks passed; targeted decision-readiness lint passed.
-- Claim vectors, vector isolation, and custody isolation guards passed.
-- Available-before/after-delivery projections are identical; blocked outcomes are collapsed; invalid inputs fail closed; expiry, suspension, and closure use truthful copy; every projection has zero runtime effect and no release or decryption authority.
-
-### Slice 14 on 2026-08-02
-
-- Review-tracking UI focused suite: 9 passed.
-- Complete claimant web suite: 50 passed; complete shared claimant suite: 89 passed.
-- Web typecheck and targeted review-tracking lint passed; production web build passed with the route statically prerendered.
-- Claim vectors, vector isolation, and custody isolation guards passed.
-- The accessible public UI uses neutral example identities, renders stopped and invalid inputs identically, omits raw states and sensitive control details, has no interactive/runtime integration, and explicitly states that no decision or release is authorized.
-
-### Slice 13 on 2026-08-02
-
-- Owner-protection/review tracking focused suite: 6 passed.
-- Complete shared claimant suite: 89 passed; claimant web regression: 41 passed.
-- Shared-types and web typechecks passed; targeted review-tracking lint passed.
-- Claim vectors, vector isolation, and custody isolation guards passed.
-- Invalid inputs and stopped outcomes collapse to a generic unavailable state; the projection excludes reviewer identity/count, owner-response detail, cancellation cause, fraud signals, internal reasons, exact timers, evidence references, approval predicates, and release authority.
-
-### Slice 12 on 2026-08-02
-
-- Safe acknowledgement UI focused suite: 13 passed.
-- Web typecheck and lint passed.
-- Claim vectors, vector isolation, and custody isolation guards passed.
-- The public acknowledgement projection is explicitly allowlisted and excludes protocol references, case versions, internal reason codes, reviewer identity, owner-response detail, fraud signals, runtime controls, and network or persistence integration.
-
-### Baseline on 2026-08-01
-
-- Inactive claimant web tests: 6 passed.
-- Mobile custody/settings/certificate/security-focused suite: 27 passed.
-- Shared validation: 42 passed.
-- Claim vectors, vector isolation, and custody isolation guards passed.
-- Code inspection confirmed all web claimant capability flags are `false` and `CLAIMANT_CUSTODY_PROBE_ENABLED` is `false`.
+Do not publish documentation or administrative changes alone. Keep them local and include them with the next authorized, reviewed code change. This rule does not authorize a code change, deployment, external configuration, or any other administrative action by itself.

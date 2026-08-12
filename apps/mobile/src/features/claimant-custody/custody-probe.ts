@@ -16,9 +16,11 @@ export type CustodyOperation = {
   result_class: string;
   passed: boolean;
   public_key?: string;
+  public_key_fingerprint?: string;
   public_key_encoding?: "ansi_x9_63_uncompressed";
   hardware_security_level?: string;
   private_key_exportable?: false;
+  protocol_profile?: "native_enrollment_v1";
   user_presence_binding?: string;
   test_alias_only: true;
 };
@@ -68,6 +70,9 @@ export function createClaimantCustodyProbe(adapter: CustodyProbeAdapter) {
           capability.eligible &&
           creation?.passed === true &&
           exercise?.passed === true &&
+          creation.protocol_profile === "native_enrollment_v1" &&
+          exercise.protocol_profile === "native_enrollment_v1" &&
+          creation.public_key_fingerprint === exercise.public_key_fingerprint &&
           cleanup.passed,
       };
     },
@@ -96,6 +101,21 @@ function assertOperation(value: CustodyOperation): CustodyOperation {
     "shared_secret" in value
   ) {
     throw new Error("Claimant custody operation exposed prohibited key material.");
+  }
+  if (value.public_key !== undefined && !/^B[A-Za-z0-9_-]{86}$/u.test(value.public_key)) {
+    throw new Error("Claimant custody operation exposed a non-canonical public key.");
+  }
+  if (
+    value.public_key_fingerprint !== undefined &&
+    !/^[A-Za-z0-9_-]{43}$/u.test(value.public_key_fingerprint)
+  ) {
+    throw new Error("Claimant custody operation exposed an invalid public-key fingerprint.");
+  }
+  if (
+    value.protocol_profile !== undefined &&
+    value.protocol_profile !== "native_enrollment_v1"
+  ) {
+    throw new Error("Claimant custody operation used an unsupported protocol profile.");
   }
   return value;
 }

@@ -36,6 +36,7 @@ export function createProtectedWebSecurityHeaders({
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "X-Permitted-Cross-Domain-Policies": "none",
+    "X-Robots-Tag": "noindex, nofollow, noarchive",
   };
   if (secureRequest) {
     headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";

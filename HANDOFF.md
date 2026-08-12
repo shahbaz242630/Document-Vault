@@ -1,15 +1,15 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-08-03 (Asia/Dubai)
+Last updated: 2026-08-12 (Asia/Dubai)
 
 ## Current Decision
 
-The controlled owner-vault TestFlight candidate is now Sanduqkin `1.0.0` Build 7, produced and submitted successfully from exact `main` commit `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`. Apple processing/export-compliance confirmation and the physical-iPhone regression remain open, so the mobile release gate has not passed. The claimant merge does not authorize another claimant slice or production claimant runtime, which remains `NO-GO`.
+The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` Build 7. The claimant programme is now `GO` for full engineering implementation and production-readiness work using synthetic data and disabled-by-default capabilities. Build and test the complete registered-recipient journey first, then the safe V2 code journey, in small reviewed slices. External claimant access, real claimant data, deployment, production activation, public App Store release, and administrative/provider changes remain `NO-GO` until their launch gates pass.
 
 ## Repository Snapshot
 
 - Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
-- Base/release branch at candidate dispatch: `main` and `origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56).
+- Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Current `main`/`origin/main` include that source and PR #54 as ancestors and point at PR #59 merge commit `887abd0459197c5123b8972e1b8c5bed14ec5528`.
 - PR #52 merged the claimant Slice 2 review package and divorce-certificate correction; PR #53 merged the biometric Settings repair.
 - Preserve unrelated local-only items such as `.codex-runtime/`.
 
@@ -18,27 +18,49 @@ The controlled owner-vault TestFlight candidate is now Sanduqkin `1.0.0` Build 7
 ### Mobile owner vault
 
 - App version is `1.0.0`; Build 7 was built and uploaded to App Store Connect from `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` by protected workflow run `30830865138` on 2026-08-03. EAS build ID: `0d8fce13-9ec8-46c9-a4de-6c9224523856`.
-- Build 6 did not complete the iOS release gate because its `Biometric unlock` status/card was non-interactive. PR #53 merged the discoverable, accessible enable/disable action; Build 7 contains the repair but has not yet been physically verified.
-- Apple processing and the App Store Connect export-compliance answer remain required before Build 7 can be assigned for internal device testing. The workflow warned that `ios.infoPlist.ITSAppUsesNonExemptEncryption` is not declared in `app.json`; do not infer or record the legal answer without owner confirmation.
+- Build 6 did not complete the iOS release gate because its `Biometric unlock` status/card was non-interactive. PR #53 merged the discoverable, accessible enable/disable action; Build 7 contains the repair.
+- On 2026-08-04, Shahbaz Malik reported that Apple processing completed and the App Store Connect export-compliance answer was approved. The exact legal classification/value is not inferred or reproduced.
 - The underlying flow is implemented: enablement authenticates before caching the MEK, lock-screen restoration uses one authenticated SecureStore read, stale remote restoration requires a live Supabase session, and password fallback remains available.
-- Android emulator evidence passed. Physical Face ID enablement and `Lock` -> `Unlock` remain unverified.
-- Marriage and divorce certificate values exist in the encrypted Document Locations registry and automated tests. The corrected divorce value still needs fresh hosted create/edit/reload/delete verification.
+- Android emulator evidence passed. Shahbaz Malik reported that the complete requested value-free Build 7 physical-iPhone regression passed, including Face ID enablement, `Lock` -> `Unlock`, background lock, cancel/error handling, password and expired-session fallbacks, returning-user recovery, and the owner-flow navigation/readiness checks.
+- Marriage and divorce certificate values exist in the encrypted Document Locations registry and automated tests. Shahbaz Malik reported that corrected divorce-certificate encrypted create/edit/reload/delete persistence and cleanup passed during the Build 7 regression.
 
 ### Owner web vault and public site
 
 - Mobile and web share the same Supabase identity, `vault_key_material`, `vault_assets`, envelope format, and 17-category validation registry.
 - The protected owner web vault is implemented locally but not deployed.
 - The hosted web preview is static and protected; it has no production domain or Supabase environment variables.
+- The existing owner-vault Hono API/processor is deployed in Vercel `fra1` at `https://sanduqkin-api.vercel.app`; no claimant runtime is present and the intended `api.sanduqkin.com` host is not approved or attached. Inventory this existing public ingress under `EDGE-01` before any custom-domain attachment, expanded external use, or claim-related use.
 - Public legal content remains a draft. Do not publish until `apps/web/LEGAL_CONTENT_REVIEW.md` is resolved and owner/counsel approval is recorded.
 
 ### Claimant work
 
-- `/claim` is informational only. Authentication, intake, evidence, review, notifications, release, and claimant decryption are disabled.
+- `/claim` is currently informational only. Authentication, intake, evidence, review, notifications, release, and claimant decryption are not yet wired as a complete runtime journey.
 - Synthetic Slices 1-17 and the end-to-end acceptance suite are complete locally. All seven synthetic preview surfaces remain read-only, non-indexed, runtime-disconnected, and based only on deterministic fixtures.
-- Product-owner direction is recorded, but legal/privacy, security, operations, native custody, and independent approvals remain incomplete.
+- Product-owner direction now authorizes production-shaped claimant engineering with synthetic data, hard-disabled external capabilities, and no deployment. Legal/privacy, security, operations, native custody, and independent approvals remain launch gates.
 - Shahbaz Malik is the provisionally designated operator/data controller candidate. Incorporation, legal confirmation, controller contact details, and the processor map remain incomplete, so no real claimant data may be collected.
-- `CLAIM_HANDOFF.md` is authoritative for claimant scope and stop gates.
-- Its `Pending Claimant Integration Code` section is the explicit fresh-session backlog. Every listed production capability remains unbuilt or incomplete and unauthorized by PR #54.
+- `CLAIM_HANDOFF.md` is authoritative for claimant engineering scope, implementation order, production-readiness definition, and launch stop gates.
+- PR #54 did not build the production integration. The new owner decision authorizes that engineering backlog in small reviewed code slices; it does not authorize external activation.
+- The current code-readiness audit is `docs/superpowers/specs/2026-08-04-claimant-code-readiness-gap-matrix.md`. Phase 0 Slice 1 implements the canonical API's disabled-by-default runtime control plane and startup validation; it mounts no claimant route and changes no external state.
+- Phase 1 Slice 1 implements the local default-deny registered-recipient schema and hostile database/RLS coverage. Four server-only tables enforce single-use invitations, claimant-bound public keys, and composite case binding. No API route is mounted and hosted Supabase is unchanged.
+- Phase 1 Slice 2 implements the local service-only mutation boundary: transactional invitation issue/acceptance, idempotency, append-only audit, and value-free outbox records. Replay, stale-version, changed-input, digest, self-acceptance, private-key, partial-failure, catalog privilege, and hostile RPC checks pass. No API route is mounted and hosted Supabase is unchanged.
+- Phase 1 Slice 3 mounts the local protected issue/accept API boundary behind disabled-by-default capabilities. Supabase bearer verification derives actors server-side; exact origin/CORS/content-type/idempotency/body limits, strict request/response allowlists, replay propagation, and error redaction have hostile coverage. The endpoints return `404` while disabled; hosted Supabase and external runtime are unchanged.
+- Phase 1 Slice 4 adds strict Supabase session-claim verification, fresh timestamped AAL2 enforcement, bounded recovery restrictions, and service-only activation/displacement/assertion/revocation persistence. Issue/accept requires the verified active session; 62 API and 61 static security tests pass. All endpoints remain concealed while disabled and hosted Supabase is unchanged.
+- Phase 1 Slice 5 completes the local registered-recipient lifecycle API: case-scoped second-device enrollment, replacement/revocation, pending-invitation revocation, strict two-key V2 ciphertext-grant owner finalization, and automatic grant/finalization invalidation after key change. All 68 API and 64 static security tests pass; clients, hosted Supabase, and external runtime remain unchanged.
+- Phase 2 Slice 1A must add an explicit server-owned claimant-portal eligibility decision and context-bound session authority. Supabase authentication/AAL2 alone is not a claimant role, and the existing user-keyed session control shared by owner and claimant mutations is not proof of cross-mode isolation.
+- The first Slice 1A boundary sub-slice now implements that eligibility/context split, three default-deny portal tables, three service-only portal-session functions, exact claimant-host concealment, protected response headers, and hostile role/origin/session tests. Client sign-in/MFA/session lifecycle wiring and disposable-stack replay remain incomplete; see `docs/verification/2026-08-04-claimant-portal-session-boundary.md`.
+- Hosted claimant Supabase MFA client work is owner-parked while the project remains on the Free plan. Existing AAL2 enforcement remains intact; paid-plan hosted MFA and production-shaped session verification block external access and final readiness. Runtime-disconnected Slices 1B/1C and their owner-accepted 2026-08-12 adversarial review are complete.
+- The first Slice 1B contract increment is complete and runtime-disconnected. Strict shared validation covers the iOS Secure Enclave capability, challenge request/response, possession proof, server-derived identity/address boundary, prohibited private material, and cross-object bindings. No live route, database state, native production alias, or invitation acceptance was added; see `docs/verification/2026-08-04-native-enrollment-contract.md`.
+- The second runtime-disconnected Slice 1B increment freezes the exact P-256 ECDH/HKDF/HMAC transcript, deterministic vector and hostile binding mutations, plus server-derived invitation normalization/keyed-index and server-ephemeral rules. Full shared/mobile/web/API/shared-validation tests, all typechecks, lint, and security/isolation checks pass. No runtime was added; see `docs/verification/2026-08-04-native-enrollment-possession-proof-review-pack.md`.
+- The 2026-08-12 adversarial review reproduced both frozen aggregates and all 25 files, added 15 findings, and was explicitly accepted by the owner as closing the Slice 1B/1C review gate. The remediation uses opaque challenge bytes, server-side fingerprint/point validation, separated address-key custody, iOS 27+ Apple extensions, lifecycle notifications/cool-off, and stricter protocol validation. Runtime slices still require their own implementation evidence.
+- Runtime-disconnected Slice 1C defines the strict App Attest bindings and passed the owner-accepted review gate. Separate native/server runtime evidence remains required; see `docs/verification/2026-08-04-app-attest-contract.md` and the 2026-08-12 review closure.
+- Slice 1D native App Attest adapter code is complete locally and remains hard-disabled. Only its dedicated iOS 27 probe profile receives a development entitlement; all native operations also require its exact bundle ID. Opaque challenge bytes are hashed without reserialization, output is allowlisted/value-free, and no server/runtime route exists. Native compile and physical-iPhone evidence remain pending separate Apple/EAS authorization; see `docs/verification/2026-08-12-claimant-slice-1d-native-app-attest-adapter.md`.
+- Slice 1E server App Attest verifier/persistence code is complete locally, unmounted, and default-deny. It implements strict CBOR/DER, offline caller-pinned Apple-root chain/nonce trust, mandatory iOS 27 extension validation, assertion signatures/counters, forced-RLS storage, and locked idempotent mutations. Local hostile/database/security checks pass; Apple-issued fixture/native integration and independent Apple review remain pending. See `docs/verification/2026-08-12-claimant-slice-1e-server-app-attest-verifier.md`.
+- Slice 1F native-enrollment challenge/acceptance code is complete locally, unmounted, and default-deny. It adds canonical single-use challenge state, encrypted context-bound server ephemeral-key custody, native ECDH/HKDF/HMAC verification, exact stored-transcript orchestration, and one atomic invitation/key/case/App-Attest-counter/audit/outbox transaction with hostile rollback/replay tests. No HTTP route or hosted change exists. See `docs/verification/2026-08-12-claimant-slice-1f-native-enrollment-transaction.md`.
+- Slice 1G native-enrollment controller code is complete locally and mounted but concealed by an immutable compile-time approval set to `false`. Its enabled path derives all identity/address/eligibility/invitation/App-Attest/device/policy/configuration authority server-side, requires fresh AAL2 and strict HTTP boundaries, applies forced-RLS per-account throttling, and calls only Slice 1E/1F. Disabled requests return `404` before configuration/CORS. No hosted or external change exists. See `docs/verification/2026-08-12-claimant-slice-1g-native-enrollment-controller.md`.
+- Slice 1H mobile transport/coordinator code is complete locally, immutable-false, and runtime-disconnected. It validates canonical server transcripts/cross-bindings, sends no client authority, orchestrates only injected production-shaped adapters, cleans up keys before finalization failure, and preserves keys for reconciliation after ambiguous final commit. Disposable probe aliases remain isolated. See `docs/verification/2026-08-12-claimant-slice-1h-mobile-enrollment-coordinator.md`.
+- The original review packet/ZIP remain preserved as historical evidence. The authenticated review and owner closure are recorded in `docs/verification/2026-08-12-native-enrollment-adversarial-pre-review.md` and `docs/verification/2026-08-12-native-enrollment-review-closure.md`; the remediated snapshot has a refreshed manifest/package.
+- The hard-disabled iOS probe now compiles against the frozen transcript through a `probe-only.v3` Secure Enclave harness, strict public output validation, cleanup/fingerprint-continuity tests, and a separately isolated internal probe app. EAS Build 1 compiled successfully, and Shahbaz Malik reported the complete physical-iPhone authenticated pass, cancellation/cleanup, and retry matrix passed. Normal application runtime still has no probe import; see `docs/verification/2026-08-04-physical-iphone-custody-probe-build.md`.
+- A separate value-free physical evidence coordinator is complete with exact non-production iOS/operator/passcode/capture preconditions, generic-only reports, native-error redaction, and no application entry point. It does not itself run on an iPhone; see `docs/verification/2026-08-04-physical-iphone-evidence-runner.md`.
 
 ## Non-Negotiable Boundaries
 
@@ -47,19 +69,22 @@ The controlled owner-vault TestFlight candidate is now Sanduqkin `1.0.0` Build 7
 - Claimant authentication, relationship, evidence, MFA, or code possession never authorizes release by itself.
 - Claimants never receive a policy path to owner vault tables or another claimant's data.
 - Public, owner, claimant, and API origins require explicit isolation before deployment.
-- Do not deploy the protected vault, attach production domains, change Supabase Auth globally, publish draft legal content, or enable claimant runtime without the recorded gates.
+- Claimant engineering may add production-shaped code, migrations, policies, adapters, and tests locally, but do not deploy the protected vault, attach production domains, change Supabase Auth globally, publish draft legal content, enable external claimant runtime, or use real claimant data without the recorded launch gates.
+- Do not create a documentation-only or administrative-only commit, push, or pull request. Keep handoff/administrative updates local and bundle them only with the next separately authorized code change; this publishing rule does not authorize that code change or any external action.
 
 ## Next Actions
 
-1. In App Store Connect, complete the Build 7 export-compliance answer, wait for Apple processing, and assign the build only to the intended internal TestFlight group/testers.
-2. Complete value-free physical-iPhone QA on Build 7: enablement, background lock, Face ID success/cancel/error, password fallback, returning-user recovery, trusted-person information navigation, Emergency Readiness, sealed-code state, and encrypted certificate CRUD.
-3. Treat PR #54 merge commit `aa84031be93b460c9addada6d2fb3b09286595de` as the closed synthetic claimant review baseline.
-4. Route one immutable claimant review set to named legal/privacy, security, operations, native, and independent reviewers. Capture approver, version, decision, conditions, evidence, and expiry.
-5. Keep claimant Slice 3 at `NO-GO` until every blocking checklist item is approved.
+1. Treat Phase 0 Slice 1 and Phase 1 Slices 1-5 as complete; exact evidence is recorded in the code-readiness gap matrix.
+2. Follow the exact `CLAIM_HANDOFF.md` Next Session Opener. Treat the owner-accepted review/remediation and local Slice 1D-1H code as complete, keep both server and mobile approvals immutable false, close the Apple-native evidence, and implement encrypted attempt persistence/reconciliation only as a separately reviewed hard-disabled slice.
+3. Keep production account bootstrap/invitation binding, native hardware-key handoff, owner-client ciphertext sealing, and server-authoritative finalization in later separately tested slices; never move claimant private-key or owner MEK operations into the browser/API.
+4. Prove reload/sign-out/displacement/recovery/stale-assurance/cross-mode behavior, then continue through key handoff, invitation acceptance, checklist/evidence/dashboard/review/release, and only then the offline-code V2 route.
+5. After freezing the engineering production-ready claimant candidate, resume `EDGE-01` through `EDGE-03` and the remaining governance/administrative launch work; none of it authorizes provider accounts, DNS, hosting, origins, or deployment without separate approval.
+6. Keep Build 7 closed and passed; do not create another build or initiate public App Store release without separate authorization.
 
-## Current Release Blockers
+## Current Launch Blockers
 
-- Build 7 Apple processing/export-compliance confirmation, physical iOS biometric regression, and corrected divorce-certificate persistence evidence.
+These items do not block local production-readiness engineering with synthetic data. They block external access, production activation, or collection of real data:
+
 - Supabase Pro, backup/restore drill, single-session policy, JWT lifetime, and displacement testing before external protected-web use.
 - Production owner/claimant origin decision and deployment review.
 - Public legal approval.
@@ -68,12 +93,18 @@ The controlled owner-vault TestFlight candidate is now Sanduqkin `1.0.0` Build 7
 
 ## Verification
 
+### Build 7 owner-reported gate closure on 2026-08-04
+
+- Apple processing completed successfully and the App Store Connect export-compliance answer was approved; no legal classification is inferred in this handoff.
+- The complete requested value-free physical-iPhone regression passed, including the corrected divorce-certificate encrypted persistence and cleanup path.
+- Result: controlled internal TestFlight mobile gate `PASS`. Public release and every other workstream remain separately gated.
+
 ### Owner-vault candidate on 2026-08-03
 
 - Exact-main Security CI run `30828358898` passed the application security, CodeQL, ZAP, Android native compile, live Supabase/RLS, Android emulator, hosted Supabase integration, and iOS simulator jobs.
 - Protected TestFlight workflow run `30830865138` passed, including release SBOM generation, EAS iOS production build, App Store Connect upload, and transient credential removal.
 - Candidate evidence: Sanduqkin `1.0.0` Build 7; source `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac`; EAS build `0d8fce13-9ec8-46c9-a4de-6c9224523856`.
-- This is build/submission evidence only. Apple processing/export compliance and physical-iPhone regression remain pending.
+- At the time, this was build/submission evidence only; the Apple processing/export-compliance and physical-iPhone items were subsequently closed by the 2026-08-04 owner evidence above.
 
 ### Claimant prototype acceptance on 2026-08-02
 

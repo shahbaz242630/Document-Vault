@@ -26,12 +26,18 @@ function adapter(
     createTestKeyAsync: vi.fn(async (): Promise<CustodyOperation> => ({
       result_class: "created",
       passed: true,
-      public_key: "synthetic-public-value",
+      public_key: `B${"A".repeat(86)}`,
+      public_key_fingerprint: "F".repeat(43),
+      public_key_encoding: "ansi_x9_63_uncompressed",
+      private_key_exportable: false,
+      protocol_profile: "native_enrollment_v1",
       test_alias_only: true,
     })),
     exerciseTestKeyAsync: vi.fn(async (): Promise<CustodyOperation> => ({
       result_class: "passed",
       passed: true,
+      public_key_fingerprint: "F".repeat(43),
+      protocol_profile: "native_enrollment_v1",
       test_alias_only: true,
     })),
     deleteTestKeyAsync: vi.fn(async (): Promise<CustodyOperation> => ({
@@ -87,6 +93,35 @@ describe("claimant custody probe", () => {
     });
     await expect(createClaimantCustodyProbe(native).run()).rejects.toThrow(
       "prohibited key material",
+    );
+  });
+
+  it("fails closed when the exercised key fingerprint does not match creation", async () => {
+    const native = adapter({
+      exerciseTestKeyAsync: vi.fn(async (): Promise<CustodyOperation> => ({
+        result_class: "passed",
+        passed: true,
+        public_key_fingerprint: "G".repeat(43),
+        protocol_profile: "native_enrollment_v1",
+        test_alias_only: true,
+      })),
+    });
+    expect((await createClaimantCustodyProbe(native).run()).passed).toBe(false);
+  });
+
+  it("rejects padded or standard-Base64 public keys", async () => {
+    const native = adapter({
+      createTestKeyAsync: vi.fn(async (): Promise<CustodyOperation> => ({
+        result_class: "created",
+        passed: true,
+        public_key: `B${"A".repeat(86)}=`,
+        public_key_fingerprint: "F".repeat(43),
+        protocol_profile: "native_enrollment_v1",
+        test_alias_only: true,
+      })),
+    });
+    await expect(createClaimantCustodyProbe(native).run()).rejects.toThrow(
+      "non-canonical public key",
     );
   });
 });

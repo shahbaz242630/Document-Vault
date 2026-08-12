@@ -5,12 +5,54 @@ const TABLE_PRIVILEGES = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "R
 const EXPECTED_AUTHENTICATED_PRIVILEGES = {
   account_deletion_requests: ["SELECT", "INSERT"],
   audit_events: ["SELECT", "INSERT"],
+  claimant_audit_events: [],
+  claimant_app_attest_events: [],
+  claimant_app_attest_keys: [],
+  claimant_app_attest_challenges: [],
+  claimant_case_device_keys: [],
+  claimant_cases: [],
+  claimant_device_keys: [],
+  claimant_identities: [],
+  claimant_idempotency_records: [],
+  claimant_invitations: [],
+  claimant_native_enrollment_challenges: [],
+  claimant_native_enrollment_rate_limits: [],
+  claimant_outbox: [],
+  claimant_portal_eligibilities: [],
+  claimant_portal_session_controls: [],
+  claimant_portal_session_events: [],
+  claimant_recipient_grants: [],
+  claimant_session_controls: [],
+  claimant_session_events: [],
   emergency_contacts: ["SELECT", "INSERT", "UPDATE"],
   emergency_key_grants: ["SELECT", "INSERT", "UPDATE"],
   emergency_release_requests: ["SELECT", "INSERT"],
   vault_assets: ["SELECT", "INSERT", "UPDATE", "DELETE"],
   vault_key_material: ["SELECT", "INSERT", "UPDATE"],
 };
+const EXPECTED_SERVER_ONLY_FUNCTIONS = new Set([
+  "claimant_accept_registered_invitation",
+  "claimant_issue_registered_invitation",
+  "claimant_activate_session",
+  "claimant_assert_active_session",
+  "claimant_revoke_session",
+  "claimant_activate_portal_session",
+  "claimant_assert_portal_session",
+  "claimant_revoke_portal_session",
+  "claimant_revoke_registered_invitation",
+  "claimant_manage_registered_recipient",
+  "bind_claimant_case_initial_key",
+  "claimant_register_app_attest_key",
+  "claimant_advance_app_attest_assertion",
+  "claimant_issue_app_attest_registration_challenge",
+  "claimant_get_app_attest_registration_challenge",
+  "claimant_consume_app_attest_registration_challenge",
+  "claimant_issue_native_enrollment_challenge",
+  "claimant_get_native_enrollment_evidence",
+  "claimant_accept_native_enrollment",
+  "claimant_take_native_enrollment_rate_limit",
+  "claimant_get_native_enrollment_authority",
+]);
 
 const CATALOG_SQL = `
 with public_tables as (
@@ -41,10 +83,18 @@ public_views as (
   where n.nspname = 'public' and c.relkind in ('v', 'm')
 ),
 public_functions as (
-  select p.proname as function_name, p.prosecdef
+  select p.oid as function_oid, p.proname as function_name, p.prosecdef
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public'
+),
+function_privileges as (
+  select
+    f.function_name,
+    role_name,
+    has_function_privilege(role_name, f.function_oid, 'EXECUTE') as has_privilege
+  from public_functions f
+  cross join (values ('anon'), ('authenticated')) roles(role_name)
 )
 select json_build_object(
   'tables', coalesce((select json_agg(json_build_object(
@@ -73,6 +123,11 @@ select json_build_object(
     'functionName', function_name,
     'securityDefiner', prosecdef
   ) order by function_name) from public_functions), '[]'::json)
+  , 'functionPrivileges', coalesce((select json_agg(json_build_object(
+    'functionName', function_name,
+    'roleName', role_name,
+    'hasPrivilege', has_privilege
+  ) order by function_name, role_name) from function_privileges), '[]'::json)
 )::text;
 `;
 
@@ -233,6 +288,28 @@ function collectPolicyViolations({ policies, privileges, violations }) {
     }
   }
 
+  for (const tableName of getServerOnlyTables()) {
+    const hasExplicitDenyPolicy = policies.some((policy) => {
+      const roles = Array.isArray(policy.roles) ? policy.roles : [];
+      return (
+        policy.tableName === tableName &&
+        policy.command === "ALL" &&
+        roles.includes("anon") &&
+        roles.includes("authenticated") &&
+        normalizeBooleanPolicyExpression(policy.qual) === "false" &&
+        normalizeBooleanPolicyExpression(policy.withCheck) === "false"
+      );
+    });
+
+    if (!hasExplicitDenyPolicy) {
+      violations.push({
+        message: `Server-only table public.${tableName} must retain an explicit deny-all policy for anon and authenticated.`,
+        rule: "server-only-table-explicit-deny-policy",
+        table: tableName,
+      });
+    }
+  }
+
   for (const tableName of getTablesWithExpectedUpdatePrivilege()) {
     const tablePolicies = policies.filter((policy) => policy.tableName === tableName);
     const hasSelectPolicy = tablePolicies.some((policy) => policy.command === "SELECT" || policy.command === "ALL");
@@ -246,6 +323,16 @@ function collectPolicyViolations({ policies, privileges, violations }) {
       });
     }
   }
+}
+
+function normalizeBooleanPolicyExpression(expression) {
+  return String(expression ?? "").replace(/[()\s]/g, "").toLowerCase();
+}
+
+function getServerOnlyTables() {
+  return Object.entries(EXPECTED_AUTHENTICATED_PRIVILEGES)
+    .filter(([, expected]) => expected.length === 0)
+    .map(([tableName]) => tableName);
 }
 
 function getTablesWithExpectedUpdatePrivilege() {
@@ -267,12 +354,34 @@ function collectViewViolations({ catalog, violations }) {
 }
 
 function collectFunctionViolations({ catalog, violations }) {
-  for (const fn of catalog.functions ?? []) {
+  const functions = catalog.functions ?? [];
+  for (const fn of functions) {
     if (fn.securityDefiner) {
       violations.push({
         function: fn.functionName,
         message: `Security definer function public.${fn.functionName} is in an exposed schema.`,
         rule: "public-function-no-security-definer",
+      });
+    }
+  }
+
+  for (const functionName of EXPECTED_SERVER_ONLY_FUNCTIONS) {
+    if (!functions.some((fn) => fn.functionName === functionName)) {
+      violations.push({
+        function: functionName,
+        message: `Expected server-only function public.${functionName} is missing.`,
+        rule: "expected-public-function-present",
+      });
+    }
+  }
+
+  for (const privilege of catalog.functionPrivileges ?? []) {
+    if (privilege.hasPrivilege && ["anon", "authenticated"].includes(privilege.roleName)) {
+      violations.push({
+        function: privilege.functionName,
+        message: `${privilege.roleName} can execute public.${privilege.functionName}.`,
+        role: privilege.roleName,
+        rule: "public-function-no-client-execute",
       });
     }
   }
