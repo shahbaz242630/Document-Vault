@@ -26,6 +26,8 @@ import {
   createNativeEnrollmentPreflightRouteV1,
   createNativeEnrollmentRouteV1,
 } from "./claimant/native-enrollment-routes.js";
+import { createClaimantUploadControllerV1, createClaimantUploadPreflightControllerV1 }
+  from "./claimant/claimant-upload-controller.js";
 import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
 
 export const app = new Hono();
@@ -121,4 +123,13 @@ for (const [path, action] of [
 ] as const) {
   app.post(path, createNativeEnrollmentRouteV1(action, { runtimeConfig: claimantRuntimeConfig }));
   app.options(path, createNativeEnrollmentPreflightRouteV1({ runtimeConfig: claimantRuntimeConfig }));
+}
+
+for (const [path, action, method] of [
+  ["/claimant/evidence/cases/:caseId/upload-capabilities", "issue", "post"],
+  ["/claimant/evidence/cases/:caseId/objects/:objectId", "upload", "put"],
+  ["/claimant/evidence/cases/:caseId/objects/:objectId/reconcile", "reconcile", "post"],
+] as const) {
+  app[method](path, createClaimantUploadControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
+  app.options(path, createClaimantUploadPreflightControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
 }

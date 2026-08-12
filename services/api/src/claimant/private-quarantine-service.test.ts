@@ -49,14 +49,17 @@ describe("private quarantine service", () => {
   });
 
   it("reproduces the same opaque capability binding for an idempotent retry", async () => {
-    const issue = vi.fn(async (value) => ({ caseId: ids.case, expiresAt: value.expiresAt,
-      objectId: value.objectId, objectPath: value.objectPath, replayed: issue.mock.calls.length > 1 }));
+    let originalExpiry = "";
+    const issue = vi.fn(async (value) => { originalExpiry ||= value.expiresAt; return {
+      caseId: ids.case, expiresAt: originalExpiry, objectId: value.objectId,
+      objectPath: value.objectPath, replayed: issue.mock.calls.length > 1 }; });
     const service = createPrivateQuarantineCapabilityServiceV1({ approved: true,
       capabilityDerivationKey: Buffer.alloc(32, 9),
       transactions: { issue } as never });
-    const first = await service.issue(request()); const replay = await service.issue(request());
+    const first = await service.issue(request()); const replay = await service.issue({ ...request(),
+      issuedAt: "2026-08-12T12:01:00.000Z" });
     expect(replay).toMatchObject({ capabilityToken: first.capabilityToken,
-      objectId: first.objectId, objectPath: first.objectPath, replayed: true });
+      expiresAt: first.expiresAt, objectId: first.objectId, objectPath: first.objectPath, replayed: true });
   });
 
   it("accepts only exact bounded inspection results", () => {

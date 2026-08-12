@@ -159,7 +159,7 @@ begin
   v_request_digest := encode(extensions.digest(concat_ws('|', p_claimant_user_id::text,
     p_case_id::text, p_expected_case_version::text, p_expected_intake_version::text,
     p_preparation_version::text, p_item_key, p_placeholder_ref, p_object_id::text,
-    p_object_path, p_capability_digest, p_expires_at::text), 'sha256'), 'hex');
+    p_object_path, p_capability_digest), 'sha256'), 'hex');
   select * into v_existing from public.claimant_idempotency_records
   where operation = 'issue_evidence_upload_capability' and actor_user_id = p_claimant_user_id
     and idempotency_key = p_idempotency_key;

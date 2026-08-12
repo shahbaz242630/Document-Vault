@@ -60,6 +60,20 @@ export function createClaimantUploadProcessorV1(dependencies: ProcessorDependenc
       assertApproved();
       const capabilityDigest = capabilityDigestOf(value.capabilityToken);
       validatePath(value.caseId, value.objectId, value.objectPath);
+      const authority = await dependencies.transactions.reconcile({ capabilityDigest,
+        objectId: value.objectId });
+      assertAuthorityBinding(authority, value.caseId, value.objectId, value.objectPath);
+      if (authority.expectedMediaType !== value.expectedMediaType
+        || authority.expectedSizeBytes !== value.expectedSizeBytes) {
+        throw new ClaimantUploadProcessorError("invalid_request");
+      }
+      if (authority.authority === "object_recorded") {
+        return settleRecordedObject(dependencies, authority, value.processorUserId,
+          value.scanIdempotencyKey);
+      }
+      if (authority.authority !== "upload_pending" || authority.capabilityStatus !== "issued") {
+        throw new ClaimantUploadProcessorError("reconciliation_required");
+      }
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), CLAIMANT_UPLOAD_MAX_DURATION_MS);
       const observed = { bytes: 0, digest: createHash("sha256") };

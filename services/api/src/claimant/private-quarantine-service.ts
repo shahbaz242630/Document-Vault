@@ -44,8 +44,11 @@ export function createPrivateQuarantineCapabilityServiceV1(input: Readonly<{
     const expiresAt = new Date(issuedAt + CLAIMANT_UPLOAD_CAPABILITY_TTL_SECONDS * 1000).toISOString();
     const result = await input.transactions.issue({ ...value, capabilityDigest, expiresAt,
       objectId, objectPath });
+    const returnedExpiry = Date.parse(result.expiresAt);
     if (result.objectId !== objectId || result.objectPath !== objectPath
-      || Date.parse(result.expiresAt) !== Date.parse(expiresAt)) {
+      || !Number.isFinite(returnedExpiry) || new Date(returnedExpiry).toISOString() !== result.expiresAt
+      || (!result.replayed && returnedExpiry !== Date.parse(expiresAt))
+      || returnedExpiry > Date.parse(expiresAt)) {
       throw new Error("Private quarantine capability binding failed.");
     }
     return { ...result, bucket: CLAIMANT_QUARANTINE_BUCKET, capabilityToken };

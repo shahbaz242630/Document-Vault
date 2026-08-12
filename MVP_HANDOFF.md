@@ -8,7 +8,9 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 supplied the synthetic claimant baseline only; the 2026-08-04 owner decision separately authorizes production-shaped engineering while external runtime and real claimant data remain blocked.
 
-Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 2B has local checkpoint `2b4f748` and Slice 2C has local checkpoint `b7b6557`. Phase 2 Slice 2D is code-complete locally on `codex/claimant-upload-processor`; all claimant capabilities remain disabled.
+Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 2C has local checkpoint `b7b6557` and Slice 2D has local checkpoint `5fb3cb8`. Phase 2 Slice 2E is code-complete locally on `codex/claimant-upload-controller`; all claimant capabilities remain disabled.
+
+Deployment safety checkpoint: the 2026-08-12 Vercel workspace-package tracing failure is fixed by compiling and bundling an explicit `@vault/shared-types` Node runtime entry while retaining source types/mobile resolution. The function-bundle guard imports the exact packaged entry. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated health and route/security probes with no exception logs. Production remains deliberately on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; the preview was not promoted.
 
 ## MVP Surfaces
 
@@ -111,6 +113,8 @@ Slice 2C private evidence quarantine is code-complete locally, hard-disabled, an
 
 Slice 2D streaming upload/reconciliation is code-complete locally, hard-disabled, and unmounted. It bounds streaming bytes/chunks/time, hashes during transfer, validates stored synthetic evidence, quarantines before scanning, records scanner failures fail closed, reconciles ambiguous commits, and revokes uncommitted capability authority before orphan cleanup. No HTTP route, real provider adapter, hosted migration, or real file exists.
 
+Slice 2E claimant upload control is code-complete locally and immutable-false. Concealed capability, raw-stream upload, and reconciliation paths require exact HTTPS origins, fresh bearer-derived AAL2, active claimant portal context, strict schemas/headers/content length, server-derived idempotency/processor authority, database preflight, and claimant-case concurrency. Synthetic local adapters are exact-fixture-only, disabled by default, and absent from the API composition root. No real file/provider, hosted configuration, distributed edge throttling, deployment, or external access exists.
+
 The returned review reproduced both original aggregates and every manifested file. On 2026-08-12 the owner explicitly accepted it as closing the Slice 1B/1C review gate and authorized bounded remediation and later disabled implementation slices. This does not authorize production activation or real claimant data.
 
 The hard-disabled iOS probe harness is implemented with a disposable `probe-only.v3` alias and the exact frozen transcript. Signed internal EAS Build 1 compiled successfully as a separate bundle/router, and the full requested value-free physical-iPhone matrix passed.
@@ -134,10 +138,10 @@ The engineering target, readiness definition, and phased implementation order ar
 
 ## Next Actions
 
-1. Review Slice 2D and `docs/verification/2026-08-12-claimant-slice-2d-upload-processor.md`; publish only with explicit authorization.
-2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D approvals immutable false and do not deploy the local claimant/Storage migrations.
+1. Review Slice 2E and `docs/verification/2026-08-12-claimant-slice-2e-upload-controller.md`; publish only with explicit authorization.
+2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E approvals immutable false and do not deploy the local claimant/Storage migrations.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
-4. Continue with a concealed fresh-AAL2 upload controller and deterministic local adapters, then dashboard, owner protection/review, and encrypted release/native retrieval before the safe V2 route.
+4. Continue with a hard-disabled synthetic evidence-upload client coordinator, then dashboard, owner protection/review, and encrypted release/native retrieval before the safe V2 route. Keep real files/providers and external access separately gated.
 5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.
 6. Treat Build 7 as closed and passed; public App Store release and another build remain separately gated.
 

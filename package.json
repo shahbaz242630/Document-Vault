@@ -56,6 +56,8 @@
     "check:claimant-intake-foundation-db": "node scripts/claimant-intake-foundation-db-test.cjs",
     "check:claimant-evidence-preparation-db": "node scripts/claimant-evidence-preparation-db-test.cjs",
     "check:claimant-private-quarantine-db": "node scripts/claimant-private-quarantine-db-test.cjs",
+    "check:claimant-upload-controller-isolation": "node scripts/claimant-upload-controller-isolation-check.cjs",
+    "check:api-vercel-bundle": "node scripts/api-vercel-bundle-check.cjs",
     "check:claim-vectors": "node scripts/generate-claim-test-vectors.mjs --check",
     "check:claim-vector-isolation": "node scripts/claim-vector-isolation-check.cjs",
     "check:claim-custody-isolation": "node scripts/claim-custody-isolation-check.cjs",
@@ -71,12 +73,14 @@
     "@supabase/supabase-js": "2.108.2",
     "@vitest/coverage-v8": "4.1.9",
     "bip39": "3.1.0",
+    "esbuild": "0.28.1",
     "eslint": "9.39.3",
     "eslint-config-expo": "56.0.4",
     "expo": "56.0.19",
     "expo-router": "56.2.18",
     "libsodium-wrappers-sumo": "0.7.15",
-    "patch-package": "^8.0.1"
+    "patch-package": "^8.0.1",
+    "typescript": "5.9.2"
   },
   "optionalDependencies": {
     "@rolldown/binding-linux-x64-gnu": "^1.0.3",

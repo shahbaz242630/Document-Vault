@@ -61,7 +61,9 @@ describe("claimant upload processor", () => {
   it("preserves a committed object after an ambiguous quarantine response", async () => {
     const dependencies = adapters();
     dependencies.transactions.quarantine.mockRejectedValueOnce(new Error("lost response"));
-    dependencies.transactions.reconcile.mockResolvedValueOnce(authority("object_recorded", "quarantined", 1));
+    dependencies.transactions.reconcile
+      .mockResolvedValueOnce(authority("upload_pending", null, null))
+      .mockResolvedValueOnce(authority("object_recorded", "quarantined", 1));
     const result = await createClaimantUploadProcessorV1({ ...dependencies, approved: true })
       .upload(uploadInput());
     expect(result).toMatchObject({ status: "clean" });
@@ -71,7 +73,9 @@ describe("claimant upload processor", () => {
   it("deletes only server-confirmed uncommitted bytes after a failed commit", async () => {
     const dependencies = adapters();
     dependencies.transactions.quarantine.mockRejectedValueOnce(new Error("rejected"));
-    dependencies.transactions.reconcile.mockResolvedValueOnce(authority("upload_pending", null, null));
+    dependencies.transactions.reconcile
+      .mockResolvedValueOnce(authority("upload_pending", null, null))
+      .mockResolvedValueOnce(authority("upload_pending", null, null));
     await expect(createClaimantUploadProcessorV1({ ...dependencies, approved: true })
       .upload(uploadInput())).rejects.toMatchObject({ kind: "upload_failed" });
     expect(dependencies.storage.remove).toHaveBeenCalledTimes(1);
@@ -108,7 +112,8 @@ function adapters() {
     remove: vi.fn().mockResolvedValue(undefined) };
   const inspector = { inspect: vi.fn().mockResolvedValue(inspection()) };
   const scanner = { scan: vi.fn().mockResolvedValue("clean") };
-  const transactions = { reconcile: vi.fn(), issue: vi.fn(), planDeletion: vi.fn(), confirmDeleted: vi.fn(),
+  const transactions = { reconcile: vi.fn().mockResolvedValue(authority("upload_pending", null, null)),
+    issue: vi.fn(), planDeletion: vi.fn(), confirmDeleted: vi.fn(),
     abandon: vi.fn().mockResolvedValue({ caseId: ids.case, objectId: ids.object, objectPath,
       replayed: false, status: "abandoned" }),
     quarantine: vi.fn().mockResolvedValue({ caseId: ids.case, objectId: ids.object,

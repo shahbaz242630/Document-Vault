@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "sourceMap": true,
+    "types": ["node"]
+  },
+  "exclude": ["src/**/*.test.ts", "src/libsodium-wrappers-sumo.d.ts"]
+}
