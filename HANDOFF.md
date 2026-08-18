@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Repository Snapshot
 
-- Active branch: `codex/claimant-owner-notice-delivery`; Slice 3A is checkpointed at `d752de1`, and Slice 3B is code-complete in the uncommitted local working tree. The branch follows Slice 2J checkpoint `e9853fb`, Slice 2I `f8935c2`, Slice 2H `0215f30`, Slice 2G `4e4d5c5`, Slice 2F `9b59916`, and PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`.
+- Active branch: `codex/claimant-owner-notice-queue`; Slice 3B is checkpointed at `2aebfa7`, Slice 3A at `d752de1`, and Slice 3C is code-complete in the uncommitted local working tree. The branch follows Slice 2J `e9853fb`, Slice 2I `f8935c2`, Slice 2H `0215f30`, Slice 2G `4e4d5c5`, Slice 2F `9b59916`, and PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`.
 - PR #65 merged the owner-accepted native-enrollment review closure/remediation, hard-disabled Slices 1D-1H, Expo/dependency alignment, the bounded `image-size` security patch/exception, and Android smoke stabilization. It made no claimant deployment, hosted migration, TestFlight action, or production activation.
 - Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
 - Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Local `main` remains at PR #59 merge `887abd0459197c5123b8972e1b8c5bed14ec5528`; local-tracking `origin/main` is PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`. The active claimant branch contains the later local Slice 1I-2I checkpoints and has not been pushed in this session.
@@ -74,6 +74,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 - Slice 2J adds an immutable-false, runtime-disconnected web submission coordinator. It strictly validates the synthetic request and safe acknowledgement, owns one stable UUIDv4 attempt key, serializes work, keeps ambiguous or aborted dispatches only in memory for exact-key retry, retains no successful acknowledgement, and is statically isolated from normal runtime, direct networking, browser persistence, providers, notifications, and private/internal fields. See `docs/verification/2026-08-18-claimant-slice-2j-web-submission-coordinator.md`.
 - Slice 3A adds an immutable-false, unmounted owner-protection persistence/transaction foundation. Verified delivery alone starts a configurable cooldown; delivery uncertainty, dispute, material change, conflicting authority, and owner cancellation stop progress without review or release authority. The service-only functions use forced RLS, value-free events, strict idempotency, and exact case/cycle/version binding. Hosted verification passed inside a rollback-only transaction and left production unchanged. See `docs/verification/2026-08-18-claimant-slice-3a-owner-protection-foundation.md`.
 - Slice 3B adds an immutable-false, unmounted owner-notice delivery coordinator with injected queue/provider contracts. First attempts dispatch only an opaque reference and stable key; retries use lookup only. Verified lookup alone creates delivery evidence, while failed/unknown/malformed lookup fails closed through Slice 3A. Persistence ambiguity replays the same key without redispatch. See `docs/verification/2026-08-18-claimant-slice-3b-owner-notice-delivery-coordinator.md`.
+- Slice 3C adds a forced-RLS, service-only owner-notice delivery queue. It atomically persists stable keys before contact, leases one eligible outbox row, reclaims only expired leases without redispatch authority, and completes only after independently matching the exact Slice 3A protection result. Hosted rollback verification passed and left production unchanged. See `docs/verification/2026-08-18-claimant-slice-3c-owner-notice-delivery-queue.md`.
 - The 2026-08-12 Vercel workspace-package failure is resolved. `@vault/shared-types` now emits a bundled Node runtime entry during install, keeps source type/React Native resolution, and has a Vercel function guard that verifies the manifest, runtime file, and actual import. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated `/health`, claimant concealment, hostile-origin, existing authorization, unknown-route, and zero-exception log checks. Production remains intentionally on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; no promotion occurred.
 - The original review packet/ZIP remain preserved as historical evidence. The authenticated review and owner closure are recorded in `docs/verification/2026-08-12-native-enrollment-adversarial-pre-review.md` and `docs/verification/2026-08-12-native-enrollment-review-closure.md`; the remediated snapshot has a refreshed manifest/package.
 - The hard-disabled iOS probe now compiles against the frozen transcript through a `probe-only.v3` Secure Enclave harness, strict public output validation, cleanup/fingerprint-continuity tests, and a separately isolated internal probe app. EAS Build 1 compiled successfully, and Shahbaz Malik reported the complete physical-iPhone authenticated pass, cancellation/cleanup, and retry matrix passed. Normal application runtime still has no probe import; see `docs/verification/2026-08-04-physical-iphone-custody-probe-build.md`.
@@ -91,10 +92,10 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Next Actions
 
-1. Review the local Slice 3B owner-notice delivery coordinator and its evidence; checkpoint or publish only with explicit owner authorization.
-2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I/2J/3A/3B hard-disabled and concealed, unmounted, or disconnected from normal app requests. Do not deploy the local claimant/Storage migrations or enable a claimant capability.
+1. Review the local Slice 3C owner-notice queue and its evidence; checkpoint or publish only with explicit owner authorization.
+2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I/2J/3A/3B/3C hard-disabled and concealed, unmounted, or disconnected from normal app requests. Do not deploy the local claimant/Storage migrations or enable a claimant capability.
 3. Treat production Swift App Attest/custody methods, production alias/entitlement configuration, direct native binding, compile, and physical Apple evidence as a separate reviewed native gate.
-4. Add a hard-disabled service-only outbox lease/claim/completion/reconciliation persistence boundary with stable dispatch/idempotency keys and expired-lease recovery. Add no provider implementation/network call, route, hosted migration, owner UI, real data, review/release predicate, or external behavior.
+4. Add an independently immutable-false owner-cancellation/claimant-dispute controller with server-derived fresh-session actor authority and safe value-free results. Add no provider, owner UI, reviewer assignment, release predicate, hosted migration, real data, deployment, or external behavior.
 5. Continue afterward through checklist/evidence/dashboard, owner protection/review, encrypted release/native retrieval, and only then the offline-code V2 route.
 6. The temporary `image-size` exception must be replaced by a compatible upstream fix or re-reviewed before it expires after 2026-09-30; it may not be broadened silently.
 7. Keep Build 7 closed and passed; do not deploy, create another build, or initiate public App Store release without separate authorization.
@@ -110,6 +111,12 @@ These items do not block local production-readiness engineering with synthetic d
 - Legal confirmation of Shahbaz Malik as operator/data controller, contracting-entity and processor mapping, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
 
 ## Verification
+
+### Claimant Slice 3C closing baseline on 2026-08-18
+
+- All workspaces: 994 tests passed; 3 established environment-gated mobile tests skipped.
+- Hosted rollback-only queue exercise, 12 focused API tests, 5 combined static regressions, all typechecks, zero-warning lint, unchanged web build, API bundle, security/isolation gates, and `git diff --check` passed.
+- Post-test checks confirmed no claimant schema or queue remained and the owner vault was unchanged. No local Supabase images, deployment, provider call, notification, or external behavior occurred.
 
 ### Claimant Slice 3B closing baseline on 2026-08-18
 

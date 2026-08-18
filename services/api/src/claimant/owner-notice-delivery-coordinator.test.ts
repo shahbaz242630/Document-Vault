@@ -8,7 +8,8 @@ const ids = { case: "90000000-0000-4000-8000-000000000001",
   cycle: "90000000-0000-4000-8000-000000000002",
   outbox: "90000000-0000-4000-8000-000000000003",
   request: "90000000-0000-4000-8000-000000000004",
-  delivery: "90000000-0000-4000-8000-000000000005" };
+  delivery: "90000000-0000-4000-8000-000000000005",
+  lease: "90000000-0000-4000-8000-000000000006" };
 const dispatchKey = `owner-notice:${ids.outbox}:${ids.delivery}`;
 
 describe("owner notice delivery coordinator", () => {
@@ -34,7 +35,7 @@ describe("owner notice delivery coordinator", () => {
       deliveryEvidenceDigest: createHash("sha256").update(canonical).digest("hex"),
       idempotencyKey: ids.delivery, outcome: "verified" }));
     expect(dependencies.queue.complete).toHaveBeenCalledWith(expect.objectContaining({
-      caseVersion: 5, outcome: "verified", outboxId: ids.outbox }));
+      caseVersion: 5, leaseToken: ids.lease, outcome: "verified", outboxId: ids.outbox }));
     expect(output?.outcome).toBe("verified");
   });
 
@@ -121,7 +122,8 @@ function adapters() {
 function work(changes = {}) { return { aggregateId: ids.case, aggregateType: "case",
   attemptNumber: 1, caseId: ids.case, caseVersion: 4, cycleId: ids.cycle, cycleNumber: 1,
   dedupeKey: `owner_notice_requested:${ids.request}`, deliveryIdempotencyKey: ids.delivery,
-  dispatchKey, noticeRef: "synthetic_owner_notice_alpha_001", noticeRequestId: ids.request,
+  dispatchKey, leaseToken: ids.lease, noticeRef: "synthetic_owner_notice_alpha_001",
+  noticeRequestId: ids.request,
   outboxId: ids.outbox, payload: { case_version: 4, cycle_number: 1,
     event: "owner_notice_requested" }, topic: "owner_notice_requested", ...changes }; }
 function result(outcome: "ambiguous" | "failed" | "verified") { return { caseId: ids.case,

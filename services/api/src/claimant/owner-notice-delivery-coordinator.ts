@@ -16,7 +16,7 @@ export type OwnerNoticeProviderV1 = Readonly<{
 export type OwnerNoticeWorkQueueV1 = Readonly<{
   claim(): Promise<unknown>;
   complete(input: Readonly<{ caseId: string; caseVersion: number; cycleId: string;
-    deliveryIdempotencyKey: string; outboxId: string; outcome: "ambiguous" | "failed" |
+    deliveryIdempotencyKey: string; leaseToken: string; outboxId: string; outcome: "ambiguous" | "failed" |
       "verified" }> ): Promise<unknown>;
 }>;
 
@@ -82,7 +82,8 @@ export function createOwnerNoticeDeliveryCoordinatorV1(dependencies: Dependencie
       }
       const completion = completionSchema.safeParse(await dependencies.queue.complete({
         caseId: work.caseId, caseVersion: result.caseVersion, cycleId: work.cycleId,
-        deliveryIdempotencyKey: work.deliveryIdempotencyKey, outboxId: work.outboxId, outcome })
+        deliveryIdempotencyKey: work.deliveryIdempotencyKey, leaseToken: work.leaseToken,
+        outboxId: work.outboxId, outcome })
         .catch(() => null));
       const expectedStatus = outcome === "verified" ? "delivered" : "failed";
       if (!completion.success || completion.data.outboxId !== work.outboxId
@@ -116,7 +117,7 @@ const workSchema = z.strictObject({ aggregateId: uuid, aggregateType: z.literal(
   attemptNumber: z.number().int().positive(), caseId: uuid, caseVersion: z.number().int().min(2),
   cycleId: uuid, cycleNumber: z.number().int().positive(), dedupeKey: z.string(),
   deliveryIdempotencyKey: uuid, dispatchKey: z.string(), noticeRef: z.string()
-    .regex(/^synthetic_owner_notice_[a-z0-9_]{1,100}$/u), noticeRequestId: uuid,
+    .regex(/^synthetic_owner_notice_[a-z0-9_]{1,100}$/u), leaseToken: uuid, noticeRequestId: uuid,
   outboxId: uuid, payload: z.strictObject({ case_version: z.number().int().min(2),
     cycle_number: z.number().int().positive(), event: z.literal("owner_notice_requested") }),
   topic: z.literal("owner_notice_requested") }).nullable();
