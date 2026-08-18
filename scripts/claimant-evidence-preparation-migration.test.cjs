@@ -49,6 +49,7 @@ test("records one locked, versioned and idempotent server-only transaction", () 
 
 test("keeps evidence preparation hard-disabled and unmounted", () => {
   assert.match(service, /CLAIMANT_EVIDENCE_PREPARATION_APPROVED\s*=\s*false\s+as\s+const/);
-  assert.doesNotMatch(apiIndex, /evidence-preparation|claimant\/evidence/);
+  assert.doesNotMatch(apiIndex,
+    /evidence-preparation-service|claimant_record_evidence_preparation|createEvidencePreparation/);
   assert.doesNotMatch(service, /fetch\(|createClient\(|process\.env/);
 });

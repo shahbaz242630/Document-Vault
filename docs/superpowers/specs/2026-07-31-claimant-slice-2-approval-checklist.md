@@ -85,6 +85,8 @@ A chat acknowledgement, unchecked task, passing unit test or owner enthusiasm do
 
 ## E. Reviewer And Case Operations
 
+Interim engineering decision (2026-08-18): Shahbaz Malik is the accountable human test reviewer and Codex is a non-human technical review assistant/test actor for synthetic staging and separately authorized disabled production-shaped checks. This enables workflow testing only. It does not complete any checkbox below, count as two human approvals, or authorize real data, external access, package creation, or release. See `docs/verification/2026-08-18-interim-reviewer-test-roles.md`.
+
 - [ ] R01 Name two qualified reviewer roles and the accountable operations owner.
 - [ ] R02 Approve training, evidence handbook, conflict-of-interest and recusal requirements.
 - [ ] R03 Prove one identity cannot submit both approvals or review its own/conflicted case.

@@ -30,6 +30,8 @@ import { createClaimantUploadControllerV1, createClaimantUploadPreflightControll
   from "./claimant/claimant-upload-controller.js";
 import { createClaimSubmissionControllerV1, createClaimSubmissionPreflightControllerV1 }
   from "./claimant/claim-submission-controller.js";
+import { createOwnerProtectionControllerV1, createOwnerProtectionPreflightControllerV1 }
+  from "./claimant/owner-protection-controller.js";
 import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
 
 export const app = new Hono();
@@ -139,3 +141,11 @@ const claimSubmissionPath = "/claimant/cases/:caseId/submissions";
 app.post(claimSubmissionPath, createClaimSubmissionControllerV1({ runtimeConfig: claimantRuntimeConfig }));
 app.options(claimSubmissionPath,
   createClaimSubmissionPreflightControllerV1({ runtimeConfig: claimantRuntimeConfig }));
+for (const [path, action] of [
+  ["/owner/cases/:caseId/protection/cancel", "ownerCancel"],
+  ["/claimant/cases/:caseId/protection/dispute", "claimantDispute"],
+] as const) {
+  app.post(path, createOwnerProtectionControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
+  app.options(path,
+    createOwnerProtectionPreflightControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
+}

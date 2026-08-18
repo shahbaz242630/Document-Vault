@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 supplied the synthetic claimant baseline only; the 2026-08-04 owner decision separately authorizes production-shaped engineering while external runtime and real claimant data remain blocked.
 
-Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 2F is `9b59916`, Slice 2G `4e4d5c5`, Slice 2H `0215f30`, Slice 2I `f8935c2`, Slice 2J `e9853fb`, Slice 3A `d752de1`, and Slice 3B `2aebfa7`. Phase 3 Slice 3C is code-complete in the uncommitted working tree on `codex/claimant-owner-notice-queue`; all claimant capabilities remain disabled.
+Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 2F is `9b59916`, Slice 2G `4e4d5c5`, Slice 2H `0215f30`, Slice 2I `f8935c2`, Slice 2J `e9853fb`, Slice 3A `d752de1`, Slice 3B `2aebfa7`, and Slice 3C `f8d6211`. Phase 3 Slice 3D is committed at branch HEAD on `codex/claimant-owner-response-controller`; all claimant capabilities remain disabled.
 
 Deployment safety checkpoint: the 2026-08-12 Vercel workspace-package tracing failure is fixed by compiling and bundling an explicit `@vault/shared-types` Node runtime entry while retaining source types/mobile resolution. The function-bundle guard imports the exact packaged entry. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated health and route/security probes with no exception logs. Production remains deliberately on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; the preview was not promoted.
 
@@ -66,6 +66,8 @@ Marriage/divorce certificate options are present in the encrypted Document Locat
 ## Claimant Product Direction
 
 Status: synthetic prototype complete; full engineering implementation `GO`; external runtime and real claimant data `NO-GO` until launch approval.
+
+Interim test staffing: Shahbaz Malik is the accountable human test reviewer; Codex is a non-human technical review assistant/test actor for synthetic staging and separately authorized disabled production-shaped checks. This does not satisfy the two-independent-human-reviewer release control. Codex cannot hold production credentials, decide a real claim, or authorize release; qualified independent humans remain required before go-live.
 
 The code-backed readiness audit is `docs/superpowers/specs/2026-08-04-claimant-code-readiness-gap-matrix.md`. Phase 0 Slice 1 now provides a disabled-by-default, startup-validated canonical API control plane with independent kill switches and no mounted claimant route.
 
@@ -131,6 +133,8 @@ Slice 3B owner-notice delivery coordination is code-complete locally, immutable-
 
 Slice 3C owner-notice queue persistence is code-complete locally, forced-RLS, service-only, and unmounted. It persists stable keys before contact, reclaims expired leases without redispatch authority, and completes only against the exact Slice 3A case/cycle outcome. The hosted rollback-only exercise passed and left production unchanged.
 
+Slice 3D owner cancellation and claimant dispute controllers are code-complete locally and independently concealed. They use distinct exact origins and session authorities, derive actors from verified claims, require fresh AAL2, supply fixed reasons server-side, and preserve false review/release authority. No provider, UI activation, hosted change, or deployment occurred.
+
 The returned review reproduced both original aggregates and every manifested file. On 2026-08-12 the owner explicitly accepted it as closing the Slice 1B/1C review gate and authorized bounded remediation and later disabled implementation slices. This does not authorize production activation or real claimant data.
 
 The hard-disabled iOS probe harness is implemented with a disposable `probe-only.v3` alias and the exact frozen transcript. Signed internal EAS Build 1 compiled successfully as a separate bundle/router, and the full requested value-free physical-iPhone matrix passed.
@@ -154,12 +158,13 @@ The engineering target, readiness definition, and phased implementation order ar
 
 ## Next Actions
 
-1. Review Slice 3C and `docs/verification/2026-08-18-claimant-slice-3c-owner-notice-delivery-queue.md`; checkpoint or publish only with explicit authorization.
-2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I/2J/3A/3B/3C approvals immutable false and do not deploy the local claimant/Storage migrations.
+1. Begin Slice 3E: immutable-false, unmounted reviewer assignment/conflict/recusal persistence with separate synthetic identities, forced RLS/client denial, immutable value-free events, locking/idempotency/version enforcement, and hostile authorization tests.
+2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I/2J/3A/3B/3C/3D approvals immutable false and do not deploy the local claimant/Storage migrations.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
-4. Add the independently concealed owner-cancellation/claimant-dispute controller, then continue through review and encrypted release/native retrieval before the safe V2 route. Keep hosted migration, real files/providers, notifications, and external access separately gated.
+4. Keep Slice 3E limited to reviewer assignment/conflict/recusal persistence; add no decisions, approval count, release predicate, UI/evidence access, hosted migration, real files/providers, notifications, deployment, or external access. Continue afterward through review decisions and encrypted release/native retrieval before the safe V2 route.
 5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.
 6. Treat Build 7 as closed and passed; public App Store release and another build remain separately gated.
+7. The hourly claimant heartbeat was deleted at session close; no monitoring remains active.
 
 ## Verification
 
