@@ -8,10 +8,10 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Repository Snapshot
 
-- Active branch: `codex/claimant-independent-review-foundation`; Slice 3F is complete locally on top of Slice 3E `f5a9728`, Slice 3D `9089497`, Slice 3C `f8d6211`, Slice 3B `2aebfa7`, Slice 3A `d752de1`, and the earlier claimant checkpoints.
+- Active branch: `codex/claimant-review-escalation-foundation`; Slice 3G is complete locally on top of Slice 3F `7bb6862`, Slice 3E `f5a9728`, Slice 3D `9089497`, Slice 3C `f8d6211`, Slice 3B `2aebfa7`, Slice 3A `d752de1`, and the earlier claimant checkpoints.
 - PR #65 merged the owner-accepted native-enrollment review closure/remediation, hard-disabled Slices 1D-1H, Expo/dependency alignment, the bounded `image-size` security patch/exception, and Android smoke stabilization. It made no claimant deployment, hosted migration, TestFlight action, or production activation.
 - Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
-- Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Local `main` remains at PR #59 merge `887abd0459197c5123b8972e1b8c5bed14ec5528`; local-tracking `origin/main` is PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`. The active claimant branch contains the later local Slice 1I-3F checkpoints and has not been pushed in this session.
+- Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Local `main` remains at PR #59 merge `887abd0459197c5123b8972e1b8c5bed14ec5528`; local-tracking `origin/main` is PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`. The active claimant branch contains the later local Slice 1I-3G checkpoints and has not been pushed in this session.
 - PR #52 merged the claimant Slice 2 review package and divorce-certificate correction; PR #53 merged the biometric Settings repair.
 - Preserve unrelated local-only items such as `.codex-runtime/`.
 
@@ -79,6 +79,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 - Slice 3D mounts independently concealed owner-cancellation and claimant-dispute controllers. Each route constructs only its own session authority, derives the actor from verified claims, requires fresh AAL2 and active role context, supplies a fixed server-side reason, and returns only immutable non-review/non-release state. All approvals remain false; hosted Supabase and external runtime are unchanged. See `docs/verification/2026-08-18-claimant-slice-3d-owner-protection-controller.md`.
 - Slice 3E adds an immutable-false, unmounted reviewer assignment/conflict/recusal foundation. Four forced-RLS tables and three service-only security-invoker transactions enforce separate synthetic reviewer identities, exact case/cycle/cooldown binding, two distinct active slots, owner/claimant related-party denial, append-only value-free events, locking, idempotency, stale-version checks, and safe reassignment. It adds no decision, approval count, release predicate, UI, or evidence access. See `docs/verification/2026-08-18-claimant-slice-3e-reviewer-assignment-foundation.md`.
 - Slice 3F adds an immutable-false, unmounted independent-review foundation. Two append-only decisions must come from distinct current assignments and bind exact case/cycle/submission/intake/preparation/policy/checklist/clean-evidence versions. The second decision revalidates the first assignment and reviewer identity before producing only a blind aggregate. Two allows satisfy review approval but never update the case or authorize release. See `docs/verification/2026-08-18-claimant-slice-3f-independent-review-foundation.md`.
+- Slice 3G adds an immutable-false, unmounted escalation/appeal foundation. Separate synthetic resolution authorities cannot overlap the owner, claimant, or reviewer identities. A locked, idempotent intervention atomically forces the review round to `held`, invalidates any two-person approval, preserves case cooldown, and keeps release false; appeal is limited to rejected or held rounds. See `docs/verification/2026-08-18-claimant-slice-3g-review-escalation-appeal-foundation.md`.
 - The 2026-08-12 Vercel workspace-package failure is resolved. `@vault/shared-types` now emits a bundled Node runtime entry during install, keeps source type/React Native resolution, and has a Vercel function guard that verifies the manifest, runtime file, and actual import. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated `/health`, claimant concealment, hostile-origin, existing authorization, unknown-route, and zero-exception log checks. Production remains intentionally on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; no promotion occurred.
 - The original review packet/ZIP remain preserved as historical evidence. The authenticated review and owner closure are recorded in `docs/verification/2026-08-12-native-enrollment-adversarial-pre-review.md` and `docs/verification/2026-08-12-native-enrollment-review-closure.md`; the remediated snapshot has a refreshed manifest/package.
 - The hard-disabled iOS probe now compiles against the frozen transcript through a `probe-only.v3` Secure Enclave harness, strict public output validation, cleanup/fingerprint-continuity tests, and a separately isolated internal probe app. EAS Build 1 compiled successfully, and Shahbaz Malik reported the complete physical-iPhone authenticated pass, cancellation/cleanup, and retry matrix passed. Normal application runtime still has no probe import; see `docs/verification/2026-08-04-physical-iphone-custody-probe-build.md`.
@@ -96,11 +97,11 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Next Actions
 
-1. Begin Slice 3G with an immutable-false, unmounted, service-only escalation and appeal persistence foundation. Require explicit hold behavior, separate synthetic authority, immutable safe reasons/events, current-version locking/idempotency, and invalidation of any prior review aggregate without authorizing release.
-2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I/2J/3A/3B/3C/3D/3E/3F hard-disabled and concealed, unmounted, or disconnected from normal app requests. Do not deploy the local claimant/Storage migrations or enable a claimant capability.
+1. Begin Phase 4 Slice 4A with a separately reviewed immutable-false, unmounted, service-only release-eligibility and final-authorization foundation. Revalidate every current prerequisite, require no open intervention, and fail closed without creating a package or retrieval authority.
+2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I/2J/3A/3B/3C/3D/3E/3F/3G hard-disabled and concealed, unmounted, or disconnected from normal app requests. Do not deploy the local claimant/Storage migrations or enable a claimant capability.
 3. Treat production Swift App Attest/custody methods, production alias/entitlement configuration, direct native binding, compile, and physical Apple evidence as a separate reviewed native gate.
-4. In Slice 3G, treat Shahbaz Malik as the accountable human test reviewer and Codex only as a non-human technical test actor. Add no reviewer UI/evidence access, provider, hosted migration, real data, deployment, package creation, release authorization, or external behavior.
-5. Continue afterward through independent review decisions/two-person approval, escalation/appeal, encrypted release/native retrieval, and only then the offline-code V2 route.
+4. In Phase 4, treat Shahbaz Malik as the accountable human test reviewer and Codex only as a non-human technical test actor. Add no reviewer UI/evidence access, provider, hosted migration, real data, deployment, package creation, retrieval, native behavior, or external behavior in Slice 4A.
+5. Continue afterward through claimant-addressed encrypted package preparation and native retrieval, and only then the offline-code V2 route.
 6. The temporary `image-size` exception must be replaced by a compatible upstream fix or re-reviewed before it expires after 2026-09-30; it may not be broadened silently.
 7. Keep Build 7 closed and passed; do not deploy, create another build, or initiate public App Store release without separate authorization.
 8. The hourly claimant heartbeat was deleted at session close; no monitoring remains active.
@@ -116,6 +117,12 @@ These items do not block local production-readiness engineering with synthetic d
 - Legal confirmation of Shahbaz Malik as operator/data controller, contracting-entity and processor mapping, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
 
 ## Verification
+
+### Claimant Slice 3G closing baseline on 2026-08-18
+
+- All workspaces: 1,021 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 141 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, API bundle, custody/intervention isolation checks, and `git diff --check` passed.
+- Standalone rollback-only hostile intervention exercise passed against the already-cached generic PostgreSQL image. The exact temporary container was removed; no Supabase images were downloaded, hosted Supabase was unchanged, and no external behavior was added.
 
 ### Claimant Slice 3F closing baseline on 2026-08-18
 
