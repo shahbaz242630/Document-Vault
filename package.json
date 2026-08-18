@@ -83,6 +83,7 @@
     "check:claimant-native-package-open-isolation": "node scripts/claimant-native-package-open-isolation-check.cjs",
     "check:claimant-retrieval-completion-isolation": "node scripts/claimant-retrieval-completion-isolation-check.cjs",
     "check:claimant-retrieval-access-control-isolation": "node scripts/claimant-retrieval-access-control-isolation-check.cjs",
+    "check:claimant-native-local-export-isolation": "node scripts/claimant-native-local-export-isolation-check.cjs",
     "check:claimant-submission-controller-isolation": "node scripts/claimant-submission-controller-isolation-check.cjs",
     "check:claimant-submission-client-isolation": "node scripts/claimant-submission-client-isolation-check.cjs",
     "check:claimant-upload-controller-isolation": "node scripts/claimant-upload-controller-isolation-check.cjs",
