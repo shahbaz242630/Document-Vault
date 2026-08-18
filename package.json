@@ -78,6 +78,7 @@
     "check:claimant-signed-manifest-isolation": "node scripts/claimant-signed-manifest-isolation-check.cjs",
     "check:claimant-retrieval-session-isolation": "node scripts/claimant-retrieval-session-isolation-check.cjs",
     "check:claimant-encrypted-package-delivery-isolation": "node scripts/claimant-encrypted-package-delivery-isolation-check.cjs",
+    "check:claimant-native-package-open-isolation": "node scripts/claimant-native-package-open-isolation-check.cjs",
     "check:claimant-submission-controller-isolation": "node scripts/claimant-submission-controller-isolation-check.cjs",
     "check:claimant-submission-client-isolation": "node scripts/claimant-submission-client-isolation-check.cjs",
     "check:claimant-upload-controller-isolation": "node scripts/claimant-upload-controller-isolation-check.cjs",
