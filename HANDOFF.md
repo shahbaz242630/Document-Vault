@@ -1,6 +1,6 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-08-12 (Asia/Dubai)
+Last updated: 2026-08-18 (Asia/Dubai)
 
 ## Current Decision
 
@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Repository Snapshot
 
-- Active branch: `codex/claimant-submission-controller`; Slice 2I is checkpointed at its local head, based on Slice 2H checkpoint `0215f30` after Slice 2G checkpoint `4e4d5c5`, Slice 2F checkpoint `9b59916`, and PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`.
+- Active branch: `codex/claimant-submission-controller`; Slice 2I is checkpointed at local head `f8935c2`, and Slice 2J is code-complete in the uncommitted local working tree. The branch is based on Slice 2H checkpoint `0215f30` after Slice 2G checkpoint `4e4d5c5`, Slice 2F checkpoint `9b59916`, and PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`.
 - PR #65 merged the owner-accepted native-enrollment review closure/remediation, hard-disabled Slices 1D-1H, Expo/dependency alignment, the bounded `image-size` security patch/exception, and Android smoke stabilization. It made no claimant deployment, hosted migration, TestFlight action, or production activation.
 - Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
 - Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Local `main` remains at PR #59 merge `887abd0459197c5123b8972e1b8c5bed14ec5528`; local-tracking `origin/main` is PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`. The active claimant branch contains the later local Slice 1I-2I checkpoints and has not been pushed in this session.
@@ -71,6 +71,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 - Slice 2G adds an immutable-false, runtime-disconnected dashboard read-model coordinator. Injected responses must be exact coherent safe-projection triplets bound to one case/version; private fields, future/precise dates, stale rollback, same-version divergence, and cross-case substitution fail closed. Accepted state is memory-only and deeply frozen. See `docs/verification/2026-08-12-claimant-slice-2g-dashboard-read-model-coordinator.md`.
 - Slice 2H adds a hard-disabled, unmounted submission/safe-acknowledgement transaction. It reasserts server-owned portal, current-key, case/intake/latest-preparation, checklist, consumed capability, and clean evidence-object authority before atomically advancing only to `submitted` and writing an append-only safe receipt, value-free audit/outbox records, and idempotency result. Review and release remain false. See `docs/verification/2026-08-12-claimant-slice-2h-submission-acknowledgement-transaction.md`.
 - Slice 2I mounts that transaction behind an independent immutable-false controller. It conceals disabled requests before configuration/CORS and, in test-only enabled operation, requires exact HTTPS API/claimant origins, JSON and bounded body, UUIDv4 route/idempotency binding, bearer-derived fresh AAL2 without recovery, an active claimant portal session, and bounded claimant-case concurrency. Only the safe acknowledgement is returned; failures remain generic and notifications stay disconnected. See `docs/verification/2026-08-12-claimant-slice-2i-submission-controller.md`.
+- Slice 2J adds an immutable-false, runtime-disconnected web submission coordinator. It strictly validates the synthetic request and safe acknowledgement, owns one stable UUIDv4 attempt key, serializes work, keeps ambiguous or aborted dispatches only in memory for exact-key retry, retains no successful acknowledgement, and is statically isolated from normal runtime, direct networking, browser persistence, providers, notifications, and private/internal fields. See `docs/verification/2026-08-18-claimant-slice-2j-web-submission-coordinator.md`.
 - The 2026-08-12 Vercel workspace-package failure is resolved. `@vault/shared-types` now emits a bundled Node runtime entry during install, keeps source type/React Native resolution, and has a Vercel function guard that verifies the manifest, runtime file, and actual import. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated `/health`, claimant concealment, hostile-origin, existing authorization, unknown-route, and zero-exception log checks. Production remains intentionally on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; no promotion occurred.
 - The original review packet/ZIP remain preserved as historical evidence. The authenticated review and owner closure are recorded in `docs/verification/2026-08-12-native-enrollment-adversarial-pre-review.md` and `docs/verification/2026-08-12-native-enrollment-review-closure.md`; the remediated snapshot has a refreshed manifest/package.
 - The hard-disabled iOS probe now compiles against the frozen transcript through a `probe-only.v3` Secure Enclave harness, strict public output validation, cleanup/fingerprint-continuity tests, and a separately isolated internal probe app. EAS Build 1 compiled successfully, and Shahbaz Malik reported the complete physical-iPhone authenticated pass, cancellation/cleanup, and retry matrix passed. Normal application runtime still has no probe import; see `docs/verification/2026-08-04-physical-iphone-custody-probe-build.md`.
@@ -88,10 +89,10 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Next Actions
 
-1. Review the local Slice 2I concealed submission/safe-acknowledgement controller and its evidence; publish only with explicit owner authorization.
-2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I hard-disabled and concealed, unmounted, or disconnected from normal app requests. Do not deploy the local claimant/Storage migrations or enable a claimant capability.
+1. Review the local Slice 2J web submission coordinator and its evidence; checkpoint or publish only with explicit owner authorization.
+2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I/2J hard-disabled and concealed, unmounted, or disconnected from normal app requests. Do not deploy the local claimant/Storage migrations or enable a claimant capability.
 3. Treat production Swift App Attest/custody methods, production alias/entitlement configuration, direct native binding, compile, and physical Apple evidence as a separate reviewed native gate.
-4. Bound the next slice around a hard-disabled runtime-disconnected web submission coordinator with injected transport, strict request/acknowledgement validation, a stable attempt idempotency key, bounded single-flight behavior, explicit abort/retry semantics, and no browser persistence. Keep hosted migration, notifications, real evidence, and external behavior separately gated.
+4. Begin Phase 3 with a hard-disabled, unmounted owner-protection persistence/transaction foundation for value-free owner-notice intent, provider-agnostic verified delivery, cooldown authority, invalidation/restart, and fail-to-hold cancellation/dispute/delivery behavior. Add no HTTP route, real notification provider, hosted migration, owner UI, real data, release predicate, or external behavior.
 5. Continue afterward through checklist/evidence/dashboard, owner protection/review, encrypted release/native retrieval, and only then the offline-code V2 route.
 6. The temporary `image-size` exception must be replaced by a compatible upstream fix or re-reviewed before it expires after 2026-09-30; it may not be broadened silently.
 7. Keep Build 7 closed and passed; do not deploy, create another build, or initiate public App Store release without separate authorization.
@@ -107,6 +108,13 @@ These items do not block local production-readiness engineering with synthetic d
 - Legal confirmation of Shahbaz Malik as operator/data controller, contracting-entity and processor mapping, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
 
 ## Verification
+
+### Claimant Slice 2J closing baseline on 2026-08-18
+
+- All workspaces: 976 tests passed; 3 established environment-gated mobile tests skipped.
+- All workspace typechecks, zero-warning root lint, the unchanged 24-page production web build, and API bundle guard passed.
+- Submission client/controller, dashboard client, upload client, repository security, GitHub Actions security, claimant-custody isolation, the focused static regression, and `git diff --check` passed.
+- No deployment, hosted migration, configuration change, production promotion, notification, real file, or external claimant action occurred.
 
 ### Claimant Slice 2I closing baseline on 2026-08-12
 

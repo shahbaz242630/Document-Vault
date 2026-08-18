@@ -1,6 +1,6 @@
 # Sanduqkin MVP Handoff
 
-Last updated: 2026-08-12 (Asia/Dubai)
+Last updated: 2026-08-18 (Asia/Dubai)
 
 ## Current Decision
 
@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 supplied the synthetic claimant baseline only; the 2026-08-04 owner decision separately authorizes production-shaped engineering while external runtime and real claimant data remain blocked.
 
-Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 2F has local checkpoint `9b59916`, Slice 2G has local checkpoint `4e4d5c5`, and Slice 2H has local checkpoint `0215f30`. Phase 2 Slice 2I is checkpointed at the local head of `codex/claimant-submission-controller`; all claimant capabilities remain disabled.
+Session checkpoint: PR #65 merged at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`; Slice 2F has local checkpoint `9b59916`, Slice 2G has local checkpoint `4e4d5c5`, Slice 2H has local checkpoint `0215f30`, and Slice 2I is checkpointed at local head `f8935c2`. Phase 2 Slice 2J is code-complete in the uncommitted working tree on `codex/claimant-submission-controller`; all claimant capabilities remain disabled.
 
 Deployment safety checkpoint: the 2026-08-12 Vercel workspace-package tracing failure is fixed by compiling and bundling an explicit `@vault/shared-types` Node runtime entry while retaining source types/mobile resolution. The function-bundle guard imports the exact packaged entry. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated health and route/security probes with no exception logs. Production remains deliberately on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; the preview was not promoted.
 
@@ -123,6 +123,8 @@ Slice 2H claimant submission and safe acknowledgement are code-complete locally 
 
 Slice 2I claimant submission control is code-complete locally and immutable-false. The mounted route is concealed before configuration/CORS while disabled; its test-only enabled path enforces exact API/claimant origins, JSON/body/idempotency bounds, route/header-to-envelope binding, bearer-derived fresh AAL2 without recovery, active portal authority, bounded claimant-case concurrency, safe acknowledgement output, and generic failures. No notification provider, hosted migration, deployment, or external behavior was added.
 
+Slice 2J claimant web submission coordination is code-complete locally, immutable-false, and absent from normal web runtime imports. It strictly binds the synthetic envelope, case and versions to one coordinator-owned UUIDv4 key, serializes submission/retry, keeps ambiguous or aborted dispatch authority only in memory for exact retry, and returns only a frozen safe acknowledgement without retaining it. Static isolation prohibits direct networking, browser persistence, providers, notifications, private material, and internal review/owner/risk fields. No deployment or external behavior was added.
+
 The returned review reproduced both original aggregates and every manifested file. On 2026-08-12 the owner explicitly accepted it as closing the Slice 1B/1C review gate and authorized bounded remediation and later disabled implementation slices. This does not authorize production activation or real claimant data.
 
 The hard-disabled iOS probe harness is implemented with a disposable `probe-only.v3` alias and the exact frozen transcript. Signed internal EAS Build 1 compiled successfully as a separate bundle/router, and the full requested value-free physical-iPhone matrix passed.
@@ -146,14 +148,21 @@ The engineering target, readiness definition, and phased implementation order ar
 
 ## Next Actions
 
-1. Review Slice 2I and `docs/verification/2026-08-12-claimant-slice-2i-submission-controller.md`; publish only with explicit authorization.
-2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I approvals immutable false and do not deploy the local claimant/Storage migrations.
+1. Review Slice 2J and `docs/verification/2026-08-18-claimant-slice-2j-web-submission-coordinator.md`; checkpoint or publish only with explicit authorization.
+2. Keep Slice 1G/1H/1I/1J/2A/2B/2C/2D/2E/2F/2G/2H/2I/2J approvals immutable false and do not deploy the local claimant/Storage migrations.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
-4. Continue with a hard-disabled runtime-disconnected web submission coordinator, then owner protection/review and encrypted release/native retrieval before the safe V2 route. Keep hosted migration, real files/providers, notifications, and external access separately gated.
+4. Begin Phase 3 with a hard-disabled, unmounted owner-protection persistence/transaction foundation, then continue through review and encrypted release/native retrieval before the safe V2 route. Keep hosted migration, real files/providers, notifications, and external access separately gated.
 5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.
 6. Treat Build 7 as closed and passed; public App Store release and another build remain separately gated.
 
 ## Verification
+
+### Claimant Slice 2J closing baseline on 2026-08-18
+
+- All workspaces: 976 tests passed; 3 established environment-gated mobile tests skipped.
+- All workspace typechecks, zero-warning root lint, the unchanged 24-page production web build, and the API Vercel bundle guard passed.
+- Submission client/controller, dashboard client, upload client, repository security, GitHub Actions security, claimant-custody isolation, the focused static regression, and `git diff --check` passed.
+- Slice 2J was not deployed; no hosted or production state changed.
 
 ### Claimant Slice 2I closing baseline on 2026-08-12
 
