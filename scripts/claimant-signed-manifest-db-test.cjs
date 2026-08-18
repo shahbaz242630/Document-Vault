@@ -241,4 +241,5 @@ function sqlJson(value) { return `'${JSON.stringify(value).replaceAll("'", "''")
 
 if (require.main === module) { runClaimantSignedManifestDbTest();
   console.log("Claimant signed-manifest DB test passed."); }
-module.exports = { buildClaimantSignedManifestDbTestSql, runClaimantSignedManifestDbTest };
+module.exports = { buildClaimantSignedManifestDbTestSql, runClaimantSignedManifestDbTest,
+  standaloneSchema };
