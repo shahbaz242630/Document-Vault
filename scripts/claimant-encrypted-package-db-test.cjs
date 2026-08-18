@@ -208,4 +208,4 @@ if (require.main === module) {
 }
 
 module.exports = { buildClaimantEncryptedPackageDbTestSql,
-  runClaimantEncryptedPackageDbTest };
+  runClaimantEncryptedPackageDbTest, standaloneSchema };
