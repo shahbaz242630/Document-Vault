@@ -8,6 +8,7 @@ import { createRecipientV2Vector } from "./claim-vector-generator/recipient-v2-v
 import { createNativeEnrollmentProofVector } from "./claim-vector-generator/native-enrollment-proof-vector.mjs";
 import { createAppAttestBindingVector } from "./claim-vector-generator/app-attest-binding-vector.mjs";
 import { createClaimStateVector } from "./claim-vector-generator/state-vector.mjs";
+import { createOfflineCodeV2Vector } from "./claim-vector-generator/offline-code-v2-vector.mjs";
 
 await sodium.ready;
 
@@ -22,7 +23,6 @@ const outputDirectory = join(
 
 const protocols = {
   grant: "sanduqkin:claim:recipient-grant:v1",
-  offline: "sanduqkin:claim:offline-code:v2",
   state: "sanduqkin:claim:state:v1",
   release: "sanduqkin:claim:release-package:v1",
 };
@@ -115,44 +115,6 @@ function deterministicSeal(message, recipientPublicKey, ephemeralSeed) {
     ephemeral.privateKey,
   );
   return concat(ephemeral.publicKey, boxed);
-}
-
-const crockfordAlphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
-const crockfordCheckAlphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ*~$=U";
-
-function crockfordEncode(bytes) {
-  let bits = 0;
-  let bitCount = 0;
-  let encoded = "";
-  for (const byte of bytes) {
-    bits = (bits << 8) | byte;
-    bitCount += 8;
-    while (bitCount >= 5) {
-      bitCount -= 5;
-      encoded += crockfordAlphabet[(bits >>> bitCount) & 31];
-      bits &= (1 << bitCount) - 1;
-    }
-  }
-  if (bitCount > 0) {
-    encoded += crockfordAlphabet[(bits << (5 - bitCount)) & 31];
-  }
-  return encoded;
-}
-
-function crockfordChecksum(payload) {
-  let remainder = 0;
-  for (const character of payload) {
-    remainder =
-      (remainder * 32 + crockfordAlphabet.indexOf(character)) %
-      crockfordCheckAlphabet.length;
-  }
-  return crockfordCheckAlphabet[remainder];
-}
-
-function formatHandoverValue(prefix, bytes) {
-  const payload = crockfordEncode(bytes);
-  const groups = payload.match(/.{1,4}/g) ?? [];
-  return `${prefix}${groups.join("-")}-${crockfordChecksum(payload)}`;
 }
 
 const recipientSeed = bytesFromRange(1, sodium.crypto_box_SEEDBYTES);
@@ -253,115 +215,17 @@ const appAttestBindingVector = createAppAttestBindingVector({
   syntheticMeta,
 });
 
-const locatorBytes = bytesFromRange(161, 16);
-const secretBytes = bytesFromRange(177, 24);
-const locator = formatHandoverValue("SK2-L-", locatorBytes);
-const secret = formatHandoverValue("SK2-S-", secretBytes);
-const normalizedSecret = secret.replace(/^SK2-S-/, "").replace(/-/g, "").slice(0, -1);
-const kdfSalt = bytesFromRange(201, sodium.crypto_pwhash_SALTBYTES);
-const testKdfProfile = {
-  algorithm: "argon2id",
-  profile_id: "argon2id-synthetic-test-v1",
-  production_approved: false,
-  opslimit: 2,
-  memlimit_bytes: 67_108_864,
-  output_bytes: 32,
-  salt: base64url(kdfSalt),
-};
-const root = sodium.crypto_pwhash(
-  32,
-  normalizedSecret,
-  kdfSalt,
-  testKdfProfile.opslimit,
-  testKdfProfile.memlimit_bytes,
-  sodium.crypto_pwhash_ALG_ARGON2ID13,
-);
-const proofSeed = sodium.crypto_kdf_derive_from_key(32, 1, "SKCLMV2!", root);
-const wrapKey = sodium.crypto_kdf_derive_from_key(32, 2, "SKCLMV2!", root);
-const proofKeys = sodium.crypto_sign_seed_keypair(proofSeed);
-const locatorIndexKey = bytesFromRange(217, 32);
-const normalizedLocator = locator.replace(/^SK2-L-/, "").replace(/-/g, "").slice(0, -1);
-const locatorDigest = hash(utf8(normalizedLocator), locatorIndexKey);
-const locatorHash = hash(utf8(normalizedLocator));
-const challenge = {
-  protocol: protocols.offline,
-  challenge_id: ids.challenge,
-  nonce: base64url(bytesFromRange(249, 32)),
-  origin: "https://app.sanduqkin.test",
-  expires_at: timestamps.challengeExpiry,
-  locator_hash: base64url(locatorHash),
-};
-const challengeCanonical = canonicalJson(challenge);
-const challengeSignature = sodium.crypto_sign_detached(
-  utf8(challengeCanonical),
-  proofKeys.privateKey,
-);
-const wrapAssociatedData = {
-  protocol: protocols.offline,
-  locator_digest: base64url(locatorDigest),
-  grant_id: ids.grant,
-  owner_id: ids.owner,
-  created_at: timestamps.created,
-};
-const wrapAssociatedDataCanonical = canonicalJson(wrapAssociatedData);
-const wrapNonce = bytesFromRange(25, 24);
-const wrappedMek = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
-  mek,
-  utf8(wrapAssociatedDataCanonical),
-  null,
-  wrapNonce,
-  wrapKey,
-);
-
-const offlineVector = {
-  meta: {
-    ...syntheticMeta,
-    warning:
-      "The Argon2id profile is synthetic-only and is not approved for production. Production values remain blocked on device benchmarks and security review.",
-  },
-  protocol: protocols.offline,
-  human_material: {
-    locator_bytes: base64url(locatorBytes),
-    locator,
-    normalized_locator: normalizedLocator,
-    secret_bytes: base64url(secretBytes),
-    secret,
-    normalized_secret: normalizedSecret,
-  },
-  kdf_profile: testKdfProfile,
-  synthetic_locator_index_key: base64url(locatorIndexKey),
-  derived: {
-    root: base64url(root),
-    proof_seed: base64url(proofSeed),
-    proof_public_key: base64url(proofKeys.publicKey),
-    proof_private_key: base64url(proofKeys.privateKey),
-    wrap_key: base64url(wrapKey),
-    locator_digest: base64url(locatorDigest),
-  },
-  challenge,
-  challenge_canonical: base64url(utf8(challengeCanonical)),
-  challenge_signature: base64url(challengeSignature),
-  wrap: {
-    associated_data: wrapAssociatedData,
-    associated_data_canonical: base64url(utf8(wrapAssociatedDataCanonical)),
-    mek: base64url(mek),
-    nonce: base64url(wrapNonce),
-    ciphertext: base64url(wrappedMek),
-    expected_unwrapped_mek: base64url(mek),
-  },
-  negative_cases: [
-    "changed_locator",
-    "changed_challenge_origin",
-    "expired_challenge",
-    "changed_grant_binding",
-    "changed_owner_binding",
-    "changed_signature",
-    "wrong_secret",
-    "changed_ciphertext",
-    "unsupported_protocol_version",
-    "unapproved_production_kdf_profile",
-  ],
-};
+const { vector: offlineVector, releaseMaterial: offlineReleaseMaterial } =
+  createOfflineCodeV2Vector({
+    base64url,
+    bytesFromRange,
+    canonicalJson,
+    ids,
+    mek,
+    sodium,
+    syntheticMeta,
+    timestamps,
+  });
 
 const stateVector = createClaimStateVector({
   meta: syntheticMeta,
@@ -439,9 +303,9 @@ const releaseVector = {
       profile: "offline_code_v2",
       locator_record_id: ids.locatorRecord,
       locator_version: 2,
-      kdf_profile_id: testKdfProfile.profile_id,
+      kdf_profile_id: offlineReleaseMaterial.kdfProfile.profile_id,
       proof_key_version: 1,
-      wrapped_mek_digest: digest(wrappedMek),
+      wrapped_mek_digest: digest(offlineReleaseMaterial.wrappedMek),
     },
   }),
   negative_cases: [

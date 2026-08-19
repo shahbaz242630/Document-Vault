@@ -4,6 +4,17 @@ import type {
   claimantStates,
 } from "./constants";
 
+export type {
+  OfflineCodeChallengeV2,
+  OfflineCodeClientSecretV2,
+  OfflineCodeKdfProfileV2,
+  OfflineCodePossessionProofV2,
+  OfflineCodeProtocolBundleV2,
+  OfflineCodePublicLocatorV2,
+  OfflineCodeRecordBindingV2,
+  OfflineCodeWrappedMekV2,
+} from "./offline-code/contracts";
+
 export type ClaimRouteProfile = (typeof claimRouteProfiles)[number];
 export type ClaimantState = (typeof claimantStates)[number];
 export type ClaimantActorRole = (typeof claimantActorRoles)[number];
@@ -75,39 +86,6 @@ export type RecipientGrantEnvelopeV2 = {
   created_at: string;
   grant_version: number;
   revoked_at: string | null;
-};
-
-export type OfflineCodeKdfProfileV2 = {
-  algorithm: "argon2id";
-  profile_id: string;
-  production_approved: boolean;
-  opslimit: number;
-  memlimit_bytes: number;
-  output_bytes: 32;
-  salt: string;
-};
-
-export type OfflineCodeChallengeV2 = {
-  protocol: "sanduqkin:claim:offline-code:v2";
-  challenge_id: string;
-  nonce: string;
-  origin: string;
-  expires_at: string;
-  locator_hash: string;
-};
-
-export type OfflineCodeWrappedMekV2 = {
-  protocol: "sanduqkin:claim:offline-code:v2";
-  algorithm: "xchacha20poly1305_ietf";
-  locator_record_id: string;
-  locator_version: number;
-  grant_id: string;
-  owner_id: string;
-  created_at: string;
-  kdf_profile_id: string;
-  proof_key_version: number;
-  nonce: string;
-  ciphertext: string;
 };
 
 export type ClaimTransitionPredicatesV1 = {

@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { createECDH, createHmac } from "node:crypto";
+import { createECDH, createHash, createHmac } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 import sodium from "libsodium-wrappers-sumo";
@@ -12,6 +12,7 @@ import {
 import type {
   ClaimTransitionRequestV1,
   OfflineCodeChallengeV2,
+  OfflineCodeProtocolBundleV2,
   RecipientGrantEnvelopeV2,
   RecipientGrantPlaintextV2,
   RecipientPossessionChallengeV2,
@@ -22,6 +23,7 @@ import {
   assertClaimTransitionRequestV1,
   assertOfflineCodeChallengeV2,
   assertOfflineCodeKdfProfileV2,
+  assertOfflineCodeProtocolBundleV2,
   assertRecipientGrantEnvelopeV1,
   assertRecipientGrantPlaintextV1,
   assertReleaseManifestV1,
@@ -62,27 +64,37 @@ type RecipientVector = {
 };
 
 type OfflineVector = {
-  meta: { synthetic_only: boolean };
+  meta: { synthetic_only: boolean; production_data: boolean };
+  approved: false;
+  authority: "route_possession_only";
   kdf_profile: {
+    profile_id: string;
     production_approved: boolean;
     opslimit: number;
     memlimit_bytes: number;
     salt: string;
   };
-  human_material: { normalized_secret: string };
-  derived: {
+  synthetic_locator_index_key: string;
+  locator_index_input: string;
+  locator_digest: string;
+  derivation: {
+    root_input_canonical: string;
     root: string;
+    proof_context: string;
     proof_public_key: string;
+    wrap_context: string;
     wrap_key: string;
   };
   challenge: OfflineCodeChallengeV2;
   challenge_canonical: string;
-  challenge_signature: string;
+  proof_message: CanonicalJsonValue;
+  proof_message_canonical: string;
+  possession_proof: { signature: string };
+  protocol_bundle: OfflineCodeProtocolBundleV2;
   wrap: {
     associated_data: CanonicalJsonValue;
     associated_data_canonical: string;
-    nonce: string;
-    ciphertext: string;
+    envelope: { nonce: string; ciphertext: string };
     expected_unwrapped_mek: string;
   };
 };
@@ -185,70 +197,131 @@ describe("claim protocol vectors", () => {
     });
   });
 
-  it("verifies the synthetic-only V2 proof and unwraps the MEK", () => {
+  it("reproduces the domain-separated synthetic V2 proof and unwraps the MEK", () => {
     const fixture = vector<OfflineVector>("offline-code-v2.json");
-    expect(fixture.meta.synthetic_only).toBe(true);
+    expect(fixture.meta).toMatchObject({ synthetic_only: true, production_data: false });
+    expect(fixture.approved).toBe(false);
+    expect(fixture.authority).toBe("route_possession_only");
     assertOfflineCodeKdfProfileV2(fixture.kdf_profile);
     expect(fixture.kdf_profile.production_approved).toBe(false);
     assertOfflineCodeChallengeV2(fixture.challenge);
+    expect(assertOfflineCodeProtocolBundleV2(fixture.protocol_bundle)).toEqual(fixture.protocol_bundle);
     expect(canonicalJson(fixture.challenge)).toBe(
       sodium.to_string(fromBase64url(fixture.challenge_canonical)),
     );
+    expect(canonicalJson(fixture.proof_message)).toBe(
+      sodium.to_string(fromBase64url(fixture.proof_message_canonical)),
+    );
+
+    const root = sodium.crypto_pwhash(
+      32,
+      fromBase64url(fixture.derivation.root_input_canonical),
+      fromBase64url(fixture.kdf_profile.salt),
+      fixture.kdf_profile.opslimit,
+      fixture.kdf_profile.memlimit_bytes,
+      sodium.crypto_pwhash_ALG_ARGON2ID13,
+    );
+    expect(root).toEqual(fromBase64url(fixture.derivation.root));
+    const proofContext = fromBase64url(fixture.derivation.proof_context);
+    const proofSeed = hkdfSha256(root, sha256(proofContext), proofContext, 32);
+    const proofKeys = sodium.crypto_sign_seed_keypair(proofSeed);
+    expect(proofKeys.publicKey).toEqual(fromBase64url(fixture.derivation.proof_public_key));
+    expect(proofKeys.publicKey).toEqual(fromBase64url(
+      fixture.protocol_bundle.record_binding.proof_public_key,
+    ));
     expect(
       sodium.crypto_sign_verify_detached(
-        fromBase64url(fixture.challenge_signature),
-        fromBase64url(fixture.challenge_canonical),
-        fromBase64url(fixture.derived.proof_public_key),
+        fromBase64url(fixture.possession_proof.signature),
+        fromBase64url(fixture.proof_message_canonical),
+        proofKeys.publicKey,
       ),
     ).toBe(true);
+
+    expect(hmacSha256(
+      fromBase64url(fixture.synthetic_locator_index_key),
+      fromBase64url(fixture.locator_index_input),
+    )).toEqual(fromBase64url(fixture.locator_digest));
 
     expect(canonicalJson(fixture.wrap.associated_data)).toBe(
       sodium.to_string(fromBase64url(fixture.wrap.associated_data_canonical)),
     );
+    const wrapContext = fromBase64url(fixture.derivation.wrap_context);
+    const wrapKey = hkdfSha256(root, sha256(wrapContext), wrapContext, 32);
+    expect(wrapKey).toEqual(fromBase64url(fixture.derivation.wrap_key));
+    expect(wrapKey).not.toEqual(proofSeed);
     const opened = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
       null,
-      fromBase64url(fixture.wrap.ciphertext),
+      fromBase64url(fixture.wrap.envelope.ciphertext),
       fromBase64url(fixture.wrap.associated_data_canonical),
-      fromBase64url(fixture.wrap.nonce),
-      fromBase64url(fixture.derived.wrap_key),
+      fromBase64url(fixture.wrap.envelope.nonce),
+      wrapKey,
     );
     expect(opened).toEqual(fromBase64url(fixture.wrap.expected_unwrapped_mek));
 
-    const changedChallenge = {
-      ...fixture.challenge,
-      origin: "https://hostile.sanduqkin.test",
+    const changedProofMessage = {
+      ...(fixture.proof_message as Record<string, CanonicalJsonValue>),
+      challenge: {
+        ...fixture.challenge,
+        origin: "https://hostile.sanduqkin.test",
+      },
     };
     expect(
       sodium.crypto_sign_verify_detached(
-        fromBase64url(fixture.challenge_signature),
-        sodium.from_string(canonicalJson(changedChallenge)),
-        fromBase64url(fixture.derived.proof_public_key),
+        fromBase64url(fixture.possession_proof.signature),
+        sodium.from_string(canonicalJson(changedProofMessage)),
+        proofKeys.publicKey,
       ),
     ).toBe(false);
 
+    const associatedData = fixture.wrap.associated_data as Record<string, CanonicalJsonValue>;
     const changedAssociatedData = {
-      ...(fixture.wrap.associated_data as Record<string, CanonicalJsonValue>),
-      owner_id: "10000000-0000-4000-8000-000000000099",
+      ...associatedData,
+      record_binding: {
+        ...(associatedData.record_binding as Record<string, CanonicalJsonValue>),
+        owner_id: "10000000-0000-4000-8000-000000000099",
+      },
     };
     expect(() =>
       sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
         null,
-        fromBase64url(fixture.wrap.ciphertext),
+        fromBase64url(fixture.wrap.envelope.ciphertext),
         sodium.from_string(canonicalJson(changedAssociatedData)),
-        fromBase64url(fixture.wrap.nonce),
-        fromBase64url(fixture.derived.wrap_key),
+        fromBase64url(fixture.wrap.envelope.nonce),
+        wrapKey,
       ),
     ).toThrow();
 
-    const changedCiphertext = fromBase64url(fixture.wrap.ciphertext);
+    const changedProofContext = proofContext.slice();
+    changedProofContext[0] ^= 1;
+    const changedProofKey = sodium.crypto_sign_seed_keypair(
+      hkdfSha256(root, sha256(changedProofContext), changedProofContext, 32),
+    ).publicKey;
+    expect(sodium.crypto_sign_verify_detached(
+      fromBase64url(fixture.possession_proof.signature),
+      fromBase64url(fixture.proof_message_canonical),
+      changedProofKey,
+    )).toBe(false);
+
+    const changedWrapContext = wrapContext.slice();
+    changedWrapContext[0] ^= 1;
+    const changedWrapKey = hkdfSha256(root, sha256(changedWrapContext), changedWrapContext, 32);
+    expect(() => sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
+      null,
+      fromBase64url(fixture.wrap.envelope.ciphertext),
+      fromBase64url(fixture.wrap.associated_data_canonical),
+      fromBase64url(fixture.wrap.envelope.nonce),
+      changedWrapKey,
+    )).toThrow();
+
+    const changedCiphertext = fromBase64url(fixture.wrap.envelope.ciphertext);
     changedCiphertext[0] ^= 1;
     expect(() =>
       sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
         null,
         changedCiphertext,
         fromBase64url(fixture.wrap.associated_data_canonical),
-        fromBase64url(fixture.wrap.nonce),
-        fromBase64url(fixture.derived.wrap_key),
+        fromBase64url(fixture.wrap.envelope.nonce),
+        wrapKey,
       ),
     ).toThrow();
   });
@@ -429,6 +502,10 @@ function hkdfSha256(
 
 function hmacSha256(key: Uint8Array, value: Uint8Array): Uint8Array {
   return new Uint8Array(createHmac("sha256", key).update(value).digest());
+}
+
+function sha256(value: Uint8Array): Uint8Array {
+  return new Uint8Array(createHash("sha256").update(value).digest());
 }
 
 function concat(...values: Uint8Array[]): Uint8Array {

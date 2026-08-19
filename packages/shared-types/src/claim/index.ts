@@ -7,6 +7,7 @@ export * from "./decision-readiness/index";
 export * from "./evidence-preparation/index";
 export * from "./journey";
 export * from "./native-enrollment/index";
+export * from "./offline-code/index";
 export * from "./recipient-v2-validation";
 export * from "./review-submission/index";
 export * from "./review-tracking/index";
