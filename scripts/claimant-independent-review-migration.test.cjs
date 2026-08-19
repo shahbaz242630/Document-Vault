@@ -18,6 +18,8 @@ test("creates four forced-RLS review tables with append-only decisions and event
   assert.doesNotMatch(migration, /grant[^;]*(update|delete)[^;]*claimant_review_events/);
 });
 test("binds reviews to current assignment, submission, policy, checklist, and clean evidence", () => {
+  assert.match(migration,
+    /claimant_submission_receipts_case_version_unique[\s\S]*unique \(case_id, case_version\)/);
   for (const token of ["v_assignment.status <> 'assigned'",
     "v_assignment.assignment_version <> p_expected_assignment_version",
     "reviewer.status = 'active'", "not reviewer.live_review_authority",

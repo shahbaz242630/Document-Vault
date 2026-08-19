@@ -37,9 +37,10 @@ grant usage on schema extensions to service_role;
 ` : "";
   const limiterCalls = limitedKeys.slice(0, 5).map((key) =>
     `perform ${issue(digest("X"), key, digest("J"))};`).join("\n  ");
+  const migrations = options.applyMigrations === false ? "" :
+    `${persistenceMigration}\n${challengeMigration}`;
   return `begin;${setup}
-${persistenceMigration}
-${challengeMigration}
+${migrations}
 insert into auth.users (id) values ('${ids.owner}') on conflict do nothing;
 set local role service_role;
 do $test$

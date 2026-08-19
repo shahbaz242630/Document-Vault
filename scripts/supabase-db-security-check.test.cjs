@@ -1,7 +1,19 @@
 const assert = require("node:assert/strict");
+const { readFileSync } = require("node:fs");
+const { join } = require("node:path");
 const test = require("node:test");
 
 const { analyzeCatalog } = require("./supabase-db-security-check.cjs");
+
+const rlsHelperMigration = readFileSync(join(__dirname,
+  "../supabase/migrations/20260819091516_harden_rls_auto_enable_execution.sql"), "utf8");
+
+test("revokes direct execution of the hosted RLS event-trigger helper", () => {
+  for (const role of ["public", "anon", "authenticated", "service_role"])
+    assert.match(rlsHelperMigration, new RegExp(
+      `revoke all on function public\\.rls_auto_enable\\(\\) from ${role}`));
+  assert.doesNotMatch(rlsHelperMigration, /grant\s+execute/iu);
+});
 
 const expectedTables = [
   ["account_deletion_requests", ["SELECT", "INSERT"]],
