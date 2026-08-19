@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Repository Snapshot
 
-- Active branch: `codex/claimant-offline-code-v2-protocol`; Slice 5A is complete at branch HEAD on top of Slice 4J `49ee8a8` and the earlier claimant checkpoints.
+- Active branch: `codex/claimant-offline-code-v2-persistence`; Slice 5B is complete at branch HEAD on top of Slice 5A `d6cb3d2`, Slice 4J `49ee8a8`, and the earlier claimant checkpoints.
 - PR #65 merged the owner-accepted native-enrollment review closure/remediation, hard-disabled Slices 1D-1H, Expo/dependency alignment, the bounded `image-size` security patch/exception, and Android smoke stabilization. It made no claimant deployment, hosted migration, TestFlight action, or production activation.
 - Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
 - Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Local `main` remains at PR #59 merge `887abd0459197c5123b8972e1b8c5bed14ec5528`; local-tracking `origin/main` is PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`. The active claimant branch contains the later local Slice 1I-4J checkpoints through `49ee8a8` and has not been pushed in this session.
@@ -91,6 +91,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 - Slice 4I adds a hard-disabled, runtime-disconnected native local-export coordinator and adapter contract. It requires exact active completed-open authority, explicit claimant intent, fresh native device-owner presence and confirmation, strict expiry/timing/cross-object bindings, and returns only an opaque value-free local-copy receipt. JavaScript/server plaintext, upload and closure remain false. See `docs/verification/2026-08-18-claimant-slice-4i-native-local-export.md`.
 - Slice 4J adds an immutable-false, unmounted retrieval-lifecycle closure foundation. One service-only locked transaction requires exact served/opened completion authority and optional all-or-none separately verified export evidence, then appends administrative closure without rewriting case, delivery, session, completion, access-control, or local state. Historical facts remain preserved; local recall and deletion remain false. See `docs/verification/2026-08-18-claimant-slice-4j-retrieval-lifecycle-closure.md`.
 - Slice 5A adds a hard-disabled, runtime-disconnected safe V2 offline-code shared protocol. It splits a non-secret checksummed locator from a 192-bit client-held secret, pins a synthetic-only KDF profile, domain-separates and binds proof/wrap derivations, fixes possession-only authority, rejects V1/malformed/weak/substituted inputs, and adds reproducible hostile vectors plus CI runtime-isolation enforcement. See `docs/verification/2026-08-19-claimant-slice-5a-offline-code-v2-protocol-foundation.md`.
+- Slice 5B adds default-deny, service-only V2 locator/challenge persistence with keyed indexing, exact five-minute challenges, append-only proof facts, five-failure/fifteen-minute lockout, stable replay, expiry/revocation, and value-free events. It stores no complete emergency secret or private/decryption material; proof establishes route possession only. The boundary remains literal-false and unmounted. See `docs/verification/2026-08-19-claimant-slice-5b-offline-code-v2-persistence.md`.
 - The 2026-08-12 Vercel workspace-package failure is resolved. `@vault/shared-types` now emits a bundled Node runtime entry during install, keeps source type/React Native resolution, and has a Vercel function guard that verifies the manifest, runtime file, and actual import. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated `/health`, claimant concealment, hostile-origin, existing authorization, unknown-route, and zero-exception log checks. Production remains intentionally on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; no promotion occurred.
 - The original review packet/ZIP remain preserved as historical evidence. The authenticated review and owner closure are recorded in `docs/verification/2026-08-12-native-enrollment-adversarial-pre-review.md` and `docs/verification/2026-08-12-native-enrollment-review-closure.md`; the remediated snapshot has a refreshed manifest/package.
 - The hard-disabled iOS probe now compiles against the frozen transcript through a `probe-only.v3` Secure Enclave harness, strict public output validation, cleanup/fingerprint-continuity tests, and a separately isolated internal probe app. EAS Build 1 compiled successfully, and Shahbaz Malik reported the complete physical-iPhone authenticated pass, cancellation/cleanup, and retry matrix passed. Normal application runtime still has no probe import; see `docs/verification/2026-08-04-physical-iphone-custody-probe-build.md`.
@@ -108,10 +109,10 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Next Actions
 
-1. Stop for owner review of Slice 5A. The proposed next Slice 5B is a default-deny, unmounted, service-only locator-record/challenge persistence foundation with keyed locator indexes, expiry/revocation, replay, and bounded attempt state; it requires separate authorization.
-2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A hard-disabled and concealed, unmounted, or disconnected from normal app requests. Do not deploy local claimant/Storage migrations or enable a claimant capability.
+1. Stop for owner review of Slice 5B. Do not begin a further offline-code controller, lookup, or route slice without separate authorization.
+2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B hard-disabled and concealed, unmounted, or disconnected from normal app requests. Do not deploy local claimant/Storage migrations or enable a claimant capability.
 3. Treat production Swift App Attest/custody methods, production alias/entitlement configuration, direct native binding, compile, and physical Apple evidence as a separate reviewed native gate.
-4. For any separately authorized Slice 5B, treat Shahbaz Malik as the accountable human test reviewer and Codex only as a non-human technical test actor. Add no mounted route, discovery/enumeration response, UI/evidence access, production KDF/native binding, hosted migration, real data, deployment, or external behavior.
+4. For any separately authorized next slice, treat Shahbaz Malik as the accountable human test reviewer and Codex only as a non-human technical test actor. Preserve the generic unavailable response and add no discovery/enumeration leak, UI/evidence access, production KDF/native binding, hosted migration, real data, deployment, or external behavior.
 5. Continue afterward through the safe V2 offline-code route without reintroducing V1 locator-only authority.
 6. The temporary `image-size` exception must be replaced by a compatible upstream fix or re-reviewed before it expires after 2026-09-30; it may not be broadened silently.
 7. Keep Build 7 closed and passed; do not deploy, create another build, or initiate public App Store release without separate authorization.
@@ -134,6 +135,12 @@ These items do not block local production-readiness engineering with synthetic d
 - All workspaces: 1,108 tests passed; 3 established environment-gated mobile tests skipped.
 - Full static/security set: 210 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, shared/API bundles, vector/custody/offline-code isolation, GitHub Actions security, and `git diff --check` passed.
 - No database, container, hosted migration, provider/configuration change, deployment, real data, or external behavior was involved.
+
+### Claimant Slice 5B closing baseline on 2026-08-19
+
+- All workspaces: 1,113 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 210 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, shared/API bundles, vector/custody/persistence isolation, GitHub Actions security, fresh PostgreSQL 16 behavior/role denial, and `git diff --check` passed.
+- The disposable local database container was removed. No hosted migration, provider/configuration change, deployment, real data, or external behavior occurred.
 
 ### Claimant Slice 4F closing baseline on 2026-08-18
 
