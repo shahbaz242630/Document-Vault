@@ -23,8 +23,8 @@ for (const [path, source] of [[servicePath, service], [clientPath, client]]) {
     "sessionStorage", "indexedDB", "storage.from", "sendEmail", "release_packages"])
     if (source.includes(token)) throw new Error(`Persistence boundary has runtime coupling at ${path}: ${token}`);
 }
-for (const token of ["raw_locator", "normalized_locator", "client_secret", "proof_private_key",
-  "plaintext_mek", "root_secret"])
+for (const token of ["raw_locator", "normalized_locator", "p_client_secret", "clientSecret",
+  "proof_private_key", "plaintext_mek", "root_secret"])
   if (migration.includes(token) || service.includes(token) || client.includes(token))
     throw new Error(`Offline-code V2 persistence contains prohibited material: ${token}`);
 

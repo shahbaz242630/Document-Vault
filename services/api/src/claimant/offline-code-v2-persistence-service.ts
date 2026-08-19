@@ -42,18 +42,15 @@ const base64url32 = z.string().regex(/^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/u);
 const registrationSchema = z.strictObject({ locatorRecordId: uuid, ownerUserId: uuid,
   locatorIndexDigest: base64url32, locatorCommitment: base64url32, grantId: uuid,
   proofPublicKey: base64url32, recordBindingDigest: base64url32,
+  kdfSalt: z.string().regex(/^[A-Za-z0-9_-]{21}[AQgw]$/u),
   wrapNonce: z.string().regex(/^[A-Za-z0-9_-]{32}$/u),
   wrapCiphertext: z.string().regex(/^[A-Za-z0-9_-]{64}$/u),
   wrapAssociatedDataDigest: base64url32, issuedAt: z.string().datetime({ offset: true }),
   expiresAt: z.string().datetime({ offset: true }), idempotencyKey: uuid });
 const challengeSchema = z.strictObject({ locatorIndexDigest: base64url32,
-  challengeId: uuid, locatorCommitment: base64url32,
-  recordBindingDigest: base64url32, proofPublicKey: base64url32,
-  challengeBytesBase64url: z.string().regex(/^[A-Za-z0-9_-]{64,8192}$/u),
-  challengeBytesDigest: base64url32,
-  origin: z.string().url().startsWith("https://").max(300), nonce: base64url32,
-  issuedAt: z.string().datetime({ offset: true }), expiresAt: z.string().datetime({ offset: true }),
-  idempotencyKey: uuid });
+  networkBucketDigest: base64url32, deviceBucketDigest: base64url32.optional(),
+  globalBucketDigest: base64url32,
+  origin: z.string().url().startsWith("https://").max(300), idempotencyKey: uuid });
 const attemptSchema = z.strictObject({ locatorRecordId: uuid, challengeId: uuid,
   verifiedChallengeBytesDigest: base64url32, verifiedRecordBindingDigest: base64url32,
   proofSignatureDigest: base64url32, verificationOutcome: z.enum(["invalid", "verified"]),
