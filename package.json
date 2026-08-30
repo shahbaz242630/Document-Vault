@@ -92,6 +92,7 @@
     "check:claimant-offline-code-v2-persistence-isolation": "node scripts/claimant-offline-code-v2-persistence-isolation-check.cjs",
     "check:claimant-offline-code-v2-challenge-isolation": "node scripts/claimant-offline-code-v2-challenge-isolation-check.cjs",
     "check:claimant-offline-code-v2-proof-attempt-isolation": "node scripts/claimant-offline-code-v2-proof-attempt-isolation-check.cjs",
+    "check:claimant-offline-code-v2-controller-isolation": "node scripts/claimant-offline-code-v2-controller-isolation-check.cjs",
     "check:claimant-submission-controller-isolation": "node scripts/claimant-submission-controller-isolation-check.cjs",
     "check:claimant-submission-client-isolation": "node scripts/claimant-submission-client-isolation-check.cjs",
     "check:claimant-upload-controller-isolation": "node scripts/claimant-upload-controller-isolation-check.cjs",

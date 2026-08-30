@@ -32,6 +32,8 @@ import { createClaimSubmissionControllerV1, createClaimSubmissionPreflightContro
   from "./claimant/claim-submission-controller.js";
 import { createOwnerProtectionControllerV1, createOwnerProtectionPreflightControllerV1 }
   from "./claimant/owner-protection-controller.js";
+import { createOfflineCodeV2Controller, createOfflineCodeV2PreflightController }
+  from "./claimant/offline-code-v2-controller.js";
 import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
 
 export const app = new Hono();
@@ -127,6 +129,13 @@ for (const [path, action] of [
 ] as const) {
   app.post(path, createNativeEnrollmentRouteV1(action, { runtimeConfig: claimantRuntimeConfig }));
   app.options(path, createNativeEnrollmentPreflightRouteV1({ runtimeConfig: claimantRuntimeConfig }));
+}
+for (const [path, action] of [
+  ["/claimant/offline-code/v2/challenges", "issueChallenge"],
+  ["/claimant/offline-code/v2/challenges/:challengeId/proofs", "verifyProof"],
+] as const) {
+  app.post(path, createOfflineCodeV2Controller(action, { runtimeConfig: claimantRuntimeConfig }));
+  app.options(path, createOfflineCodeV2PreflightController({ runtimeConfig: claimantRuntimeConfig }));
 }
 
 for (const [path, action, method] of [
