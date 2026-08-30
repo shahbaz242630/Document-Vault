@@ -19,7 +19,8 @@ for (const token of ["fetch(", "axios", "@supabase", "process.env", "SecureStore
 
 for (const file of productionFiles(join(root, "apps/mobile"))) {
   const path = relative(root, file).replaceAll("\\", "/");
-  if (path.includes("/claimant-offline-code/") || path.endsWith(".test.ts") || path.endsWith(".test.tsx")) continue;
+  if (path.includes("/claimant-offline-code/") || path.includes("/offline-code-kdf-probe-app/")
+    || path.endsWith(".test.ts") || path.endsWith(".test.tsx")) continue;
   const source = readFileSync(file, "utf8");
   if (source.includes("offline-code-v2-proof-core") || source.includes("offline-code-v2-proof-producer"))
     throw new Error(`Offline-code V2 client proof is mounted by ${path}.`);

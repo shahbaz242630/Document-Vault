@@ -35,6 +35,21 @@
         "simulator": false
       }
     },
+    "claimant-offline-code-kdf-probe": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "environment": "preview",
+      "env": {
+        "SANDUQKIN_BUILD_TARGET": "claimant_offline_code_kdf_probe"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "credentialsSource": "remote",
+        "simulator": false
+      }
+    },
     "production": {
       "autoIncrement": true,
       "environment": "production",

@@ -14,6 +14,7 @@ for (const token of ["fetch(", "axios", "@supabase", "process.env", "SecureStore
 for (const file of productionFiles(join(root, "apps/mobile"))) {
   const path = relative(root, file).replaceAll("\\", "/");
   if (file === runnerPath || path.includes("/claimant-offline-code/")
+    || path.includes("/offline-code-kdf-probe-app/")
     || path.endsWith(".test.ts") || path.endsWith(".test.tsx")) continue;
   if (readFileSync(file, "utf8").includes("offline-code-v2-kdf-evidence-runner"))
     throw new Error(`Offline-code V2 KDF evidence is mounted by ${path}.`);
