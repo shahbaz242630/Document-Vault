@@ -1,6 +1,6 @@
 # Sanduqkin MVP Handoff
 
-Last updated: 2026-08-18 (Asia/Dubai)
+Last updated: 2026-08-30 (Asia/Dubai)
 
 ## Current Decision
 
@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 supplied the synthetic claimant baseline only; the 2026-08-04 owner decision separately authorizes production-shaped engineering while external runtime and real claimant data remain blocked.
 
-Session checkpoint: claimant Slice 5C is complete and the full 44-migration chain is hosted on Supabase project `pxwtexjjttpgtairpepz`. The hosted catalog has 77 forced-RLS claimant tables, 54 invoker-only claimant functions, and zero anonymous/authenticated claimant authority; the hostile Slice 5C rollback test passed. All claimant application capabilities remain immutable-false, unmounted, and externally inactive.
+Session checkpoint: claimant Slice 5D is code-complete locally and unmounted; the full 44-migration chain remains hosted through Slice 5C on Supabase project `pxwtexjjttpgtairpepz`. The hosted catalog has 77 forced-RLS claimant tables, 54 invoker-only claimant functions, and zero anonymous/authenticated claimant authority; the hostile Slice 5C rollback test passed. All claimant application capabilities remain immutable-false, unmounted, and externally inactive.
 
 Deployment safety checkpoint: the 2026-08-12 Vercel workspace-package tracing failure is fixed by compiling and bundling an explicit `@vault/shared-types` Node runtime entry while retaining source types/mobile resolution. The function-bundle guard imports the exact packaged entry. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated health and route/security probes with no exception logs. Production remains deliberately on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; the preview was not promoted.
 
@@ -158,8 +158,8 @@ The engineering target, readiness definition, and phased implementation order ar
 
 ## Next Actions
 
-1. Review the remaining Supabase Auth leaked-password-protection warning and measured foreign-key index recommendations, then request authorization for the unmounted proof-verification/attempt coordinator. Do not mount a route without separate authorization.
-2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C approvals immutable false. Hosted schema presence does not authorize external claimant access.
+1. Review the remaining Supabase Auth leaked-password-protection warning and measured foreign-key index recommendations, then request separate design authorization for any offline-code V2 proof route/controller. Do not mount a route without that authorization.
+2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D approvals immutable false. Hosted schema presence does not authorize external claimant access.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
 4. Keep any separately authorized next slice default-deny. Preserve the generic unavailable response and add no discovery/enumeration leak, UI/evidence access, production KDF/native binding, hosted migration, real files/providers, notifications, deployment, or external access.
 5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.

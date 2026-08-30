@@ -1,6 +1,6 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-08-18 (Asia/Dubai)
+Last updated: 2026-08-30 (Asia/Dubai)
 
 ## Current Decision
 
@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Repository Snapshot
 
-- Active branch: `codex/claimant-offline-code-v2-challenge-coordinator`; Slice 5C is hosted-migrated at branch HEAD on top of code checkpoint `5117cb2`, Slice 5B `2067b4e`, and the earlier claimant checkpoints.
+- Active branch: `codex/claimant-offline-code-v2-proof-attempt-coordinator`; Slice 5D is code-complete locally on top of hosted-migrated Slice 5C checkpoint `81e1fca`, Slice 5B `2067b4e`, and the earlier claimant checkpoints.
 - PR #65 merged the owner-accepted native-enrollment review closure/remediation, hard-disabled Slices 1D-1H, Expo/dependency alignment, the bounded `image-size` security patch/exception, and Android smoke stabilization. It made no claimant deployment, hosted migration, TestFlight action, or production activation.
 - Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
 - Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Local `main` remains at PR #59 merge `887abd0459197c5123b8972e1b8c5bed14ec5528`; local-tracking `origin/main` is PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`. The active claimant branch contains the later local Slice 1I-4J checkpoints through `49ee8a8` and has not been pushed in this session.
@@ -93,6 +93,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 - Slice 5A adds a hard-disabled, runtime-disconnected safe V2 offline-code shared protocol. It splits a non-secret checksummed locator from a 192-bit client-held secret, pins a synthetic-only KDF profile, domain-separates and binds proof/wrap derivations, fixes possession-only authority, rejects V1/malformed/weak/substituted inputs, and adds reproducible hostile vectors plus CI runtime-isolation enforcement. See `docs/verification/2026-08-19-claimant-slice-5a-offline-code-v2-protocol-foundation.md`.
 - Slice 5B adds default-deny, service-only V2 locator/challenge persistence with keyed indexing, exact five-minute challenges, append-only proof facts, five-failure/fifteen-minute lockout, stable replay, expiry/revocation, and value-free events. It stores no complete emergency secret or private/decryption material; proof establishes route possession only. The boundary remains literal-false and unmounted. See `docs/verification/2026-08-19-claimant-slice-5b-offline-code-v2-persistence.md`.
 - Slice 5C adds a literal-false, unmounted enumeration-resistant challenge coordinator. It derives keyed boundary digests, consumes global/network/device/locator budgets before lookup, returns identical challenge/KDF schemas and replay semantics for active and unavailable records, and persists only real active-record challenges. See `docs/verification/2026-08-19-claimant-slice-5c-offline-code-v2-challenge-coordinator.md`.
+- Slice 5D adds a literal-false, unmounted proof-verification/attempt coordinator. It verifies the exact frozen Ed25519 transcript, cross-binds every proof field to canonical challenge bytes, records only bounded public proof facts through Slice 5B, returns one rejection for invalid real and unavailable synthetic challenges, and asserts possession-only authority on success. See `docs/verification/2026-08-30-claimant-slice-5d-offline-code-v2-proof-attempt-coordinator.md`.
 - Hosted Supabase project `pxwtexjjttpgtairpepz` now contains the full 44-migration repository chain through Slice 5C. Hosted catalog and rollback tests prove forced RLS and zero client authority across 77 claimant tables and 54 claimant functions. One missing composite-key prerequisite was repaired, migration history was reconciled exactly, and direct execution of `rls_auto_enable()` was revoked. See `docs/verification/2026-08-19-hosted-claimant-migration-through-slice-5c.md`.
 - The 2026-08-12 Vercel workspace-package failure is resolved. `@vault/shared-types` now emits a bundled Node runtime entry during install, keeps source type/React Native resolution, and has a Vercel function guard that verifies the manifest, runtime file, and actual import. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated `/health`, claimant concealment, hostile-origin, existing authorization, unknown-route, and zero-exception log checks. Production remains intentionally on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; no promotion occurred.
 - The original review packet/ZIP remain preserved as historical evidence. The authenticated review and owner closure are recorded in `docs/verification/2026-08-12-native-enrollment-adversarial-pre-review.md` and `docs/verification/2026-08-12-native-enrollment-review-closure.md`; the remediated snapshot has a refreshed manifest/package.
@@ -111,8 +112,8 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Next Actions
 
-1. Review the remaining hosted Auth warning (leaked-password protection disabled) and measured foreign-key index recommendations; then request authorization for the proof-verification/attempt coordinator. Do not mount a route without separate authorization.
-2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C hard-disabled and concealed, unmounted, or disconnected from normal app requests. Hosted schema presence grants no claimant capability.
+1. Review the remaining hosted Auth warning (leaked-password protection disabled) and measured foreign-key index recommendations; then request separate design authorization for any offline-code V2 proof route/controller. Do not mount a route without that authorization.
+2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D hard-disabled and concealed, unmounted, or disconnected from normal app requests. Hosted schema presence grants no claimant capability.
 3. Treat production Swift App Attest/custody methods, production alias/entitlement configuration, direct native binding, compile, and physical Apple evidence as a separate reviewed native gate.
 4. For any separately authorized next slice, treat Shahbaz Malik as the accountable human test reviewer and Codex only as a non-human technical test actor. Preserve the generic unavailable response and add no discovery/enumeration leak, UI/evidence access, production KDF/native binding, hosted migration, real data, deployment, or external behavior.
 5. Continue afterward through the safe V2 offline-code route without reintroducing V1 locator-only authority.
@@ -131,6 +132,12 @@ These items do not block local production-readiness engineering with synthetic d
 - Legal confirmation of Shahbaz Malik as operator/data controller, contracting-entity and processor mapping, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
 
 ## Verification
+
+### Claimant Slice 5D closing baseline on 2026-08-30
+
+- All workspaces: 1,123 tests passed; 3 established environment-gated mobile tests skipped.
+- All typechecks, zero-warning lint, unchanged 24-page web build, API bundle, repository/GitHub Actions security, claim-vector/custody, and Slice 5A-5D isolation checks passed.
+- No migration, hosted database/Auth/Storage/provider change, route, deployment, real data, or external behavior occurred. Optional local Slice 5B/5C database replay was unavailable because Docker Desktop was not running; Slice 5D changes no SQL or database contract.
 
 ### Claimant Slice 5A closing baseline on 2026-08-19
 
