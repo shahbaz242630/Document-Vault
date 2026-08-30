@@ -8,7 +8,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 supplied the synthetic claimant baseline only; the 2026-08-04 owner decision separately authorizes production-shaped engineering while external runtime and real claimant data remain blocked.
 
-Session checkpoint: claimant Slice 5F is code-complete locally; its client proof producer and benchmark harness are literal-false and runtime-disconnected, while Slice 5E's two HTTP paths remain `404`-concealed. PR #68 and staging preview `dpl_C7hkpzPvTsatfXWtZJeqjNCFwdV1` are under an owner-requested watcher. The full 44-migration chain remains hosted through Slice 5C; no production promotion, database mutation, or claimant activation occurred.
+Session checkpoint: claimant Slice 5G is code-complete locally; its physical KDF evidence runner, Slice 5F proof/benchmark module, and all earlier claimant capabilities remain literal-false and runtime-disconnected or concealed. PR #68 and staging preview `dpl_C7hkpzPvTsatfXWtZJeqjNCFwdV1` are under an owner-requested watcher. No physical KDF run, production approval, production promotion, database mutation, or claimant activation occurred.
 
 Deployment safety checkpoint: the 2026-08-12 Vercel workspace-package tracing failure is fixed by compiling and bundling an explicit `@vault/shared-types` Node runtime entry while retaining source types/mobile resolution. The function-bundle guard imports the exact packaged entry. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated health and route/security probes with no exception logs. Production remains deliberately on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; the preview was not promoted.
 
@@ -158,8 +158,8 @@ The engineering target, readiness definition, and phased implementation order ar
 
 ## Next Actions
 
-1. Obtain separately reviewed physical iOS/Android KDF benchmark evidence and production parameter selection before any KDF approval; separately authorize client transport/runtime work. Do not add a trusted-edge adapter, post-possession case binding, or enable the controller without separate review.
-2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E/5F approvals immutable false. Hosted schema presence, preview deployment, and mounted `404` routes do not authorize external claimant access.
+1. Separately authorize physical iOS/Android KDF probe builds and accountable human evidence review before production parameter selection; separately authorize client transport/runtime work. Do not add a trusted-edge adapter, post-possession case binding, or enable the controller without separate review.
+2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E/5F/5G approvals immutable false. Hosted schema presence, preview deployment, and mounted `404` routes do not authorize external claimant access.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
 4. Keep any separately authorized next slice default-deny. Preserve the generic unavailable response and add no discovery/enumeration leak, UI/evidence access, production KDF/native binding, hosted migration, real files/providers, notifications, deployment, or external access.
 5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.
