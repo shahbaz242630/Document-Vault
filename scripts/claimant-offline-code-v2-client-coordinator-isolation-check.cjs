@@ -1,6 +1,7 @@
 const { readFileSync, readdirSync } = require("node:fs");
 const { join, relative } = require("node:path");
 const ts = require("typescript");
+const { lifecyclePath, validateLifecycleSources } = require("./claimant-offline-code-v2-lifecycle-isolation-check.cjs");
 
 const feature = "apps/mobile/src/features/claimant-offline-code/";
 const transportPath = `${feature}offline-code-v2-transport.ts`;
@@ -10,6 +11,8 @@ const protectedSymbols = ["offline-code-v2-transport", "offline-code-v2-coordina
   "CLAIMANT_OFFLINE_CODE_V2_TRANSPORT_APPROVED", "CLAIMANT_OFFLINE_CODE_V2_CLIENT_COORDINATOR_APPROVED"];
 
 function validateSources(sources) {
+  // Exactly one separately guarded composition root may consume the 5I modules.
+  validateLifecycleSources(sources);
   const transport = sources.get(transportPath);
   const coordinator = sources.get(coordinatorPath);
   if (!transport || !coordinator) throw new Error("Offline-code V2 client boundary is missing.");
@@ -27,12 +30,12 @@ function validateSources(sources) {
     if (!transport.includes(token)) throw new Error(`Offline-code V2 transport lost ${token}.`);
 
   const permittedImports = new Set(["@vault/shared-types", "buffer", "zod",
-    "./offline-code-v2-proof-core", "./offline-code-v2-transport"]);
+    "./offline-code-v2-proof-core", "./offline-code-v2-transport", "./offline-code-v2-coordinator"]);
   const forbiddenIdentifiers = new Set(["fetch", "XMLHttpRequest", "WebSocket", "EventSource", "axios",
     "process", "globalThis", "localStorage", "sessionStorage", "indexedDB", "SecureStore", "AsyncStorage", "console"]);
   for (const [path, source] of sources) {
     if (/\.test\.[cm]?[jt]sx?$/u.test(path)) continue;
-    if (path !== transportPath && path !== coordinatorPath) {
+    if (path !== transportPath && path !== coordinatorPath && path !== lifecyclePath) {
       if (protectedSymbols.some((symbol) => source.includes(symbol)))
         throw new Error(`Offline-code V2 client is imported outside its isolated boundary: ${path}`);
       continue;
