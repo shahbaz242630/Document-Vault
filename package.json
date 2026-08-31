@@ -96,6 +96,7 @@
     "check:claimant-offline-code-v2-client-proof-isolation": "node scripts/claimant-offline-code-v2-client-proof-isolation-check.cjs",
     "check:claimant-offline-code-v2-kdf-evidence-isolation": "node scripts/claimant-offline-code-v2-kdf-evidence-isolation-check.cjs",
     "check:claimant-offline-code-v2-kdf-probe-isolation": "node scripts/claimant-offline-code-v2-kdf-probe-isolation-check.cjs",
+    "check:claimant-offline-code-v2-client-coordinator-isolation": "node scripts/claimant-offline-code-v2-client-coordinator-isolation-check.cjs",
     "check:claimant-submission-controller-isolation": "node scripts/claimant-submission-controller-isolation-check.cjs",
     "check:claimant-submission-client-isolation": "node scripts/claimant-submission-client-isolation-check.cjs",
     "check:claimant-upload-controller-isolation": "node scripts/claimant-upload-controller-isolation-check.cjs",

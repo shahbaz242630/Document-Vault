@@ -1,6 +1,6 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-08-30 (Asia/Dubai)
+Last updated: 2026-08-31 (Asia/Dubai)
 
 ## Security Status
 
@@ -8,7 +8,9 @@ Owner-vault controls are implemented and under controlled internal testing, and 
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 remains the closed synthetic claimant review baseline and did not enable claimant runtime.
 
-Current security checkpoint: claimant Slice 5H adds an isolated internal-preview iOS/Android KDF probe router/profile with distinct app identities and no normal-runtime import. It runs only the frozen synthetic five-sample benchmark through Slice 5G and displays aggregate value-free evidence. No EAS build or physical run occurred. Slice 5E remains `404`-concealed with no default trusted-edge adapter. PR #68 remains under watcher; production, Supabase, and external claimant traffic remain unchanged.
+Current security checkpoint: Slice 5I is code-complete locally on `codex/claimant-offline-code-v2-mobile-coordinator`, based on Slice 5H `f8dce80`. The injected transport and mobile coordinator remain independently literal-false and runtime-disconnected; they validate the frozen synthetic KDF/challenge/proof bindings, support bounded identical public-proof retries, and return possession-only authority. No normal runtime, native binding, hosted state, build, deployment, or external activation changed. Both new approvals stay literal false. Bounded response streaming, cancellation/expiry cleanup, strict possession-only results, and runtime-import isolation have hostile coverage. Evidence: `docs/verification/2026-08-31-claimant-slice-5i-offline-code-v2-mobile-coordinator.md`.
+
+Read-only PR #68 refresh on 2026-08-31: head remains `47a3322`; native compile/simulator checks and push emulator/hosted integration now pass, while both Supabase live-security checks and GitGuardian remain failed. The watcher is ACTIVE and its latest inspected turn was interrupted/idle. Direct staging health returned a deployment-protection 302, so no fresh health or concealment pass is claimed.
 
 Operational incident checkpoint: the 2026-08-12 Vercel startup failure is resolved with an explicit bundled `@vault/shared-types` Node entry and a function-output guard that imports the exact packaged runtime. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated health, claimant concealment for POST/PUT/OPTIONS/reconciliation and hostile origins, existing authorization, unknown-route, and zero-exception log checks. Production remains on verified rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; no preview promotion, environment change, hosted migration, or claimant activation occurred.
 
@@ -141,13 +143,13 @@ Research snapshot: 2026-08-03. This baseline applies before any external access 
 
 ## Immediate Security Next Step
 
-1. Separately authorize EAS dispatch, physical iOS/Android KDF probe execution, and accountable human evidence review before production parameter selection; then separately review client transport/runtime work. Do not add a trusted-edge adapter, post-possession case binding, or enable the controller without separate security review.
-2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E/5F/5G/5H approvals immutable false, concealed, unmounted, or disconnected from normal runtime. Hosted schema presence, preview deployment, and mounted `404` routes are not runtime activation.
+1. Refresh PR #68 and watcher status, then define and review the next bounded synthetic integration/lifecycle slice. Slice 5I is complete; do not rebuild it. Keep every approval literal false. Production material distribution, native transport/crypto binding, trusted-edge adaptation, post-possession case binding, representative-device KDF work, EAS dispatch, hosted MFA, deployment, and activation retain their separate gates; no such action is authorized by this handoff.
+2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E/5F/5G/5H/5I approvals immutable false, concealed, unmounted, or disconnected from normal runtime. Hosted schema presence, preview deployment, and mounted `404` routes are not runtime activation.
 3. Require a separate native review before adding production Swift methods, aliases, entitlements, direct module binding, builds, or physical Apple evidence. Never promote disposable probe aliases.
 4. For any separately authorized next slice, Shahbaz Malik remains the accountable human test reviewer and Codex only a non-human technical test actor. Preserve generic unavailable responses and add no discovery/enumeration leak, UI/evidence access, browser/server plaintext, server decryption, URL, production KDF/native binding, hosted migration, real data, deployment, or external behavior.
 5. Preserve the open reinstall/lost-state limitation: device-only state may disappear, the server challenge expires independently, and no deleted custody key is recoverable.
 6. Replace the temporary `image-size` patch/exception with a compatible upstream release when available and no later than the review deadline after 2026-09-30; never broaden the advisory allowlist without a new documented review.
-7. Owner-requested watcher `watch-claimant-integration-delivery` monitors PR #68 and its staging preview every 15 minutes with no merge, production-promotion, Supabase-mutation, or claimant-activation authority.
+7. Owner-requested watcher `watch-claimant-integration-delivery` monitors PR #68 and its staging preview every 15 minutes with no merge, production-promotion, Supabase-mutation, scanner-suppression, or claimant-activation authority. GitGuardian's two deterministic synthetic-vector findings require the owner's dashboard false-positive decision; do not add a path exclusion or weaken the gate.
 
 ## Open Launch Security Gates
 

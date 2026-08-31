@@ -1,6 +1,6 @@
 # Sanduqkin Claimant Engineering Handoff
 
-Last updated: 2026-08-30 (Asia/Dubai)
+Last updated: 2026-08-31 (Asia/Dubai)
 
 ## Current Owner Decision
 
@@ -22,18 +22,19 @@ Interim reviewer decision on 2026-08-18: Shahbaz Malik is the accountable human 
 ## Next Session Opener
 
 1. Read `CLAIM_HANDOFF.md` first. Use `HANDOFF.md`, `SECURITY_HANDOFF.md`, and `MVP_HANDOFF.md` for wider product and launch context.
-2. Resume from the local Slice 5H branch `codex/claimant-offline-code-v2-kdf-probe-host`, based on Slice 5G checkpoint `a474024`, Slice 5F checkpoint `993bc84`, and the earlier claimant checkpoints. PR #68 tracks the accumulated stack through Slice 5E.
+2. Resume from local Slice 5I branch `codex/claimant-offline-code-v2-mobile-coordinator`, based on Slice 5H `f8dce80`, Slice 5G `a474024`, and Slice 5F `993bc84`. PR #68 remains on separate watcher remediation `47a3322`; do not merge that isolated worktree into this branch accidentally.
 3. Preserve `.codex-runtime/` and `.playwright-cli/` exactly as unrelated untracked local state. Do not inspect, modify, delete, or stage them.
-4. PR #68 and preview `dpl_C7hkpzPvTsatfXWtZJeqjNCFwdV1` were dispatched on 2026-08-30 under watcher `watch-claimant-integration-delivery`. The preview is staging-only; production remains deliberately on healthy rollback deployment `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`, and no promotion or claimant activation was performed.
+4. Read-only PR #68 refresh on 2026-08-31: head remains `47a3322`; native compile/simulator checks and push emulator/hosted integration now pass, while both Supabase live-security checks and GitGuardian remain failed. The watcher is ACTIVE and its latest inspected turn was interrupted/idle. Direct staging health returned a deployment-protection 302, so no fresh health or concealment pass is claimed. The preview remains staging-only and production was not promoted.
 5. The complete committed Supabase migration chain through Slice 5C is now hosted on project `pxwtexjjttpgtairpepz`. History has 44 aligned entries; 77 claimant tables all use forced RLS; client roles have zero claimant table/function authority; all 54 claimant functions are invoker-only; and the hosted rollback-only Slice 5C hostile test passed. The independent-review composite-key prerequisite and the exposed `rls_auto_enable()` execution grants were repaired. Evidence: `docs/verification/2026-08-19-hosted-claimant-migration-through-slice-5c.md`.
-6. Keep Slice 1G server, Slice 1H mobile, Slice 1I persistence, Slice 1J adapter/runtime, Slice 2A through 2J, Slice 3A through 3G, Slices 4A through 4J, and Slices 5A/5B/5C/5D/5E/5F/5G/5H approval immutable `false`; normal app requests remain concealed, unmounted, or runtime-disconnected.
+6. Keep Slice 1G server, Slice 1H mobile, Slice 1I persistence, Slice 1J adapter/runtime, Slice 2A through 2J, Slice 3A through 3G, Slices 4A through 4J, and Slices 5A/5B/5C/5D/5E/5F/5G/5H/5I approval immutable `false`; normal app requests remain concealed, unmounted, or runtime-disconnected.
 7. Actual production Swift methods, aliases, entitlements, direct module binding, build, and physical Apple evidence require a separate reviewed native gate; do not reuse disposable probe aliases.
-8. Slice 5H supplies the isolated internal iOS/Android KDF probe host and EAS profile, but no external build or device run occurred. Next, separately authorize EAS build dispatch, physical execution, and accountable human evidence review before any production KDF selection or disabled client transport/coordinator. Do not add a trusted-edge adapter, post-possession case binding, flip the controller approval, or enable external claimant access.
+8. Refresh PR #68 and watcher status, then define and review the next bounded synthetic integration/lifecycle slice. Slice 5I is complete; do not rebuild it. Keep every approval literal false. Production material distribution, native transport/crypto binding, trusted-edge adaptation, post-possession case binding, representative-device KDF work, EAS dispatch, hosted MFA, deployment, and activation retain their separate gates; no such action is authorized by this handoff.
 9. Keep **Phase 2 Slice 1A** parked at the paid-plan gate. Its claimant-host, eligibility, and context-bound session foundation is complete; hosted Supabase sign-in/MFA/activation/restoration/sign-out is not.
 10. Preserve the original and remediated review packages and the owner-accepted closure evidence. The review closes the design gate only; it is not launch approval.
 11. Do not deploy, enable claimant capabilities, use real claimant identities/data/documents, change provider/DNS/Auth/Apple settings, or create another mobile build without exact authorization.
 12. Do not push, open a PR, deploy, or run a hosted migration without separate authorization. Future handoff-only changes remain local until bundled with separately authorized code.
-13. Owner-requested watcher `watch-claimant-integration-delivery` monitors PR #68 and its staging preview every 15 minutes. It may fix/retry in-scope failures from an isolated worktree but may not merge, promote production, mutate Supabase, or activate claimant traffic.
+13. Owner-requested watcher `watch-claimant-integration-delivery` monitors PR #68 and its staging preview every 15 minutes. It may fix/retry in-scope failures from an isolated worktree but may not merge, promote production, mutate Supabase, suppress security findings, or activate claimant traffic.
+14. GitGuardian flags two deterministic high-entropy values in `packages/shared-types/test-vectors/claim/offline-code-v2.json`. The vector generator and isolation guards confirm synthetic-only, production-false custody. Repository-local ignore configuration does not clear the GitGuardian GitHub integration; the owner must mark the two dashboard findings false positive. Do not rewrite PR history, expose the values, exclude the vector path, or weaken the scanner.
 
 ### Phase 2 Slice 1A Exit Gate
 
@@ -47,6 +48,8 @@ Interim reviewer decision on 2026-08-18: Shahbaz Malik is the accountable human 
 - Focused web/API/browser tests and the full Phase 1 regression baseline pass before Slice 1A is recorded complete.
 
 ## Current Verified State
+
+- Slice 5I is code-complete locally on `codex/claimant-offline-code-v2-mobile-coordinator`, based on Slice 5H `f8dce80`. The injected transport and mobile coordinator remain independently literal-false and runtime-disconnected; they validate the frozen synthetic KDF/challenge/proof bindings, support bounded identical public-proof retries, and return possession-only authority. No normal runtime, native binding, hosted state, build, deployment, or external activation changed. Verification: 1,195 workspace tests passed (3 established environment-gated skips), 231 static/security tests, all typechecks/lint/builds and isolation checks. Evidence: `docs/verification/2026-08-31-claimant-slice-5i-offline-code-v2-mobile-coordinator.md`.
 
 - PR #65, `Add hard-disabled claimant enrollment foundation`, merged Slices 1D-1H and the review closure/remediation at `dcd6fefee4c527a4e0eceff54fed59e1f240f746`. Its final protected matrix passed. No claimant deployment, hosted migration, TestFlight action, or production activation was performed.
 - PR #65 also aligns Expo SDK dependencies, uses Expo's supported native-module export, upgrades remediable production dependencies, and applies a digest-verified `image-size` parser hardening patch. The temporary exception permits only `GHSA-w3rx-r6r6-pgpr` and `GHSA-5p2g-fcmc-qvqq`, fails closed for new advisories or patch drift, and expires after 2026-09-30; see `docs/dependency-security-exceptions.md`.
@@ -186,7 +189,7 @@ Engineering production readiness is not launch authorization. External access re
 ### Phase 5 — Safe V2 offline-code journey
 
 - Implement the split locator/client-secret protocol, domain-separated proof, enumeration resistance, throttling, attempt controls, expiry, revocation, and explicit V1 rejection.
-- Slice 5A completes the split-material protocol foundation; Slice 5B completes local default-deny persistence; Slice 5C completes enumeration-resistant challenges; Slice 5D completes proof verification and bounded attempts; Slice 5E completes a mounted but immutable-false HTTP boundary; Slice 5F completes runtime-disconnected client proof production and a synthetic benchmark harness; Slice 5G completes the disabled evidence boundary; Slice 5H completes the isolated internal probe host/profile. External probe builds and physical runs, production KDF approval, client transport/runtime integration, trusted-edge throttling, post-possession case binding, and activation remain unimplemented.
+- Slice 5A completes the split-material protocol foundation; Slice 5B completes local default-deny persistence; Slice 5C completes enumeration-resistant challenges; Slice 5D completes proof verification and bounded attempts; Slice 5E completes a mounted but immutable-false HTTP boundary; Slice 5F completes runtime-disconnected client proof production and a synthetic benchmark harness; Slice 5G completes the disabled evidence boundary; Slice 5H completes the isolated internal probe host/profile; Slice 5I completes the disabled injected mobile transport/coordinator. External probe builds and physical runs, production KDF approval, production client runtime integration, trusted-edge throttling, post-possession case binding, and activation remain unimplemented.
 - Add representative-device KDF benchmarks and reproducible protocol vectors.
 - Reuse the common intake, evidence, dashboard, review, and release platform after safe case binding.
 

@@ -1,6 +1,6 @@
 # Sanduqkin MVP Handoff
 
-Last updated: 2026-08-30 (Asia/Dubai)
+Last updated: 2026-08-31 (Asia/Dubai)
 
 ## Current Decision
 
@@ -8,7 +8,9 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 supplied the synthetic claimant baseline only; the 2026-08-04 owner decision separately authorizes production-shaped engineering while external runtime and real claimant data remain blocked.
 
-Session checkpoint: claimant Slice 5H is code-complete locally; its isolated internal iOS/Android KDF probe host/profile, Slice 5G evidence runner, and all earlier claimant capabilities remain outside normal runtime or literal-false/concealed. PR #68 remains under an owner-requested watcher. No EAS build, physical KDF run, production approval, production promotion, database mutation, or claimant activation occurred.
+Session checkpoint: Slice 5I is code-complete locally on `codex/claimant-offline-code-v2-mobile-coordinator`, based on Slice 5H `f8dce80`. The injected transport and mobile coordinator remain independently literal-false and runtime-disconnected; they validate the frozen synthetic KDF/challenge/proof bindings, support bounded identical public-proof retries, and return possession-only authority. No normal runtime, native binding, hosted state, build, deployment, or external activation changed. Evidence: `docs/verification/2026-08-31-claimant-slice-5i-offline-code-v2-mobile-coordinator.md`.
+
+Read-only PR #68 refresh on 2026-08-31: head remains `47a3322`; native compile/simulator checks and push emulator/hosted integration now pass, while both Supabase live-security checks and GitGuardian remain failed. The watcher is ACTIVE and its latest inspected turn was interrupted/idle. Direct staging health returned a deployment-protection 302, so no fresh health or concealment pass is claimed.
 
 Deployment safety checkpoint: the 2026-08-12 Vercel workspace-package tracing failure is fixed by compiling and bundling an explicit `@vault/shared-types` Node runtime entry while retaining source types/mobile resolution. The function-bundle guard imports the exact packaged entry. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated health and route/security probes with no exception logs. Production remains deliberately on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; the preview was not promoted.
 
@@ -158,13 +160,13 @@ The engineering target, readiness definition, and phased implementation order ar
 
 ## Next Actions
 
-1. Separately authorize EAS dispatch, physical iOS/Android KDF probe execution, and accountable human evidence review before production parameter selection; separately authorize client transport/runtime work. Do not add a trusted-edge adapter, post-possession case binding, or enable the controller without separate review.
-2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E/5F/5G/5H approvals immutable false. Hosted schema presence, preview deployment, and mounted `404` routes do not authorize external claimant access.
+1. Refresh PR #68 and watcher status, then define and review the next bounded synthetic integration/lifecycle slice. Slice 5I is complete; do not rebuild it. Keep every approval literal false. Production material distribution, native transport/crypto binding, trusted-edge adaptation, post-possession case binding, representative-device KDF work, EAS dispatch, hosted MFA, deployment, and activation retain their separate gates; no such action is authorized by this handoff.
+2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E/5F/5G/5H/5I approvals immutable false. Hosted schema presence, preview deployment, and mounted `404` routes do not authorize external claimant access.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
 4. Keep any separately authorized next slice default-deny. Preserve the generic unavailable response and add no discovery/enumeration leak, UI/evidence access, production KDF/native binding, hosted migration, real files/providers, notifications, deployment, or external access.
 5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.
 6. Treat Build 7 as closed and passed; public App Store release and another build remain separately gated.
-7. The hourly claimant heartbeat was deleted at session close; no monitoring remains active.
+7. The 15-minute PR #68/staging watcher remains active. GitGuardian's two deterministic synthetic-vector findings require the owner's dashboard false-positive decision; no scanner exclusion or weakened security gate is authorized.
 
 ## Verification
 
