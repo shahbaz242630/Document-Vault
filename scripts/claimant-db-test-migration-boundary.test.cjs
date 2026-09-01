@@ -34,6 +34,14 @@ test("database tests do not replay migrations after CI applies the catalog", () 
   const independentReview = builders[1]();
   assert.doesNotMatch(independentReview, /insert\s+into\s+public\.claimant_cases\s+values/iu);
   assert.match(independentReview, /insert\s+into\s+public\.claimant_cases\s*\(/iu);
+  const independentReviewSource = readFileSync(join(__dirname,
+    "claimant-independent-review-db-test.cjs"), "utf8");
+  assert.match(independentReviewSource,
+    /'v1\/\$\{id\.case\}\/\$\{id\.capability\}'/u,
+    "the live upload fixture must bind object_path to the capability id");
+  assert.doesNotMatch(independentReviewSource,
+    /'v1\/\$\{id\.case\}\/\$\{id\.object\}'/u,
+    "the live upload fixture must not bind object_path to a separate object id");
 
   for (const name of [
     "claimant-native-enrollment-reconciliation-db-test.cjs",

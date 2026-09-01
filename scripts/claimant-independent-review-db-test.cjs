@@ -95,13 +95,13 @@ insert into public.claimant_evidence_upload_capabilities(id, case_id, claimant_u
   preparation_version, item_key, placeholder_ref, object_path, capability_digest,
   expected_media_type, expected_size_bytes, status, expires_at, consumed_at)
 values ('${id.capability}', '${id.case}', '${id.claimant}', 9, 'claimant_photo_identity',
-  'synthetic_evidence_review', 'v1/${id.case}/${id.object}', repeat('c',64),
+  'synthetic_evidence_review', 'v1/${id.case}/${id.capability}', repeat('c',64),
   'application/pdf', 1024, 'consumed', now() + interval '5 minutes', now());
 insert into public.claimant_evidence_objects(id, capability_id, case_id, claimant_user_id,
   item_key, object_path, content_digest, detected_media_type, size_bytes, page_count,
   expanded_size_bytes, status, scan_result, retention_policy_id, delete_after, scanned_at, version)
 values ('${id.object}', '${id.capability}', '${id.case}', '${id.claimant}',
-  'claimant_photo_identity', 'v1/${id.case}/${id.object}', repeat('e',64),
+  'claimant_photo_identity', 'v1/${id.case}/${id.capability}', repeat('e',64),
   'application/pdf', 1024, 1, 1024, 'clean', 'clean', 'synthetic_retention_30d_v1',
   now() + interval '30 days', now(), 2);
 insert into public.claimant_submission_receipts(case_id, claimant_user_id, synthetic_only,
