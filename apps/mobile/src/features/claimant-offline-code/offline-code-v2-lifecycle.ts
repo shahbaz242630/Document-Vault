@@ -26,8 +26,7 @@ export type OfflineCodeV2LifecycleSnapshot = Readonly<{
   release_authorized: false;
 }>;
 
-// This is an isolated composition root, not an app entry point or a native adapter.
-export function createOfflineCodeV2Lifecycle(input: Readonly<{
+type LifecycleInput = Readonly<{
   approved?: boolean;
   syntheticOnly: true;
   productionRuntime: false;
@@ -37,122 +36,152 @@ export function createOfflineCodeV2Lifecycle(input: Readonly<{
   producer: Readonly<{ produce(value: OfflineCodeV2ProofInput): Promise<OfflineCodePossessionProofV2> }>;
   lifecycle: OfflineCodeV2LifecycleSource;
   now?: () => Date;
-}>) {
+}>;
+type LifecycleState = {
+  status: Status;
+  closed: boolean;
+  initialized: boolean;
+  foreground: boolean;
+  generation: number;
+  lastEvent: LifecycleEvent | null;
+  active: boolean;
+  activeCompletion: Promise<void> | null;
+  unsubscribe: (() => void) | null;
+  coordinator: ReturnType<typeof createOfflineCodeV2Coordinator> | null;
+};
+
+// This is an isolated composition root, not an app entry point or a native adapter.
+export function createOfflineCodeV2Lifecycle(input: LifecycleInput) {
   const approved = input.approved ?? CLAIMANT_OFFLINE_CODE_V2_LIFECYCLE_APPROVED;
-  let status: Status = approved ? "suspended" : "disabled";
-  let closed = !approved;
-  let initialized = false;
-  let foreground = false;
-  let generation = 0;
-  let lastEvent: LifecycleEvent | null = null;
-  let active = false;
-  let activeCompletion: Promise<void> | null = null;
-  let unsubscribe: (() => void) | null = null;
-  let coordinator: ReturnType<typeof createOfflineCodeV2Coordinator> | null = null;
+  const state: LifecycleState = {
+    status: approved ? "suspended" : "disabled",
+    closed: !approved,
+    initialized: false,
+    foreground: false,
+    generation: 0,
+    lastEvent: null,
+    active: false,
+    activeCompletion: null,
+    unsubscribe: null,
+    coordinator: null,
+  };
+  if (approved) initialize(state, input);
+  return createLifecycleApi(state);
+}
 
-  function detach(): void {
-    const cleanup = unsubscribe;
-    unsubscribe = null;
-    try { cleanup?.(); } catch { /* No adapter detail escapes cleanup. */ }
-  }
-  function invalidate(): void {
-    generation += 1;
-    coordinator?.cancel();
-  }
-  function close(): void {
-    if (closed) return;
-    closed = true;
-    foreground = false;
-    status = "closed";
-    invalidate();
-    detach();
-  }
-  function onEvent(value: unknown): void {
-    if (closed) return;
-    try {
-      const event = lifecycleEvent.parse(value);
-      if (lastEvent && event.sequence <= lastEvent.sequence) {
-        if (event.sequence === lastEvent.sequence && event.state === lastEvent.state) return;
-        close(); return;
-      }
-      lastEvent = Object.freeze(event);
-      if (event.state === "locked" || event.state === "session_ended" || event.state === "disabled") {
-        close(); return;
-      }
-      if (event.state !== "foreground") {
-        foreground = false;
-        status = "suspended";
-        invalidate();
-      } else if (!foreground) {
-        foreground = true;
-        // A cancelled KDF may still be settling; do not expose readiness for another attempt yet.
-        status = active ? "working" : "ready";
-      }
-    } catch { close(); }
-  }
+function detach(state: LifecycleState): void {
+  const cleanup = state.unsubscribe;
+  state.unsubscribe = null;
+  try { cleanup?.(); } catch { /* No adapter detail escapes cleanup. */ }
+}
 
-  if (approved) {
-    try {
-      if (input.syntheticOnly !== true || input.productionRuntime !== false) throw new Error();
-      const apiOrigin = input.apiOrigin;
-      const claimantOrigin = input.claimantOrigin;
-      assertOfflineCodeV2Origin(apiOrigin);
-      assertOfflineCodeV2Origin(claimantOrigin);
-      if (apiOrigin === claimantOrigin || typeof input.send !== "function"
-        || typeof input.producer.produce !== "function") throw new Error();
-      // Snapshot adapter methods so replacing the caller's dependency object cannot rebind this scope.
-      const send = input.send;
-      const producer = { produce: input.producer.produce.bind(input.producer) };
-      coordinator = createOfflineCodeV2Coordinator({ approved: true, claimantOrigin, producer, now: input.now,
-        transport: createOfflineCodeV2Transport({ approved: true, apiOrigin, claimantOrigin, send }) });
-      const cleanup = input.lifecycle.subscribe(onEvent);
-      if (typeof cleanup !== "function") throw new Error();
-      unsubscribe = cleanup;
-      if (!lastEvent || closed) { close(); detach(); }
-      else initialized = true;
-    } catch { close(); detach(); }
-  }
+function invalidate(state: LifecycleState): void {
+  state.generation += 1;
+  state.coordinator?.cancel();
+}
 
-  async function run(operation: () => Promise<OfflineCodeV2PossessionResult>): Promise<OfflineCodeV2PossessionResult> {
-    if (closed || !initialized || !foreground || active || !coordinator) throw new OfflineCodeV2UnavailableError();
-    const startedGeneration = generation;
-    active = true;
-    let finish!: () => void;
-    activeCompletion = new Promise<void>((resolve) => { finish = resolve; });
-    status = "working";
-    try {
-      const result = await operation();
-      if (closed || !foreground || generation !== startedGeneration) throw new Error();
-      status = "completed";
-      return result;
-    } catch {
-      if (!closed && foreground && generation === startedGeneration) status = "unavailable";
-      throw new OfflineCodeV2UnavailableError();
-    } finally {
-      active = false;
-      // Resuming the host never resumes or replays an old attempt automatically.
-      if (!closed && foreground && generation !== startedGeneration) status = "ready";
-      activeCompletion = null;
-      finish();
+function close(state: LifecycleState): void {
+  if (state.closed) return;
+  state.closed = true;
+  state.foreground = false;
+  state.status = "closed";
+  invalidate(state);
+  detach(state);
+}
+
+function onEvent(state: LifecycleState, value: unknown): void {
+  if (state.closed) return;
+  try {
+    const event = lifecycleEvent.parse(value);
+    const lastEvent = state.lastEvent;
+    if (lastEvent && event.sequence <= lastEvent.sequence) {
+      if (event.sequence === lastEvent.sequence && event.state === lastEvent.state) return;
+      close(state); return;
     }
-  }
+    state.lastEvent = Object.freeze(event);
+    if (event.state === "locked" || event.state === "session_ended" || event.state === "disabled") {
+      close(state); return;
+    }
+    if (event.state !== "foreground") {
+      state.foreground = false;
+      state.status = "suspended";
+      invalidate(state);
+    } else if (!state.foreground) {
+      state.foreground = true;
+      // A cancelled KDF may still be settling; do not expose readiness for another attempt yet.
+      state.status = state.active ? "working" : "ready";
+    }
+  } catch { close(state); }
+}
 
+function initialize(state: LifecycleState, input: LifecycleInput): void {
+  try {
+    if (input.syntheticOnly !== true || input.productionRuntime !== false) throw new Error();
+    const apiOrigin = input.apiOrigin;
+    const claimantOrigin = input.claimantOrigin;
+    assertOfflineCodeV2Origin(apiOrigin);
+    assertOfflineCodeV2Origin(claimantOrigin);
+    if (apiOrigin === claimantOrigin || typeof input.send !== "function"
+      || typeof input.producer.produce !== "function") throw new Error();
+    // Snapshot adapter methods so replacing the caller's dependency object cannot rebind this scope.
+    const send = input.send;
+    const producer = { produce: input.producer.produce.bind(input.producer) };
+    state.coordinator = createOfflineCodeV2Coordinator({ approved: true, claimantOrigin, producer, now: input.now,
+      transport: createOfflineCodeV2Transport({ approved: true, apiOrigin, claimantOrigin, send }) });
+    const cleanup = input.lifecycle.subscribe((value) => onEvent(state, value));
+    if (typeof cleanup !== "function") throw new Error();
+    state.unsubscribe = cleanup;
+    const { lastEvent, closed } = state;
+    if (!lastEvent || closed) { close(state); detach(state); }
+    else state.initialized = true;
+  } catch { close(state); detach(state); }
+}
+
+async function run(state: LifecycleState,
+  operation: () => Promise<OfflineCodeV2PossessionResult>): Promise<OfflineCodeV2PossessionResult> {
+  const { closed, initialized, foreground, active, coordinator } = state;
+  if (closed || !initialized || !foreground || active || !coordinator) throw new OfflineCodeV2UnavailableError();
+  const startedGeneration = state.generation;
+  state.active = true;
+  let finish!: () => void;
+  state.activeCompletion = new Promise<void>((resolve) => { finish = resolve; });
+  state.status = "working";
+  try {
+    const result = await operation();
+    if (state.closed || !state.foreground || state.generation !== startedGeneration) throw new Error();
+    state.status = "completed";
+    return result;
+  } catch {
+    if (!state.closed && state.foreground && state.generation === startedGeneration) state.status = "unavailable";
+    throw new OfflineCodeV2UnavailableError();
+  } finally {
+    state.active = false;
+    // Resuming the host never resumes or replays an old attempt automatically.
+    if (!state.closed && state.foreground && state.generation !== startedGeneration) state.status = "ready";
+    state.activeCompletion = null;
+    finish();
+  }
+}
+
+function createLifecycleApi(state: LifecycleState) {
   return Object.freeze({
-    start: (value: OfflineCodeV2SyntheticAttempt) => run(() => coordinator!.start(value)),
-    retryProof: () => run(() => coordinator!.retryProof()),
+    start: (value: OfflineCodeV2SyntheticAttempt) => run(state, () => state.coordinator!.start(value)),
+    retryProof: () => run(state, () => state.coordinator!.retryProof()),
     cancel(): void {
-      if (closed) return;
-      invalidate();
-      status = foreground ? (active ? "working" : "ready") : "suspended";
+      if (state.closed) return;
+      invalidate(state);
+      state.status = state.foreground ? (state.active ? "working" : "ready") : "suspended";
     },
     dispose(): Promise<void> {
-      close();
+      close(state);
       // Hosts can wait for non-interruptible producer cleanup without receiving its result/error.
+      const activeCompletion = state.activeCompletion;
       return activeCompletion ?? Promise.resolve();
     },
     snapshot(): OfflineCodeV2LifecycleSnapshot {
       // No response, material, identifiers, error detail, or reusable authority is retained here.
-      return Object.freeze({ status, identity_verified: false, claim_created: false, release_authorized: false });
+      return Object.freeze({ status: state.status, identity_verified: false,
+        claim_created: false, release_authorized: false });
     },
   });
 }

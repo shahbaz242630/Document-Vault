@@ -72,109 +72,110 @@ export class OfflineCodeV2ClientProofError extends Error {
   }
 }
 
+type OfflineCodeV2BenchmarkInput = Omit<OfflineCodeV2ProofInput, "challenge" | "expectedOrigin" | "now"> & Readonly<{
+  device: OfflineCodeV2BenchmarkDevice;
+  sampleCount: number;
+  clock?: () => number;
+}>;
+
 export function createOfflineCodeV2ClientProofProducer(input: Readonly<{
   approved?: boolean;
   crypto: OfflineCodeV2ProofCrypto;
 }>) {
   const enabled = input.approved ?? CLAIMANT_OFFLINE_CODE_V2_CLIENT_PROOF_APPROVED;
   return {
-    async produce(value: OfflineCodeV2ProofInput): Promise<OfflineCodePossessionProofV2> {
-      if (!enabled) throw new OfflineCodeV2ClientProofError("disabled");
-      let root: Uint8Array | null = null;
-      let proofSeed: Uint8Array | null = null;
-      let privateKey: Uint8Array | null = null;
-      try {
-        const material = await prepare(input.crypto, value);
-        root = material.root;
-        const proofContext = canonical({
-          protocol: OFFLINE_CODE_PROTOCOL_V2,
-          purpose: "possession_proof_seed",
-          label: OFFLINE_CODE_V2_LABELS.proofSeed,
-          binding_digest: encodeBase64Url(material.provisionalDigest),
-        });
-        proofSeed = input.crypto.hkdfSha256(
-          root,
-          await input.crypto.sha256(proofContext),
-          proofContext,
-          32,
-        );
-        const keys = input.crypto.seedKeyPair(proofSeed);
-        privateKey = keys.privateKey;
-        equalBytes(keys.publicKey, decodeBase64Url(value.recordBinding.proof_public_key));
-        bindChallenge(value.challenge, value.recordBinding, material.recordBindingDigest,
-          value.expectedOrigin, value.now?.() ?? new Date());
-        const message = canonical({
-          protocol: OFFLINE_CODE_PROTOCOL_V2,
-          purpose: "possession_proof",
-          label: OFFLINE_CODE_V2_LABELS.possessionProof,
-          challenge: value.challenge,
-        });
-        const proof = assertOfflineCodePossessionProofV2({
-          protocol: OFFLINE_CODE_PROTOCOL_V2,
-          purpose: "possession_proof",
-          authority: OFFLINE_CODE_V2_AUTHORITY,
-          challenge_id: value.challenge.challenge_id,
-          locator_record_id: value.recordBinding.locator_record_id,
-          locator_version: value.recordBinding.locator_version,
-          proof_key_version: value.recordBinding.proof_key_version,
-          proof_public_key: value.recordBinding.proof_public_key,
-          record_binding_digest: encodeBase64Url(material.recordBindingDigest),
-          signature: encodeBase64Url(input.crypto.sign(message, privateKey)),
-        });
-        return proof;
-      } catch (error) {
-        if (error instanceof OfflineCodeV2ClientProofError) throw error;
-        throw new OfflineCodeV2ClientProofError("failed");
-      } finally {
-        if (privateKey) input.crypto.wipe(privateKey);
-        if (proofSeed) input.crypto.wipe(proofSeed);
-        if (root) input.crypto.wipe(root);
-      }
-    },
-
-    async benchmark(value: Omit<OfflineCodeV2ProofInput, "challenge" | "expectedOrigin" | "now"> & Readonly<{
-      device: OfflineCodeV2BenchmarkDevice;
-      sampleCount: number;
-      clock?: () => number;
-    }>): Promise<OfflineCodeV2KdfBenchmark> {
-      if (!enabled) throw new OfflineCodeV2ClientProofError("disabled");
-      try {
-        assertDevice(value.device);
-        if (!Number.isSafeInteger(value.sampleCount) || value.sampleCount < 1 || value.sampleCount > 10) fail();
-        const clock = value.clock ?? (() => globalThis.performance.now());
-        await input.crypto.ready();
-        const prepared = validateMaterial(value);
-        const durations: number[] = [];
-        for (let sample = 0; sample < value.sampleCount; sample += 1) {
-          const started = clock();
-          const root = input.crypto.argon2id(prepared.rootInput, prepared.salt,
-            value.kdfProfile.opslimit, value.kdfProfile.memlimit_bytes, value.kdfProfile.output_bytes);
-          const ended = clock();
-          input.crypto.wipe(root);
-          const duration = Math.round((ended - started) * 100) / 100;
-          if (!Number.isFinite(duration) || duration < 0) fail();
-          durations.push(duration);
-        }
-        const sorted = [...durations].sort((left, right) => left - right);
-        return {
-          protocol: OFFLINE_CODE_PROTOCOL_V2,
-          purpose: "synthetic_kdf_benchmark",
-          profile_id: value.kdfProfile.profile_id,
-          synthetic_only: true,
-          production_approved: false,
-          representative_device: value.device.evidenceClass === "physical",
-          sample_count: durations.length,
-          durations_ms: durations,
-          median_ms: percentile(sorted, 0.5),
-          p95_ms: percentile(sorted, 0.95),
-          device: value.device,
-        };
-      } catch (error) {
-        if (error instanceof OfflineCodeV2ClientProofError) throw error;
-        throw new OfflineCodeV2ClientProofError("failed");
-      }
-    },
+    produce: (value: OfflineCodeV2ProofInput) => produceProof(input.crypto, enabled, value),
+    benchmark: (value: OfflineCodeV2BenchmarkInput) => benchmarkKdf(input.crypto, enabled, value),
   };
+}
+
+async function produceProof(crypto: OfflineCodeV2ProofCrypto, enabled: boolean,
+  value: OfflineCodeV2ProofInput): Promise<OfflineCodePossessionProofV2> {
+  if (!enabled) throw new OfflineCodeV2ClientProofError("disabled");
+  let root: Uint8Array | null = null;
+  let proofSeed: Uint8Array | null = null;
+  let privateKey: Uint8Array | null = null;
+  try {
+    const material = await prepare(crypto, value);
+    root = material.root;
+    const proofContext = canonical({
+      protocol: OFFLINE_CODE_PROTOCOL_V2,
+      purpose: "possession_proof_seed",
+      label: OFFLINE_CODE_V2_LABELS.proofSeed,
+      binding_digest: encodeBase64Url(material.provisionalDigest),
+    });
+    proofSeed = crypto.hkdfSha256(root, await crypto.sha256(proofContext), proofContext, 32);
+    const keys = crypto.seedKeyPair(proofSeed);
+    privateKey = keys.privateKey;
+    equalBytes(keys.publicKey, decodeBase64Url(value.recordBinding.proof_public_key));
+    bindChallenge(value.challenge, value.recordBinding, material.recordBindingDigest,
+      value.expectedOrigin, value.now?.() ?? new Date());
+    const message = canonical({
+      protocol: OFFLINE_CODE_PROTOCOL_V2,
+      purpose: "possession_proof",
+      label: OFFLINE_CODE_V2_LABELS.possessionProof,
+      challenge: value.challenge,
+    });
+    return assertOfflineCodePossessionProofV2({
+      protocol: OFFLINE_CODE_PROTOCOL_V2,
+      purpose: "possession_proof",
+      authority: OFFLINE_CODE_V2_AUTHORITY,
+      challenge_id: value.challenge.challenge_id,
+      locator_record_id: value.recordBinding.locator_record_id,
+      locator_version: value.recordBinding.locator_version,
+      proof_key_version: value.recordBinding.proof_key_version,
+      proof_public_key: value.recordBinding.proof_public_key,
+      record_binding_digest: encodeBase64Url(material.recordBindingDigest),
+      signature: encodeBase64Url(crypto.sign(message, privateKey)),
+    });
+  } catch (error) {
+    if (error instanceof OfflineCodeV2ClientProofError) throw error;
+    throw new OfflineCodeV2ClientProofError("failed");
+  } finally {
+    if (privateKey) crypto.wipe(privateKey);
+    if (proofSeed) crypto.wipe(proofSeed);
+    if (root) crypto.wipe(root);
+  }
+}
+
+async function benchmarkKdf(crypto: OfflineCodeV2ProofCrypto, enabled: boolean,
+  value: OfflineCodeV2BenchmarkInput): Promise<OfflineCodeV2KdfBenchmark> {
+  if (!enabled) throw new OfflineCodeV2ClientProofError("disabled");
+  try {
+    assertDevice(value.device);
+    if (!Number.isSafeInteger(value.sampleCount) || value.sampleCount < 1 || value.sampleCount > 10) fail();
+    const clock = value.clock ?? (() => globalThis.performance.now());
+    await crypto.ready();
+    const prepared = validateMaterial(value);
+    const durations: number[] = [];
+    for (let sample = 0; sample < value.sampleCount; sample += 1) {
+      const started = clock();
+      const root = crypto.argon2id(prepared.rootInput, prepared.salt,
+        value.kdfProfile.opslimit, value.kdfProfile.memlimit_bytes, value.kdfProfile.output_bytes);
+      const ended = clock();
+      crypto.wipe(root);
+      const duration = Math.round((ended - started) * 100) / 100;
+      if (!Number.isFinite(duration) || duration < 0) fail();
+      durations.push(duration);
+    }
+    const sorted = [...durations].sort((left, right) => left - right);
+    return {
+      protocol: OFFLINE_CODE_PROTOCOL_V2,
+      purpose: "synthetic_kdf_benchmark",
+      profile_id: value.kdfProfile.profile_id,
+      synthetic_only: true,
+      production_approved: false,
+      representative_device: value.device.evidenceClass === "physical",
+      sample_count: durations.length,
+      durations_ms: durations,
+      median_ms: percentile(sorted, 0.5),
+      p95_ms: percentile(sorted, 0.95),
+      device: value.device,
+    };
+  } catch (error) {
+    if (error instanceof OfflineCodeV2ClientProofError) throw error;
+    throw new OfflineCodeV2ClientProofError("failed");
+  }
 }
 
 async function prepare(crypto: OfflineCodeV2ProofCrypto, value: OfflineCodeV2ProofInput) {
