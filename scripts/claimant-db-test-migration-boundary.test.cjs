@@ -6,6 +6,8 @@ const test = require("node:test");
 const builders = [
   require("./claimant-encrypted-package-delivery-db-test.cjs")
     .buildClaimantEncryptedPackageDeliveryDbTestSql,
+  require("./claimant-independent-review-db-test.cjs")
+    .buildClaimantIndependentReviewDbTestSql,
   require("./claimant-retrieval-completion-db-test.cjs")
     .buildClaimantRetrievalCompletionDbTestSql,
   require("./claimant-retrieval-access-control-db-test.cjs").buildSuspensionSql,
@@ -29,6 +31,9 @@ test("database tests do not replay migrations after CI applies the catalog", () 
     /create\s+(?:or\s+replace\s+)?function\s+public\./iu);
   assert.match(buildReviewerAssignment({ includeMigrations: true }),
     /create\s+(?:or\s+replace\s+)?function\s+public\./iu);
+  const independentReview = builders[1]();
+  assert.doesNotMatch(independentReview, /insert\s+into\s+public\.claimant_cases\s+values/iu);
+  assert.match(independentReview, /insert\s+into\s+public\.claimant_cases\s*\(/iu);
 
   for (const name of [
     "claimant-native-enrollment-reconciliation-db-test.cjs",
