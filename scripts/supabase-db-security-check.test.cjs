@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const { readFileSync } = require("node:fs");
+const { readFileSync, readdirSync } = require("node:fs");
 const { join } = require("node:path");
 const test = require("node:test");
 
@@ -29,6 +29,9 @@ const expectedTables = [
   ["claimant_case_device_keys", []],
   ["claimant_cases", []],
   ["claimant_device_keys", []],
+  ["claimant_encrypted_package_deliveries", []],
+  ["claimant_encrypted_package_delivery_events", []],
+  ["claimant_encrypted_package_delivery_idempotency", []],
   ["claimant_evidence_preparation_items", []],
   ["claimant_evidence_upload_capabilities", []],
   ["claimant_evidence_objects", []],
@@ -38,13 +41,62 @@ const expectedTables = [
   ["claimant_invitations", []],
   ["claimant_native_enrollment_challenges", []],
   ["claimant_native_enrollment_rate_limits", []],
+  ["claimant_offline_code_v2_attempts", []],
+  ["claimant_offline_code_v2_challenges", []],
+  ["claimant_offline_code_v2_events", []],
+  ["claimant_offline_code_v2_idempotency", []],
+  ["claimant_offline_code_v2_locators", []],
+  ["claimant_offline_code_v2_rate_limits", []],
   ["claimant_outbox", []],
+  ["claimant_owner_notice_deliveries", []],
+  ["claimant_owner_protection_cycles", []],
+  ["claimant_owner_protection_events", []],
+  ["claimant_owner_protection_idempotency", []],
   ["claimant_submission_receipts", []],
   ["claimant_checklist_items", []],
   ["claimant_portal_eligibilities", []],
   ["claimant_portal_session_controls", []],
   ["claimant_portal_session_events", []],
   ["claimant_recipient_grants", []],
+  ["claimant_release_authority_identities", []],
+  ["claimant_release_authorization_events", []],
+  ["claimant_release_authorization_idempotency", []],
+  ["claimant_release_authorizations", []],
+  ["claimant_release_package_assets", []],
+  ["claimant_release_package_events", []],
+  ["claimant_release_package_finalization_events", []],
+  ["claimant_release_package_finalization_idempotency", []],
+  ["claimant_release_package_finalizations", []],
+  ["claimant_release_package_grants", []],
+  ["claimant_release_package_idempotency", []],
+  ["claimant_release_packages", []],
+  ["claimant_release_retrieval_session_events", []],
+  ["claimant_release_retrieval_session_idempotency", []],
+  ["claimant_release_retrieval_sessions", []],
+  ["claimant_release_signed_manifests", []],
+  ["claimant_release_signing_authorities", []],
+  ["claimant_release_signing_keys", []],
+  ["claimant_retrieval_access_control_events", []],
+  ["claimant_retrieval_access_control_idempotency", []],
+  ["claimant_retrieval_access_controls", []],
+  ["claimant_retrieval_completion_events", []],
+  ["claimant_retrieval_completion_idempotency", []],
+  ["claimant_retrieval_completions", []],
+  ["claimant_retrieval_lifecycle_closure_events", []],
+  ["claimant_retrieval_lifecycle_closure_idempotency", []],
+  ["claimant_retrieval_lifecycle_closures", []],
+  ["claimant_review_decisions", []],
+  ["claimant_review_events", []],
+  ["claimant_review_idempotency", []],
+  ["claimant_review_intervention_events", []],
+  ["claimant_review_intervention_idempotency", []],
+  ["claimant_review_interventions", []],
+  ["claimant_review_resolution_authorities", []],
+  ["claimant_review_rounds", []],
+  ["claimant_reviewer_assignment_events", []],
+  ["claimant_reviewer_assignment_idempotency", []],
+  ["claimant_reviewer_assignments", []],
+  ["claimant_reviewer_identities", []],
   ["claimant_session_controls", []],
   ["claimant_session_events", []],
   ["emergency_contacts", ["SELECT", "INSERT", "UPDATE"]],
@@ -53,6 +105,26 @@ const expectedTables = [
   ["vault_assets", ["SELECT", "INSERT", "UPDATE", "DELETE"]],
   ["vault_key_material", ["SELECT", "INSERT", "UPDATE"]],
 ];
+
+test("tracks every migrated public table and claimant function explicitly", () => {
+  const migrationDirectory = join(__dirname, "../supabase/migrations");
+  const sql = readdirSync(migrationDirectory)
+    .filter((name) => name.endsWith(".sql"))
+    .map((name) => readFileSync(join(migrationDirectory, name), "utf8"))
+    .join("\n");
+  const migratedTables = [...new Set([...sql.matchAll(
+    /create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z0-9_]+)/giu,
+  )].map((match) => match[1]))].sort();
+  const protectedFunctions = [...new Set([...sql.matchAll(
+    /create\s+(?:or\s+replace\s+)?function\s+public\.([a-z0-9_]+)/giu,
+  )].map((match) => match[1]))]
+    .filter((name) => name.startsWith("claimant_") || name === "bind_claimant_case_initial_key")
+    .sort();
+
+  assert.deepEqual(expectedTables.map(([name]) => name).sort(), migratedTables);
+  assert.deepEqual(createCatalog().functions.map(({ functionName }) => functionName).sort(),
+    protectedFunctions);
+});
 
 const tablePrivileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"];
 
@@ -155,6 +227,29 @@ function createCatalog() {
     { functionName: "claimant_get_evidence_upload_reconciliation", securityDefiner: false },
     { functionName: "claimant_abandon_evidence_upload", securityDefiner: false },
     { functionName: "claimant_submit_claim_for_review", securityDefiner: false },
+    { functionName: "claimant_assign_reviewer", securityDefiner: false },
+    { functionName: "claimant_authorize_release", securityDefiner: false },
+    { functionName: "claimant_authorize_release_retrieval_session", securityDefiner: false },
+    { functionName: "claimant_begin_owner_notice", securityDefiner: false },
+    { functionName: "claimant_claim_owner_notice_delivery", securityDefiner: false },
+    { functionName: "claimant_close_retrieval_lifecycle", securityDefiner: false },
+    { functionName: "claimant_commit_encrypted_package_delivery", securityDefiner: false },
+    { functionName: "claimant_complete_owner_notice_delivery", securityDefiner: false },
+    { functionName: "claimant_complete_verified_native_open", securityDefiner: false },
+    { functionName: "claimant_declare_reviewer_conflict", securityDefiner: false },
+    { functionName: "claimant_end_release_retrieval_access", securityDefiner: false },
+    { functionName: "claimant_finalize_signed_release_package", securityDefiner: false },
+    { functionName: "claimant_issue_offline_code_v2_challenge", securityDefiner: false },
+    { functionName: "claimant_open_review_intervention", securityDefiner: false },
+    { functionName: "claimant_prepare_encrypted_package_delivery", securityDefiner: false },
+    { functionName: "claimant_prepare_encrypted_release_package", securityDefiner: false },
+    { functionName: "claimant_record_independent_review", securityDefiner: false },
+    { functionName: "claimant_record_offline_code_v2_attempt", securityDefiner: false },
+    { functionName: "claimant_record_owner_notice_delivery", securityDefiner: false },
+    { functionName: "claimant_recuse_reviewer", securityDefiner: false },
+    { functionName: "claimant_register_offline_code_v2_locator", securityDefiner: false },
+    { functionName: "claimant_revoke_offline_code_v2_locator", securityDefiner: false },
+    { functionName: "claimant_stop_owner_protection", securityDefiner: false },
   ];
 
   return {
