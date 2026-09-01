@@ -127,6 +127,9 @@ insert into public.claimant_reviewer_assignments(id, case_id, cycle_id,
   reviewer_identity_id, assignment_slot, assigned_case_version, cycle_number, status)
 values ('${id.assignment1}', '${id.case}', '${id.cycle}', '${id.reviewer1}', 1, 5, 1, 'assigned'),
   ('${id.assignment2}', '${id.case}', '${id.cycle}', '${id.reviewer2}', 2, 5, 1, 'assigned');`;
+  const recuseUpdate = options.standalone
+    ? "set status = 'recused', assignment_version = 2"
+    : "set status = 'recused', assignment_version = 2, terminal_reason = 'availability', terminal_at = now(), updated_at = now()";
   return `begin;
 ${options.standalone ? standaloneSchema() : ""}
 ${options.standalone ? standaloneFixture : liveFixture}
@@ -172,7 +175,7 @@ begin
     raise exception 'stale checklist digest was accepted';
   exception when serialization_failure then null; end;
   begin
-    update public.claimant_reviewer_assignments set status = 'recused', assignment_version = 2
+    update public.claimant_reviewer_assignments ${recuseUpdate}
       where id = '${id.assignment1}';
     begin perform public.claimant_record_independent_review('${id.case}', '${id.cycle}',
       '${id.assignment2}', '${id.reviewer2}', 5, 1, 3, 9, 9,

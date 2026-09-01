@@ -45,6 +45,10 @@ test("database tests do not replay migrations after CI applies the catalog", () 
   assert.match(independentReviewSource,
     /values \('\$\{id\.capability\}', '\$\{id\.capability\}', '\$\{id\.case\}'/u,
     "the live evidence object must share the capability id");
+  assert.match(independentReview,
+    /terminal_reason = 'availability', terminal_at = now\(\), updated_at = now\(\)/u,
+    "the live recusal fixture must satisfy terminal-state invariants");
+  assert.doesNotMatch(builders[1]({ standalone: true }), /terminal_reason = 'availability'/u);
 
   for (const name of [
     "claimant-native-enrollment-reconciliation-db-test.cjs",
