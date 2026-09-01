@@ -61,7 +61,7 @@ grant usage on schema extensions to service_role;
   perform ${challenge(first, "L", challengeId, firstChallengeKeys[index + 1])};
   v_result := ${attempt(first, challengeId, "invalid", firstAttemptKeys[index + 1], "S")};`).join("");
   return `begin;${setup}
-${migration}
+${options.standalone ? migration : ""}
 insert into auth.users (id) values ('${first.owner}') on conflict do nothing;
 set local role service_role;
 do $test$

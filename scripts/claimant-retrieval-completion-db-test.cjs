@@ -70,7 +70,7 @@ function buildClaimantRetrievalCompletionDbTestSql(options = {}) {
   const id = Object.fromEntries(names.map((name) => [name, randomUUID()]));
   return `${fixture}
 ${options.standalone ? standaloneAppAttestSchema : ""}
-${migration}
+${options.standalone ? migration : ""}
 insert into public.claimant_app_attest_keys (id, claimant_user_id,
   app_attest_key_id_digest, app_id_hash, public_key_spki_base64,
   attestation_receipt, environment, attested_bundle_version,

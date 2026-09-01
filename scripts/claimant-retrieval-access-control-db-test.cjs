@@ -22,7 +22,7 @@ function buildSuspensionSql(options = {}) {
     "completion", "complete", "hostile"].map((name) => [name, randomUUID()]));
   const sessionDigest = digest(`claimant-package-open.v1.${randomUUID()}`);
   return `${fixture(options)}
-${migration}
+${options.standalone ? migration : ""}
 set local role service_role;
 do $test$
 declare v_case public.claimant_cases%rowtype;
@@ -128,7 +128,7 @@ function buildExpirySql(options = {}) {
   const id = Object.fromEntries(["control", "end", "delivery", "prepare"]
     .map((name) => [name, randomUUID()]));
   return `${fixture(options)}
-${migration}
+${options.standalone ? migration : ""}
 set local role service_role;
 update public.claimant_release_package_finalizations
 set expires_at = now() - interval '1 second';

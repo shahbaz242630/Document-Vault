@@ -17,7 +17,7 @@ function buildClaimantEncryptedPackageDeliveryDbTestSql(options = {}) {
   const id = Object.fromEntries(["asset", "retrieval", "delivery", "prepare", "commit",
     "bad", "intervention"].map((name) => [name, randomUUID()]));
   return `${fixture}
-${migration}
+${options.standalone ? migration : ""}
 insert into public.vault_assets
 select '${id.asset}', owner_user_id, 'document', repeat('V', 64), repeat('N', 24),
   now() - interval '2 hours', now() - interval '1 hour', null
