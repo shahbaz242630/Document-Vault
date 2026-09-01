@@ -42,6 +42,9 @@ test("database tests do not replay migrations after CI applies the catalog", () 
   assert.doesNotMatch(independentReviewSource,
     /'v1\/\$\{id\.case\}\/\$\{id\.object\}'/u,
     "the live upload fixture must not bind object_path to a separate object id");
+  assert.match(independentReviewSource,
+    /values \('\$\{id\.capability\}', '\$\{id\.capability\}', '\$\{id\.case\}'/u,
+    "the live evidence object must share the capability id");
 
   for (const name of [
     "claimant-native-enrollment-reconciliation-db-test.cjs",

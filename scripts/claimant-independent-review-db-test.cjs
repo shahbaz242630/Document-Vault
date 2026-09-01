@@ -100,7 +100,7 @@ values ('${id.capability}', '${id.case}', '${id.claimant}', 9, 'claimant_photo_i
 insert into public.claimant_evidence_objects(id, capability_id, case_id, claimant_user_id,
   item_key, object_path, content_digest, detected_media_type, size_bytes, page_count,
   expanded_size_bytes, status, scan_result, retention_policy_id, delete_after, scanned_at, version)
-values ('${id.object}', '${id.capability}', '${id.case}', '${id.claimant}',
+values ('${id.capability}', '${id.capability}', '${id.case}', '${id.claimant}',
   'claimant_photo_identity', 'v1/${id.case}/${id.capability}', repeat('e',64),
   'application/pdf', 1024, 1, 1024, 'clean', 'clean', 'synthetic_retention_30d_v1',
   now() + interval '30 days', now(), 2);
