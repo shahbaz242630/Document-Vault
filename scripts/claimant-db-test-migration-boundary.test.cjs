@@ -16,6 +16,8 @@ const builders = [
   require("./claimant-offline-code-v2-challenge-db-test.cjs")
     .buildOfflineCodeV2ChallengeDbTestSql,
 ];
+const buildReviewerAssignment = require("./claimant-reviewer-assignment-db-test.cjs")
+  .buildClaimantReviewerAssignmentDbTestSql;
 
 test("database tests do not replay migrations after CI applies the catalog", () => {
   for (const build of builders) {
@@ -23,11 +25,16 @@ test("database tests do not replay migrations after CI applies the catalog", () 
     assert.match(build({ standalone: true }),
       /create\s+(?:or\s+replace\s+)?function\s+public\./iu);
   }
+  assert.doesNotMatch(buildReviewerAssignment(),
+    /create\s+(?:or\s+replace\s+)?function\s+public\./iu);
+  assert.match(buildReviewerAssignment({ includeMigrations: true }),
+    /create\s+(?:or\s+replace\s+)?function\s+public\./iu);
 
   for (const name of [
     "claimant-native-enrollment-reconciliation-db-test.cjs",
     "claimant-intake-foundation-db-test.cjs",
     "claimant-evidence-preparation-db-test.cjs",
+    "claimant-private-quarantine-db-test.cjs",
   ]) {
     const source = readFileSync(join(__dirname, name), "utf8");
     assert.doesNotMatch(source, /supabase\/migrations\//u);

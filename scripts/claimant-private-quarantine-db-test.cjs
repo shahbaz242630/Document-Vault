@@ -1,14 +1,6 @@
 const { execFileSync } = require("node:child_process");
 const { randomUUID } = require("node:crypto");
-const { readFileSync } = require("node:fs");
-const { join } = require("node:path");
-
 const DEFAULT_CONTAINER = "supabase_db_supabase";
-const migrations = ["20260812210000_claimant_intake_checklist_foundation.sql",
-  "20260812220000_claimant_evidence_preparation_metadata.sql",
-  "20260812230000_claimant_private_evidence_quarantine.sql",
-  "20260813000000_claimant_upload_reconciliation_authority.sql"]
-  .map((name) => readFileSync(join(__dirname, "../supabase/migrations", name), "utf8")).join("\n");
 
 function runClaimantPrivateQuarantineDbTest(options = {}) {
   const names = ["owner", "claimant", "other", "processor", "session", "otherSession", "invitation",
@@ -28,7 +20,6 @@ function runClaimantPrivateQuarantineDbTest(options = {}) {
   const contentDigest = "d".repeat(64);
   const sql = `
 begin;
-${migrations}
 insert into auth.users (id) values ('${id.owner}'), ('${id.claimant}'), ('${id.other}'), ('${id.processor}');
 insert into public.claimant_portal_eligibilities (user_id, status, source)
 values ('${id.claimant}', 'eligible', 'synthetic_fixture'), ('${id.other}', 'eligible', 'synthetic_fixture');
