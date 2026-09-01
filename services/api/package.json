@@ -6,6 +6,7 @@
   "scripts": {
     "start:zap": "tsx scripts/zap-server.ts",
     "test": "vitest run",
+    "test:offline-code-v2-database": "tsx scripts/offline-code-v2-database-acceptance-test.ts",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },

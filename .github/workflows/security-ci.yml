@@ -451,6 +451,11 @@ jobs:
       - name: Claimant offline-code V2 challenge test
         run: npm run check:claimant-offline-code-v2-challenge-db
 
+      - name: Claimant offline-code V2 database acceptance
+        run: npm run check:claimant-offline-code-v2-database-acceptance
+        env:
+          SANDUQKIN_LOCAL_SUPABASE_ACCEPTANCE: "1"
+
       - name: Live RLS attack test
         run: npm run check:supabase-rls
 
