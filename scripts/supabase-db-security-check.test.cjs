@@ -9,6 +9,10 @@ const rlsHelperMigration = readFileSync(join(__dirname,
   "../supabase/migrations/20260819091516_harden_rls_auto_enable_execution.sql"), "utf8");
 
 test("revokes direct execution of the hosted RLS event-trigger helper", () => {
+  assert.match(
+    rlsHelperMigration,
+    /if\s+to_regprocedure\('public\.rls_auto_enable\(\)'\)\s+is\s+not\s+null/iu,
+  );
   for (const role of ["public", "anon", "authenticated", "service_role"])
     assert.match(rlsHelperMigration, new RegExp(
       `revoke all on function public\\.rls_auto_enable\\(\\) from ${role}`));
