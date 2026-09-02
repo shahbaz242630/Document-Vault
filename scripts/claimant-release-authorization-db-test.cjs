@@ -183,7 +183,9 @@ do $test$
 declare v_result jsonb;
 begin
   begin
-    update public.claimant_recipient_grants set status = 'revoked' where id = '${id.grant2}';
+    update public.claimant_recipient_grants
+    set status = 'revoked', revoked_at = now()
+    where id = '${id.grant2}';
     begin perform public.claimant_authorize_release('${id.case}', '${id.cycle}', '${id.round}',
       '${id.authority}', 5, 2, 2, 1, '${id.hostile}');
       raise exception 'missing grant was accepted';
