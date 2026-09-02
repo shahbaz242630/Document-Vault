@@ -153,7 +153,7 @@ values ('${id.grant1}', '${id.case}', '${id.owner}', '${id.claimant}', '${id.key
   return `begin;
 ${options.standalone ? standaloneSchema() : ""}
 ${options.standalone ? standaloneFixture : liveFixture}
-insert into public.vault_assets values ('${id.asset}', '${id.owner}', 'document',
+insert into public.vault_assets values ('${id.asset}', '${id.owner}', 'document_location',
   'VaultCiphertext_00000000000000000001', 'VaultNonce_0000000000000001',
   now() - interval '2 hours', now() - interval '1 hour', null);
 set local role service_role;
