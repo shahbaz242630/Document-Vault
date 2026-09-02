@@ -29,7 +29,7 @@ const claimantOrigin = "https://app.sanduqkin.test";
 const container = "supabase_db_supabase";
 
 type Fixture = Readonly<{
-  public_locator: unknown;
+  public_locator: Readonly<{ locator: string }>;
   synthetic_client_secret: unknown;
   kdf_profile: Readonly<{ salt: string }>;
   record_binding: Readonly<{ locator_record_id: string; locator_commitment: string;
@@ -104,7 +104,7 @@ function config(supabaseUrl: string, serviceRoleKey: string, fixture: Fixture,
 
 async function registration(fixture: Fixture, value: OfflineCodeV2ControllerConfig,
   overrides: Partial<OfflineCodeV2RegistrationInput> = {}): Promise<OfflineCodeV2RegistrationInput> {
-  const normalizedLocator = normalizeOfflineCodePublicLocatorV2(fixture.public_locator);
+  const normalizedLocator = normalizeOfflineCodePublicLocatorV2(fixture.public_locator.locator);
   const indexes = await createOfflineCodeV2BoundaryIndexer(value).derive({ normalizedLocator,
     networkSignal: "synthetic-database-network" });
   const issuedAt = new Date(); const expiresAt = new Date(issuedAt.getTime() + 30 * 86_400_000);
@@ -185,7 +185,7 @@ async function exerciseExpiry(fixture: Fixture, value: OfflineCodeV2ControllerCo
   const id = fixture.record_binding.locator_record_id;
   sql(`update public.claimant_offline_code_v2_locators set issued_at = now() - interval '2 days', expires_at = now() - interval '1 day' where id = '${id}';`);
   const before = sql(`select count(*) from public.claimant_offline_code_v2_challenges where locator_record_id = '${id}';`);
-  const response = await issue(server(value), fixture.public_locator,
+  const response = await issue(server(value), fixture.public_locator.locator,
     "51000000-0000-4000-8000-000000000004");
   assert.equal(response.status, 200);
   assert.equal(sql(`select status from public.claimant_offline_code_v2_locators where id = '${id}';`), "expired");
@@ -199,7 +199,7 @@ async function exerciseUnknownLimiter(supabaseUrl: string, serviceRoleKey: strin
   locatorIndexKey: digest("synthetic-unknown-locator-key") };
   const app = server(unknownConfig); const responses: Response[] = [];
   for (let index = 0; index < 6; index += 1) responses.push(await issue(app,
-    fixture.public_locator, `52000000-0000-4000-8000-00000000000${index + 1}`));
+    fixture.public_locator.locator, `52000000-0000-4000-8000-00000000000${index + 1}`));
   assert.deepEqual(responses.map((response) => response.status), [200, 200, 200, 200, 200, 429]);
   const limited = await responses[5].json() as { result: Record<string, unknown> };
   assert.equal(limited.result.retry_after_seconds, 300);
