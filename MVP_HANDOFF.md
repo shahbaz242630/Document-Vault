@@ -8,9 +8,9 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 Repository reference: Build 7 was dispatched from `main`/`origin/main` at `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` after PR #56. PR #54 supplied the synthetic claimant baseline only; the 2026-08-04 owner decision separately authorizes production-shaped engineering while external runtime and real claimant data remain blocked.
 
-Session checkpoint: Slice 5K is complete locally on `codex/claimant-offline-code-v2-integration-acceptance`, based on Slice 5J `5b0fcdb`. Thirty synthetic in-process acceptance scenarios connect the actual mobile proof flow to the actual Hono controllers, server verifier, and transaction decoder, replacing only the database RPC. Lost-response retries, lifecycle cancellation after server acceptance, hostile bindings, and fail-closed output are covered. All existing runtime approvals remain literal false; no production implementation or native binding changed. This does not establish SQL/RLS, hosted, or physical-device correctness. Evidence: `docs/verification/2026-08-31-claimant-slice-5k-offline-code-v2-integration-acceptance.md`.
+Session checkpoint: Slice 5L is complete locally at `03570ca` on `codex/claimant-offline-code-v2-database-acceptance`. Disposable local Supabase/PostgREST/RPC acceptance now exercises the actual registration and mobile possession path through PostgreSQL, including retry, concurrency, expiry, limiting, RLS denial, and possession-only outputs. All runtime approvals remain literal false. Evidence: `docs/verification/2026-09-02-claimant-slice-5l-offline-code-v2-database-acceptance.md`.
 
-Latest read-only PR #68 refresh during Slice 5K: head remains `47a3322`; both Supabase live-security checks and GitGuardian still fail, while native, push emulator/hosted-integration, App Security, CodeQL, ZAP, and Vercel checks pass. The watcher automation file is now absent; active monitoring cannot be confirmed. The owner was informed, and no watcher was recreated or modified. No fresh preview smoke result is claimed.
+PR #68 is open at `18c6df6` after a narrow release-authorization live-fixture repair. Fresh checks are running and GitGuardian is green. The watcher will notify on meaningful red or merge when all required checks are green and the PR is mergeable.
 
 Deployment safety checkpoint: the 2026-08-12 Vercel workspace-package tracing failure is fixed by compiling and bundling an explicit `@vault/shared-types` Node runtime entry while retaining source types/mobile resolution. The function-bundle guard imports the exact packaged entry. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated health and route/security probes with no exception logs. Production remains deliberately on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; the preview was not promoted.
 
@@ -160,13 +160,15 @@ The engineering target, readiness definition, and phased implementation order ar
 
 ## Next Actions
 
-1. Refresh PR #68 and verify whether the watcher exists before relying on monitoring. Slice 5K local mobile/API compatibility acceptance is complete; review the remaining integration gaps and select the next bounded synthetic increment. Do not count fixture RPC replay as database transaction evidence or rebuild the completed 5I-5K work. Keep every approval literal false. Production material distribution, native lifecycle/transport/crypto binding, trusted-edge adaptation, post-possession case binding, representative-device KDF work, EAS dispatch, hosted MFA, deployment, and activation retain their separate gates; this handoff authorizes none of those actions.
+Session-close resume instructions and a copyable prompt are in `CLAIM_HANDOFF.md`. Resume Slice 5L checkpoint `03570ca`, inspect the PR #68 watcher result, and rerun the database acceptance after clean integration. Slice 5M post-possession case binding is recommended but not authorized or started.
+
+1. Inspect the PR #68 watcher result. If merged, integrate the new main baseline safely and rerun Slice 5L from a clean disposable Supabase stack; if red, fix only the failing gate. Do not duplicate PR migration repairs or rebuild completed Slices 5I-5L. Slice 5M post-possession case binding is recommended but not authorized.
 2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E/5F/5G/5H/5I/5J approvals immutable false. Hosted schema presence, preview deployment, and mounted `404` routes do not authorize external claimant access.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
 4. Keep any separately authorized next slice default-deny. Preserve the generic unavailable response and add no discovery/enumeration leak, UI/evidence access, production KDF/native binding, hosted migration, real files/providers, notifications, deployment, or external access.
 5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.
 6. Treat Build 7 as closed and passed; public App Store release and another build remain separately gated.
-7. Watcher `watch-claimant-integration-delivery` was previously owner-requested every 15 minutes, but its local automation file is now absent and active monitoring is unconfirmed. Do not silently recreate it or assume delivery is monitored. Any separately restored watcher retains no merge, production-promotion, Supabase-mutation, scanner-suppression, or claimant-activation authority. GitGuardian findings still require the owner dashboard decision.
+7. The PR #68 watcher reports meaningful red or merges when all required checks are green and the PR is mergeable. It grants no production-promotion, Supabase-mutation, scanner-suppression, or claimant-activation authority.
 
 ## Verification
 
