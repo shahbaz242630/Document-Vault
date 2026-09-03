@@ -4,6 +4,8 @@ Date: 2026-09-02 (Asia/Dubai)
 
 Status: authorized for bounded local engineering with synthetic data. Runtime activation, hosted mutation, deployment, native production binding, and real claimant data remain unauthorized.
 
+2026-09-03 checkpoint: implementation and local hostile/concurrent database verification passed at `20b0d89`; combined-main-baseline closeout awaits PR #68 merge/integration. See `docs/verification/2026-09-03-claimant-slice-5m-offline-code-v2-case-binding.md`.
+
 ## Outcome
 
 Add one service-only, immutable-false transaction that converts a recently verified offline-code V2 challenge into one `draft` claimant case bound to the authenticated claimant-portal context. The transaction derives the owner and route material from the locked locator row. The caller cannot choose an owner, route profile, locator version, proof-key version, or release authority.

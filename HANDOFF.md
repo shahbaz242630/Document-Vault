@@ -1,6 +1,17 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-08-31 (Asia/Dubai)
+Last updated: 2026-09-03 (Asia/Dubai)
+
+## Latest checkpoint — Slice 5M
+
+This checkpoint supersedes the older branch/PR status and next-session instructions below.
+
+- Slice 5M was owner-authorized and is implemented locally on `codex/claimant-offline-code-v2-case-binding`: scaffold `af2fce3`, hardened database verification checkpoint `20b0d89`. It remains literal-false and unmounted. No Slice 5M push or PR publication is authorized or performed.
+- Local Slice 5M hostile SQL/RLS and real two-session concurrency tests pass. Slice 5L database acceptance also passes with 5M applied. Workspace tests: 1,265 passed, with 3 established mobile skips; all typechecks, zero-warning lint, security/phase guards, and 78 serial script-test files pass.
+- PR #68 is separate at `6d47a23`, open with fresh CI running. This session repaired encrypted-package and signed-manifest live fixtures and unnecessary locks on append-only authorization records without widening grants. Both repaired gates pass locally.
+- The existing `watch-pr-68-checks` heartbeat is ACTIVE every ten minutes. It reports meaningful RED, merges only after required GREEN and mergeability, and deletes itself after merge. Do not create a duplicate watcher.
+- Final combined-baseline closeout remains pending PR #68 merge and safe integration of the new main baseline. The current 5M branch's older catalog checker lacks expectations already repaired in PR #68; the PR checker passes against the composite local database. Do not duplicate those repairs.
+- Evidence and exact replay instructions: `docs/verification/2026-09-03-claimant-slice-5m-offline-code-v2-case-binding.md`. Preserve `.codex-runtime/` and `.playwright-cli/` without inspecting them. All hosted, deployment, native-build, real-data, and activation prohibitions remain in force.
 
 ## Current Decision
 
