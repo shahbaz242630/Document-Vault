@@ -10,6 +10,10 @@ test("database exercise covers binding, replay, session freshness, tenant race, 
     "changed idempotency input was accepted", "verified challenge rebound to another account",
     "displaced portal session was accepted", "non-verified challenge was accepted",
     "revoked locator was accepted", "stale portal session was accepted",
+    "stale proof was accepted", "expired locator was accepted", "locked locator was accepted",
+    "owner self-binding was accepted", "mismatched commitment was accepted",
+    "null input 0 was accepted", "null input 7 was accepted",
+    "null route locator_version was accepted", "anonymous role called case binding RPC",
     "authenticated role read offline-code case",
     "authenticated role called case binding RPC", "release_authorized"])
     assert.ok(sql.includes(token), token);

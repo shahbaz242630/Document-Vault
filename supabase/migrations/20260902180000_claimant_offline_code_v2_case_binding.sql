@@ -63,7 +63,8 @@ add constraint claimant_cases_offline_challenge_unique unique (offline_code_v2_c
 add constraint claimant_cases_route_binding_check check (
   (
     route_profile = 'registered_recipient_v1'
-    and invitation_id is not null and invitation_status = 'accepted'
+    and invitation_id is not null and invitation_status is not null
+    and invitation_status = 'accepted'
     and current_key_id is not null
     and offline_code_v2_locator_record_id is null
     and offline_code_v2_locator_version is null
@@ -77,11 +78,15 @@ add constraint claimant_cases_route_binding_check check (
     route_profile = 'offline_code_v2'
     and invitation_id is null and invitation_status is null and current_key_id is null
     and offline_code_v2_locator_record_id is not null
+    and offline_code_v2_locator_version is not null
     and offline_code_v2_locator_version = 2
+    and offline_code_v2_proof_key_version is not null
     and offline_code_v2_proof_key_version = 1
     and offline_code_v2_challenge_id is not null
+    and offline_code_v2_record_binding_digest is not null
     and offline_code_v2_record_binding_digest ~ '^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$'
     and offline_code_v2_portal_session_id is not null
+    and offline_code_v2_portal_session_version is not null
     and offline_code_v2_portal_session_version > 0
     and offline_code_v2_bound_at is not null
     and owner_finalized_at is null and finalization_version = 0
@@ -119,7 +124,10 @@ declare
   v_digest text;
   v_result jsonb;
 begin
-  if p_expected_record_binding_digest !~ '^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$'
+  if num_nulls(p_case_id, p_claimant_user_id, p_portal_session_id, p_challenge_id,
+    p_expected_record_binding_digest, p_policy_pack_id, p_policy_pack_version,
+    p_idempotency_key) > 0
+    or p_expected_record_binding_digest !~ '^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$'
     or p_policy_pack_id <> 'synthetic_policy_death_alpha'
     or p_policy_pack_version <> 1 then
     raise exception 'Offline-code V2 case binding is unavailable.' using errcode = '22023';
@@ -141,8 +149,10 @@ begin
     return v_existing.result || jsonb_build_object('replayed', true);
   end if;
 
+  perform pg_advisory_xact_lock(hashtextextended(
+    'claimant:portal-session:' || p_claimant_user_id::text, 0));
   select * into v_eligibility from public.claimant_portal_eligibilities
-  where user_id = p_claimant_user_id for update;
+  where user_id = p_claimant_user_id;
   select * into v_session from public.claimant_portal_session_controls
   where user_id = p_claimant_user_id for update;
   if v_eligibility.user_id is null or v_eligibility.status <> 'eligible'
@@ -156,7 +166,17 @@ begin
   end if;
 
   select * into v_challenge from public.claimant_offline_code_v2_challenges
-  where id = p_challenge_id for update;
+  where id = p_challenge_id;
+  if v_challenge.id is null then
+    raise exception 'Offline-code V2 case binding is unavailable.' using errcode = '42501';
+  end if;
+  -- Match proof/revocation lock ordering: record advisory lock, locator, challenge.
+  perform pg_advisory_xact_lock(hashtextextended(
+    'claimant:offline-v2:record:' || v_challenge.locator_record_id::text, 0));
+  select * into v_locator from public.claimant_offline_code_v2_locators
+  where id = v_challenge.locator_record_id for update;
+  select * into v_challenge from public.claimant_offline_code_v2_challenges
+  where id = p_challenge_id and locator_record_id = v_locator.id for update;
   if v_challenge.id is null or v_challenge.status <> 'verified'
     or v_challenge.terminal_at is null
     or v_challenge.terminal_at < now() - interval '5 minutes'
@@ -165,16 +185,14 @@ begin
     raise exception 'Offline-code V2 case binding is unavailable.' using errcode = '42501';
   end if;
 
-  perform pg_advisory_xact_lock(hashtextextended(
-    'claimant:offline-v2:locator:' || v_challenge.locator_record_id::text, 0));
-  select * into v_locator from public.claimant_offline_code_v2_locators
-  where id = v_challenge.locator_record_id for update;
   if v_locator.id is null or v_locator.status <> 'active' or v_locator.expires_at <= now()
+    or (v_locator.locked_until is not null and v_locator.locked_until > now())
     or v_locator.locator_version <> 2 or v_locator.proof_key_version <> 1
     or v_locator.record_binding_digest <> p_expected_record_binding_digest
     or v_challenge.locator_version <> v_locator.locator_version
     or v_challenge.proof_key_version <> v_locator.proof_key_version
     or v_challenge.proof_public_key <> v_locator.proof_public_key
+    or v_challenge.locator_commitment <> v_locator.locator_commitment
     or v_locator.owner_user_id = p_claimant_user_id then
     raise exception 'Offline-code V2 case binding is unavailable.' using errcode = '42501';
   end if;

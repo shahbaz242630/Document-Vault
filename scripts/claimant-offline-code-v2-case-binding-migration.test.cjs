@@ -30,6 +30,12 @@ test("requires fresh portal AAL2 and recent verified possession", () => {
 });
 
 test("enforces a route-specific one-locator one-challenge case binding", () => {
+  for (const column of ["locator_version", "proof_key_version", "record_binding_digest",
+    "portal_session_version"])
+    assert.ok(migration.includes(`offline_code_v2_${column} is not null`));
+  assert.match(migration, /if num_nulls\(p_case_id/u);
+  assert.doesNotMatch(migration, /from public\.claimant_portal_eligibilities[^;]*for update/u);
+  assert.ok(migration.includes("claimant:offline-v2:record:"));
   for (const token of ["route_profile in ('registered_recipient_v1', 'offline_code_v2')",
     "claimant_cases_route_binding_check", "offline_code_v2_locator_version = 2",
     "offline_code_v2_proof_key_version = 1",

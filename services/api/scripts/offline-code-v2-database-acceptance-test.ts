@@ -26,7 +26,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const challengePath = "/claimant/offline-code/v2/challenges";
 const apiOrigin = "https://api.sanduqkin.test";
 const claimantOrigin = "https://app.sanduqkin.test";
-const container = "supabase_db_supabase";
+const container = process.env.SANDUQKIN_LOCAL_SUPABASE_CONTAINER ?? "supabase_db_supabase";
 
 type Fixture = Readonly<{
   public_locator: Readonly<{ locator: string }>;
@@ -44,6 +44,7 @@ type LocalStatus = Readonly<Record<string, string>>;
 async function main(): Promise<void> {
   assert.equal(process.env.SANDUQKIN_LOCAL_SUPABASE_ACCEPTANCE, "1",
     "Local Supabase acceptance requires its explicit test-only flag.");
+  assert.match(container, /^supabase_db_[a-zA-Z0-9_-]+$/u);
   const status = readLocalStatus();
   const supabaseUrl = required(status.API_URL ?? status.api_url, "local API URL");
   const serviceRoleKey = required(status.SERVICE_ROLE_KEY ?? status.service_role_key,
@@ -72,7 +73,8 @@ async function main(): Promise<void> {
 
 function readLocalStatus(): LocalStatus {
   const output = execFileSync("supabase", ["status", "--workdir",
-    resolve(root, "supabase"), "-o", "json"], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    resolve(root, process.env.SANDUQKIN_LOCAL_SUPABASE_WORKDIR ?? "supabase"), "-o", "json"],
+  { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
   return JSON.parse(output) as LocalStatus;
 }
 
