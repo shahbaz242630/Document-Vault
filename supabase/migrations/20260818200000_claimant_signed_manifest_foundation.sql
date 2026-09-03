@@ -253,7 +253,8 @@ begin
   select * into v_package from public.claimant_release_packages
   where id = p_package_id and case_id = p_case_id;
   select * into v_authorization from public.claimant_release_authorizations
-  where id = p_release_authorization_id and case_id = p_case_id for update;
+  -- Append-only record; mutable case, review, and authorities are locked separately.
+  where id = p_release_authorization_id and case_id = p_case_id;
   select * into v_cycle from public.claimant_owner_protection_cycles
   where id = v_package.cycle_id and case_id = p_case_id for update;
   select * into v_round from public.claimant_review_rounds

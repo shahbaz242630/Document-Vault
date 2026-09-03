@@ -58,7 +58,7 @@ function buildClaimantEncryptedPackageDbTestSql(options = {}) {
   const names = ["case", "cycle", "round", "authorization", "authority", "authorityUser", "owner",
     "claimant", "key1", "key2", "grant1", "grant2", "asset", "package", "first",
     "changed", "hostile", "intervention"];
-  const id = Object.fromEntries(names.map((name) => [name, randomUUID()]));
+  const id = { ...Object.fromEntries(names.map((name) => [name, randomUUID()])), ...options.ids };
   const standaloneFixture = `
 insert into auth.users(id) values ('${id.owner}'), ('${id.claimant}');
 insert into public.claimant_identities values ('${id.claimant}');
@@ -160,6 +160,7 @@ values ('${id.grant1}', '${id.case}', '${id.owner}', '${id.claimant}', '${id.key
         source_round_version) values ('${id.intervention}', '${id.case}', '${id.cycle}',
         '${id.round}', '${id.authority}', 'escalation', 'policy_review_required',
         'two_person_approved', 2);`;
+  if (options.fixtureOnly) return options.standalone ? standaloneFixture : liveFixture;
   return `begin;
 ${options.standalone ? standaloneSchema() : ""}
 ${options.standalone ? standaloneFixture : liveFixture}
