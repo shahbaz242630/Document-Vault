@@ -4,6 +4,22 @@ Date: 2026-09-03 (Asia/Dubai)
 
 Status: local implementation and hostile database verification passed. Final combined-main-baseline closeout remains pending PR #68 merge/integration; this is not production-readiness or activation approval.
 
+## Session-close addendum — 2026-09-03
+
+PR #68 repair `88e88de` is now pushed after `6d47a23`; at the closeout check it
+was open with CI still running. The nine downstream live DB gates, 236 script
+tests, standalone persistence, source lint (excluding generated CLI temp code),
+local RLS attack test, catalog check, and security advisors passed for that PR.
+See `docs/handoff/2026-09-03-session-close.md` for the current state and opener.
+
+IMPORTANT: that repair verification reset `supabase_db_sanduqkin` to the PR-only
+schema. The current database no longer includes 5M. The composite-baseline results
+below are historical evidence, not a description of its current schema. After
+PR merge, safely integrate merged main and replay the integrated branch with 5M
+before rerunning 5L/5M acceptance, concurrency, and regressions. Only after that
+passes may conditionally authorized 5N start. The existing watcher remains active
+with its already-authorized merge-and-baseline-first continuation; do not duplicate it.
+
 ## Candidate and scope
 
 - Local branch: `codex/claimant-offline-code-v2-case-binding`.

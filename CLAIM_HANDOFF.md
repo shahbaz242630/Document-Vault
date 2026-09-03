@@ -2,16 +2,19 @@
 
 Last updated: 2026-09-03 (Asia/Dubai)
 
-## Latest checkpoint — Slice 5M
+## Latest checkpoint — session close, 2026-09-03
 
-This checkpoint supersedes the older branch/PR status and next-session instructions below.
+This checkpoint and the current opener in `CLAIM_HANDOFF.md` supersede all older branch/PR snapshots and historical resume prompts below.
 
-- Slice 5M was owner-authorized and is implemented locally on `codex/claimant-offline-code-v2-case-binding`: scaffold `af2fce3`, hardened database verification checkpoint `20b0d89`. It remains literal-false and unmounted. No Slice 5M push or PR publication is authorized or performed.
-- Local Slice 5M hostile SQL/RLS and real two-session concurrency tests pass. Slice 5L database acceptance also passes with 5M applied. Workspace tests: 1,265 passed, with 3 established mobile skips; all typechecks, zero-warning lint, security/phase guards, and 78 serial script-test files pass.
-- PR #68 is separate at `6d47a23`, open with fresh CI running. This session repaired encrypted-package and signed-manifest live fixtures and unnecessary locks on append-only authorization records without widening grants. Both repaired gates pass locally.
-- The existing `watch-pr-68-checks` heartbeat is ACTIVE every ten minutes. It reports meaningful RED, merges only after required GREEN and mergeability, and deletes itself after merge. Do not create a duplicate watcher.
-- Final combined-baseline closeout remains pending PR #68 merge and safe integration of the new main baseline. The current 5M branch's older catalog checker lacks expectations already repaired in PR #68; the PR checker passes against the composite local database. Do not duplicate those repairs.
-- Evidence and exact replay instructions: `docs/verification/2026-09-03-claimant-slice-5m-offline-code-v2-case-binding.md`. Preserve `.codex-runtime/` and `.playwright-cli/` without inspecting them. All hosted, deployment, native-build, real-data, and activation prohibitions remain in force.
+- Local Slice 5M branch: `codex/claimant-offline-code-v2-case-binding`, scaffold `af2fce3`, hardening `20b0d89`, verification/handoff checkpoint `f81516d`. 5M is implemented, literal-false, unmounted, and unpushed. Preserve these checkpoints; do not rebuild completed 5I-5M work.
+- Previous 5M verification passed: hostile SQL/RLS, a genuine two-session race with one winner, 5L database acceptance, 1,265 workspace tests plus 3 established skips, all typechecks/lint/security/phase guards, and 78 serial script-test files. This is local evidence, not merged-baseline closeout.
+- PR #68 is separate on `codex/claimant-offline-code-v2-controller` in `C:\Projects\GitHub\Sandoq Kin-pr68-watch`. Repair `88e88de` was pushed after `ff40766` and `6d47a23`. It fixes complete retrieval/delivery fixtures and the persistence test's obsolete RPC signatures, and adds CI fixture regressions; it changes no production grants, migrations, or flags.
+- Last GitHub observation at session close (2026-09-03 around 11:05 Asia/Dubai): PR #68 OPEN, not merged, head `88e88de`. App security, CodeQL, ZAP, and GitGuardian passed; native and Supabase live gates were in progress. Refresh the latest head/checks before acting; this is not an all-green claim.
+- PR repair verification passed on a clean PR-only local database: all nine downstream live DB gates, 236 serial script tests, standalone persistence, RLS attacks, catalog security, and security advisors. Source lint passed excluding only generated `supabase/.temp/**`; no lint config was weakened.
+- IMPORTANT local state: `supabase_db_sanduqkin` was reset from the PR worktree for that repair. It currently has the PR-only schema, NOT the 5M migration. Docker availability must be rechecked; do not treat this database as the verified combined baseline.
+- The existing ten-minute `watch-pr-68-checks` heartbeat remains ACTIVE and unchanged. It reports meaningful failures; after required checks pass and mergeability is confirmed, it merges, confirms the result, queues one baseline-first continuation in task `01a0623a-edeb-7c03-8ab0-0262693bcffd`, then deletes itself. Check for an already queued/running continuation; do not duplicate the watcher or work.
+- Slice 5N (authenticated possession-to-case handoff) is conditionally authorized only AFTER PR #68 passes/merges AND safe integration plus clean 5L/5M acceptance/regressions pass. Bind possession to the exact authenticated claimant and active AAL2 session, short expiry, single use, safe retries, and server-derived authority. A public challenge ID alone is never authorization.
+- Full closeout and copyable opener: `docs/handoff/2026-09-03-session-close.md`. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection. No 5M/5N push/publication, hosted mutation, deployment, new native/EAS build, real claimant data, capability activation, or subagents are authorized.
 
 ## Current Owner Decision
 
@@ -30,7 +33,7 @@ It does not authorize the unsafe V1 code as a public claim locator. It also does
 
 Interim reviewer decision on 2026-08-18: Shahbaz Malik is the accountable human test reviewer and Codex is the non-human technical review assistant/test actor for synthetic local/staging and separately authorized disabled production-shaped verification. Codex may simulate a second reviewer path for hostile testing but cannot satisfy a human approval, hold production credentials, review real evidence, authorize release, or count as independent assurance. Two qualified independent human reviewers remain mandatory before real claimant data or go-live. See `docs/verification/2026-08-18-interim-reviewer-test-roles.md`.
 
-## Session Close — 2026-09-02
+## Historical Session Close — 2026-09-02 (superseded)
 
 - Slice 5L is complete locally at `03570ca` on `codex/claimant-offline-code-v2-database-acceptance`, following scaffold `4b32214` and refactor `2be9d71`. It replaces Slice 5K's final persistence double with disposable local Supabase PostgREST/RPC acceptance while retaining the actual mobile, Hono, verifier, and decoder paths.
 - The real local database run passed registration, mobile possession, committed-response retry, concurrent registration, expiry, unknown-locator limiting, anonymous RLS denial, and possession-only output. Closing evidence: 1,258 workspace tests passed with 3 established mobile skips; 236 static/security tests, 30 focused integration scenarios, 2 Slice 5L guards, all typechecks, zero-warning lint, phase/security checks, and database acceptance passed. See `docs/verification/2026-09-02-claimant-slice-5l-offline-code-v2-database-acceptance.md`.
@@ -42,7 +45,7 @@ Interim reviewer decision on 2026-08-18: Shahbaz Malik is the accountable human 
 
 > Read CLAIM_HANDOFF.md first, then HANDOFF.md, SECURITY_HANDOFF.md, MVP_HANDOFF.md, and the Slice 5L verification record. Resume `codex/claimant-offline-code-v2-database-acceptance` at `03570ca`, preserving unrelated `.codex-runtime/` and `.playwright-cli/`. First inspect the PR #68 watcher outcome. If PR #68 merged, integrate the new main baseline safely and rerun Slice 5L database acceptance from a clean disposable Supabase stack; do not duplicate its migration repairs. If it is red, inspect and fix only the failing gate. Slice 5L is otherwise complete. The recommended next bounded slice is 5M post-possession case binding, but it is not authorized or started. Keep every runtime approval false; do not deploy, mutate hosted services, build native apps, or use real claimant data without separate authorization.
 
-## Session Close — 2026-08-31
+## Historical Session Close — 2026-08-31 (superseded)
 
 - Completed Slice 5I transport/coordinator at `60a8601`, Slice 5J lifecycle composition at `5b0fcdb`, and Slice 5K mobile/API integration acceptance at `1bc43c4`. Current branch: `codex/claimant-offline-code-v2-integration-acceptance`.
 - Slice 5K adds 30 scenarios using the actual mobile crypto/transport/lifecycle, API controllers/verifier, and transaction decoder with synthetic RPC responses. Success, ambiguous response retries, cancellation, hostile input, and malformed output are covered. No production implementation changed in 5K.
@@ -55,22 +58,20 @@ Interim reviewer decision on 2026-08-18: Shahbaz Malik is the accountable human 
 
 > Read CLAIM_HANDOFF.md first, then the other three handoffs and the Slice 5K verification record. Resume branch codex/claimant-offline-code-v2-integration-acceptance at commit 1bc43c4, preserving the uncommitted handoff-only session-close updates and unrelated local directories. Slices 5I-5K are complete; do not rebuild them. Confirm the repository state, review the remaining engineering gaps, and identify the next bounded synthetic slice and its acceptance criteria. No next slice has been selected or started yet. Refresh PR #68 and verify the watcher before relying on delivery status. Keep every runtime approval false; do not push, deploy, mutate hosted services, build native apps, or use real claimant data without separate authorization.
 
-## Next Session Opener
+## Next Session Opener — current
 
-1. Read this 2026-09-02 session close first. Use `HANDOFF.md`, `SECURITY_HANDOFF.md`, `MVP_HANDOFF.md`, and the Slice 5L verification record for wider context.
-2. Resume from Slice 5L checkpoint `03570ca` on `codex/claimant-offline-code-v2-database-acceptance`. PR #68 remains separate at `18c6df6`; inspect the watcher outcome before integrating it.
-3. Preserve `.codex-runtime/` and `.playwright-cli/` exactly as unrelated untracked local state. Do not inspect, modify, delete, or stage them.
-4. PR #68 fresh checks are running at `18c6df6`; GitGuardian is green. The watcher is configured to notify on meaningful red and merge once required checks are green and the PR is mergeable. Do not manually monitor logs.
-5. The complete committed Supabase migration chain through Slice 5C is now hosted on project `pxwtexjjttpgtairpepz`. History has 44 aligned entries; 77 claimant tables all use forced RLS; client roles have zero claimant table/function authority; all 54 claimant functions are invoker-only; and the hosted rollback-only Slice 5C hostile test passed. The independent-review composite-key prerequisite and the exposed `rls_auto_enable()` execution grants were repaired. Evidence: `docs/verification/2026-08-19-hosted-claimant-migration-through-slice-5c.md`.
-6. Keep Slice 1G server, Slice 1H mobile, Slice 1I persistence, Slice 1J adapter/runtime, Slice 2A through 2J, Slice 3A through 3G, Slices 4A through 4J, and Slices 5A/5B/5C/5D/5E/5F/5G/5H/5I/5J approval immutable `false`; normal app requests remain concealed, unmounted, or runtime-disconnected.
-7. Actual production Swift methods, aliases, entitlements, direct module binding, build, and physical Apple evidence require a separate reviewed native gate; do not reuse disposable probe aliases.
-8. Inspect the PR #68 watcher result. If merged, integrate the new main baseline safely and rerun Slice 5L against a clean disposable Supabase stack; if red, fix only the failing gate. Do not rebuild completed Slices 5I-5L or duplicate the PR's replay-safe migration repair. Slice 5M post-possession case binding is recommended but remains separately gated.
-9. Keep **Phase 2 Slice 1A** parked at the paid-plan gate. Its claimant-host, eligibility, and context-bound session foundation is complete; hosted Supabase sign-in/MFA/activation/restoration/sign-out is not.
-10. Preserve the original and remediated review packages and the owner-accepted closure evidence. The review closes the design gate only; it is not launch approval.
-11. Do not deploy, enable claimant capabilities, use real claimant identities/data/documents, change provider/DNS/Auth/Apple settings, or create another mobile build without exact authorization.
-12. Do not push, open a PR, deploy, or run a hosted migration without separate authorization. Future handoff-only changes remain local until bundled with separately authorized code.
-13. The PR #68 watcher is configured to report meaningful red or merge when required checks are green and the PR is mergeable. It has no production-promotion, Supabase-mutation, scanner-suppression, or claimant-activation authority.
-14. GitGuardian flags two deterministic high-entropy values in `packages/shared-types/test-vectors/claim/offline-code-v2.json`. The vector generator and isolation guards confirm synthetic-only, production-false custody. Repository-local ignore configuration does not clear the GitGuardian GitHub integration; the owner must mark the two dashboard findings false positive. Do not rewrite PR history, expose the values, exclude the vector path, or weaken the scanner.
+1. Read the latest checkpoint, all four handoffs, `docs/handoff/2026-09-03-session-close.md`, and the 5M verification record. Historical resume prompts are not current instructions.
+2. Inspect Git status on `codex/claimant-offline-code-v2-case-binding`; retain `af2fce3`, `20b0d89`, `f81516d`, and the latest local handoff commit. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection, modification, deletion, or staging.
+3. Refresh PR #68's actual head, checks, and merge result. Inspect whether the watcher already queued or ran its baseline-first continuation. Do not duplicate the watcher or implementation.
+4. If pending, wait. If failed, diagnose the specific gate and keep 5N paused; use only existing in-scope repair authority and request direction for any expansion. Do not suppress checks, rerun jobs blindly, or assume merge.
+5. After confirmed required GREEN and merge, safely integrate merged main into local 5M. Preserve local work and include the PR repairs instead of copying them independently. Reset only the disposable local stack from the integrated branch and rerun clean 5L/5M SQL/RLS, genuine concurrency, end-to-end database acceptance, and regression/security checks. The current local database is PR-only and lacks 5M.
+6. Only after that passes, proceed with conditionally authorized 5N: exact authenticated claimant/active AAL2-session binding of verified possession, short expiry, single use, safe retries, cross-account/replay rejection, server-derived 5M authority, and possession-to-handoff-to-draft-case tests. A public challenge ID alone is not authority.
+7. Keep all claimant approvals literal-false. No 5M/5N push/publication, hosted changes, deployment, new native/EAS build, real data, activation, provider changes, or subagents. Hosted MFA and native/independent launch gates remain parked; possession does not verify identity or authorize release.
+8. Closing the session does not cancel the watcher's existing merge-and-resume authorization. Its continuation may run before the next manual session; inspect state before repeating work. The earlier exposed-token rotation follow-up remains unconfirmed; never retrieve or reproduce the token.
+
+### Copyable next-session prompt — current
+
+> Partner, read CLAIM_HANDOFF.md first, then the other three handoffs and docs/handoff/2026-09-03-session-close.md. Resume the local Slice 5M case-binding branch, preserving all checkpoints and unrelated runtime/browser directories without inspecting them. Check PR #68 and the watcher outcome, including whether its continuation already ran. If still pending, wait; if red, diagnose only the failed gate and do not start 5N. After confirmed green and merge, safely integrate merged main and rerun clean local 5L/5M acceptance and regressions. Only once that passes, continue the conditionally authorized Slice 5N authenticated possession-to-case handoff. Keep everything synthetic, literal-false, local, and undeployed; do not push/publish 5M/5N, mutate hosted services, build native/EAS apps, use real claimant data, or spawn subagents.
 
 ### Phase 2 Slice 1A Exit Gate
 
