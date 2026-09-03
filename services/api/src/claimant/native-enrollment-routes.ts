@@ -71,6 +71,7 @@ const possessionSchema = z.strictObject({ challenge_id: uuid, claimant_id: uuid,
   public_key_fingerprint: base64Url32 });
 const completeNativeSchema = z.strictObject({ app_attest_challenge_id: uuid,
   app_attest_response: assertionResponseSchema, possession_proof: possessionSchema });
+const reconcileNativeSchema = z.strictObject({ app_attest_challenge_id: uuid, native_challenge_id: uuid });
 
 export type NativeEnrollmentRouteConfigV1 = RegisteredRecipientSupabaseConfig & Readonly<{
   addressIndexKey: Uint8Array;
@@ -100,7 +101,7 @@ type NativeRouteDeps = Readonly<{
 }>;
 
 export type NativeEnrollmentRouteAction =
-  | "registrationIssue" | "registrationComplete" | "nativeIssue" | "nativeComplete";
+  | "registrationIssue" | "registrationComplete" | "nativeIssue" | "nativeComplete" | "reconcile";
 
 export function createNativeEnrollmentRouteV1(action: NativeEnrollmentRouteAction, deps: NativeRouteDeps = {}) {
   return async (context: Context): Promise<Response> => {
@@ -113,10 +114,12 @@ export function createNativeEnrollmentRouteV1(action: NativeEnrollmentRouteActio
       const session = await prepared.authority.getConfirmedSession(prepared.jwt);
       requireFreshClaimantAssurance(session, Math.floor((deps.now?.() ?? new Date()).getTime() / 1000), prepared.config.freshAssuranceSeconds);
       const rateAction = ({ registrationIssue: "registration_issue", registrationComplete: "registration_complete",
-        nativeIssue: "native_issue", nativeComplete: "native_complete" } as const)[action];
+        nativeIssue: "native_issue", nativeComplete: "native_complete", reconcile: "native_reconcile" } as const)[action];
       await prepared.authority.takeRateLimit({ action: rateAction,
         claimantUserId: session.userId, portalSessionId: session.sessionId });
-      return action === "registrationIssue"
+      return action === "reconcile"
+        ? reconcileNative(context, body.value, session, prepared)
+        : action === "registrationIssue"
         ? issueRegistration(context, body.value, session, prepared, deps)
         : action === "registrationComplete"
           ? completeRegistration(context, body.value, session, prepared, deps)
@@ -125,6 +128,18 @@ export function createNativeEnrollmentRouteV1(action: NativeEnrollmentRouteActio
             : completeNative(context, body.value, session, prepared, deps);
     } catch (error) { return routeError(context, error); }
   };
+}
+
+async function reconcileNative(context: Context, body: unknown, session: Session, prepared: Prepared) {
+  const parsed = reconcileNativeSchema.safeParse(body); if (!parsed.success) return invalid(context);
+  const attemptId = uuid.safeParse(context.req.param("attemptId"));
+  if (!attemptId.success || attemptId.data !== prepared.idempotencyKey) return invalid(context);
+  const result = await prepared.transactions.reconcileNativeEnrollment({
+    appAttestChallengeId: parsed.data.app_attest_challenge_id, attemptId: attemptId.data,
+    claimantUserId: session.userId, nativeChallengeId: parsed.data.native_challenge_id,
+    portalSessionId: session.sessionId,
+  });
+  return context.json({ result }, 200);
 }
 
 export function createNativeEnrollmentPreflightRouteV1(deps: NativeRouteDeps = {}) {

@@ -2,6 +2,7 @@ export const claimantPortalCapabilities = {
   adminCaseNotification: false,
   authentication: false,
   claimIntake: false,
+  dashboard: false,
   emergencyCodeEntry: false,
   evidenceUpload: false,
   localClaimantDecryption: false,

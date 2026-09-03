@@ -31,6 +31,19 @@ describe("native enrollment transaction client", () => {
     expect(rpc.mock.calls[0]![1]).not.toHaveProperty("p_assertion_object");
   });
 
+  it("maps server-authoritative reconciliation without accepting extra fields", async () => {
+    const rpc = vi.fn(async () => ({ data: { status: "not_committed" }, error: null }));
+    const client = createNativeEnrollmentTransactionClientV1(rpc);
+    await expect(client.reconcileNativeEnrollment({ appAttestChallengeId: ids.app,
+      attemptId: ids.idempotency, claimantUserId: ids.claimant,
+      nativeChallengeId: ids.native, portalSessionId: ids.portal })).resolves.toEqual({ status: "not_committed" });
+    expect(rpc).toHaveBeenCalledWith("claimant_reconcile_native_enrollment", {
+      p_app_attest_challenge_id: ids.app, p_attempt_id: ids.idempotency,
+      p_claimant_user_id: ids.claimant, p_native_challenge_id: ids.native,
+      p_portal_session_id: ids.portal,
+    });
+  });
+
   it("strictly parses stored evidence and redacts RPC failures", async () => {
     const valid = { app_attest_challenge_bytes_base64url: "A".repeat(22),
       app_attest_challenge_bytes_digest: "A".repeat(43), app_attest_challenge_id: ids.app,

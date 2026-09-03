@@ -26,6 +26,14 @@ import {
   createNativeEnrollmentPreflightRouteV1,
   createNativeEnrollmentRouteV1,
 } from "./claimant/native-enrollment-routes.js";
+import { createClaimantUploadControllerV1, createClaimantUploadPreflightControllerV1 }
+  from "./claimant/claimant-upload-controller.js";
+import { createClaimSubmissionControllerV1, createClaimSubmissionPreflightControllerV1 }
+  from "./claimant/claim-submission-controller.js";
+import { createOwnerProtectionControllerV1, createOwnerProtectionPreflightControllerV1 }
+  from "./claimant/owner-protection-controller.js";
+import { createOfflineCodeV2Controller, createOfflineCodeV2PreflightController }
+  from "./claimant/offline-code-v2-controller.js";
 import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
 
 export const app = new Hono();
@@ -117,7 +125,36 @@ for (const [path, action] of [
   ["/claimant/native-enrollment/app-attest/registration/challenges/:challengeId/complete", "registrationComplete"],
   ["/claimant/native-enrollment/challenges", "nativeIssue"],
   ["/claimant/native-enrollment/challenges/:nativeChallengeId/complete", "nativeComplete"],
+  ["/claimant/native-enrollment/attempts/:attemptId/reconcile", "reconcile"],
 ] as const) {
   app.post(path, createNativeEnrollmentRouteV1(action, { runtimeConfig: claimantRuntimeConfig }));
   app.options(path, createNativeEnrollmentPreflightRouteV1({ runtimeConfig: claimantRuntimeConfig }));
+}
+for (const [path, action] of [
+  ["/claimant/offline-code/v2/challenges", "issueChallenge"],
+  ["/claimant/offline-code/v2/challenges/:challengeId/proofs", "verifyProof"],
+] as const) {
+  app.post(path, createOfflineCodeV2Controller(action, { runtimeConfig: claimantRuntimeConfig }));
+  app.options(path, createOfflineCodeV2PreflightController({ runtimeConfig: claimantRuntimeConfig }));
+}
+
+for (const [path, action, method] of [
+  ["/claimant/evidence/cases/:caseId/upload-capabilities", "issue", "post"],
+  ["/claimant/evidence/cases/:caseId/objects/:objectId", "upload", "put"],
+  ["/claimant/evidence/cases/:caseId/objects/:objectId/reconcile", "reconcile", "post"],
+] as const) {
+  app[method](path, createClaimantUploadControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
+  app.options(path, createClaimantUploadPreflightControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
+}
+const claimSubmissionPath = "/claimant/cases/:caseId/submissions";
+app.post(claimSubmissionPath, createClaimSubmissionControllerV1({ runtimeConfig: claimantRuntimeConfig }));
+app.options(claimSubmissionPath,
+  createClaimSubmissionPreflightControllerV1({ runtimeConfig: claimantRuntimeConfig }));
+for (const [path, action] of [
+  ["/owner/cases/:caseId/protection/cancel", "ownerCancel"],
+  ["/claimant/cases/:caseId/protection/dispute", "claimantDispute"],
+] as const) {
+  app.post(path, createOwnerProtectionControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
+  app.options(path,
+    createOwnerProtectionPreflightControllerV1(action, { runtimeConfig: claimantRuntimeConfig }));
 }

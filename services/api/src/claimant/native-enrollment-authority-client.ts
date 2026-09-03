@@ -7,7 +7,7 @@ export type ConfirmedClaimantSessionV1 = ClaimantApiSession & Readonly<{
   confirmedAddress: string;
 }>;
 export type NativeEnrollmentRateActionV1 =
-  | "registration_issue" | "registration_complete" | "native_issue" | "native_complete";
+  | "registration_issue" | "registration_complete" | "native_issue" | "native_complete" | "native_reconcile";
 
 export type NativeEnrollmentAuthorityClientV1 = Readonly<{
   getAuthority: (input: Readonly<{

@@ -33,6 +33,10 @@ export type NativeEnrollmentTransactionClientV1 = Readonly<{
   issueRegistrationChallenge: (input: Readonly<{
     claimantUserId: string; idempotencyKey: string; material: RegistrationMaterial; portalSessionId: string;
   }>) => Promise<Readonly<{ challengeId: string; expiresAt: string; replayed: boolean }>>;
+  reconcileNativeEnrollment: (input: Readonly<{
+    appAttestChallengeId: string; attemptId: string; claimantUserId: string;
+    nativeChallengeId: string; portalSessionId: string;
+  }>) => Promise<NativeEnrollmentReconciliationResultV1>;
 }>;
 
 export type ChallengeIssueResultV1 = Readonly<{
@@ -42,6 +46,9 @@ export type NativeAcceptanceResultV1 = Readonly<{
   assertionCounter: number; caseId: string; caseVersion: number; claimantKeyId: string;
   invitationId: string; invitationVersion: number; replayed: boolean;
 }>;
+export type NativeEnrollmentReconciliationResultV1 =
+  | Readonly<{ status: "committed"; result: NativeAcceptanceResultV1 }>
+  | Readonly<{ status: "not_committed" | "unknown" }>;
 
 export class NativeEnrollmentTransactionError extends Error {
   readonly code: string | undefined;
@@ -142,7 +149,19 @@ export function createNativeEnrollmentTransactionClientV1(rpc: Rpc): NativeEnrol
         p_required_validation_category: challenge.required_validation_category,
       }));
     },
+    reconcileNativeEnrollment: (input) => reconcileNativeEnrollment(rpc, input),
   };
+}
+
+async function reconcileNativeEnrollment(rpc: Rpc, input: Readonly<{
+  appAttestChallengeId: string; attemptId: string; claimantUserId: string;
+  nativeChallengeId: string; portalSessionId: string;
+}>): Promise<NativeEnrollmentReconciliationResultV1> {
+  return readNativeReconciliation(await rpc("claimant_reconcile_native_enrollment", {
+    p_app_attest_challenge_id: input.appAttestChallengeId, p_attempt_id: input.attemptId,
+    p_claimant_user_id: input.claimantUserId, p_native_challenge_id: input.nativeChallengeId,
+    p_portal_session_id: input.portalSessionId,
+  }));
 }
 
 export function createNativeEnrollmentSupabaseTransactionClientV1(config: Readonly<{
@@ -171,6 +190,11 @@ const nativeEvidenceSchema = z.strictObject({
 const nativeAcceptanceSchema = z.strictObject({ assertion_counter: z.number().int(), case_id: z.string().uuid(),
   case_version: z.number().int(), claimant_key_id: z.string().uuid(), invitation_id: z.string().uuid(),
   invitation_version: z.number().int(), replayed: z.boolean() });
+const nativeReconciliationSchema = z.discriminatedUnion("status", [
+  z.strictObject({ status: z.literal("committed"), result: nativeAcceptanceSchema }),
+  z.strictObject({ status: z.literal("not_committed") }),
+  z.strictObject({ status: z.literal("unknown") }),
+]);
 
 function parse<T>(result: Readonly<{ data: unknown; error: Readonly<{ code?: string }> | null }>, schema: z.ZodType<T>): T {
   if (result.error) throw new NativeEnrollmentTransactionError(result.error.code);
@@ -194,3 +218,13 @@ function readNativeAcceptance(result: Awaited<RpcResult>): NativeAcceptanceResul
   claimantKeyId: value.claimant_key_id, invitationId: value.invitation_id,
   invitationVersion: value.invitation_version, replayed: value.replayed,
 }; }
+function readNativeReconciliation(result: Awaited<RpcResult>): NativeEnrollmentReconciliationResultV1 {
+  const value = parse(result, nativeReconciliationSchema);
+  if (value.status !== "committed") return value;
+  return { status: "committed", result: {
+    assertionCounter: value.result.assertion_counter, caseId: value.result.case_id,
+    caseVersion: value.result.case_version, claimantKeyId: value.result.claimant_key_id,
+    invitationId: value.result.invitation_id, invitationVersion: value.result.invitation_version,
+    replayed: value.result.replayed,
+  } };
+}

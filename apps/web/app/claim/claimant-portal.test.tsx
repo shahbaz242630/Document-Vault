@@ -27,6 +27,7 @@ describe("inactive claimant portal foundation", () => {
       adminCaseNotification: false,
       authentication: false,
       claimIntake: false,
+      dashboard: false,
       emergencyCodeEntry: false,
       evidenceUpload: false,
       localClaimantDecryption: false,

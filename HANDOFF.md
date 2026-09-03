@@ -1,6 +1,6 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-08-12 (Asia/Dubai)
+Last updated: 2026-08-30 (Asia/Dubai)
 
 ## Current Decision
 
@@ -8,8 +8,10 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Repository Snapshot
 
+- Active branch: `codex/claimant-offline-code-v2-controller`; Slice 5E is code-complete locally on top of Slice 5D checkpoint `49d892a`, hosted-migrated Slice 5C `81e1fca`, and the earlier claimant checkpoints.
+- PR #65 merged the owner-accepted native-enrollment review closure/remediation, hard-disabled Slices 1D-1H, Expo/dependency alignment, the bounded `image-size` security patch/exception, and Android smoke stabilization. It made no claimant deployment, hosted migration, TestFlight action, or production activation.
 - Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
-- Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Current `main`/`origin/main` include that source and PR #54 as ancestors and point at PR #59 merge commit `887abd0459197c5123b8972e1b8c5bed14ec5528`.
+- Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Local `main` remains at PR #59 merge `887abd0459197c5123b8972e1b8c5bed14ec5528`; local-tracking `origin/main` is PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`. The active claimant branch contains the later local Slice 1I-4J checkpoints through `49ee8a8` and has not been pushed in this session.
 - PR #52 merged the claimant Slice 2 review package and divorce-certificate correction; PR #53 merged the biometric Settings repair.
 - Preserve unrelated local-only items such as `.codex-runtime/`.
 
@@ -38,6 +40,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 - Synthetic Slices 1-17 and the end-to-end acceptance suite are complete locally. All seven synthetic preview surfaces remain read-only, non-indexed, runtime-disconnected, and based only on deterministic fixtures.
 - Product-owner direction now authorizes production-shaped claimant engineering with synthetic data, hard-disabled external capabilities, and no deployment. Legal/privacy, security, operations, native custody, and independent approvals remain launch gates.
 - Shahbaz Malik is the provisionally designated operator/data controller candidate. Incorporation, legal confirmation, controller contact details, and the processor map remain incomplete, so no real claimant data may be collected.
+- For interim synthetic engineering, Shahbaz Malik is the accountable human test reviewer and Codex is a non-human technical review assistant/test actor. Codex may simulate distinct reviewer paths but cannot hold production credentials, approve a real claim, count as a human/independent reviewer, or authorize release. At least two qualified independent human reviewers remain a pre-live gate; see `docs/verification/2026-08-18-interim-reviewer-test-roles.md`.
 - `CLAIM_HANDOFF.md` is authoritative for claimant engineering scope, implementation order, production-readiness definition, and launch stop gates.
 - PR #54 did not build the production integration. The new owner decision authorizes that engineering backlog in small reviewed code slices; it does not authorize external activation.
 - The current code-readiness audit is `docs/superpowers/specs/2026-08-04-claimant-code-readiness-gap-matrix.md`. Phase 0 Slice 1 implements the canonical API's disabled-by-default runtime control plane and startup validation; it mounts no claimant route and changes no external state.
@@ -58,6 +61,42 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 - Slice 1F native-enrollment challenge/acceptance code is complete locally, unmounted, and default-deny. It adds canonical single-use challenge state, encrypted context-bound server ephemeral-key custody, native ECDH/HKDF/HMAC verification, exact stored-transcript orchestration, and one atomic invitation/key/case/App-Attest-counter/audit/outbox transaction with hostile rollback/replay tests. No HTTP route or hosted change exists. See `docs/verification/2026-08-12-claimant-slice-1f-native-enrollment-transaction.md`.
 - Slice 1G native-enrollment controller code is complete locally and mounted but concealed by an immutable compile-time approval set to `false`. Its enabled path derives all identity/address/eligibility/invitation/App-Attest/device/policy/configuration authority server-side, requires fresh AAL2 and strict HTTP boundaries, applies forced-RLS per-account throttling, and calls only Slice 1E/1F. Disabled requests return `404` before configuration/CORS. No hosted or external change exists. See `docs/verification/2026-08-12-claimant-slice-1g-native-enrollment-controller.md`.
 - Slice 1H mobile transport/coordinator code is complete locally, immutable-false, and runtime-disconnected. It validates canonical server transcripts/cross-bindings, sends no client authority, orchestrates only injected production-shaped adapters, cleans up keys before finalization failure, and preserves keys for reconciliation after ambiguous final commit. Disposable probe aliases remain isolated. See `docs/verification/2026-08-12-claimant-slice-1h-mobile-enrollment-coordinator.md`.
+- Slice 1I encrypted enrollment-attempt persistence and server-authoritative reconciliation are code-complete locally and remain immutable-false/runtime-disconnected. The bounded XChaCha20-Poly1305 record retains only exact identifiers/digests and a key alias; final recovery serializes against acceptance before any key deletion. Tamper, cross-account, expiry, cancellation, replay, race, and role-denial coverage pass. See `docs/verification/2026-08-12-claimant-slice-1i-enrollment-attempt-reconciliation.md`.
+- Slice 1J adds a hard-disabled, runtime-disconnected production-shaped native adapter contract and lifecycle composition root. It keeps probe APIs/aliases isolated, validates exact App Attest/custody output, computes canonical request digests, prevents concurrent enrollment, and reconciles ambiguous finalization before session teardown can delete custody. Actual production Swift methods, entitlements, direct native binding, and Apple evidence remain separate gates. See `docs/verification/2026-08-12-claimant-slice-1j-native-lifecycle-adapters.md`.
+- Slice 2A adds an unmounted, immutable-false claim-intake/checklist service with forced-RLS service-only persistence and an atomic idempotent `draft` to `identity_pending` transition. It binds the active claimant portal session, identity, case key, case version, claimant, and synthetic policy version, and stores only bounded routing facts plus server-selected checklist rows. No route, binary upload, document metadata, hosted migration, or external behavior exists. See `docs/verification/2026-08-12-claimant-slice-2a-intake-checklist-foundation.md`.
+- Slice 2B adds an unmounted, immutable-false evidence-preparation boundary. Append-only metadata revisions are bound to the active claimant portal session, identity, key, case/checklist, policy, and intake version. Only synthetic placeholder references, media type, size, claimed preparation time, or unavailable declarations persist; prepared metadata leaves checklist availability `pending`, does not transition the case, and cannot claim upload, receipt, scanning, or review readiness. See `docs/verification/2026-08-12-claimant-slice-2b-evidence-preparation-metadata.md`.
+- Slice 2C adds an unmounted, immutable-false private evidence-quarantine foundation. It defines a private bounded bucket with deny-all client Storage policies, server-keyed replay-stable five-minute upload capabilities, strict inspection/scanner contracts, service-only lifecycle persistence, legal-hold-aware retention, and storage-before-confirmation deletion. It does not mount an upload route, stream bytes, select a provider, or deploy Storage/migrations. See `docs/verification/2026-08-12-claimant-slice-2c-private-quarantine-foundation.md`.
+- Slice 2D adds an unmounted, immutable-false streaming upload/reconciliation processor. It bounds chunks/total bytes/time, hashes while streaming, requires exact inspection, persists quarantine before scanning, records scanner outages fail closed, preserves committed objects after ambiguous responses, and atomically revokes unconsumed capabilities before orphan deletion. Storage, inspector, and scanner remain injected interfaces. See `docs/verification/2026-08-12-claimant-slice-2d-upload-processor.md`.
+- Slice 2E mounts three upload-control paths behind an immutable-false concealment gate. The enabled test path enforces exact API/portal origins, fresh AAL2, active portal context, strict operation-specific CORS and headers, mandatory bounded content length, server-derived processor/idempotency authority, database preflight, bounded claimant-case concurrency, and generic failures. Exact-fixture synthetic adapters are disabled and never wired by the API entrypoint. See `docs/verification/2026-08-12-claimant-slice-2e-upload-controller.md`.
+- Slice 2F adds an immutable-false, runtime-disconnected web upload coordinator using injected transport and synthetic prepared bytes only. It binds exact metadata, validates capabilities/progress/results, reconciles ambiguous completion, retains only memory-scoped pending authority, and is statically isolated from network, persistence, file, provider, and normal runtime wiring. See `docs/verification/2026-08-12-claimant-slice-2f-upload-client-coordinator.md`.
+- Slice 2G adds an immutable-false, runtime-disconnected dashboard read-model coordinator. Injected responses must be exact coherent safe-projection triplets bound to one case/version; private fields, future/precise dates, stale rollback, same-version divergence, and cross-case substitution fail closed. Accepted state is memory-only and deeply frozen. See `docs/verification/2026-08-12-claimant-slice-2g-dashboard-read-model-coordinator.md`.
+- Slice 2H adds a hard-disabled, unmounted submission/safe-acknowledgement transaction. It reasserts server-owned portal, current-key, case/intake/latest-preparation, checklist, consumed capability, and clean evidence-object authority before atomically advancing only to `submitted` and writing an append-only safe receipt, value-free audit/outbox records, and idempotency result. Review and release remain false. See `docs/verification/2026-08-12-claimant-slice-2h-submission-acknowledgement-transaction.md`.
+- Slice 2I mounts that transaction behind an independent immutable-false controller. It conceals disabled requests before configuration/CORS and, in test-only enabled operation, requires exact HTTPS API/claimant origins, JSON and bounded body, UUIDv4 route/idempotency binding, bearer-derived fresh AAL2 without recovery, an active claimant portal session, and bounded claimant-case concurrency. Only the safe acknowledgement is returned; failures remain generic and notifications stay disconnected. See `docs/verification/2026-08-12-claimant-slice-2i-submission-controller.md`.
+- Slice 2J adds an immutable-false, runtime-disconnected web submission coordinator. It strictly validates the synthetic request and safe acknowledgement, owns one stable UUIDv4 attempt key, serializes work, keeps ambiguous or aborted dispatches only in memory for exact-key retry, retains no successful acknowledgement, and is statically isolated from normal runtime, direct networking, browser persistence, providers, notifications, and private/internal fields. See `docs/verification/2026-08-18-claimant-slice-2j-web-submission-coordinator.md`.
+- Slice 3A adds an immutable-false, unmounted owner-protection persistence/transaction foundation. Verified delivery alone starts a configurable cooldown; delivery uncertainty, dispute, material change, conflicting authority, and owner cancellation stop progress without review or release authority. The service-only functions use forced RLS, value-free events, strict idempotency, and exact case/cycle/version binding. Hosted verification passed inside a rollback-only transaction and left production unchanged. See `docs/verification/2026-08-18-claimant-slice-3a-owner-protection-foundation.md`.
+- Slice 3B adds an immutable-false, unmounted owner-notice delivery coordinator with injected queue/provider contracts. First attempts dispatch only an opaque reference and stable key; retries use lookup only. Verified lookup alone creates delivery evidence, while failed/unknown/malformed lookup fails closed through Slice 3A. Persistence ambiguity replays the same key without redispatch. See `docs/verification/2026-08-18-claimant-slice-3b-owner-notice-delivery-coordinator.md`.
+- Slice 3C adds a forced-RLS, service-only owner-notice delivery queue. It atomically persists stable keys before contact, leases one eligible outbox row, reclaims only expired leases without redispatch authority, and completes only after independently matching the exact Slice 3A protection result. Hosted rollback verification passed and left production unchanged. See `docs/verification/2026-08-18-claimant-slice-3c-owner-notice-delivery-queue.md`.
+- Slice 3D mounts independently concealed owner-cancellation and claimant-dispute controllers. Each route constructs only its own session authority, derives the actor from verified claims, requires fresh AAL2 and active role context, supplies a fixed server-side reason, and returns only immutable non-review/non-release state. All approvals remain false; hosted Supabase and external runtime are unchanged. See `docs/verification/2026-08-18-claimant-slice-3d-owner-protection-controller.md`.
+- Slice 3E adds an immutable-false, unmounted reviewer assignment/conflict/recusal foundation. Four forced-RLS tables and three service-only security-invoker transactions enforce separate synthetic reviewer identities, exact case/cycle/cooldown binding, two distinct active slots, owner/claimant related-party denial, append-only value-free events, locking, idempotency, stale-version checks, and safe reassignment. It adds no decision, approval count, release predicate, UI, or evidence access. See `docs/verification/2026-08-18-claimant-slice-3e-reviewer-assignment-foundation.md`.
+- Slice 3F adds an immutable-false, unmounted independent-review foundation. Two append-only decisions must come from distinct current assignments and bind exact case/cycle/submission/intake/preparation/policy/checklist/clean-evidence versions. The second decision revalidates the first assignment and reviewer identity before producing only a blind aggregate. Two allows satisfy review approval but never update the case or authorize release. See `docs/verification/2026-08-18-claimant-slice-3f-independent-review-foundation.md`.
+- Slice 3G adds an immutable-false, unmounted escalation/appeal foundation. Separate synthetic resolution authorities cannot overlap the owner, claimant, or reviewer identities. A locked, idempotent intervention atomically forces the review round to `held`, invalidates any two-person approval, preserves case cooldown, and keeps release false; appeal is limited to rejected or held rounds. See `docs/verification/2026-08-18-claimant-slice-3g-review-escalation-appeal-foundation.md`.
+- Slice 4A adds an immutable-false, unmounted final release-authorization foundation. A distinct synthetic authorizer must revalidate current owner finalization, expired cooldown, exact two-allow review authority, no intervention, current policy/submission versions, and at least two active claimant keys with exactly matching recipient grants. The transaction advances only `cooldown` to `approved`; package creation and retrieval remain false. See `docs/verification/2026-08-18-claimant-slice-4a-release-authorization-foundation.md`.
+- Slice 4B adds an immutable-false, unmounted encrypted-package preparation foundation. One locked service-only transaction revalidates the exact approved case, current final authorization, expired protection cycle, two-person round, synthetic authority, no intervention, every current claimant recipient grant/key version, and each selected active owner vault envelope. It persists an immutable unsigned 72-hour snapshot containing only existing ciphertext/nonce envelopes plus digests and authority bindings; the server never encrypts or decrypts. The case remains `approved`, while manifest signing and retrieval remain false. See `docs/verification/2026-08-18-claimant-slice-4b-encrypted-package-foundation.md`.
+- Slice 4C adds an immutable-false, unmounted signed-manifest/package-finalization foundation. A separate synthetic non-live signing authority and versioned Ed25519 public key verify one frozen canonical `release-package:v1` manifest per current package grant. A locked service-only transaction rechecks the exact immutable 4B snapshot, authorization, package expiry, ordered ciphertext digests, all current grants/keys, signing authority/key, and absence of intervention before advancing only `approved` to `release_ready`. Retrieval remains false. See `docs/verification/2026-08-18-claimant-slice-4c-signed-manifest-foundation.md`.
+- Slice 4D adds an immutable-false, unmounted retrieval-session authorization foundation. Verified Supabase identity/session claims and the existing fresh-AAL2 policy derive the claimant and authentication timestamp server-side. A locked service-only transaction requires the exact active claimant portal context and binds a maximum-15-minute `authorized_unserved` record to the current release-ready finalization, signed manifest, grant, and active key version. The case remains `release_ready`; package serving and retrieval completion remain false. See `docs/verification/2026-08-18-claimant-slice-4d-retrieval-session-foundation.md`.
+- Slice 4E adds an immutable-false, unmounted encrypted-package delivery transaction/coordinator. Preparation consumes and revalidates one exact live Slice 4D authorization and returns only the frozen ciphertext envelopes, claimant-addressed encrypted grant, and signed manifest under an exact digest/byte/lease binding. Lookup is the sole complete-delivery authority and replay never redispatches. Only the first verified receipt records `package_served` and advances `release_ready` to `released`; retrieval completion stays false. See `docs/verification/2026-08-18-claimant-slice-4e-encrypted-package-delivery.md`.
+- Slice 4F adds an immutable-false, runtime-disconnected mobile native-package open coordinator and adapter contract. It cross-binds the exact served ciphertext payload, canonical signed manifest, trusted Ed25519 key, case/package/session, grant, recipient key/version, ordered ciphertext digests and expiry before delegating verification/decryption to one injected native-shaped operation. JavaScript receives only an opaque local-open reference and value-free counts; export and server retrieval completion stay false. See `docs/verification/2026-08-18-claimant-slice-4f-native-package-open.md`.
+- Slice 4G adds an immutable-false, unmounted verified retrieval-completion foundation. One locked service-only transaction consumes the exact served delivery plus a separately verified claimant-device/App-Attest native-open proof, advances the App Attest counter, and atomically records only retrieval completion with stable replay. The case remains released; export and closure remain false. See `docs/verification/2026-08-18-claimant-slice-4g-retrieval-completion.md`.
+- Slice 4H adds an immutable-false, unmounted retrieval suspension/expiry foundation. One locked service-only transaction serializes against authorization, delivery and completion, then ends every future serving/retrieval authority while preserving whether a package was already served or opened. Served/completed states are explicitly unrecalled; local deletion, export and closure are never claimed. See `docs/verification/2026-08-18-claimant-slice-4h-retrieval-suspension-expiry.md`.
+- Slice 4I adds a hard-disabled, runtime-disconnected native local-export coordinator and adapter contract. It requires exact active completed-open authority, explicit claimant intent, fresh native device-owner presence and confirmation, strict expiry/timing/cross-object bindings, and returns only an opaque value-free local-copy receipt. JavaScript/server plaintext, upload and closure remain false. See `docs/verification/2026-08-18-claimant-slice-4i-native-local-export.md`.
+- Slice 4J adds an immutable-false, unmounted retrieval-lifecycle closure foundation. One service-only locked transaction requires exact served/opened completion authority and optional all-or-none separately verified export evidence, then appends administrative closure without rewriting case, delivery, session, completion, access-control, or local state. Historical facts remain preserved; local recall and deletion remain false. See `docs/verification/2026-08-18-claimant-slice-4j-retrieval-lifecycle-closure.md`.
+- Slice 5A adds a hard-disabled, runtime-disconnected safe V2 offline-code shared protocol. It splits a non-secret checksummed locator from a 192-bit client-held secret, pins a synthetic-only KDF profile, domain-separates and binds proof/wrap derivations, fixes possession-only authority, rejects V1/malformed/weak/substituted inputs, and adds reproducible hostile vectors plus CI runtime-isolation enforcement. See `docs/verification/2026-08-19-claimant-slice-5a-offline-code-v2-protocol-foundation.md`.
+- Slice 5B adds default-deny, service-only V2 locator/challenge persistence with keyed indexing, exact five-minute challenges, append-only proof facts, five-failure/fifteen-minute lockout, stable replay, expiry/revocation, and value-free events. It stores no complete emergency secret or private/decryption material; proof establishes route possession only. The boundary remains literal-false and unmounted. See `docs/verification/2026-08-19-claimant-slice-5b-offline-code-v2-persistence.md`.
+- Slice 5C adds a literal-false enumeration-resistant challenge coordinator. It derives keyed boundary digests, consumes global/network/device/locator budgets before lookup, returns identical challenge/KDF schemas and replay semantics for active and unavailable records, and persists only real active-record challenges. It is reachable only through the immutable-false Slice 5E controller. See `docs/verification/2026-08-19-claimant-slice-5c-offline-code-v2-challenge-coordinator.md`.
+- Slice 5D adds a literal-false proof-verification/attempt coordinator. It verifies the exact frozen Ed25519 transcript, cross-binds every proof field to canonical challenge bytes, records only bounded public proof facts through Slice 5B, returns one rejection for invalid real and unavailable synthetic challenges, and asserts possession-only authority on success. It is reachable only through the immutable-false Slice 5E controller. See `docs/verification/2026-08-30-claimant-slice-5d-offline-code-v2-proof-attempt-coordinator.md`.
+- Slice 5E mounts strict challenge/proof HTTP paths behind a separate literal-false concealment gate. The enabled synthetic path requires exact origins/CORS/media/idempotency/body/path bindings, rejects Auth/Cookie identity input, derives domain-separated HMAC boundary digests only from an injected trusted-edge adapter, and fails before persistence when that adapter is absent. See `docs/verification/2026-08-30-claimant-slice-5e-offline-code-v2-controller.md`.
+- Hosted Supabase project `pxwtexjjttpgtairpepz` now contains the full 44-migration repository chain through Slice 5C. Hosted catalog and rollback tests prove forced RLS and zero client authority across 77 claimant tables and 54 claimant functions. One missing composite-key prerequisite was repaired, migration history was reconciled exactly, and direct execution of `rls_auto_enable()` was revoked. See `docs/verification/2026-08-19-hosted-claimant-migration-through-slice-5c.md`.
+- The 2026-08-12 Vercel workspace-package failure is resolved. `@vault/shared-types` now emits a bundled Node runtime entry during install, keeps source type/React Native resolution, and has a Vercel function guard that verifies the manifest, runtime file, and actual import. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated `/health`, claimant concealment, hostile-origin, existing authorization, unknown-route, and zero-exception log checks. Production remains intentionally on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; no promotion occurred.
 - The original review packet/ZIP remain preserved as historical evidence. The authenticated review and owner closure are recorded in `docs/verification/2026-08-12-native-enrollment-adversarial-pre-review.md` and `docs/verification/2026-08-12-native-enrollment-review-closure.md`; the remediated snapshot has a refreshed manifest/package.
 - The hard-disabled iOS probe now compiles against the frozen transcript through a `probe-only.v3` Secure Enclave harness, strict public output validation, cleanup/fingerprint-continuity tests, and a separately isolated internal probe app. EAS Build 1 compiled successfully, and Shahbaz Malik reported the complete physical-iPhone authenticated pass, cancellation/cleanup, and retry matrix passed. Normal application runtime still has no probe import; see `docs/verification/2026-08-04-physical-iphone-custody-probe-build.md`.
 - A separate value-free physical evidence coordinator is complete with exact non-production iOS/operator/passcode/capture preconditions, generic-only reports, native-error redaction, and no application entry point. It does not itself run on an iPhone; see `docs/verification/2026-08-04-physical-iphone-evidence-runner.md`.
@@ -74,12 +113,14 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Next Actions
 
-1. Treat Phase 0 Slice 1 and Phase 1 Slices 1-5 as complete; exact evidence is recorded in the code-readiness gap matrix.
-2. Follow the exact `CLAIM_HANDOFF.md` Next Session Opener. Treat the owner-accepted review/remediation and local Slice 1D-1H code as complete, keep both server and mobile approvals immutable false, close the Apple-native evidence, and implement encrypted attempt persistence/reconciliation only as a separately reviewed hard-disabled slice.
-3. Keep production account bootstrap/invitation binding, native hardware-key handoff, owner-client ciphertext sealing, and server-authoritative finalization in later separately tested slices; never move claimant private-key or owner MEK operations into the browser/API.
-4. Prove reload/sign-out/displacement/recovery/stale-assurance/cross-mode behavior, then continue through key handoff, invitation acceptance, checklist/evidence/dashboard/review/release, and only then the offline-code V2 route.
-5. After freezing the engineering production-ready claimant candidate, resume `EDGE-01` through `EDGE-03` and the remaining governance/administrative launch work; none of it authorizes provider accounts, DNS, hosting, origins, or deployment without separate approval.
-6. Keep Build 7 closed and passed; do not create another build or initiate public App Store release without separate authorization.
+1. Review the remaining hosted Auth warning (leaked-password protection disabled) and measured foreign-key index recommendations; then request separate authorization for the next bounded offline-code V2 client/native proof-production and representative KDF-benchmark slice. Do not add a trusted-edge adapter, post-possession case binding, or enable the controller without separate review.
+2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E hard-disabled and concealed, unmounted, or disconnected from normal app requests. Hosted schema presence and mounted `404` routes grant no claimant capability.
+3. Treat production Swift App Attest/custody methods, production alias/entitlement configuration, direct native binding, compile, and physical Apple evidence as a separate reviewed native gate.
+4. For any separately authorized next slice, treat Shahbaz Malik as the accountable human test reviewer and Codex only as a non-human technical test actor. Preserve the generic unavailable response and add no discovery/enumeration leak, UI/evidence access, production KDF/native binding, hosted migration, real data, deployment, or external behavior.
+5. Continue afterward through the safe V2 offline-code route without reintroducing V1 locator-only authority.
+6. The temporary `image-size` exception must be replaced by a compatible upstream fix or re-reviewed before it expires after 2026-09-30; it may not be broadened silently.
+7. Keep Build 7 closed and passed; do not deploy, create another build, or initiate public App Store release without separate authorization.
+8. The hourly claimant heartbeat was deleted at session close; no monitoring remains active.
 
 ## Current Launch Blockers
 
@@ -92,6 +133,117 @@ These items do not block local production-readiness engineering with synthetic d
 - Legal confirmation of Shahbaz Malik as operator/data controller, contracting-entity and processor mapping, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
 
 ## Verification
+
+### Claimant Slice 5E closing baseline on 2026-08-30
+
+- All workspaces: 1,131 tests passed; 3 established environment-gated mobile tests skipped.
+- All typechecks, zero-warning lint, unchanged 24-page web build, API bundle, repository/GitHub Actions security, claim-vector/custody, and Slice 5A-5E isolation checks passed.
+- Both HTTP paths are mounted but return `404` before configuration or dependencies because controller approval is literal false. No migration, hosted database/Auth/Storage/provider change, trusted-edge adapter, deployment, real data, or external behavior occurred.
+
+### Claimant Slice 5D closing baseline on 2026-08-30
+
+- All workspaces: 1,123 tests passed; 3 established environment-gated mobile tests skipped.
+- All typechecks, zero-warning lint, unchanged 24-page web build, API bundle, repository/GitHub Actions security, claim-vector/custody, and Slice 5A-5D isolation checks passed.
+- No migration, hosted database/Auth/Storage/provider change, route, deployment, real data, or external behavior occurred. Optional local Slice 5B/5C database replay was unavailable because Docker Desktop was not running; Slice 5D changes no SQL or database contract.
+
+### Claimant Slice 5A closing baseline on 2026-08-19
+
+- All workspaces: 1,108 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 210 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, shared/API bundles, vector/custody/offline-code isolation, GitHub Actions security, and `git diff --check` passed.
+- No database, container, hosted migration, provider/configuration change, deployment, real data, or external behavior was involved.
+
+### Claimant Slice 5C closing baseline on 2026-08-19
+
+- All workspaces: 1,118 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 217 passed serially after hosted remediation; all typechecks, zero-warning lint, unchanged 24-page web build, shared/API bundles, vector/custody/protocol/persistence/challenge isolation, GitHub Actions security, fresh PostgreSQL 16 and hosted PostgreSQL 17 behavior/role denial, and `git diff --check` passed.
+- The disposable local database container was removed. No hosted migration, provider/configuration change, deployment, real data, or external behavior occurred.
+
+### Claimant Slice 4F closing baseline on 2026-08-18
+
+- All workspaces: 1,065 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 176 passed serially; all typechecks, zero-warning lint, API bundle, custody/native-open isolation checks, GitHub Actions workflow guards, and `git diff --check` passed.
+- No database migration or container was required. Both native-open approvals remain false, the feature is unmounted, and no production native package-opening method or plaintext/export path exists.
+
+### Claimant Slice 4E closing baseline on 2026-08-18
+
+- All workspaces: 1,051 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 170 passed serially; all typechecks, zero-warning lint, API bundle, custody/encrypted-delivery isolation checks, GitHub Actions workflow guards, and `git diff --check` passed.
+- Standalone rollback-only hostile encrypted-delivery exercise passed against the already-cached generic PostgreSQL image. The exact temporary container was removed; no Supabase images were downloaded, hosted Supabase was unchanged, and retrieval completion stayed false.
+
+### Claimant Slice 4D closing baseline on 2026-08-18
+
+- All workspaces: 1,043 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 170 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, API bundle, custody/retrieval-session isolation checks, GitHub Actions workflow guards, and `git diff --check` passed.
+- Standalone rollback-only hostile retrieval-session exercise passed against the already-cached generic PostgreSQL image. The exact temporary container was removed; no Supabase images were downloaded, hosted Supabase was unchanged, and package serving/retrieval completion stayed false.
+
+### Claimant Slice 4C closing baseline on 2026-08-18
+
+- All workspaces: 1,038 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 163 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, API bundle, custody/signed-manifest isolation checks, GitHub Actions workflow guards, and `git diff --check` passed.
+- Standalone rollback-only hostile signed-finalization exercise passed against the already-cached generic PostgreSQL image. The exact temporary container was removed; no Supabase images were downloaded, hosted Supabase was unchanged, and package retrieval stayed false.
+
+### Claimant Slice 4B closing baseline on 2026-08-18
+
+- All workspaces: 1,033 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 155 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, API bundle, custody/encrypted-package isolation checks, GitHub Actions workflow guards, and `git diff --check` passed.
+- Standalone rollback-only hostile package-preparation exercise passed against the already-cached generic PostgreSQL image. The exact temporary container was removed; no Supabase images were downloaded, hosted Supabase was unchanged, and manifest signing/retrieval stayed false.
+
+### Claimant Slice 4A closing baseline on 2026-08-18
+
+- All workspaces: 1,027 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 148 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, API bundle, custody/release-authorization isolation checks, and `git diff --check` passed.
+- Standalone rollback-only hostile final-authorization exercise passed against the already-cached generic PostgreSQL image. The exact temporary container was removed; no Supabase images were downloaded, hosted Supabase was unchanged, and package creation/retrieval stayed false.
+
+### Claimant Slice 3G closing baseline on 2026-08-18
+
+- All workspaces: 1,021 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 141 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, API bundle, custody/intervention isolation checks, and `git diff --check` passed.
+- Standalone rollback-only hostile intervention exercise passed against the already-cached generic PostgreSQL image. The exact temporary container was removed; no Supabase images were downloaded, hosted Supabase was unchanged, and no external behavior was added.
+
+### Claimant Slice 3F closing baseline on 2026-08-18
+
+- All workspaces: 1,015 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 135 passed serially; all typechecks, zero-warning lint, unchanged 24-page web build, API bundle, custody/isolation checks, and `git diff --check` passed.
+- Standalone rollback-only PostgreSQL hostile review exercise passed without Supabase image downloads. Direct linked hosted discovery returned access-control 403; no hosted SQL or state change occurred.
+
+### Claimant Slice 3E closing baseline on 2026-08-18
+
+- All workspaces: 1,009 tests passed; 3 established environment-gated mobile tests skipped.
+- Full static/security set: 129 passed serially; all typechecks, zero-warning lint, the unchanged 24-page web build, API bundle, custody/isolation checks, and `git diff --check` passed.
+- Full disposable migration replay and rollback-only hostile reviewer exercise passed. The local stack and downloaded Supabase images were removed afterward; hosted Supabase, deployment state, and external behavior were unchanged.
+
+### Claimant Slice 3C closing baseline on 2026-08-18
+
+- All workspaces: 994 tests passed; 3 established environment-gated mobile tests skipped.
+- Hosted rollback-only queue exercise, 12 focused API tests, 5 combined static regressions, all typechecks, zero-warning lint, unchanged web build, API bundle, security/isolation gates, and `git diff --check` passed.
+- Post-test checks confirmed no claimant schema or queue remained and the owner vault was unchanged. No local Supabase images, deployment, provider call, notification, or external behavior occurred.
+
+### Claimant Slice 3B closing baseline on 2026-08-18
+
+- All workspaces: 990 tests passed; 3 established environment-gated mobile tests skipped.
+- Eight focused API tests, one static regression, all typechecks, zero-warning lint, unchanged 24-page web build, API bundle, security/isolation gates, Security CI registration, and `git diff --check` passed.
+- Slice 3B contains no migration or provider/network implementation. Hosted Supabase, Docker, deployment state, and external behavior remained unchanged.
+
+### Claimant Slice 3A closing baseline on 2026-08-18
+
+- All workspaces: 982 tests passed; 3 established environment-gated mobile tests skipped.
+- All workspace typechecks, zero-warning root lint, the unchanged 24-page production web build, and API bundle guard passed.
+- The hosted rollback-only database exercise, 6 focused API tests, 5 static regressions, repository/GitHub Actions security, existing claimant isolation gates, Security CI registration, and `git diff --check` passed.
+- Hosted Supabase was unchanged after rollback; no local Supabase images remain; no deployment, migration-history entry, provider call, notification, real file, or external claimant action occurred.
+
+### Claimant Slice 2J closing baseline on 2026-08-18
+
+- All workspaces: 976 tests passed; 3 established environment-gated mobile tests skipped.
+- All workspace typechecks, zero-warning root lint, the unchanged 24-page production web build, and API bundle guard passed.
+- Submission client/controller, dashboard client, upload client, repository security, GitHub Actions security, claimant-custody isolation, the focused static regression, and `git diff --check` passed.
+- No deployment, hosted migration, configuration change, production promotion, notification, real file, or external claimant action occurred.
+
+### Claimant Slice 2I closing baseline on 2026-08-12
+
+- All workspaces: 969 tests passed; 3 established environment-gated mobile tests skipped.
+- All workspace typechecks, zero-warning root lint, the 24-route production web build, API bundle guard, and rollback-only submission database exercise passed.
+- Controller isolation, repository security, GitHub Actions security, claimant-custody isolation, 31 combined static regressions, and `git diff --check` passed.
+- No deployment, hosted migration, configuration change, production promotion, notification, real file, or external claimant action occurred.
 
 ### Build 7 owner-reported gate closure on 2026-08-04
 

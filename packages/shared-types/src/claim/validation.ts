@@ -6,14 +6,22 @@ import {
 } from "./constants";
 import type {
   ClaimTransitionRequestV1,
-  OfflineCodeChallengeV2,
-  OfflineCodeKdfProfileV2,
-  OfflineCodeWrappedMekV2,
   RecipientGrantEnvelopeV1,
   RecipientGrantPlaintextV1,
   ReleaseManifestV1,
   SignedReleasePackageV1,
 } from "./contracts";
+
+export {
+  assertOfflineCodeChallengeV2,
+  assertOfflineCodeClientSecretV2,
+  assertOfflineCodeKdfProfileV2,
+  assertOfflineCodePossessionProofV2,
+  assertOfflineCodeProtocolBundleV2,
+  assertOfflineCodePublicLocatorV2,
+  assertOfflineCodeRecordBindingV2,
+  assertOfflineCodeWrappedMekV2,
+} from "./offline-code/validation";
 
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -74,96 +82,6 @@ export function assertRecipientGrantEnvelopeV1(
   if (record.revoked_at !== null) {
     assertTimestamp(record.revoked_at, "revoked_at");
   }
-  assertBase64UrlMinimum(record.ciphertext, "ciphertext", 48);
-}
-
-export function assertOfflineCodeChallengeV2(
-  value: unknown,
-): asserts value is OfflineCodeChallengeV2 {
-  const record = asRecord(value);
-  assertExactKeys(record, [
-    "challenge_id",
-    "expires_at",
-    "locator_hash",
-    "nonce",
-    "origin",
-    "protocol",
-  ]);
-  assertProtocol(record.protocol, claimProtocolVersions.offlineCode);
-  assertUuid(record.challenge_id, "challenge_id");
-  assertTimestamp(record.expires_at, "expires_at");
-  assertBase64Url(record.locator_hash, "locator_hash", 32);
-  assertBase64Url(record.nonce, "nonce", 32);
-  assertHttpsOrigin(record.origin, "origin");
-}
-
-export function assertOfflineCodeKdfProfileV2(
-  value: unknown,
-): asserts value is OfflineCodeKdfProfileV2 {
-  const record = asRecord(value);
-  assertExactKeys(record, [
-    "algorithm",
-    "memlimit_bytes",
-    "opslimit",
-    "output_bytes",
-    "production_approved",
-    "profile_id",
-    "salt",
-  ]);
-  if (record.algorithm !== "argon2id") {
-    throw new Error("Offline-code KDF algorithm is unsupported.");
-  }
-  if (
-    typeof record.profile_id !== "string" ||
-    !/^[a-z0-9][a-z0-9_-]{2,63}$/.test(record.profile_id)
-  ) {
-    throw new Error("Offline-code KDF profile_id is invalid.");
-  }
-  if (typeof record.production_approved !== "boolean") {
-    throw new Error("Offline-code KDF approval flag is invalid.");
-  }
-  assertPositiveInteger(record.opslimit, "opslimit");
-  assertPositiveInteger(record.memlimit_bytes, "memlimit_bytes");
-  if (record.output_bytes !== 32) {
-    throw new Error("Offline-code KDF output length is unsupported.");
-  }
-  assertBase64Url(record.salt, "salt", 16);
-}
-
-export function assertOfflineCodeWrappedMekV2(
-  value: unknown,
-): asserts value is OfflineCodeWrappedMekV2 {
-  const record = asRecord(value);
-  assertExactKeys(record, [
-    "algorithm",
-    "ciphertext",
-    "created_at",
-    "grant_id",
-    "kdf_profile_id",
-    "locator_record_id",
-    "locator_version",
-    "nonce",
-    "owner_id",
-    "proof_key_version",
-    "protocol",
-  ]);
-  assertProtocol(record.protocol, claimProtocolVersions.offlineCode);
-  if (record.algorithm !== "xchacha20poly1305_ietf") {
-    throw new Error("Offline-code wrapping algorithm is unsupported.");
-  }
-  ["locator_record_id", "grant_id", "owner_id"].forEach((key) =>
-    assertUuid(record[key], key),
-  );
-  assertPositiveInteger(record.locator_version, "locator_version");
-  assertPositiveInteger(record.proof_key_version, "proof_key_version");
-  if (
-    typeof record.kdf_profile_id !== "string" ||
-    record.kdf_profile_id.length === 0
-  ) {
-    throw new Error("kdf_profile_id is invalid.");
-  }
-  assertTimestamp(record.created_at, "created_at");
-  assertBase64Url(record.nonce, "nonce", 24);
   assertBase64UrlMinimum(record.ciphertext, "ciphertext", 48);
 }
 
@@ -386,16 +304,6 @@ function assertTimestamp(value: unknown, field: string): void {
     Number.isNaN(Date.parse(value))
   ) {
     throw new Error(`${field} must be a canonical UTC timestamp.`);
-  }
-}
-
-function assertHttpsOrigin(value: unknown, field: string): void {
-  if (
-    typeof value !== "string" ||
-    new URL(value).origin !== value ||
-    !value.startsWith("https://")
-  ) {
-    throw new Error(`${field} must be an HTTPS origin.`);
   }
 }
 

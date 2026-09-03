@@ -38,7 +38,13 @@ export type NativeEnrollmentTransportV1 = Readonly<{
   issueRegistration(input: Readonly<{ appAttestKeyId: string; idempotencyKey: string;
     signal?: AbortSignal }>): Promise<Readonly<{ challenge: AppAttestRegistrationChallengeV1;
     challengeBytes: string }>>;
+  reconcileNative(input: Readonly<{ appAttestChallengeId: string; attemptId: string;
+    nativeChallengeId: string; signal?: AbortSignal }>): Promise<NativeEnrollmentReconciliationV1>;
 }>;
+
+export type NativeEnrollmentReconciliationV1 =
+  | Readonly<{ status: "committed"; result: z.infer<typeof acceptanceResult> }>
+  | Readonly<{ status: "not_committed" | "unknown" }>;
 
 export class NativeEnrollmentTransportError extends Error {
   constructor(readonly kind: "aborted" | "authentication" | "conflict" | "invalid_response" | "rate_limited" | "unavailable") {
@@ -111,6 +117,14 @@ export function createNativeEnrollmentTransportV1(input: Readonly<{
         possession_proof: proof }, value.idempotencyKey, value.signal);
       return unwrap(raw, acceptanceResult);
     },
+    async reconcileNative(value) {
+      const attemptId = requireUuid(value.attemptId);
+      const raw = await post(`/claimant/native-enrollment/attempts/${attemptId}/reconcile`, {
+        app_attest_challenge_id: requireUuid(value.appAttestChallengeId),
+        native_challenge_id: requireUuid(value.nativeChallengeId),
+      }, attemptId, value.signal);
+      return unwrap(raw, reconciliationResult);
+    },
   };
 }
 
@@ -136,3 +150,8 @@ function requireApiOrigin(value: string): string { try { const url = new URL(val
 function requireUuid(value: string): string { if (!uuid.safeParse(value).success) throw new NativeEnrollmentTransportError("invalid_response"); return value; }
 function invalidResponse(): never { throw new NativeEnrollmentTransportError("invalid_response"); }
 function isAbort(error: unknown): boolean { return error instanceof Error && error.name === "AbortError"; }
+const reconciliationResult = z.discriminatedUnion("status", [
+  z.strictObject({ status: z.literal("committed"), result: acceptanceResult }),
+  z.strictObject({ status: z.literal("not_committed") }),
+  z.strictObject({ status: z.literal("unknown") }),
+]);

@@ -118,6 +118,45 @@ const enrollmentCoordinatorSource = readFileSync(
 if (!/CLAIMANT_NATIVE_ENROLLMENT_COORDINATOR_APPROVED\s*=\s*false\s+as\s+const/.test(enrollmentCoordinatorSource)) {
   throw new Error("Claimant native enrollment coordinator is not hard-disabled.");
 }
+const enrollmentAttemptStoreSource = readFileSync(
+  join(enrollmentDirectory, "native-enrollment-attempt-store.ts"),
+  "utf8",
+);
+if (!/CLAIMANT_NATIVE_ENROLLMENT_ATTEMPT_PERSISTENCE_APPROVED\s*=\s*false\s+as\s+const/.test(enrollmentAttemptStoreSource)) {
+  throw new Error("Claimant native enrollment attempt persistence is not hard-disabled.");
+}
+const enrollmentAdaptersSource = readFileSync(
+  join(enrollmentDirectory, "native-enrollment-adapters.ts"),
+  "utf8",
+);
+const enrollmentRuntimeSource = readFileSync(
+  join(enrollmentDirectory, "native-enrollment-runtime.ts"),
+  "utf8",
+);
+if (!/CLAIMANT_NATIVE_LIFECYCLE_ADAPTERS_APPROVED\s*=\s*false\s+as\s+const/.test(enrollmentAdaptersSource)) {
+  throw new Error("Claimant production-shaped native lifecycle adapters are not hard-disabled.");
+}
+if (!/CLAIMANT_NATIVE_ENROLLMENT_RUNTIME_APPROVED\s*=\s*false\s+as\s+const/.test(enrollmentRuntimeSource)) {
+  throw new Error("Claimant native enrollment composition runtime is not hard-disabled.");
+}
+for (const prohibitedProbeBinding of ["createTestKeyAsync", "exerciseTestKeyAsync", "deleteTestKeyAsync",
+  "ensureTestKeyAsync", "attestTestKeyAsync", "generateTestAssertionAsync", "test_alias_only", "probe-only"]) {
+  if (enrollmentAdaptersSource.includes(prohibitedProbeBinding) || enrollmentRuntimeSource.includes(prohibitedProbeBinding)) {
+    throw new Error(`Claimant production-shaped enrollment boundary imports or promotes probe binding ${prohibitedProbeBinding}.`);
+  }
+}
+for (const requiredProductionBinding of ["createClaimantKeyAsync", "createClaimantPossessionProofAsync",
+  "deleteClaimantKeyAsync", "ensureAppAttestKeyAsync", "attestAppAttestKeyAsync",
+  "generateAppAttestAssertionAsync", "claimant-enrollment\\.v1"] ) {
+  if (!enrollmentAdaptersSource.includes(requiredProductionBinding)) {
+    throw new Error(`Claimant production-shaped enrollment adapters are missing ${requiredProductionBinding}.`);
+  }
+}
+for (const prohibitedAttemptField of ["bearer_token", "recovery_phrase", "private_key", "proof_mac", "assertion_object", "attestation_object"]) {
+  if (enrollmentAttemptStoreSource.includes(`${prohibitedAttemptField}:`)) {
+    throw new Error(`Claimant enrollment attempt persistence declares prohibited field ${prohibitedAttemptField}.`);
+  }
+}
 for (const prohibitedProbeBinding of [
   "claimant-key-custody",
   "app-attest-adapter",

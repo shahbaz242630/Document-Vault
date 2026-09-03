@@ -47,9 +47,10 @@ module.exports = defineConfig([
   globalIgnores([
     "**/.expo/**",
     "**/.next/**",
+    "**/.vercel/**",
+    "**/dist/**",
     "apps/web/next-env.d.ts",
     "coverage/**",
-    "dist/**",
     "supabase/supabase/.temp/**",
   ]),
 ]);

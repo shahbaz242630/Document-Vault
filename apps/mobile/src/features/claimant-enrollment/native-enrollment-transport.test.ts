@@ -70,6 +70,22 @@ describe("native enrollment mobile transport", () => {
     await expect(transport.issueRegistration({ appAttestKeyId: app.registration_response.app_attest_key_id,
       idempotencyKey, signal: controller.signal })).rejects.toMatchObject({ kind: "aborted" });
   });
+
+  it("reconciles only the exact stored challenge tuple", async () => {
+    const fetch = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) =>
+      response({ result: { status: "not_committed" } }));
+    const transport = createNativeEnrollmentTransportV1({ apiBaseUrl: "https://api.test", fetch,
+      getAccessToken: async () => "token" });
+    const result = await transport.reconcileNative({
+      appAttestChallengeId: "71000000-0000-4000-8000-000000000002", attemptId: idempotencyKey,
+      nativeChallengeId: "71000000-0000-4000-8000-000000000001" });
+    expect(result).toEqual({ status: "not_committed" });
+    expect(fetch.mock.calls[0]?.[0]).toBe(`https://api.test/claimant/native-enrollment/attempts/${idempotencyKey}/reconcile`);
+    expect(JSON.parse(String(fetch.mock.calls[0]?.[1]?.body))).toEqual({
+      app_attest_challenge_id: "71000000-0000-4000-8000-000000000002",
+      native_challenge_id: "71000000-0000-4000-8000-000000000001",
+    });
+  });
 });
 
 function pairedAssertion() { return { ...app.assertion_challenge, claimant_id: native.challenge.claimant_id,
