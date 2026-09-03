@@ -114,7 +114,7 @@ const EXPECTED_SERVER_ONLY_FUNCTIONS = new Set([
   "claimant_assign_reviewer",
   "claimant_authorize_release",
   "claimant_authorize_release_retrieval_session",
-  "claimant_begin_owner_notice",
+  "claimant_begin_owner_notice", "claimant_bind_offline_code_v2_case",
   "claimant_claim_owner_notice_delivery",
   "claimant_close_retrieval_lifecycle",
   "claimant_commit_encrypted_package_delivery",

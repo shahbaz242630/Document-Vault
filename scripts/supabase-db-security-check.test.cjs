@@ -231,6 +231,7 @@ function createCatalog() {
     { functionName: "claimant_authorize_release", securityDefiner: false },
     { functionName: "claimant_authorize_release_retrieval_session", securityDefiner: false },
     { functionName: "claimant_begin_owner_notice", securityDefiner: false },
+    { functionName: "claimant_bind_offline_code_v2_case", securityDefiner: false },
     { functionName: "claimant_claim_owner_notice_delivery", securityDefiner: false },
     { functionName: "claimant_close_retrieval_lifecycle", securityDefiner: false },
     { functionName: "claimant_commit_encrypted_package_delivery", securityDefiner: false },
