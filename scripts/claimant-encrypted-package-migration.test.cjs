@@ -25,6 +25,9 @@ test("creates five forced-RLS immutable package tables", () => {
     ));
 });
 test("binds preparation to current authorization, cycle, review, and no intervention", () => {
+  assert.doesNotMatch(migration,
+    /from public\.claimant_release_authorizations[^;]*for update/);
+  assert.match(migration, /from public\.claimant_cases where id = p_case_id for update;/);
   for (const token of ["v_case.state <> 'approved'",
     "v_authorization.authorized_case_version <> p_expected_case_version",
     "v_authorization.status <> 'authorized'", "not v_authorization.release_authorized",

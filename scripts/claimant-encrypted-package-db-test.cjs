@@ -131,6 +131,9 @@ values ('${id.round}', '${id.case}', '${id.cycle}', 5, 3, 9, 9,
 insert into public.claimant_release_authority_identities(id, user_id, pseudonymous_ref,
   authority_class) values ('${id.authority}', '${id.authorityUser}',
   'synthetic_release_authority_encrypted_package', 'release_test_authorizer');
+insert into public.claimant_review_resolution_authorities(id, user_id, pseudonymous_ref,
+  authority_class) values ('${id.authority}', '${id.authorityUser}',
+  'synthetic_resolution_authority_encrypted_package', 'escalation_test_operator');
 insert into public.claimant_release_authorizations(id, case_id, cycle_id, review_round_id,
   authority_identity_id, source_case_version, authorized_case_version, binding_version,
   finalization_version, submission_case_version, review_round_version, policy_pack_id,
@@ -150,6 +153,13 @@ values ('${id.grant1}', '${id.case}', '${id.owner}', '${id.claimant}', '${id.key
     'sanduqkin:claim:recipient-grant:v2', 'registered_recipient_v2', 'p256_ecdh',
     'hkdf_sha256', 'xchacha20poly1305_ietf', repeat('F', 87), repeat('M', 32),
     repeat('H', 64), 1, 'active', now());`;
+  const interventionInsert = options.standalone
+    ? `insert into public.claimant_review_interventions values ('${id.intervention}', '${id.case}');`
+    : `insert into public.claimant_review_interventions(id, case_id, cycle_id, review_round_id,
+        authority_identity_id, intervention_type, reason_class, source_review_status,
+        source_round_version) values ('${id.intervention}', '${id.case}', '${id.cycle}',
+        '${id.round}', '${id.authority}', 'escalation', 'policy_review_required',
+        'two_person_approved', 2);`;
   return `begin;
 ${options.standalone ? standaloneSchema() : ""}
 ${options.standalone ? standaloneFixture : liveFixture}
@@ -184,7 +194,9 @@ begin
     raise exception 'tampered ciphertext was accepted';
   exception when serialization_failure then null; end;
   begin
-    update public.claimant_recipient_grants set status = 'revoked' where id = '${id.grant2}';
+    update public.claimant_recipient_grants
+    set status = 'revoked'${options.standalone ? "" : ", revoked_at = now()"}
+    where id = '${id.grant2}';
     begin perform public.claimant_prepare_encrypted_release_package('${id.owner}',
       '${id.case}', '${id.authorization}', '${id.cycle}', '${id.round}', 6,
       '${id.package}', 'synthetic_release_package_slice_4b', v_assets, v_grants, '${id.hostile}');
@@ -195,7 +207,7 @@ begin
     if sqlerrm <> 'ROLLBACK_GRANT' then raise; end if;
   end;
   begin
-    insert into public.claimant_review_interventions values ('${id.intervention}', '${id.case}');
+    ${interventionInsert}
     begin perform public.claimant_prepare_encrypted_release_package('${id.owner}',
       '${id.case}', '${id.authorization}', '${id.cycle}', '${id.round}', 6,
       '${id.package}', 'synthetic_release_package_slice_4b', v_assets, v_grants, '${id.hostile}');
