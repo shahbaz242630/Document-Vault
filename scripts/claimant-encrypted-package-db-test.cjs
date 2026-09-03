@@ -55,12 +55,11 @@ grant all on all tables in schema public to service_role;
 ${migration}`; }
 
 function buildClaimantEncryptedPackageDbTestSql(options = {}) {
-  const names = ["case", "cycle", "round", "authorization", "authority", "owner",
+  const names = ["case", "cycle", "round", "authorization", "authority", "authorityUser", "owner",
     "claimant", "key1", "key2", "grant1", "grant2", "asset", "package", "first",
     "changed", "hostile", "intervention"];
-  const id = Object.fromEntries(names.map((name) => [name, randomUUID()]));
-  return `begin;
-${options.standalone ? standaloneSchema() : ""}
+  const id = { ...Object.fromEntries(names.map((name) => [name, randomUUID()])), ...options.ids };
+  const standaloneFixture = `
 insert into auth.users(id) values ('${id.owner}'), ('${id.claimant}');
 insert into public.claimant_identities values ('${id.claimant}');
 insert into public.claimant_cases values ('${id.case}', '${id.claimant}', '${id.owner}',
@@ -88,8 +87,84 @@ insert into public.claimant_recipient_grants values
   ('${id.grant2}', '${id.case}', '${id.owner}', '${id.claimant}', '${id.key2}', 1,
     'sanduqkin:claim:recipient-grant:v1', 'registered_recipient_v2', 'X25519',
     'HKDF-SHA256', 'XChaCha20-Poly1305', 'OwnerEphemeralPublicKey_00000002',
-    'GrantNonce_0000000000000002', 'GrantCiphertext_00000000000000000002', 1, 'active');
-insert into public.vault_assets values ('${id.asset}', '${id.owner}', 'document',
+    'GrantNonce_0000000000000002', 'GrantCiphertext_00000000000000000002', 1, 'active');`;
+  const liveFixture = `
+insert into auth.users(id) values ('${id.owner}'), ('${id.claimant}'), ('${id.authorityUser}');
+insert into public.claimant_identities(user_id, status) values ('${id.claimant}', 'active');
+insert into public.claimant_invitations(id, owner_user_id, recipient_address_digest, status,
+  accepted_by_user_id, expires_at, accepted_at)
+values (gen_random_uuid(), '${id.owner}', repeat('a', 64), 'accepted', '${id.claimant}',
+  now() + interval '1 day', now());
+insert into public.claimant_device_keys(id, claimant_user_id, device_binding_digest, public_key_jwk)
+values ('${id.key1}', '${id.claimant}', repeat('b', 64),
+    jsonb_build_object('kty','EC','crv','P-256','x',repeat('A',43),'y',repeat('B',43))),
+  ('${id.key2}', '${id.claimant}', repeat('c', 64),
+    jsonb_build_object('kty','EC','crv','P-256','x',repeat('C',43),'y',repeat('D',43)));
+insert into public.claimant_cases(id, claimant_user_id, owner_user_id, invitation_id,
+  current_key_id, state, policy_pack_id, policy_pack_version, version, binding_version,
+  finalization_version, owner_finalized_at)
+select '${id.case}', '${id.claimant}', '${id.owner}', invitation.id, '${id.key1}',
+  'approved', 'synthetic_policy_death_alpha', 1, 6, 2, 1, now()
+from public.claimant_invitations invitation where invitation.owner_user_id = '${id.owner}';
+insert into public.claimant_submission_receipts(case_id, claimant_user_id, synthetic_only,
+  submission_ref, acknowledgement_ref, submission_digest, case_version, intake_version,
+  preparation_version, evidence_object_count, unavailable_item_count, status, review_started,
+  release_authorized, claimed_created_at)
+values ('${id.case}', '${id.claimant}', true, 'synthetic_submission_encrypted_package',
+  'synthetic_acknowledgement_${"a".repeat(32)}', repeat('d', 64), 3, 9, 9, 1, 0,
+  'received_for_review', false, false, now() - interval '2 days');
+insert into public.claimant_owner_protection_cycles(id, case_id, owner_user_id,
+  claimant_user_id, policy_pack_id, policy_pack_version, submission_case_version,
+  cycle_number, notice_ref, status, cooldown_seconds, delivery_evidence_digest,
+  delivery_verified_at, cooldown_started_at, cooldown_expires_at)
+values ('${id.cycle}', '${id.case}', '${id.owner}', '${id.claimant}',
+  'synthetic_policy_death_alpha', 1, 3, 1, 'synthetic_owner_notice_encrypted_package',
+  'delivery_verified', 86400, repeat('e', 64), now() - interval '2 days',
+  now() - interval '2 days', now() - interval '1 day');
+insert into public.claimant_review_rounds(id, case_id, cycle_id, case_version,
+  submission_case_version, intake_version, preparation_version, policy_pack_id,
+  policy_pack_version, checklist_digest, evidence_manifest_digest, status, round_version,
+  two_person_approval_satisfied, release_authorized, completed_at)
+values ('${id.round}', '${id.case}', '${id.cycle}', 5, 3, 9, 9,
+  'synthetic_policy_death_alpha', 1, repeat('f', 64), repeat('1', 64),
+  'two_person_approved', 2, true, false, now());
+insert into public.claimant_release_authority_identities(id, user_id, pseudonymous_ref,
+  authority_class) values ('${id.authority}', '${id.authorityUser}',
+  'synthetic_release_authority_encrypted_package', 'release_test_authorizer');
+insert into public.claimant_review_resolution_authorities(id, user_id, pseudonymous_ref,
+  authority_class) values ('${id.authority}', '${id.authorityUser}',
+  'synthetic_resolution_authority_encrypted_package', 'escalation_test_operator');
+insert into public.claimant_release_authorizations(id, case_id, cycle_id, review_round_id,
+  authority_identity_id, source_case_version, authorized_case_version, binding_version,
+  finalization_version, submission_case_version, review_round_version, policy_pack_id,
+  policy_pack_version)
+values ('${id.authorization}', '${id.case}', '${id.cycle}', '${id.round}', '${id.authority}',
+  5, 6, 2, 1, 3, 2, 'synthetic_policy_death_alpha', 1);
+insert into public.claimant_case_device_keys(case_id, key_id, claimant_user_id)
+values ('${id.case}', '${id.key2}', '${id.claimant}');
+insert into public.claimant_recipient_grants(id, case_id, owner_user_id, claimant_user_id,
+  recipient_key_id, recipient_key_version, protocol, profile, key_agreement, kdf, aead,
+  owner_ephemeral_public_key, nonce, ciphertext, grant_version, status, created_at)
+values ('${id.grant1}', '${id.case}', '${id.owner}', '${id.claimant}', '${id.key1}', 1,
+    'sanduqkin:claim:recipient-grant:v2', 'registered_recipient_v2', 'p256_ecdh',
+    'hkdf_sha256', 'xchacha20poly1305_ietf', repeat('E', 87), repeat('N', 32),
+    repeat('G', 64), 1, 'active', now()),
+  ('${id.grant2}', '${id.case}', '${id.owner}', '${id.claimant}', '${id.key2}', 1,
+    'sanduqkin:claim:recipient-grant:v2', 'registered_recipient_v2', 'p256_ecdh',
+    'hkdf_sha256', 'xchacha20poly1305_ietf', repeat('F', 87), repeat('M', 32),
+    repeat('H', 64), 1, 'active', now());`;
+  const interventionInsert = options.standalone
+    ? `insert into public.claimant_review_interventions values ('${id.intervention}', '${id.case}');`
+    : `insert into public.claimant_review_interventions(id, case_id, cycle_id, review_round_id,
+        authority_identity_id, intervention_type, reason_class, source_review_status,
+        source_round_version) values ('${id.intervention}', '${id.case}', '${id.cycle}',
+        '${id.round}', '${id.authority}', 'escalation', 'policy_review_required',
+        'two_person_approved', 2);`;
+  if (options.fixtureOnly) return options.standalone ? standaloneFixture : liveFixture;
+  return `begin;
+${options.standalone ? standaloneSchema() : ""}
+${options.standalone ? standaloneFixture : liveFixture}
+insert into public.vault_assets values ('${id.asset}', '${id.owner}', 'document_location',
   'VaultCiphertext_00000000000000000001', 'VaultNonce_0000000000000001',
   now() - interval '2 hours', now() - interval '1 hour', null);
 set local role service_role;
@@ -120,7 +195,9 @@ begin
     raise exception 'tampered ciphertext was accepted';
   exception when serialization_failure then null; end;
   begin
-    update public.claimant_recipient_grants set status = 'revoked' where id = '${id.grant2}';
+    update public.claimant_recipient_grants
+    set status = 'revoked'${options.standalone ? "" : ", revoked_at = now()"}
+    where id = '${id.grant2}';
     begin perform public.claimant_prepare_encrypted_release_package('${id.owner}',
       '${id.case}', '${id.authorization}', '${id.cycle}', '${id.round}', 6,
       '${id.package}', 'synthetic_release_package_slice_4b', v_assets, v_grants, '${id.hostile}');
@@ -131,7 +208,7 @@ begin
     if sqlerrm <> 'ROLLBACK_GRANT' then raise; end if;
   end;
   begin
-    insert into public.claimant_review_interventions values ('${id.intervention}', '${id.case}');
+    ${interventionInsert}
     begin perform public.claimant_prepare_encrypted_release_package('${id.owner}',
       '${id.case}', '${id.authorization}', '${id.cycle}', '${id.round}', 6,
       '${id.package}', 'synthetic_release_package_slice_4b', v_assets, v_grants, '${id.hostile}');

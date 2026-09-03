@@ -16,24 +16,36 @@ function buildClaimantEncryptedPackageDeliveryDbTestSql(options = {}) {
   const fixture = base.slice(0, fixtureEnd);
   const id = Object.fromEntries(["asset", "retrieval", "delivery", "prepare", "commit",
     "bad", "intervention"].map((name) => [name, randomUUID()]));
+  const interventionInsert = options.standalone
+    ? `insert into public.claimant_review_interventions values ('${id.intervention}', v_case.id);`
+    : `insert into public.claimant_review_interventions(id, case_id, cycle_id, review_round_id,
+        authority_identity_id, intervention_type, reason_class, source_review_status,
+        source_round_version)
+      select '${id.intervention}', release_auth.case_id, release_auth.cycle_id,
+        release_auth.review_round_id, authority.id, 'escalation', 'policy_review_required',
+        'two_person_approved', 2
+      from public.claimant_release_authorizations release_auth
+      join public.claimant_review_resolution_authorities authority
+        on authority.id = release_auth.authority_identity_id
+      where release_auth.case_id = v_case.id;`;
   return `${fixture}
-${migration}
+${options.standalone ? migration : ""}
 insert into public.vault_assets
-select '${id.asset}', owner_user_id, 'document', repeat('V', 64), repeat('N', 24),
+select '${id.asset}', owner_user_id, 'document_location', repeat('V', 64), repeat('N', 24),
   now() - interval '2 hours', now() - interval '1 hour', null
 from public.claimant_cases;
 insert into public.claimant_release_package_assets
   (package_id, case_id, ordinal, source_asset_id, asset_type, source_updated_at,
    ciphertext, nonce, ciphertext_digest)
-select package.id, package.case_id, 1, '${id.asset}', 'document', now() - interval '1 hour',
+select package.id, package.case_id, 1, '${id.asset}', 'document_location', now() - interval '1 hour',
   repeat('V', 64), repeat('N', 24), encode(extensions.digest(concat_ws('|',
-    '${id.asset}', 'document', repeat('V', 64), repeat('N', 24)), 'sha256'), 'hex')
+    '${id.asset}', 'document_location', repeat('V', 64), repeat('N', 24)), 'sha256'), 'hex')
 from public.claimant_release_packages package;
 update public.claimant_recipient_grants set
   protocol = 'sanduqkin:claim:recipient-grant:v2', profile = 'registered_recipient_v2',
   key_agreement = 'p256_ecdh', kdf = 'hkdf_sha256',
-  aead = 'xchacha20poly1305_ietf', owner_ephemeral_public_key = repeat('E', 43),
-  nonce = repeat('G', 24), ciphertext = repeat('C', 96);
+  aead = 'xchacha20poly1305_ietf', owner_ephemeral_public_key = repeat('E', 87),
+  nonce = repeat('G', 32), ciphertext = repeat('C', 96);
 insert into public.claimant_release_retrieval_sessions
   (id, case_id, finalization_id, package_id, claimant_user_id, portal_session_id,
    portal_session_version, grant_id, recipient_key_id, recipient_key_version,
@@ -70,7 +82,8 @@ begin
     raise exception 'ROLLBACK_EXPIRY' using errcode = 'P0001';
   exception when sqlstate 'P0001' then if sqlerrm <> 'ROLLBACK_EXPIRY' then raise; end if; end;
   begin
-    update public.claimant_recipient_grants set status = 'revoked'
+    update public.claimant_recipient_grants
+    set status = 'revoked'${options.standalone ? "" : ", revoked_at = now()"}
       where id = (select grant_id from public.claimant_release_retrieval_sessions
         where id = '${id.retrieval}');
     begin perform public.claimant_prepare_encrypted_package_delivery('${id.delivery}',
@@ -80,7 +93,7 @@ begin
     raise exception 'ROLLBACK_GRANT' using errcode = 'P0001';
   exception when sqlstate 'P0001' then if sqlerrm <> 'ROLLBACK_GRANT' then raise; end if; end;
   begin
-    insert into public.claimant_review_interventions values ('${id.intervention}', v_case.id);
+    ${interventionInsert}
     begin perform public.claimant_prepare_encrypted_package_delivery('${id.delivery}',
       v_delivery_key, '${id.retrieval}', v_case.id, 7, '${id.bad}');
       raise exception 'intervention was accepted';

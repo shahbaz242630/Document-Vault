@@ -32,7 +32,7 @@ function buildClaimantReviewerAssignmentDbTestSql(options = {}) {
     "recuse", "hostile", "otherCase"];
   const id = Object.fromEntries(names.map((name) => [name, randomUUID()]));
   return `begin;
-${options.includeMigrations === false ? "" : migrations()}
+${options.includeMigrations ? migrations() : ""}
 insert into auth.users (id) values ('${id.owner}'), ('${id.claimant}'),
   ('${id.reviewer1User}'), ('${id.reviewer2User}'), ('${id.reviewer3User}');
 insert into public.claimant_identities (user_id, status) values ('${id.claimant}', 'active');
@@ -185,7 +185,7 @@ function runClaimantReviewerAssignmentDbTest(options = {}) {
 }
 
 if (process.argv.includes("--emit-hosted-sql")) {
-  process.stdout.write(buildClaimantReviewerAssignmentDbTestSql());
+  process.stdout.write(buildClaimantReviewerAssignmentDbTestSql({ includeMigrations: true }));
 } else if (require.main === module) {
   runClaimantReviewerAssignmentDbTest();
   console.log("Claimant reviewer-assignment DB test passed.");

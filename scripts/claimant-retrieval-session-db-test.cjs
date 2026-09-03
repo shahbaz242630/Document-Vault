@@ -4,6 +4,8 @@ const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { standaloneSchema: signedManifestSchema } =
   require("./claimant-signed-manifest-db-test.cjs");
+const { buildClaimantEncryptedPackageDbTestSql } =
+  require("./claimant-encrypted-package-db-test.cjs");
 
 const DEFAULT_CONTAINER = "supabase_db_supabase";
 const migration = readFileSync(join(__dirname,
@@ -30,19 +32,13 @@ function buildClaimantRetrievalSessionDbTestSql(options = {}) {
     "changedRetrieval", "first", "hostile", "intervention"];
   const id = Object.fromEntries(names.map((name) => [name, randomUUID()]));
   const authenticatedAt = new Date(Date.now() - 60_000).toISOString();
-  return `begin;
-${options.standalone ? standaloneSchema() : ""}
-insert into auth.users(id) values ('${id.owner}'), ('${id.claimant}'),
+  const standaloneFixture = `insert into auth.users(id) values ('${id.owner}'), ('${id.claimant}'),
   ('${id.releaseAuthorityUser}'), ('${id.signingUser}');
 insert into public.claimant_identities(user_id, status) values ('${id.claimant}', 'active');
 insert into public.claimant_cases (id, claimant_user_id, owner_user_id, state, version,
   route_profile, policy_pack_id, policy_pack_version, updated_at) values
   ('${id.case}', '${id.claimant}', '${id.owner}', 'release_ready', 7,
   'registered_recipient_v1', 'synthetic_policy_death_alpha', 1, now());
-insert into public.claimant_portal_eligibilities values
-  ('${id.claimant}', 'eligible', 'synthetic_fixture');
-insert into public.claimant_portal_session_controls values
-  ('${id.claimant}', '${id.portalSession}', 'active', 'aal2', '${authenticatedAt}', 2);
 insert into public.claimant_owner_protection_cycles
   (id, case_id, owner_user_id, claimant_user_id, status, cooldown_expires_at, cycle_number)
 values ('${id.cycle}', '${id.case}', '${id.owner}', '${id.claimant}',
@@ -67,7 +63,25 @@ insert into public.claimant_recipient_grants values
     'HKDF-SHA256', 'XChaCha20-Poly1305', 'ephemeral_1', 'nonce_1', 'cipher_1', 1, 'active'),
   ('${id.grant2}', '${id.case}', '${id.owner}', '${id.claimant}', '${id.key2}', 1,
     'sanduqkin:claim:recipient-grant:v1', 'registered_recipient_v2', 'X25519',
-    'HKDF-SHA256', 'XChaCha20-Poly1305', 'ephemeral_2', 'nonce_2', 'cipher_2', 1, 'active');
+    'HKDF-SHA256', 'XChaCha20-Poly1305', 'ephemeral_2', 'nonce_2', 'cipher_2', 1, 'active');`;
+  const liveFixture = buildClaimantEncryptedPackageDbTestSql({ fixtureOnly: true,
+    ids: { ...id, authority: id.releaseAuthority, authorityUser: id.releaseAuthorityUser } })
+    + `insert into auth.users(id) values ('${id.signingUser}');
+      update public.claimant_cases set state = 'release_ready', version = 7 where id = '${id.case}';`;
+  const interventionInsert = options.standalone
+    ? `insert into public.claimant_review_interventions values ('${id.intervention}', '${id.case}');`
+    : `insert into public.claimant_review_interventions(id, case_id, cycle_id, review_round_id,
+        authority_identity_id, intervention_type, reason_class, source_review_status,
+        source_round_version) values ('${id.intervention}', '${id.case}', '${id.cycle}',
+        '${id.round}', '${id.releaseAuthority}', 'escalation', 'policy_review_required',
+        'two_person_approved', 2);`;
+  return `begin;
+${options.standalone ? standaloneSchema() + standaloneFixture : liveFixture}
+insert into public.claimant_portal_eligibilities(user_id, status, source)
+values ('${id.claimant}', 'eligible', 'synthetic_fixture');
+insert into public.claimant_portal_session_controls(user_id, active_session_id, status,
+  assurance_level, authenticated_at, version)
+values ('${id.claimant}', '${id.portalSession}', 'active', 'aal2', '${authenticatedAt}', 2);
 insert into public.claimant_release_packages (id, package_ref, case_id,
   release_authorization_id, cycle_id, review_round_id, owner_user_id, claimant_user_id,
   case_version, asset_count, grant_count, asset_snapshot_boundary,
@@ -132,7 +146,9 @@ do $test$ declare v_result jsonb; begin
     raise exception 'ROLLBACK_SIGNING_KEY' using errcode = 'P0001';
   exception when sqlstate 'P0001' then if sqlerrm <> 'ROLLBACK_SIGNING_KEY' then raise; end if; end;
   begin
-    update public.claimant_recipient_grants set status = 'revoked' where id = '${id.grant1}';
+    update public.claimant_recipient_grants
+    set status = 'revoked'${options.standalone ? "" : ", revoked_at = now()"}
+    where id = '${id.grant1}';
     begin perform public.claimant_authorize_release_retrieval_session(
       '${id.retrieval}', '${id.claimant}', '${id.portalSession}', '${authenticatedAt}',
       '${id.case}', 7, '${id.finalization}', '${id.package}', '${id.grant1}', '${id.key1}',
@@ -141,7 +157,7 @@ do $test$ declare v_result jsonb; begin
     raise exception 'ROLLBACK_GRANT' using errcode = 'P0001';
   exception when sqlstate 'P0001' then if sqlerrm <> 'ROLLBACK_GRANT' then raise; end if; end;
   begin
-    insert into public.claimant_review_interventions values ('${id.intervention}', '${id.case}');
+    ${interventionInsert}
     begin perform public.claimant_authorize_release_retrieval_session(
       '${id.retrieval}', '${id.claimant}', '${id.portalSession}', '${authenticatedAt}',
       '${id.case}', 7, '${id.finalization}', '${id.package}', '${id.grant1}', '${id.key1}',

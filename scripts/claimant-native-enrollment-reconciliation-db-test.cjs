@@ -1,20 +1,14 @@
 const { execFileSync } = require("node:child_process");
 const { randomUUID } = require("node:crypto");
-const { readFileSync } = require("node:fs");
-const { resolve } = require("node:path");
-
 const DEFAULT_CONTAINER = "supabase_db_supabase";
 
 function runClaimantNativeEnrollmentReconciliationDbTest(options = {}) {
-  const migration = readFileSync(resolve(__dirname,
-    "../supabase/migrations/20260812190000_claimant_native_enrollment_reconciliation.sql"), "utf8");
   const id = Object.fromEntries(["owner", "claimant", "session", "sessionTwo", "invitation", "invitationTwo", "appOne", "nativeOne",
     "appTwo", "nativeTwo", "keyOne", "keyTwo", "attemptOne", "attemptTwo", "caseTwo"]
     .map((name) => [name, randomUUID()]));
   const digest = "A".repeat(42) + "E"; const publicKey = "BA" + "A".repeat(84) + "E";
   const sql = `
 begin;
-${migration}
 insert into auth.users (id) values ('${id.owner}'), ('${id.claimant}');
 insert into public.claimant_portal_eligibilities (user_id, status, source)
 values ('${id.claimant}', 'eligible', 'synthetic_fixture');

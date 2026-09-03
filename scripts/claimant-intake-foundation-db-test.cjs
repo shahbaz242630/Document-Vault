@@ -1,11 +1,6 @@
 const { execFileSync } = require("node:child_process");
 const { randomUUID } = require("node:crypto");
-const { readFileSync } = require("node:fs");
-const { join } = require("node:path");
-
 const DEFAULT_CONTAINER = "supabase_db_supabase";
-const migration = readFileSync(join(__dirname,
-  "../supabase/migrations/20260812210000_claimant_intake_checklist_foundation.sql"), "utf8");
 
 function runClaimantIntakeFoundationDbTest(options = {}) {
   const id = Object.fromEntries(["owner", "claimant", "other", "session", "otherSession", "invitation",
@@ -21,7 +16,6 @@ function runClaimantIntakeFoundationDbTest(options = {}) {
   const incomplete = items.filter(({ item_key }) => item_key !== "conflict_declaration");
   const sql = `
 begin;
-${migration}
 insert into auth.users (id) values ('${id.owner}'), ('${id.claimant}'), ('${id.other}');
 insert into public.claimant_portal_eligibilities (user_id, status, source)
 values ('${id.claimant}', 'eligible', 'synthetic_fixture'), ('${id.other}', 'eligible', 'synthetic_fixture');

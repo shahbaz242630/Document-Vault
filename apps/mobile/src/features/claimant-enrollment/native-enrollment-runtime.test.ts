@@ -67,6 +67,7 @@ describe("hard-disabled claimant native enrollment runtime", () => {
 });
 
 const alias = "claimant-enrollment.v1.91000000-0000-4000-8000-000000000019";
+type FetchMockV1 = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 function dependencies() {
   const values = new Map<string, string>();
   const storage: NativeEnrollmentAttemptSecureStorageV1 & { values: Map<string, string> } = {
@@ -94,7 +95,7 @@ function dependencies() {
       claimantKeyId: fixture.challenge.claimant_key_id, invitationId: fixture.challenge.invitation_reference,
       invitationVersion: 1, replayed: false } },
   ];
-  const fetchMock = vi.fn<typeof fetch>(async () => response(replies.shift()));
+  const fetchMock = vi.fn<FetchMockV1>(async () => response(replies.shift()));
   let id = 15; return { accountId: "21000000-0000-4000-8000-000000000002",
     apiBaseUrl: "https://api.synthetic.test", createIdempotencyKey: () => `91000000-0000-4000-8000-${String(++id).padStart(12, "0")}`,
     fetch: fetchMock, getAccessToken: vi.fn(async () => "synthetic-token"), native, storage };

@@ -225,7 +225,8 @@ begin
   select * into v_round from public.claimant_review_rounds
   where id = p_review_round_id and case_id = p_case_id for update;
   select * into v_authorization from public.claimant_release_authorizations
-  where id = p_release_authorization_id and case_id = p_case_id for update;
+  -- Authorization records are append-only; mutable authority is locked above/below.
+  where id = p_release_authorization_id and case_id = p_case_id;
   select * into v_authority from public.claimant_release_authority_identities
   where id = v_authorization.authority_identity_id for update;
   if v_case.id is null or v_case.owner_user_id <> p_owner_user_id

@@ -38,10 +38,10 @@ ${migration}`; }
 
 function buildClaimantIndependentReviewDbTestSql(options = {}) {
   const names = ["case", "cycle", "reviewer1", "reviewer2", "assignment1", "assignment2",
-    "capability", "object", "first", "second", "hostile", "otherCase"];
+    "capability", "object", "first", "second", "hostile", "otherCase", "owner", "claimant",
+    "invitation", "key", "reviewer1User", "reviewer2User"];
   const id = Object.fromEntries(names.map((name) => [name, randomUUID()]));
-  return `begin;
-${options.standalone ? standaloneSchema() : ""}
+  const standaloneFixture = `
 insert into public.claimant_cases values ('${id.case}', 'cooldown', 5,
   'synthetic_policy_death_alpha', 1);
 insert into public.claimant_owner_protection_cycles values ('${id.cycle}', '${id.case}',
@@ -59,7 +59,80 @@ insert into public.claimant_reviewer_identities values
   ('${id.reviewer1}', 'active', true, false), ('${id.reviewer2}', 'active', true, false);
 insert into public.claimant_reviewer_assignments values
   ('${id.assignment1}', '${id.case}', '${id.cycle}', '${id.reviewer1}', 1, 'assigned', 1),
-  ('${id.assignment2}', '${id.case}', '${id.cycle}', '${id.reviewer2}', 2, 'assigned', 1);
+  ('${id.assignment2}', '${id.case}', '${id.cycle}', '${id.reviewer2}', 2, 'assigned', 1);`;
+  const liveFixture = `
+insert into auth.users(id) values ('${id.owner}'), ('${id.claimant}'),
+  ('${id.reviewer1User}'), ('${id.reviewer2User}');
+insert into public.claimant_identities(user_id, status) values ('${id.claimant}', 'active');
+insert into public.claimant_invitations(id, owner_user_id, recipient_address_digest, status,
+  accepted_by_user_id, expires_at, accepted_at)
+values ('${id.invitation}', '${id.owner}', repeat('a', 64), 'accepted', '${id.claimant}',
+  now() + interval '1 day', now());
+insert into public.claimant_device_keys(id, claimant_user_id, device_binding_digest, public_key_jwk)
+values ('${id.key}', '${id.claimant}', repeat('b', 64),
+  jsonb_build_object('kty','EC','crv','P-256','x',repeat('A',43),'y',repeat('B',43)));
+insert into public.claimant_cases(id, claimant_user_id, owner_user_id, invitation_id,
+  current_key_id, state, policy_pack_id, policy_pack_version, version)
+values ('${id.case}', '${id.claimant}', '${id.owner}', '${id.invitation}', '${id.key}',
+  'cooldown', 'synthetic_policy_death_alpha', 1, 5);
+insert into public.claimant_intake_snapshots(case_id, claimant_user_id, synthetic_only,
+  jurisdiction_key, trigger_type, routing_conditions, policy_pack_id, policy_pack_version,
+  status, version)
+values ('${id.case}', '${id.claimant}', true, 'synthetic_jurisdiction_alpha', 'death',
+  '{"probate_required":false,"relationship_evidence_required":false,"name_variation_present":false,
+  "translation_required":false,"attestation_required":false,"dispute_known":false}'::jsonb,
+  'synthetic_policy_death_alpha', 1, 'ready_for_review', 9);
+insert into public.claimant_checklist_items(case_id, item_key, source, availability) values
+  ('${id.case}', 'claimant_photo_identity', 'common', 'available'),
+  ('${id.case}', 'official_death_record', 'common', 'available');
+insert into public.claimant_evidence_preparation_items(case_id, preparation_version,
+  claimant_user_id, policy_pack_id, policy_pack_version, bundle_ref, item_key, disposition,
+  placeholder_ref, media_type, size_bytes, claimed_prepared_at, synthetic_only)
+values ('${id.case}', 9, '${id.claimant}', 'synthetic_policy_death_alpha', 1,
+  'synthetic_bundle_review', 'claimant_photo_identity', 'prepared',
+  'synthetic_evidence_review', 'application/pdf', 1024, now() - interval '1 minute', true);
+insert into public.claimant_evidence_upload_capabilities(id, case_id, claimant_user_id,
+  preparation_version, item_key, placeholder_ref, object_path, capability_digest,
+  expected_media_type, expected_size_bytes, status, expires_at, consumed_at)
+values ('${id.capability}', '${id.case}', '${id.claimant}', 9, 'claimant_photo_identity',
+  'synthetic_evidence_review', 'v1/${id.case}/${id.capability}', repeat('c',64),
+  'application/pdf', 1024, 'consumed', now() + interval '5 minutes', now());
+insert into public.claimant_evidence_objects(id, capability_id, case_id, claimant_user_id,
+  item_key, object_path, content_digest, detected_media_type, size_bytes, page_count,
+  expanded_size_bytes, status, scan_result, retention_policy_id, delete_after, scanned_at, version)
+values ('${id.capability}', '${id.capability}', '${id.case}', '${id.claimant}',
+  'claimant_photo_identity', 'v1/${id.case}/${id.capability}', repeat('e',64),
+  'application/pdf', 1024, 1, 1024, 'clean', 'clean', 'synthetic_retention_30d_v1',
+  now() + interval '30 days', now(), 2);
+insert into public.claimant_submission_receipts(case_id, claimant_user_id, synthetic_only,
+  submission_ref, acknowledgement_ref, submission_digest, case_version, intake_version,
+  preparation_version, evidence_object_count, unavailable_item_count, status, review_started,
+  release_authorized, claimed_created_at)
+values ('${id.case}', '${id.claimant}', true, 'synthetic_submission_review',
+  'synthetic_acknowledgement_${"a".repeat(32)}', repeat('d',64), 3, 9, 9, 1, 0,
+  'received_for_review', false, false, now() - interval '1 minute');
+insert into public.claimant_owner_protection_cycles(id, case_id, owner_user_id,
+  claimant_user_id, policy_pack_id, policy_pack_version, submission_case_version,
+  cycle_number, notice_ref, status, cooldown_seconds, delivery_evidence_digest,
+  delivery_verified_at, cooldown_started_at, cooldown_expires_at)
+values ('${id.cycle}', '${id.case}', '${id.owner}', '${id.claimant}',
+  'synthetic_policy_death_alpha', 1, 3, 1, 'synthetic_owner_notice_review',
+  'delivery_verified', 86400, repeat('f',64), now() - interval '2 days',
+  now() - interval '2 days', now() - interval '1 day');
+insert into public.claimant_reviewer_identities(id, user_id, pseudonymous_ref, reviewer_class)
+values ('${id.reviewer1}', '${id.reviewer1User}', 'synthetic_reviewer_review_one',
+  'accountable_human_test'), ('${id.reviewer2}', '${id.reviewer2User}',
+  'synthetic_reviewer_review_two', 'non_human_test_actor');
+insert into public.claimant_reviewer_assignments(id, case_id, cycle_id,
+  reviewer_identity_id, assignment_slot, assigned_case_version, cycle_number, status)
+values ('${id.assignment1}', '${id.case}', '${id.cycle}', '${id.reviewer1}', 1, 5, 1, 'assigned'),
+  ('${id.assignment2}', '${id.case}', '${id.cycle}', '${id.reviewer2}', 2, 5, 1, 'assigned');`;
+  const recuseUpdate = options.standalone
+    ? "set status = 'recused', assignment_version = 2"
+    : "set status = 'recused', assignment_version = 2, terminal_reason = 'availability', terminal_at = now(), updated_at = now()";
+  return `begin;
+${options.standalone ? standaloneSchema() : ""}
+${options.standalone ? standaloneFixture : liveFixture}
 set local role service_role;
 do $test$
 declare v_checklist text; v_evidence text; v_first jsonb; v_second jsonb;
@@ -102,7 +175,7 @@ begin
     raise exception 'stale checklist digest was accepted';
   exception when serialization_failure then null; end;
   begin
-    update public.claimant_reviewer_assignments set status = 'recused', assignment_version = 2
+    update public.claimant_reviewer_assignments ${recuseUpdate}
       where id = '${id.assignment1}';
     begin perform public.claimant_record_independent_review('${id.case}', '${id.cycle}',
       '${id.assignment2}', '${id.reviewer2}', 5, 1, 3, 9, 9,

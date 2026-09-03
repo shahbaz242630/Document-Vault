@@ -28,8 +28,7 @@ function buildClosureSql(options = {}, withExport = false) {
   const marker = withExport ? "CLAIMANT_RETRIEVAL_EXPORTED_CLOSURE_DB_TEST_PASSED"
     : "CLAIMANT_RETRIEVAL_CLOSURE_DB_TEST_PASSED";
   return `${fixture(options)}
-${accessMigration}
-${migration}
+${options.standalone ? `${accessMigration}\n${migration}` : ""}
 set local role service_role;
 do $test$
 declare v_case public.claimant_cases%rowtype;

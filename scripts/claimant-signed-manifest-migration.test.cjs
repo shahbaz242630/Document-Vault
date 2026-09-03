@@ -10,6 +10,10 @@ const service = readFileSync(join(root,
 const client = readFileSync(join(root,
   "services/api/src/claimant/signed-manifest-transaction-client.ts"), "utf8");
 const index = readFileSync(join(root, "services/api/src/index.ts"), "utf8");
+test("reads immutable release authorizations without requiring update grants", () => {
+  assert.doesNotMatch(migration, /from public\.claimant_release_authorizations[^;]*for update/);
+  assert.match(migration, /from public\.claimant_cases where id = p_case_id for update;/);
+});
 
 test("creates six forced-RLS signing and finalization tables", () => {
   for (const table of ["claimant_release_signing_authorities",
