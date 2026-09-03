@@ -72,6 +72,9 @@ jobs:
       - name: Latest offline-code V2 isolation tests
         run: node --test scripts/claimant-offline-code-v2-proof-attempt-isolation-check.test.cjs scripts/claimant-offline-code-v2-controller-isolation-check.test.cjs
 
+      - name: Live database fixture regression tests
+        run: node --test scripts/claimant-signed-manifest-db-test.test.cjs scripts/claimant-retrieval-session-db-test.test.cjs scripts/claimant-offline-code-v2-persistence-db-test.test.cjs
+
       - name: Production dependency audit for high or critical advisories
         run: npm run check:production-dependencies
 
