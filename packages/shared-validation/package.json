@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@vault/shared-types": "0.1.0",
-    "zod": "4.4.3"
+    "zod": "4.5.4"
   },
   "devDependencies": {
     "typescript": "5.9.2",
-    "vitest": "4.1.9"
+    "vitest": "4.1.11"
   }
 }
