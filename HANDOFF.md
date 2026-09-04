@@ -1,6 +1,15 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-09-03 (Asia/Dubai)
+Last updated: 2026-09-04 (Asia/Dubai)
+
+## Latest checkpoint — Slice 5N complete locally, 2026-09-04
+
+- PR #68 merged at `f529803`; merged main was safely integrated in `9f290db`, and clean merged 5L/5M baseline evidence is `f3120f4`.
+- Slice 5N authenticated possession-to-case handoff is complete locally on `codex/claimant-offline-code-v2-case-binding`. It remains literal-false, unmounted, synthetic-only, local, and unpushed.
+- A two-minute server-stored Ed25519 transcript binds the exact authenticated claimant, active fresh non-recovery AAL2 session/version, verified possession, server-selected case, expiry, and nonce. Public challenge IDs and original anonymous-proof signatures cannot create a case.
+- Verification passed after clean migration-zero resets: 1,274 workspace tests plus 3 established skips, 261 script/security tests, all typechecks, zero-warning source lint, Phase 1/security/GitHub Actions/dependency guards, 5M/5N hostile and concurrent database gates, real HTTP/session/Ed25519/PostgreSQL acceptance, RLS/catalog checks, and database lint with zero errors.
+- Canonical closeout and opener: `docs/handoff/2026-09-04-slice-5n-session-close.md`. No next slice is selected or authorized. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging. No push/publication, hosted mutation, deployment, native/EAS build, real data, activation, or subagent is authorized.
+
 
 ## Latest checkpoint — session close, 2026-09-03
 

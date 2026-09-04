@@ -53,7 +53,7 @@ export function createOfflineCodeV2CaseBindingTransactionClient(rpc: Rpc) {
         p_idempotency_key: input.idempotencyKey,
       });
       if (response.error) throw new OfflineCodeV2CaseBindingTransactionError(response.error.code);
-      const parsed = resultSchema.safeParse(response.data);
+      const parsed = offlineCodeV2CaseBindingResultSchema.safeParse(response.data);
       if (!parsed.success || parsed.data.case_id !== input.caseId) {
         throw new Error("Offline-code V2 case binding returned an invalid result.");
       }
@@ -76,7 +76,7 @@ export function createOfflineCodeV2CaseBindingTransactionClient(rpc: Rpc) {
   };
 }
 
-const resultSchema = z.strictObject({
+export const offlineCodeV2CaseBindingResultSchema = z.strictObject({
   case_id: z.string().uuid(),
   case_version: z.literal(1),
   state: z.literal("draft"),
