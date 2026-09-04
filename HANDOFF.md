@@ -1,6 +1,29 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-08-30 (Asia/Dubai)
+Last updated: 2026-09-04 (Asia/Dubai)
+
+## Latest checkpoint — Slice 5N complete locally, 2026-09-04
+
+- PR #68 merged at `f529803`; merged main was safely integrated in `9f290db`, and clean merged 5L/5M baseline evidence is `f3120f4`.
+- Slice 5N authenticated possession-to-case handoff is complete locally on `codex/claimant-offline-code-v2-case-binding`. It remains literal-false, unmounted, synthetic-only, local, and unpushed.
+- A two-minute server-stored Ed25519 transcript binds the exact authenticated claimant, active fresh non-recovery AAL2 session/version, verified possession, server-selected case, expiry, and nonce. Public challenge IDs and original anonymous-proof signatures cannot create a case.
+- Verification passed after clean migration-zero resets: 1,274 workspace tests plus 3 established skips, 261 script/security tests, all typechecks, zero-warning source lint, Phase 1/security/GitHub Actions/dependency guards, 5M/5N hostile and concurrent database gates, real HTTP/session/Ed25519/PostgreSQL acceptance, RLS/catalog checks, and database lint with zero errors.
+- Canonical closeout and opener: `docs/handoff/2026-09-04-slice-5n-session-close.md`. No next slice is selected or authorized. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging. No push/publication, hosted mutation, deployment, native/EAS build, real data, activation, or subagent is authorized.
+
+
+## Latest checkpoint — session close, 2026-09-03
+
+This checkpoint and the current opener in `CLAIM_HANDOFF.md` supersede all older branch/PR snapshots and historical resume prompts below.
+
+- Local Slice 5M branch: `codex/claimant-offline-code-v2-case-binding`, scaffold `af2fce3`, hardening `20b0d89`, verification/handoff checkpoint `f81516d`. 5M is implemented, literal-false, unmounted, and unpushed. Preserve these checkpoints; do not rebuild completed 5I-5M work.
+- Previous 5M verification passed: hostile SQL/RLS, a genuine two-session race with one winner, 5L database acceptance, 1,265 workspace tests plus 3 established skips, all typechecks/lint/security/phase guards, and 78 serial script-test files. This is local evidence, not merged-baseline closeout.
+- PR #68 is separate on `codex/claimant-offline-code-v2-controller` in `C:\Projects\GitHub\Sandoq Kin-pr68-watch`. Repair `88e88de` was pushed after `ff40766` and `6d47a23`. It fixes complete retrieval/delivery fixtures and the persistence test's obsolete RPC signatures, and adds CI fixture regressions; it changes no production grants, migrations, or flags.
+- Last GitHub observation at session close (2026-09-03 around 11:05 Asia/Dubai): PR #68 OPEN, not merged, head `88e88de`. App security, CodeQL, ZAP, and GitGuardian passed; native and Supabase live gates were in progress. Refresh the latest head/checks before acting; this is not an all-green claim.
+- PR repair verification passed on a clean PR-only local database: all nine downstream live DB gates, 236 serial script tests, standalone persistence, RLS attacks, catalog security, and security advisors. Source lint passed excluding only generated `supabase/.temp/**`; no lint config was weakened.
+- IMPORTANT local state: `supabase_db_sanduqkin` was reset from the PR worktree for that repair. It currently has the PR-only schema, NOT the 5M migration. Docker availability must be rechecked; do not treat this database as the verified combined baseline.
+- The existing ten-minute `watch-pr-68-checks` heartbeat remains ACTIVE and unchanged. It reports meaningful failures; after required checks pass and mergeability is confirmed, it merges, confirms the result, queues one baseline-first continuation in task `01a0623a-edeb-7c03-8ab0-0262693bcffd`, then deletes itself. Check for an already queued/running continuation; do not duplicate the watcher or work.
+- Slice 5N (authenticated possession-to-case handoff) is conditionally authorized only AFTER PR #68 passes/merges AND safe integration plus clean 5L/5M acceptance/regressions pass. Bind possession to the exact authenticated claimant and active AAL2 session, short expiry, single use, safe retries, and server-derived authority. A public challenge ID alone is never authorization.
+- Full closeout and copyable opener: `docs/handoff/2026-09-03-session-close.md`. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection. No 5M/5N push/publication, hosted mutation, deployment, new native/EAS build, real claimant data, capability activation, or subagents are authorized.
 
 ## Current Decision
 
@@ -8,7 +31,7 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Repository Snapshot
 
-- Active branch: `codex/claimant-offline-code-v2-controller`; Slice 5E is code-complete locally on top of Slice 5D checkpoint `49d892a`, hosted-migrated Slice 5C `81e1fca`, and the earlier claimant checkpoints.
+- Active branch: `codex/claimant-offline-code-v2-database-acceptance`; Slice 5L is complete at `03570ca` on top of scaffold `4b32214`, refactor `2be9d71`, Slice 5K `1bc43c4`, and the earlier local claimant checkpoints. PR #68 remains separate at `18c6df6`, with fresh checks running under the merge watcher.
 - PR #65 merged the owner-accepted native-enrollment review closure/remediation, hard-disabled Slices 1D-1H, Expo/dependency alignment, the bounded `image-size` security patch/exception, and Android smoke stabilization. It made no claimant deployment, hosted migration, TestFlight action, or production activation.
 - Closed review branch: `codex/claimant-synthetic-journey`; PR #54 merged after final protected CI passed.
 - Build 7 source at candidate dispatch: `90291df0a77a707dc27bee4a4c17ba8c0b01f1ac` (PR #56). Local `main` remains at PR #59 merge `887abd0459197c5123b8972e1b8c5bed14ec5528`; local-tracking `origin/main` is PR #65 merge `dcd6fefee4c527a4e0eceff54fed59e1f240f746`. The active claimant branch contains the later local Slice 1I-4J checkpoints through `49ee8a8` and has not been pushed in this session.
@@ -95,6 +118,13 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 - Slice 5C adds a literal-false enumeration-resistant challenge coordinator. It derives keyed boundary digests, consumes global/network/device/locator budgets before lookup, returns identical challenge/KDF schemas and replay semantics for active and unavailable records, and persists only real active-record challenges. It is reachable only through the immutable-false Slice 5E controller. See `docs/verification/2026-08-19-claimant-slice-5c-offline-code-v2-challenge-coordinator.md`.
 - Slice 5D adds a literal-false proof-verification/attempt coordinator. It verifies the exact frozen Ed25519 transcript, cross-binds every proof field to canonical challenge bytes, records only bounded public proof facts through Slice 5B, returns one rejection for invalid real and unavailable synthetic challenges, and asserts possession-only authority on success. It is reachable only through the immutable-false Slice 5E controller. See `docs/verification/2026-08-30-claimant-slice-5d-offline-code-v2-proof-attempt-coordinator.md`.
 - Slice 5E mounts strict challenge/proof HTTP paths behind a separate literal-false concealment gate. The enabled synthetic path requires exact origins/CORS/media/idempotency/body/path bindings, rejects Auth/Cookie identity input, derives domain-separated HMAC boundary digests only from an injected trusted-edge adapter, and fails before persistence when that adapter is absent. See `docs/verification/2026-08-30-claimant-slice-5e-offline-code-v2-controller.md`.
+- Slice 5F adds a literal-false, runtime-disconnected mobile proof producer and bounded KDF benchmark harness. It reproduces the frozen Argon2id/HKDF/Ed25519 proof, rejects locator/record/origin/expiry/proof-key substitutions, wipes derived buffers, and cannot mark a KDF profile production-approved. The desktop reference is not representative physical-device evidence. See `docs/verification/2026-08-30-claimant-slice-5f-offline-code-v2-client-proof.md`.
+- Slice 5G adds a literal-false physical KDF evidence runner with exact non-production physical-device, thermal, power, operator, synthetic-material, and value-free preconditions. It treats benchmark output as untrusted, emits only measured/invalid/runner-error evidence, and cannot approve production parameters. No device run occurred. See `docs/verification/2026-08-30-claimant-slice-5g-offline-code-v2-kdf-evidence.md`.
+- Slice 5H adds an isolated internal-preview iOS/Android KDF probe router/profile with separate app identities. It executes the frozen five-sample synthetic benchmark through Slice 5G and displays aggregate value-free evidence only; normal app builds cannot import it. No EAS build or device run occurred. See `docs/verification/2026-08-30-claimant-slice-5h-offline-code-v2-kdf-probe-host.md`.
+- Slice 5I is code-complete locally on `codex/claimant-offline-code-v2-mobile-coordinator`, based on Slice 5H `f8dce80`. The injected transport and mobile coordinator remain independently literal-false and runtime-disconnected; they validate the frozen synthetic KDF/challenge/proof bindings, support bounded identical public-proof retries, and return possession-only authority. No normal runtime, native binding, hosted state, build, deployment, or external activation changed. See `docs/verification/2026-08-31-claimant-slice-5i-offline-code-v2-mobile-coordinator.md`.
+- Slice 5J is code-complete locally on `codex/claimant-offline-code-v2-mobile-lifecycle`, based on Slice 5I `60a8601`. Its independently literal-false lifecycle root composes the injected proof flow, cancels and clears retry state on background/inactive events, closes permanently on lock/session-end/kill-switch, rejects stale completions, and provides awaitable disposal with value-free snapshots. No normal runtime or native binding is added. See `docs/verification/2026-08-31-claimant-slice-5j-offline-code-v2-mobile-lifecycle.md`.
+- Slice 5K is complete at local commit `1bc43c4` (`Add offline-code V2 mobile API acceptance`) on `codex/claimant-offline-code-v2-integration-acceptance`, based on Slice 5J `5b0fcdb`. Thirty synthetic in-process acceptance scenarios connect the actual mobile proof flow to the actual Hono controllers, server verifier, and transaction decoder, replacing only the database RPC. Lost-response retries, lifecycle cancellation after server acceptance, hostile bindings, and fail-closed output are covered. All existing runtime approvals remain literal false; no production implementation or native binding changed. This does not establish SQL/RLS, hosted, or physical-device correctness. See `docs/verification/2026-08-31-claimant-slice-5k-offline-code-v2-integration-acceptance.md`.
+- Slice 5L is complete at `03570ca` on `codex/claimant-offline-code-v2-database-acceptance`. It replaces the final database double with disposable local Supabase/PostgREST/RPC acceptance and passes registration, possession, retry, concurrency, expiry, limiter, RLS-denial, and possession-only-output scenarios. Verification: 1,258 workspace tests with 3 established skips, 236 static/security tests, 30 focused integration scenarios, and all typecheck/lint/phase/security checks. See `docs/verification/2026-09-02-claimant-slice-5l-offline-code-v2-database-acceptance.md`.
 - Hosted Supabase project `pxwtexjjttpgtairpepz` now contains the full 44-migration repository chain through Slice 5C. Hosted catalog and rollback tests prove forced RLS and zero client authority across 77 claimant tables and 54 claimant functions. One missing composite-key prerequisite was repaired, migration history was reconciled exactly, and direct execution of `rls_auto_enable()` was revoked. See `docs/verification/2026-08-19-hosted-claimant-migration-through-slice-5c.md`.
 - The 2026-08-12 Vercel workspace-package failure is resolved. `@vault/shared-types` now emits a bundled Node runtime entry during install, keeps source type/React Native resolution, and has a Vercel function guard that verifies the manifest, runtime file, and actual import. Preview `dpl_C6PGm7FBQn4LTLhYXyJHe1vh8Kro` passed repeated `/health`, claimant concealment, hostile-origin, existing authorization, unknown-route, and zero-exception log checks. Production remains intentionally on healthy rollback `dpl_H7NXnWujWdcLd6coKrraDHe1N5gr`; no promotion occurred.
 - The original review packet/ZIP remain preserved as historical evidence. The authenticated review and owner closure are recorded in `docs/verification/2026-08-12-native-enrollment-adversarial-pre-review.md` and `docs/verification/2026-08-12-native-enrollment-review-closure.md`; the remediated snapshot has a refreshed manifest/package.
@@ -113,14 +143,16 @@ The controlled internal TestFlight mobile gate is `PASS` for Sanduqkin `1.0.0` B
 
 ## Next Actions
 
-1. Review the remaining hosted Auth warning (leaked-password protection disabled) and measured foreign-key index recommendations; then request separate authorization for the next bounded offline-code V2 client/native proof-production and representative KDF-benchmark slice. Do not add a trusted-edge adapter, post-possession case binding, or enable the controller without separate review.
-2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E hard-disabled and concealed, unmounted, or disconnected from normal app requests. Hosted schema presence and mounted `404` routes grant no claimant capability.
+Use the current opener in `CLAIM_HANDOFF.md` and `docs/handoff/2026-09-03-session-close.md`. Resume implemented local 5M, preserve its checkpoints, and check whether the watcher already continued the task. 5N is conditionally authorized only after PR #68 passes/merges and the integrated 5L/5M baseline is reverified.
+
+1. Follow the current PR #68 gate: pending means wait; red means diagnose only the failed gate and keep 5N paused; confirmed green/merged means safely integrate main and rerun clean local 5L/5M acceptance, concurrency, regressions, and security checks before 5N. The current disposable database is PR-only and lacks 5M. Do not duplicate repairs or completed work.
+2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E/5F/5G/5H/5I/5J hard-disabled and concealed, unmounted, or disconnected from normal app requests. Hosted schema presence, preview deployment, and mounted `404` routes grant no claimant capability.
 3. Treat production Swift App Attest/custody methods, production alias/entitlement configuration, direct native binding, compile, and physical Apple evidence as a separate reviewed native gate.
 4. For any separately authorized next slice, treat Shahbaz Malik as the accountable human test reviewer and Codex only as a non-human technical test actor. Preserve the generic unavailable response and add no discovery/enumeration leak, UI/evidence access, production KDF/native binding, hosted migration, real data, deployment, or external behavior.
 5. Continue afterward through the safe V2 offline-code route without reintroducing V1 locator-only authority.
 6. The temporary `image-size` exception must be replaced by a compatible upstream fix or re-reviewed before it expires after 2026-09-30; it may not be broadened silently.
 7. Keep Build 7 closed and passed; do not deploy, create another build, or initiate public App Store release without separate authorization.
-8. The hourly claimant heartbeat was deleted at session close; no monitoring remains active.
+8. The PR #68 watcher reports meaningful red or merges when all required checks are green and the PR is mergeable. It grants no production-promotion, Supabase-mutation, scanner-suppression, or claimant-activation authority.
 
 ## Current Launch Blockers
 
@@ -133,6 +165,50 @@ These items do not block local production-readiness engineering with synthetic d
 - Legal confirmation of Shahbaz Malik as operator/data controller, contracting-entity and processor mapping, jurisdiction policy packs, evidence/retention rules, reviewer staffing, native custody proof, audit integrity, and independent assurance.
 
 ## Verification
+
+### Claimant Slice 5K closing baseline on 2026-08-31
+
+- Slice 5K is complete at local commit `1bc43c4` (`Add offline-code V2 mobile API acceptance`) on `codex/claimant-offline-code-v2-integration-acceptance`, based on Slice 5J `5b0fcdb`. Thirty synthetic in-process acceptance scenarios connect the actual mobile proof flow to the actual Hono controllers, server verifier, and transaction decoder, replacing only the database RPC. Lost-response retries, lifecycle cancellation after server acceptance, hostile bindings, and fail-closed output are covered. All existing runtime approvals remain literal false; no production implementation or native binding changed. This does not establish SQL/RLS, hosted, or physical-device correctness.
+- Workspace tests: 1,258 passed, with 3 established mobile skips. Static/security tests: 234 passed. All typechecks, zero-warning lint, web build (24 static pages), API bundle, vectors/custody, and isolation checks passed. Evidence: `docs/verification/2026-08-31-claimant-slice-5k-offline-code-v2-integration-acceptance.md`.
+- PR #68 remains open at `47a3322`; both Supabase live-security checks and GitGuardian still fail. The watcher file remains absent and monitoring is unconfirmed; no watcher change or fresh preview smoke is claimed.
+
+### Claimant Slice 5J closing baseline on 2026-08-31
+
+- Slice 5J is code-complete locally on `codex/claimant-offline-code-v2-mobile-lifecycle`, based on Slice 5I `60a8601`. Its independently literal-false lifecycle root composes the injected proof flow, cancels and clears retry state on background/inactive events, closes permanently on lock/session-end/kill-switch, rejects stale completions, and provides awaitable disposal with value-free snapshots. No normal runtime or native binding is added.
+- Workspace tests: 1,228 passed with 3 established environment-gated mobile skips. Static/security suite: 234 passed. All typechecks, zero-warning lint, unchanged 24-page web build, API bundle, deterministic vectors/custody, and isolation guards passed. Evidence: `docs/verification/2026-08-31-claimant-slice-5j-offline-code-v2-mobile-lifecycle.md`.
+- Latest read-only PR #68 refresh during Slice 5J: head remains `47a3322`; both Supabase live-security checks and GitGuardian still fail, while native, push emulator/hosted-integration, App Security, CodeQL, ZAP, and Vercel checks pass. The watcher automation file is now absent; active monitoring cannot be confirmed. The owner was informed, and no watcher was recreated or modified. No fresh preview smoke result is claimed.
+
+### Claimant Slice 5I closing baseline on 2026-08-31
+
+- Slice 5I is code-complete locally on `codex/claimant-offline-code-v2-mobile-coordinator`, based on Slice 5H `f8dce80`. The injected transport and mobile coordinator remain independently literal-false and runtime-disconnected; they validate the frozen synthetic KDF/challenge/proof bindings, support bounded identical public-proof retries, and return possession-only authority. No normal runtime, native binding, hosted state, build, deployment, or external activation changed.
+- All workspaces: 1,195 tests passed; 3 established environment-gated mobile tests skipped. Static/security suite: 231 passed. All typechecks, zero-warning lint, unchanged 24-page web build, API bundle, deterministic vectors/custody, and isolation guards passed.
+- Read-only PR #68 refresh on 2026-08-31: head remains `47a3322`; native compile/simulator checks and push emulator/hosted integration now pass, while both Supabase live-security checks and GitGuardian remain failed. The watcher is ACTIVE and its latest inspected turn was interrupted/idle. Direct staging health returned a deployment-protection 302, so no fresh health or concealment pass is claimed.
+- Evidence: `docs/verification/2026-08-31-claimant-slice-5i-offline-code-v2-mobile-coordinator.md`.
+
+### PR #68 watcher checkpoint on 2026-08-30
+
+- Watcher remediation commits on the PR branch are `a05896c` (portable native-enrollment fetch-mock typing), `2277950` (Expo SDK-compatible patch alignment), and `47a3322` (npm 11.4.2-compatible lock synchronization). These commits were made in an isolated worktree and did not disturb local Slice 5H.
+- At handoff capture, both App Security jobs, CodeQL, the OWASP ZAP retry, and both Vercel preview deployments passed. The explicit staging deployment remained Ready; `/health` returned healthy and both offline-code V2 challenge/proof POST paths returned concealed `404` responses without trusted-edge injection.
+- Android/iOS jobs were still running and both Supabase live-security jobs had failed for watcher investigation. GitGuardian remained blocked on two deterministic synthetic-vector findings that require an owner dashboard false-positive decision; no repository scanner exclusion or weakened gate was added.
+
+### Claimant Slice 5H closing baseline on 2026-08-30
+
+- All workspaces: 1,143 tests passed; 3 established environment-gated mobile tests skipped.
+- All typechecks, zero-warning lint, unchanged 24-page web build, API bundle, security, deterministic vectors/custody, and Slice 5H isolation checks passed.
+- No EAS build, physical-device run, or production KDF approval occurred.
+
+### Claimant Slice 5G closing baseline on 2026-08-30
+
+- All workspaces: 1,140 tests passed; 3 established environment-gated mobile tests skipped.
+- All typechecks, zero-warning lint, unchanged 24-page web build, API bundle, security, deterministic vectors/custody, and Slice 5G isolation checks passed.
+- No physical-device run or production KDF approval occurred.
+
+### Claimant Slice 5F closing baseline on 2026-08-30
+
+- All workspaces: 1,135 tests passed; 3 established environment-gated mobile tests skipped.
+- All typechecks, zero-warning lint, unchanged 24-page web build, API bundle, repository/GitHub Actions security, deterministic vectors/custody, and Slice 5F isolation checks passed.
+- Desktop reference Argon2id samples had median 86.27 ms and p95 116.38 ms; they do not constitute representative-device or production KDF approval.
+- PR #68 and staging preview `dpl_C7hkpzPvTsatfXWtZJeqjNCFwdV1` are monitored by owner-requested watcher `watch-claimant-integration-delivery`; no production promotion or claimant activation occurred.
 
 ### Claimant Slice 5E closing baseline on 2026-08-30
 
