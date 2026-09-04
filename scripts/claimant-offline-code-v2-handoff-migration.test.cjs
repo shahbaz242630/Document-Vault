@@ -10,6 +10,8 @@ const service = readFileSync(join(root,
   "services/api/src/claimant/offline-code-v2-handoff-service.ts"), "utf8");
 const controller = readFileSync(join(root,
   "services/api/src/claimant/offline-code-v2-handoff-controller.ts"), "utf8");
+const routes = readFileSync(join(root,
+  "services/api/src/claimant/offline-code-v2-handoff-routes.ts"), "utf8");
 const index = readFileSync(join(root, "services/api/src/index.ts"), "utf8");
 
 test("creates a two-minute service-only authenticated handoff", () => {
@@ -28,13 +30,15 @@ test("server-selects case and binds exact claimant, AAL2 session, proof, and tra
     assert.ok(migration.includes(token), token);
 });
 
-test("returns possession-only draft authority and remains literal-false and unmounted", () => {
+test("returns possession-only draft authority and mounts behind independent literal-false controls", () => {
   for (const token of ["'authority', 'route_possession_only'", "'identity_verified', false",
     "'claim_created', false", "'release_authorized', false"])
     assert.ok(migration.includes(token), token);
   assert.match(service, /CLAIMANT_OFFLINE_CODE_V2_HANDOFF_APPROVED = false as const/u);
   assert.match(controller, /CLAIMANT_OFFLINE_CODE_V2_HANDOFF_CONTROLLER_APPROVED = false as const/u);
-  assert.equal(index.includes("offline-code-v2-handoff"), false);
+  assert.match(routes, /CLAIMANT_OFFLINE_CODE_V2_HANDOFF_ROUTES_APPROVED = false as const/u);
+  assert.ok(index.includes("/claimant/offline-code/v2/handoffs/issue"));
+  assert.ok(index.includes("/claimant/offline-code/v2/handoffs/complete"));
 });
 
 test("stores no private proof or release material", () => {
