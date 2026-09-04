@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createOfflineCodeV2Coordinator, type OfflineCodeV2SyntheticAttempt } from "./offline-code-v2-coordinator";
 import type { OfflineCodeV2ProofInput } from "./offline-code-v2-proof-core";
 import { assertOfflineCodeV2Origin, createOfflineCodeV2Transport, OfflineCodeV2UnavailableError,
-  type OfflineCodeV2PossessionResult } from "./offline-code-v2-transport";
+  type OfflineCodeV2PossessionResult, type OfflineCodeV2Send } from "./offline-code-v2-transport";
 
 export const CLAIMANT_OFFLINE_CODE_V2_LIFECYCLE_APPROVED = false as const;
 
@@ -32,7 +32,7 @@ type LifecycleInput = Readonly<{
   productionRuntime: false;
   apiOrigin: string;
   claimantOrigin: string;
-  send: typeof fetch;
+  send: OfflineCodeV2Send;
   producer: Readonly<{ produce(value: OfflineCodeV2ProofInput): Promise<OfflineCodePossessionProofV2> }>;
   lifecycle: OfflineCodeV2LifecycleSource;
   now?: () => Date;

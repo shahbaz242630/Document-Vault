@@ -42,6 +42,7 @@ export type OfflineCodeV2Transport = Readonly<{
   verifyProof(value: OfflineCodeV2ProofRequest & Readonly<{ signal: AbortSignal }>):
     Promise<OfflineCodeV2PossessionResult>;
 }>;
+export type OfflineCodeV2Send = (url: string, init?: RequestInit) => Promise<Response>;
 
 export class OfflineCodeV2UnavailableError extends Error {
   constructor(readonly retryable = false) {
@@ -55,7 +56,7 @@ export function createOfflineCodeV2Transport(input: Readonly<{
   approved?: boolean;
   apiOrigin: string;
   claimantOrigin: string;
-  send: typeof fetch;
+  send: OfflineCodeV2Send;
 }>): OfflineCodeV2Transport {
   const approved = input.approved ?? CLAIMANT_OFFLINE_CODE_V2_TRANSPORT_APPROVED;
   const apiOrigin = input.apiOrigin;
