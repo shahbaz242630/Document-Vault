@@ -120,14 +120,13 @@ async function runConcurrentHandoffTest(selectedContainer) {
     child.stdout.on("data", onData); child.stdin.end(input);
   });
   sync(buildOfflineCodeV2CaseBindingDbTestSql({ id, fixtureOnly: true }));
-  let handoffId;
   try {
     const issued = sync(`set role service_role; select (e->>'handoff_id') || '|' ||
       (e->>'transcript_digest') from (select public.claimant_offline_code_v2_handoff('issue',
       '${id.claimant}','${id.session}','${id.challenge}','${randomUUID()}',null,null) e) x; reset role;`)
       .split(/\r?\n/u).find((line) => line.includes("|"));
     if (!issued) throw new Error("Concurrent handoff fixture was not issued.");
-    const [handoff, transcript] = issued.split("|"); handoffId = handoff;
+    const [handoff, transcript] = issued.split("|");
     const completionKey = randomUUID();
     let signalReady; const ready = new Promise((resolve) => { signalReady = resolve; });
     const first = execute(`begin; set local role service_role;
