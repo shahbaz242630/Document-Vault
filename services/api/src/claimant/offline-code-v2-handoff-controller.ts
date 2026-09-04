@@ -1,7 +1,8 @@
 import type { Context } from "hono";
 import { z } from "zod";
 
-import { createOfflineCodeV2HandoffService } from "./offline-code-v2-handoff-service.js";
+import { createOfflineCodeV2HandoffService, handoffCompleteSchema, handoffIssueSchema }
+  from "./offline-code-v2-handoff-service.js";
 import { getClaimantRuntimeConfig, requireClaimantCapability, type ClaimantRuntimeConfig }
   from "./runtime-config.js";
 
@@ -11,6 +12,7 @@ type Deps = Readonly<{
   runtimeConfig?: ClaimantRuntimeConfig;
   config?: Readonly<{ apiOrigin: string; claimantOrigin: string }>;
   service?: ReturnType<typeof createOfflineCodeV2HandoffService>;
+  createService?: () => ReturnType<typeof createOfflineCodeV2HandoffService>;
 }>;
 const limit = 16_384;
 
@@ -21,7 +23,7 @@ export function createOfflineCodeV2HandoffController(action: "issue" | "complete
     try { requireClaimantCapability(deps.runtimeConfig ?? getClaimantRuntimeConfig(), "offlineCodeV2"); }
     catch { return concealed(context); }
     const config = deps.config;
-    if (!config || !deps.service || !validOrigin(config.apiOrigin) || !validOrigin(config.claimantOrigin)
+    if (!config || !validOrigin(config.apiOrigin) || !validOrigin(config.claimantOrigin)
       || new URL(context.req.url).origin !== config.apiOrigin
       || context.req.header("Origin") !== config.claimantOrigin || context.req.header("Cookie")
       || context.req.method !== "POST") return concealed(context);
@@ -38,7 +40,11 @@ export function createOfflineCodeV2HandoffController(action: "issue" | "complete
     if (declared && (!/^\d+$/u.test(declared) || Number(declared) > limit)) return unavailable(context);
     try {
       const body = await boundedBody(context);
-      const result = await deps.service[action](match[1], key.data, body);
+      const parsed = (action === "issue" ? handoffIssueSchema : handoffCompleteSchema).safeParse(body);
+      if (!parsed.success) return unavailable(context);
+      const service = deps.service ?? deps.createService?.();
+      if (!service) return unavailable(context);
+      const result = await service[action](match[1], key.data, parsed.data);
       return context.json({ result });
     } catch { return unavailable(context); }
   };

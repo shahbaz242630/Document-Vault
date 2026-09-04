@@ -34,6 +34,8 @@ import { createOwnerProtectionControllerV1, createOwnerProtectionPreflightContro
   from "./claimant/owner-protection-controller.js";
 import { createOfflineCodeV2Controller, createOfflineCodeV2PreflightController }
   from "./claimant/offline-code-v2-controller.js";
+import { createOfflineCodeV2HandoffPreflightRoute, createOfflineCodeV2HandoffRoute }
+  from "./claimant/offline-code-v2-handoff-routes.js";
 import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
 
 export const app = new Hono();
@@ -136,6 +138,13 @@ for (const [path, action] of [
 ] as const) {
   app.post(path, createOfflineCodeV2Controller(action, { runtimeConfig: claimantRuntimeConfig }));
   app.options(path, createOfflineCodeV2PreflightController({ runtimeConfig: claimantRuntimeConfig }));
+}
+for (const [path, action] of [
+  ["/claimant/offline-code/v2/handoffs/issue", "issue"],
+  ["/claimant/offline-code/v2/handoffs/complete", "complete"],
+] as const) {
+  app.post(path, createOfflineCodeV2HandoffRoute(action));
+  app.options(path, createOfflineCodeV2HandoffPreflightRoute());
 }
 
 for (const [path, action, method] of [
