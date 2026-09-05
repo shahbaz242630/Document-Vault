@@ -1,14 +1,26 @@
 # Sanduqkin Claimant Engineering Handoff
 
-Last updated: 2026-09-04 (Asia/Dubai)
+Last updated: 2026-09-05 (Asia/Dubai)
 
-## Latest checkpoint — Slice 5N complete locally, 2026-09-04
+## Current checkpoint and opener — Slice 5P client, 2026-09-05
 
-- PR #68 merged at `f529803`; merged main was safely integrated in `9f290db`, and clean merged 5L/5M baseline evidence is `f3120f4`.
-- Slice 5N authenticated possession-to-case handoff is complete locally on `codex/claimant-offline-code-v2-case-binding`. It remains literal-false, unmounted, synthetic-only, local, and unpushed.
-- A two-minute server-stored Ed25519 transcript binds the exact authenticated claimant, active fresh non-recovery AAL2 session/version, verified possession, server-selected case, expiry, and nonce. Public challenge IDs and original anonymous-proof signatures cannot create a case.
-- Verification passed after clean migration-zero resets: 1,274 workspace tests plus 3 established skips, 261 script/security tests, all typechecks, zero-warning source lint, Phase 1/security/GitHub Actions/dependency guards, 5M/5N hostile and concurrent database gates, real HTTP/session/Ed25519/PostgreSQL acceptance, RLS/catalog checks, and database lint with zero errors.
-- Canonical closeout and opener: `docs/handoff/2026-09-04-slice-5n-session-close.md`. No next slice is selected or authorized. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging. No push/publication, hosted mutation, deployment, native/EAS build, real data, activation, or subagent is authorized.
+This checkpoint supersedes all older "current" openers, branch snapshots and watcher instructions below. PR #71 merged at `201f079`; PR #72 merged Slice 5O at `96e41e0`. Do not repeat their staging or merge work.
+
+Owner-authorized Slice 5P is implemented locally on `codex/claimant-offline-code-v2-handoff-client`, from `96e41e0`: a separate disabled mobile handoff transport and coordinator, strict account/session/source/domain transcript binding, exact opaque-byte injected synthetic signing, allowlisted draft result and bounded identical completion retries. Production native signing, lifecycle/UI composition and activation remain out of scope.
+
+Read `docs/superpowers/specs/2026-09-05-claimant-slice-5p-handoff-client.md` and `docs/verification/2026-09-05-claimant-slice-5p-handoff-client.md`. Finish local verification and publish the code slice together with preserved handoff edits. Use the existing matching watcher if present; otherwise create one for this PR. The owner requests watcher-reported green/red for PR gates, staging and logs. Green permits the next delivery step; red requires a focused fix followed by watcher re-evaluation. Pending checks and inaccessible protected staging are not green. Preserve merge-commit/branch-retention practice and verify ancestry after merge. No next slice is selected or authorized automatically.
+
+Keep all approvals literal false and use synthetic data only. No hosted mutations, production deployment/promotion, native/EAS build, production signer, real claimant data or expansion of identity/intake/review/release authority. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection, modification, deletion or staging. Earlier token-rotation follow-up is unconfirmed; never retrieve or reproduce that token.
+
+## Latest checkpoint — PR #71 green; protected staging smoke blocked, 2026-09-04
+
+- Slice 5N is published in PR #71 from `codex/claimant-offline-code-v2-case-binding`; current head is `aff02b7d3013e19cb9f983a50733d3018d245850`. The PR is open, mergeable, and GitHub reports `CLEAN`.
+- Two watcher repairs were pushed: `daba9ee` stabilizes the cross-platform offline-code transport typing, and `aff02b7` removes the unused handoff database-test variable. Proportional local typecheck, focused test, lint, Phase 1, and security checks passed before each push.
+- Every required GitHub/Vercel gate is now successful or intentionally skipped: app security, CodeQL, OWASP ZAP, Android compile/emulator, iOS simulator, live Supabase security/integration, GitGuardian, and both Vercel projects. The ZAP gate's first attempt failed before producing a report despite a healthy API; one evidence-based retry of the same pinned scanner passed.
+- Both `sanduqkin-api` and `sanduqkin-web` preview deployments are Ready. Vercel Authentication correctly returns `302` to SSO with `X-Robots-Tag: noindex` for `/health`, hostile claimant paths, and the web root. Because no `VERCEL_AUTOMATION_BYPASS_SECRET` is available, application-level health, concealment, web, and runtime-log staging verification is incomplete. Do not merge until that smoke test passes through an existing or separately authorized bypass; do not weaken preview protection.
+- The ten-minute heartbeat `pr-71-green-staging-merge-watcher` remains ACTIVE. It is authorized to complete staging, merge PR #71 with a merge commit without deleting the branch, verify the PR head is an ancestor of `origin/main`, report the result, and delete itself. It must remain paused while staging is inaccessible.
+- Main branch protection now requires strict/up-to-date app security, CodeQL, ZAP, Android compile, iOS smoke, and both Vercel gates; admin enforcement, resolved conversations, and force-push/deletion protection are enabled. GitHub production environments for the API and web require the owner reviewer and protected branches. Solo-repository approvals remain zero to avoid deadlocking owner-authored PRs; GitHub still reports that administrators can bypass environment protection.
+- Slice 5N remains synthetic-only, literal-false, and unmounted. No hosted Supabase mutation, production promotion/deployment, native/EAS build, real claimant data, or capability activation occurred. Canonical closeout and copyable opener: `docs/handoff/2026-09-04-slice-5n-session-close.md`. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging.
 
 
 ## Latest checkpoint — session close, 2026-09-03
@@ -69,18 +81,18 @@ Interim reviewer decision on 2026-08-18: Shahbaz Malik is the accountable human 
 
 ## Next Session Opener — current
 
-1. Read the latest checkpoint, all four handoffs, `docs/handoff/2026-09-03-session-close.md`, and the 5M verification record. Historical resume prompts are not current instructions.
-2. Inspect Git status on `codex/claimant-offline-code-v2-case-binding`; retain `af2fce3`, `20b0d89`, `f81516d`, and the latest local handoff commit. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection, modification, deletion, or staging.
-3. Refresh PR #68's actual head, checks, and merge result. Inspect whether the watcher already queued or ran its baseline-first continuation. Do not duplicate the watcher or implementation.
-4. If pending, wait. If failed, diagnose the specific gate and keep 5N paused; use only existing in-scope repair authority and request direction for any expansion. Do not suppress checks, rerun jobs blindly, or assume merge.
-5. After confirmed required GREEN and merge, safely integrate merged main into local 5M. Preserve local work and include the PR repairs instead of copying them independently. Reset only the disposable local stack from the integrated branch and rerun clean 5L/5M SQL/RLS, genuine concurrency, end-to-end database acceptance, and regression/security checks. The current local database is PR-only and lacks 5M.
-6. Only after that passes, proceed with conditionally authorized 5N: exact authenticated claimant/active AAL2-session binding of verified possession, short expiry, single use, safe retries, cross-account/replay rejection, server-derived 5M authority, and possession-to-handoff-to-draft-case tests. A public challenge ID alone is not authority.
-7. Keep all claimant approvals literal-false. No 5M/5N push/publication, hosted changes, deployment, new native/EAS build, real data, activation, provider changes, or subagents. Hosted MFA and native/independent launch gates remain parked; possession does not verify identity or authorize release.
-8. Closing the session does not cancel the watcher's existing merge-and-resume authorization. Its continuation may run before the next manual session; inspect state before repeating work. The earlier exposed-token rotation follow-up remains unconfirmed; never retrieve or reproduce the token.
+1. Read the latest checkpoint, all four handoffs, `docs/handoff/2026-09-04-slice-5n-session-close.md`, and the Slice 5N verification record. Historical resume prompts are not current instructions.
+2. Inspect Git status on `codex/claimant-offline-code-v2-case-binding` and preserve the current handoff edits. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection, modification, deletion, or staging.
+3. Refresh PR #71 and confirm its head before acting. At close it was open, mergeable/`CLEAN`, fully green, and at `aff02b7d3013e19cb9f983a50733d3018d245850`; both Vercel previews were Ready.
+4. Confirm the ten-minute `pr-71-green-staging-merge-watcher` is active. Do not duplicate it. If any fresh gate is red, diagnose and repair only that gate without weakening it.
+5. Finish the required staging smoke through an existing authorized Vercel automation bypass: API `/health`, hostile/unauthorized offline-code V2 and authenticated-handoff route concealment and origin handling, safe web response, and relevant exception logs. No bypass was available at close. Do not create a persistent bypass or weaken SSO protection without explicit authorization; if still blocked, report it and do not merge.
+6. After staging passes, merge PR #71 with a merge commit without deleting the branch, fetch `origin/main`, and verify the exact PR head is an ancestor. Report the result and delete the watcher.
+7. Keep all claimant approvals literal-false and routes unmounted. No hosted Supabase/Auth/Storage mutation, production promotion/deployment, native/EAS build, real claimant data, capability activation, or expansion into identity/intake/review/release.
+8. No next engineering slice is selected or authorized. The earlier exposed-token rotation follow-up remains unconfirmed; never retrieve or reproduce the token.
 
 ### Copyable next-session prompt — current
 
-> Partner, read CLAIM_HANDOFF.md first, then the other three handoffs and docs/handoff/2026-09-03-session-close.md. Resume the local Slice 5M case-binding branch, preserving all checkpoints and unrelated runtime/browser directories without inspecting them. Check PR #68 and the watcher outcome, including whether its continuation already ran. If still pending, wait; if red, diagnose only the failed gate and do not start 5N. After confirmed green and merge, safely integrate merged main and rerun clean local 5L/5M acceptance and regressions. Only once that passes, continue the conditionally authorized Slice 5N authenticated possession-to-case handoff. Keep everything synthetic, literal-false, local, and undeployed; do not push/publish 5M/5N, mutate hosted services, build native/EAS apps, use real claimant data, or spawn subagents.
+> Partner, read CLAIM_HANDOFF.md first, then HANDOFF.md, SECURITY_HANDOFF.md, MVP_HANDOFF.md, docs/handoff/2026-09-04-slice-5n-session-close.md, and the Slice 5N verification record. Resume `codex/claimant-offline-code-v2-case-binding` and preserve the local handoff edits plus `.codex-runtime/` and `.playwright-cli/` without inspecting those protected directories. Refresh PR #71 and confirm the active watcher; at close, head `aff02b7d3013e19cb9f983a50733d3018d245850` was fully green, mergeable, and both Vercel previews were Ready. The only blocker was Vercel SSO preventing the required application-level staging smoke, with no automation-bypass credential available. Use an existing authorized bypass if available—do not create one or weaken protection without explicit approval—then verify API health, hostile route concealment/origins, the web preview, and exception logs. If staging passes, merge with a merge commit without deleting the branch, fetch `origin/main`, verify ancestry, report completion, and delete the watcher. If still blocked, do not merge. Do not start a new slice or mutate hosted Supabase/Auth/Storage, promote production, build native/EAS artifacts, use real claimant data, activate capabilities, or expand authority.
 
 ### Phase 2 Slice 1A Exit Gate
 
