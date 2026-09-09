@@ -75,6 +75,9 @@ jobs:
       - name: Live database fixture regression tests
         run: node --test scripts/claimant-signed-manifest-db-test.test.cjs scripts/claimant-retrieval-session-db-test.test.cjs scripts/claimant-offline-code-v2-persistence-db-test.test.cjs
 
+      - name: Authenticated handoff client isolation
+        run: node --test scripts/claimant-handoff-client-isolation-check.test.cjs
+
       - name: Production dependency audit for high or critical advisories
         run: npm run check:production-dependencies
 

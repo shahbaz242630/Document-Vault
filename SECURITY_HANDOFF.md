@@ -1,14 +1,24 @@
 # Sanduqkin Security Handoff
 
-Last updated: 2026-09-04 (Asia/Dubai)
+Last updated: 2026-09-05 (Asia/Dubai)
 
-## Latest checkpoint — Slice 5N complete locally, 2026-09-04
+## Current checkpoint — Slice 5P client, 2026-09-05
 
-- PR #68 merged at `f529803`; merged main was safely integrated in `9f290db`, and clean merged 5L/5M baseline evidence is `f3120f4`.
-- Slice 5N authenticated possession-to-case handoff is complete locally on `codex/claimant-offline-code-v2-case-binding`. It remains literal-false, unmounted, synthetic-only, local, and unpushed.
-- A two-minute server-stored Ed25519 transcript binds the exact authenticated claimant, active fresh non-recovery AAL2 session/version, verified possession, server-selected case, expiry, and nonce. Public challenge IDs and original anonymous-proof signatures cannot create a case.
-- Verification passed after clean migration-zero resets: 1,274 workspace tests plus 3 established skips, 261 script/security tests, all typechecks, zero-warning source lint, Phase 1/security/GitHub Actions/dependency guards, 5M/5N hostile and concurrent database gates, real HTTP/session/Ed25519/PostgreSQL acceptance, RLS/catalog checks, and database lint with zero errors.
-- Canonical closeout and opener: `docs/handoff/2026-09-04-slice-5n-session-close.md`. No next slice is selected or authorized. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging. No push/publication, hosted mutation, deployment, native/EAS build, real data, activation, or subagent is authorized.
+This supersedes older PR/watcher/next-action snapshots below. PR #71 and PR #72 are merged; Slice 5P is local on `codex/claimant-offline-code-v2-handoff-client`, based on `96e41e0`. New client approvals are literal false, with no normal-runtime importer, ambient authentication/network/storage or native signer.
+
+The client checks the server transcript's domain, exact claimant/session/version, source challenge, record binding and expiry before synthetic injected signing. It transmits only existing allowlisted request fields and a header bearer, and retains only the exact signed completion and public binding metadata for bounded retries. The server remains independently authoritative. A draft result grants no identity, intake, review or release authority.
+
+Verification and limitations: `docs/verification/2026-09-05-claimant-slice-5p-handoff-client.md`. Use a watcher for exact-head PR gates and protected preview smoke/logs: green permits progression, red requires focused repair and re-evaluation. Do not merge pending/red checks or inaccessible staging, weaken protection, mutate hosted systems, activate capabilities, or start a further slice automatically. Preserve `.codex-runtime/` and `.playwright-cli/` untouched.
+
+## Latest checkpoint — PR #71 green; protected staging smoke blocked, 2026-09-04
+
+- Slice 5N is published in PR #71 from `codex/claimant-offline-code-v2-case-binding`; current head is `aff02b7d3013e19cb9f983a50733d3018d245850`. The PR is open, mergeable, and GitHub reports `CLEAN`.
+- Two watcher repairs were pushed: `daba9ee` stabilizes the cross-platform offline-code transport typing, and `aff02b7` removes the unused handoff database-test variable. Proportional local typecheck, focused test, lint, Phase 1, and security checks passed before each push.
+- Every required GitHub/Vercel gate is now successful or intentionally skipped: app security, CodeQL, OWASP ZAP, Android compile/emulator, iOS simulator, live Supabase security/integration, GitGuardian, and both Vercel projects. The ZAP gate's first attempt failed before producing a report despite a healthy API; one evidence-based retry of the same pinned scanner passed.
+- Both `sanduqkin-api` and `sanduqkin-web` preview deployments are Ready. Vercel Authentication correctly returns `302` to SSO with `X-Robots-Tag: noindex` for `/health`, hostile claimant paths, and the web root. Because no `VERCEL_AUTOMATION_BYPASS_SECRET` is available, application-level health, concealment, web, and runtime-log staging verification is incomplete. Do not merge until that smoke test passes through an existing or separately authorized bypass; do not weaken preview protection.
+- The ten-minute heartbeat `pr-71-green-staging-merge-watcher` remains ACTIVE. It is authorized to complete staging, merge PR #71 with a merge commit without deleting the branch, verify the PR head is an ancestor of `origin/main`, report the result, and delete itself. It must remain paused while staging is inaccessible.
+- Main branch protection now requires strict/up-to-date app security, CodeQL, ZAP, Android compile, iOS smoke, and both Vercel gates; admin enforcement, resolved conversations, and force-push/deletion protection are enabled. GitHub production environments for the API and web require the owner reviewer and protected branches. Solo-repository approvals remain zero to avoid deadlocking owner-authored PRs; GitHub still reports that administrators can bypass environment protection.
+- Slice 5N remains synthetic-only, literal-false, and unmounted. No hosted Supabase mutation, production promotion/deployment, native/EAS build, real claimant data, or capability activation occurred. Canonical closeout and copyable opener: `docs/handoff/2026-09-04-slice-5n-session-close.md`. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging.
 
 
 ## Latest checkpoint — session close, 2026-09-03
