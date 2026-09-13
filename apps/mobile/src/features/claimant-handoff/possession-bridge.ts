@@ -1,9 +1,7 @@
-import type { OfflineCodePossessionProofV2 } from "@vault/shared-types";
 import { z } from "zod";
 
 import { createOfflineCodeV2Lifecycle, type OfflineCodeV2LifecycleSource } from "../claimant-offline-code/offline-code-v2-lifecycle";
 import type { OfflineCodeV2SyntheticAttempt, OfflineCodeV2VerifiedSource } from "../claimant-offline-code/offline-code-v2-coordinator";
-import type { OfflineCodeV2ProofInput } from "../claimant-offline-code/offline-code-v2-proof-core";
 import type { OfflineCodeV2Send } from "../claimant-offline-code/offline-code-v2-transport";
 import { attemptSchema, HandoffUnavailableError, validateSession, type HandoffCompletion,
   type HandoffSession } from "./contracts";
@@ -22,7 +20,7 @@ type Input = Readonly<{
   approved?: boolean; syntheticOnly: true; productionRuntime: false;
   apiOrigin: string; claimantOrigin: string;
   possessionSend: OfflineCodeV2Send; handoffSend: HandoffSend;
-  producer: Readonly<{ produce(value: OfflineCodeV2ProofInput): Promise<OfflineCodePossessionProofV2> }>;
+  producer: Parameters<typeof createOfflineCodeV2Lifecycle>[0]["producer"];
   signer: Readonly<{ syntheticOnly: true; sign(value: Readonly<{ transcriptBytesBase64url: string;
     challengeId: string; recordBindingDigest: string; signal: AbortSignal }>): Promise<string> }>;
   getSession: () => unknown; lifecycle: OfflineCodeV2LifecycleSource; now?: () => number;
