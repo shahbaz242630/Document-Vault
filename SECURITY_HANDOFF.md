@@ -2,7 +2,7 @@
 
 ## Current checkpoint — Slice 5Q lifecycle, 2026-09-13
 
-PR #73 merged Slice 5P at `b6cd577`. The local Slice 5Q foreground lifecycle root remains independently literal-false and runtime-disconnected. It invalidates in-flight work and exact completion retry on background/inactive, closes on lock/session end/disable and malformed or regressing events, suppresses late results, and offers awaitable disposal with a value-free snapshot. No native signing, production custody, hosted mutation, activation or new external claimant authority was added. The historical 5P local staging note does not prove application-level handoff-route concealment or hostile-origin smoke before PR #73 merged. See the 5Q spec/verification record.
+PR #73 merged Slice 5P at `b6cd577`. Slice 5Q is published in PR #79. Its foreground lifecycle root remains independently literal-false and runtime-disconnected. It invalidates in-flight work and exact completion retry on background/inactive, closes on lock/session end/disable and malformed or regressing events, suppresses late results, and offers awaitable disposal with a value-free snapshot. Local dependency audit and Docker-backed handoff acceptance pass; `pr-79-handoff-lifecycle-gates` monitors exact-head CI and protected staging without merging. No native signing, production custody, hosted mutation, activation or new external claimant authority was added. The historical 5P local staging note does not prove application-level handoff-route concealment or hostile-origin smoke before PR #73 merged. See the 5Q spec/verification record.
 
 Last updated: 2026-09-13 (Asia/Dubai)
 
