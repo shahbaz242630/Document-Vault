@@ -8,6 +8,8 @@ The next bounded synthetic slice, 5Q, is published in PR #79 from `codex/claiman
 
 Keep all claimant approvals false. No normal mobile UI/runtime importer, production signer, native build, hosted mutation, deployment, real claimant data or downstream intake/release activation was added. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging. The focused dependency follow-up patched Next, Sharp and both xmldom lines without weakening the audit. Full workspace tests, typechecks, lint, security/isolation checks, web build, production dependency audit and local handoff database acceptance now pass. The active ten-minute `pr-79-handoff-lifecycle-gates` watcher reports meaningful exact-head CI and protected-preview red/green evidence; it must not merge or deploy. CI and protected staging evidence remain required before any merge or activation claim.
 
+PR #79's first head `96129f3` went red at `npm ci` before tests because npm 11.4.2 required an optional `react-native-worklets@0.8.3` lock entry removed by the newer local installer. A lock-only repair restores that entry; npm 11.4.2 clean install, audit, focused handoff tests, typechecks and security/isolation pass locally. Push the repair and let the existing watcher re-evaluate the new exact head. Do not interpret the earlier red runs or passing Vercel build contexts as complete staging evidence.
+
 Last updated: 2026-09-13 (Asia/Dubai)
 
 ## Current checkpoint — Slice 5P client implemented locally, 2026-09-05
