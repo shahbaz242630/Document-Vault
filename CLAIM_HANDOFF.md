@@ -1,6 +1,12 @@
 # Sanduqkin Claimant Engineering Handoff
 
-Last updated: 2026-09-05 (Asia/Dubai)
+## Current checkpoint — Slice 5Q lifecycle, 2026-09-13
+
+PR #73 merged Slice 5P at `b6cd577` on 2026-09-09. Slice 5Q is now implemented locally on `codex/claimant-handoff-lifecycle`: a separate, synthetic-only, literal-false foreground lifecycle wrapper for the 5P mobile handoff. It cancels and clears retry on background/inactive, closes on lock/session end/disable or hostile event ordering, discards late results and supports awaitable disposal. See the 5Q spec and verification record. The prior 5P staging note is preserved; it does not establish handoff-route concealment/hostile-origin smoke before the merge.
+
+The complete claimant journey is still not runtime-wired. Hosted MFA, production native custody/signing, UI/session composition, provider adapters and whole-journey acceptance remain open. Keep capabilities false and synthetic data only. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging. No further slice follows automatically.
+
+Last updated: 2026-09-13 (Asia/Dubai)
 
 ## Current checkpoint and opener — Slice 5P client, 2026-09-05
 

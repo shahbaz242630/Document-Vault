@@ -1,0 +1,11 @@
+# Slice 5Q — authenticated handoff lifecycle verification
+
+Date: 2026-09-13 (Asia/Dubai). Baseline: PR #73 merge `b6cd577`, with its exact client head `77b83b8` verified as an ancestor of `origin/main`.
+
+The new literal-false composition root injects the existing 5P transport/coordinator and exposes a foreground-only handoff operation. Background/inactive cancels pending work and replay, terminal lifecycle events close permanently, and late issue/sign/complete results cannot surface after cancellation. Explicit cancellation and awaitable disposal clear local authority. A value-free snapshot carries no transcript, bearer, signature, case identifier, or elevated claim/release status. No normal app importer, native signer or ambient adapter was added.
+
+Focused verification: 89 mobile handoff tests and four static isolation tests passed. Full workspace tests passed: 670 mobile, 171 web, 131 shared-types, 42 shared-validation and 359 API (1,373 total), with three established mobile skips. All workspace typechecks and root ESLint passed with zero warnings; the ESLint invocation excluded only generated `supabase/.temp/**` and the two unrelated protected local directories. Phase 1, repository security, GitHub Actions security, mobile-secret scan, handoff-client and offline-code mobile-coordinator isolation checks passed. `git diff --check` passed.
+
+The production dependency audit is red on newly reported `@xmldom/xmldom` (high), `next` (critical), and `sharp` (high) advisories. This branch changes no dependency manifest or lockfile, so the result is not caused by the lifecycle code; it still blocks a green delivery claim. No audit exception or gate weakening was added. Resolve and rerun the audit before publication/merge.
+
+The earlier local [Slice 5P verification](2026-09-05-claimant-slice-5p-handoff-client.md) records a staging gap for handoff route concealment, POST/OPTIONS and hostile-origin probes. PR #73 subsequently merged; that fact alone does not close the missing application-level smoke evidence. Slice 5Q changes no server route, migration, hosted state, deployment, native build, feature activation or real-data behavior. Production custody, UI/session wiring, full protected-preview smoke and end-to-end claimant acceptance remain separate work.

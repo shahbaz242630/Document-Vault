@@ -1,6 +1,14 @@
 # Sanduqkin Project Handoff
 
-Last updated: 2026-09-05 (Asia/Dubai)
+## Current checkpoint — Slice 5Q lifecycle, 2026-09-13
+
+PR #73 merged Slice 5P at `b6cd577` on 2026-09-09; its exact head `77b83b8` is an ancestor of `origin/main`. The older uncommitted 5P staging checkpoint is preserved in its verification file, but its statement that PR #73 is unmerged is now historical. Handoff-route concealment and hostile-origin application-level staging probes are not documented as passed.
+
+The next bounded synthetic slice, 5Q, is implemented locally on `codex/claimant-handoff-lifecycle` from that merged baseline. It adds a separate literal-false mobile handoff lifecycle root: foreground-only operation, cancellation and retry clearing on background/inactive, terminal lock/session-end/disable, late-result suppression and awaitable disposal. Scope and evidence: `docs/superpowers/specs/2026-09-13-claimant-slice-5q-handoff-lifecycle.md` and `docs/verification/2026-09-13-claimant-slice-5q-handoff-lifecycle.md`.
+
+Keep all claimant approvals false. No normal mobile UI/runtime importer, production signer, native build, hosted mutation, deployment, real claimant data or downstream intake/release activation was added. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging. Full workspace tests, typechecks, lint and security/isolation checks pass, but the production dependency audit is red on newly reported `@xmldom/xmldom`, `next` and `sharp` advisories. No dependency file changed in 5Q; do not call delivery green or weaken the audit. Protected staging evidence remains required before any merge or activation claim.
+
+Last updated: 2026-09-13 (Asia/Dubai)
 
 ## Current checkpoint — Slice 5P client implemented locally, 2026-09-05
 

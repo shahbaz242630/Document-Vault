@@ -3,16 +3,18 @@ const ts = require("typescript");
 const { collectSources } = require("./claimant-offline-code-v2-client-coordinator-isolation-check.cjs");
 
 const directory = "apps/mobile/src/features/claimant-handoff/";
-const files = ["contracts.ts", "transport.ts", "coordinator.ts"].map((name) => directory + name);
+const files = ["contracts.ts", "transport.ts", "coordinator.ts", "lifecycle.ts"].map((name) => directory + name);
 const symbols = ["claimant-handoff/", "createHandoffTransport", "createHandoffCoordinator",
-  "CLAIMANT_HANDOFF_TRANSPORT_APPROVED", "CLAIMANT_HANDOFF_COORDINATOR_APPROVED"];
+  "createHandoffLifecycle", "CLAIMANT_HANDOFF_TRANSPORT_APPROVED",
+  "CLAIMANT_HANDOFF_COORDINATOR_APPROVED", "CLAIMANT_HANDOFF_LIFECYCLE_APPROVED"];
 function validateSources(sources) {
   for (const path of files) if (!sources.has(path)) throw new Error(`Missing handoff client: ${path}`);
-  for (const [file, flag] of [["transport.ts", "TRANSPORT"], ["coordinator.ts", "COORDINATOR"]]) {
+  for (const [file, flag] of [["transport.ts", "TRANSPORT"], ["coordinator.ts", "COORDINATOR"],
+    ["lifecycle.ts", "LIFECYCLE"]]) {
     if (!sources.get(directory + file).includes(`export const CLAIMANT_HANDOFF_${flag}_APPROVED = false as const;`))
       throw new Error("Handoff client approval must remain literal false.");
   }
-  const allowedImports = new Set(["buffer", "zod", "./contracts", "./transport"]);
+  const allowedImports = new Set(["buffer", "zod", "./contracts", "./transport", "./coordinator"]);
   const forbidden = new Set(["fetch", "XMLHttpRequest", "WebSocket", "EventSource", "axios", "process",
     "globalThis", "localStorage", "sessionStorage", "indexedDB", "SecureStore", "AsyncStorage", "console"]);
   for (const [path, source] of sources) {
@@ -40,6 +42,11 @@ function validateSources(sources) {
   for (const token of ['credentials: "omit"', 'redirect: "error"', 'cache: "no-store"',
     "MAX_RESPONSE_BYTES = 16_384", "REQUEST_TIMEOUT_MS = 15_000"])
     if (!transport.includes(token)) throw new Error(`Missing handoff transport control: ${token}`);
+  const lifecycle = sources.get(directory + "lifecycle.ts");
+  for (const token of ["syntheticOnly !== true", "productionRuntime !== false", "eventSchema.parse",
+    "createHandoffCoordinator({ approved: true", "createHandoffTransport({ approved: true",
+    "if (!lastEvent || closed)", "coordinator?.cancel()", "activeCompletion ?? Promise.resolve()"])
+    if (!lifecycle.includes(token)) throw new Error(`Missing handoff lifecycle control: ${token}`);
 }
 if (require.main === module) {
   validateSources(collectSources(join(__dirname, "..")));
