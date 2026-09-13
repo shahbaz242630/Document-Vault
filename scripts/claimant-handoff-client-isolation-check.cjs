@@ -4,6 +4,7 @@ const { collectSources } = require("./claimant-offline-code-v2-client-coordinato
 
 const directory = "apps/mobile/src/features/claimant-handoff/";
 const files = ["contracts.ts", "transport.ts", "coordinator.ts", "lifecycle.ts"].map((name) => directory + name);
+const bridgePath = directory + "possession-bridge.ts";
 const symbols = ["claimant-handoff/", "createHandoffTransport", "createHandoffCoordinator",
   "createHandoffLifecycle", "CLAIMANT_HANDOFF_TRANSPORT_APPROVED",
   "CLAIMANT_HANDOFF_COORDINATOR_APPROVED", "CLAIMANT_HANDOFF_LIFECYCLE_APPROVED"];
@@ -20,6 +21,7 @@ function validateSources(sources) {
   for (const [path, source] of sources) {
     if (/\.test\.[cm]?[jt]sx?$/u.test(path)) continue;
     if (!files.includes(path)) {
+      if (path === bridgePath) continue; // Separately guarded synthetic composition.
       if (symbols.some((symbol) => source.includes(symbol))) throw new Error(`Handoff client runtime importer: ${path}`);
       continue;
     }
