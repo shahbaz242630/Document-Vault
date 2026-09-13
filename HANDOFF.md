@@ -1,5 +1,9 @@
 # Sanduqkin Project Handoff
 
+## Current checkpoint — 5Q and 5R merged, 2026-09-13
+
+PRs [#79](https://github.com/shahbaz242630/Document-Vault/pull/79) and [#80](https://github.com/shahbaz242630/Document-Vault/pull/80) are merged into `main`; final main CI and Vercel checks are green at `85223a3`. Protected-preview application smoke passed on both exact PR heads. Earlier entries below that describe an open PR, active watcher or SSO-blocked staging are historical. There is no active watcher for those PRs. The claimant flow remains disabled and is not end to end. The [2026-09-13 session closeout](docs/handoff/2026-09-13-claimant-5q-5r-session-close.md) records what is complete, what remains and how to resume.
+
 ## Current checkpoint — Slice 5Q lifecycle, 2026-09-13
 
 PR #73 merged Slice 5P at `b6cd577` on 2026-09-09; its exact head `77b83b8` is an ancestor of `origin/main`. The older uncommitted 5P staging checkpoint is preserved in its verification file, but its statement that PR #73 is unmerged is now historical. Handoff-route concealment and hostile-origin application-level staging probes are not documented as passed.
