@@ -1,7 +1,8 @@
 import type { OfflineCodePossessionProofV2 } from "@vault/shared-types";
 import { z } from "zod";
 
-import { createOfflineCodeV2Coordinator, type OfflineCodeV2SyntheticAttempt } from "./offline-code-v2-coordinator";
+import { createOfflineCodeV2Coordinator, type OfflineCodeV2SyntheticAttempt,
+  type OfflineCodeV2VerifiedSource } from "./offline-code-v2-coordinator";
 import type { OfflineCodeV2ProofInput } from "./offline-code-v2-proof-core";
 import { assertOfflineCodeV2Origin, createOfflineCodeV2Transport, OfflineCodeV2UnavailableError,
   type OfflineCodeV2PossessionResult, type OfflineCodeV2Send } from "./offline-code-v2-transport";
@@ -137,8 +138,8 @@ function initialize(state: LifecycleState, input: LifecycleInput): void {
   } catch { close(state); detach(state); }
 }
 
-async function run(state: LifecycleState,
-  operation: () => Promise<OfflineCodeV2PossessionResult>): Promise<OfflineCodeV2PossessionResult> {
+async function run<T extends OfflineCodeV2PossessionResult | OfflineCodeV2VerifiedSource>(state: LifecycleState,
+  operation: () => Promise<T>): Promise<T> {
   const { closed, initialized, foreground, active, coordinator } = state;
   if (closed || !initialized || !foreground || active || !coordinator) throw new OfflineCodeV2UnavailableError();
   const startedGeneration = state.generation;
@@ -167,6 +168,8 @@ function createLifecycleApi(state: LifecycleState) {
   return Object.freeze({
     start: (value: OfflineCodeV2SyntheticAttempt) => run(state, () => state.coordinator!.start(value)),
     retryProof: () => run(state, () => state.coordinator!.retryProof()),
+    startVerified: (value: OfflineCodeV2SyntheticAttempt) => run(state, () => state.coordinator!.startVerified(value)),
+    retryProofVerified: () => run(state, () => state.coordinator!.retryProofVerified()),
     cancel(): void {
       if (state.closed) return;
       invalidate(state);

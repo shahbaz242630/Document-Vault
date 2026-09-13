@@ -1,5 +1,9 @@
 # Sanduqkin Claimant Engineering Handoff
 
+## Current checkpoint — Slice 5R local bridge, 2026-09-13
+
+Owner-authorized Slice 5R is in progress locally on `codex/claimant-v2-possession-handoff-bridge`, stacked on the still-open Slice 5Q PR #79 head `386482f`. It composes the disabled synthetic offline-code V2 possession and authenticated handoff lifecycles. The server-validated proof supplies the source challenge and binding digest; the bridge enforces claimant session continuity and shared lifecycle invalidation. See the [5R spec](docs/superpowers/specs/2026-09-13-claimant-slice-5r-possession-handoff-bridge.md) and [verification](docs/verification/2026-09-13-claimant-slice-5r-possession-handoff-bridge.md). Do not treat this local branch as merged or staging-verified. PR #79's protected-preview smoke remains blocked by SSO and its watcher remains active. Keep approvals false and all data synthetic; preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging.
+
 ## Current checkpoint — Slice 5Q lifecycle, 2026-09-13
 
 PR #73 merged Slice 5P at `b6cd577` on 2026-09-09. Slice 5Q is published in PR #79 from `codex/claimant-handoff-lifecycle`: a separate, synthetic-only, literal-false foreground lifecycle wrapper for the 5P mobile handoff. It cancels and clears retry on background/inactive, closes on lock/session end/disable or hostile event ordering, discards late results and supports awaitable disposal. The local dependency-audit repair and Docker-backed handoff acceptance pass. The active `pr-79-handoff-lifecycle-gates` watcher reports actionable exact-head CI/staging green or red, without merging. See the 5Q spec and verification record. The prior 5P staging note is preserved; it does not establish handoff-route concealment/hostile-origin smoke before the merge.

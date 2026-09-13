@@ -6,6 +6,7 @@ const { lifecyclePath, validateLifecycleSources } = require("./claimant-offline-
 const feature = "apps/mobile/src/features/claimant-offline-code/";
 const transportPath = `${feature}offline-code-v2-transport.ts`;
 const coordinatorPath = `${feature}offline-code-v2-coordinator.ts`;
+const bridgePath = "apps/mobile/src/features/claimant-handoff/possession-bridge.ts";
 const protectedSymbols = ["offline-code-v2-transport", "offline-code-v2-coordinator",
   "createOfflineCodeV2Transport", "createOfflineCodeV2Coordinator",
   "CLAIMANT_OFFLINE_CODE_V2_TRANSPORT_APPROVED", "CLAIMANT_OFFLINE_CODE_V2_CLIENT_COORDINATOR_APPROVED"];
@@ -35,12 +36,13 @@ function validateSources(sources) {
     "process", "globalThis", "localStorage", "sessionStorage", "indexedDB", "SecureStore", "AsyncStorage", "console"]);
   for (const [path, source] of sources) {
     if (/\.test\.[cm]?[jt]sx?$/u.test(path)) continue;
-    if (path !== transportPath && path !== coordinatorPath && path !== lifecyclePath) {
+    if (path !== transportPath && path !== coordinatorPath && path !== lifecyclePath && path !== bridgePath) {
       if (protectedSymbols.some((symbol) => source.includes(symbol)))
         throw new Error(`Offline-code V2 client is imported outside its isolated boundary: ${path}`);
       continue;
     }
     const ast = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true);
+    if (path === bridgePath) continue; // The bridge has its own, narrower guard.
     function visit(node) {
       if (ts.isImportDeclaration(node) && (!ts.isStringLiteral(node.moduleSpecifier)
         || !permittedImports.has(node.moduleSpecifier.text)))

@@ -37,6 +37,11 @@ type CoordinatorInput = Readonly<{
   producer: Readonly<{ produce(value: OfflineCodeV2ProofInput): Promise<OfflineCodePossessionProofV2> }>;
   now?: () => Date;
 }>;
+export type OfflineCodeV2VerifiedSource = Readonly<{
+  result: OfflineCodeV2PossessionResult;
+  challengeId: string;
+  recordBindingDigest: string;
+}>;
 type CoordinatorState = {
   approved: boolean;
   origin: string;
@@ -65,8 +70,10 @@ export function createOfflineCodeV2Coordinator(input: CoordinatorInput) {
     lastTime: -Infinity,
   };
   return {
-    start: (value: OfflineCodeV2SyntheticAttempt) => startAttempt(state, value),
-    retryProof: () => retryProof(state),
+    start: async (value: OfflineCodeV2SyntheticAttempt) => (await startAttempt(state, value)).result,
+    retryProof: async () => (await retryProof(state)).result,
+    startVerified: (value: OfflineCodeV2SyntheticAttempt) => startAttempt(state, value),
+    retryProofVerified: () => retryProof(state),
     cancel: () => cancel(state),
   };
 }
@@ -102,7 +109,7 @@ function enter(state: CoordinatorState): AbortController {
 }
 
 async function sendProof(state: CoordinatorState,
-  controller: AbortController): Promise<OfflineCodeV2PossessionResult> {
+  controller: AbortController): Promise<OfflineCodeV2VerifiedSource> {
   try {
     if (!state.pending || state.sends >= MAX_PROOF_SENDS) throw new Error();
     checkpoint(state, controller, state.pending.challenge);
@@ -111,8 +118,10 @@ async function sendProof(state: CoordinatorState,
     const raw = await state.transport.verifyProof({ ...request, signal: controller.signal });
     checkpoint(state, controller, request.challenge);
     const result = validateOfflineCodeV2PossessionResult(raw);
+    const source = Object.freeze({ result, challengeId: request.challenge.challenge_id,
+      recordBindingDigest: request.challenge.record_binding_digest });
     clearPending(state);
-    return result;
+    return source;
   } catch (error) {
     // Only ambiguous delivery failures retain the exact public proof request, never client secret material.
     if (controller.signal.aborted || !(error instanceof OfflineCodeV2UnavailableError)
@@ -122,7 +131,7 @@ async function sendProof(state: CoordinatorState,
 }
 
 async function startAttempt(state: CoordinatorState,
-  value: OfflineCodeV2SyntheticAttempt): Promise<OfflineCodeV2PossessionResult> {
+  value: OfflineCodeV2SyntheticAttempt): Promise<OfflineCodeV2VerifiedSource> {
   let controller: AbortController | null = null;
   let material: Omit<OfflineCodeV2ProofInput, "challenge" | "expectedOrigin" | "now"> | null = null;
   let proofDispatched = false;
@@ -173,7 +182,7 @@ async function startAttempt(state: CoordinatorState,
   }
 }
 
-async function retryProof(state: CoordinatorState): Promise<OfflineCodeV2PossessionResult> {
+async function retryProof(state: CoordinatorState): Promise<OfflineCodeV2VerifiedSource> {
   let controller: AbortController | null = null;
   try { controller = enter(state); return await sendProof(state, controller); }
   catch { throw new OfflineCodeV2UnavailableError(); }

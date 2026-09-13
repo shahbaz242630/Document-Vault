@@ -1,0 +1,9 @@
+# Slice 5R — possession-to-handoff bridge verification
+
+Date: 2026-09-13 (Asia/Dubai). Branch: `codex/claimant-v2-possession-handoff-bridge`, stacked on the open Slice 5Q PR #79 head `386482f`.
+
+The bridge is synthetic-only and literal-false. It composes the existing V2 proof and handoff lifecycles through one ordered foreground source. A narrow verified-source receipt carries the server-issued challenge ID and record-binding digest only after the strict proof result validates. The bridge checks claimant portal session continuity before proof, after proof, and after handoff; either child also enforces its own lifecycle and session constraints. The API remains authoritative for proof verification and draft case binding. No app entry point imports the bridge.
+
+Focused tests cover the complete injected synthetic proof-to-draft path, proof denial, session rotation and replay, background/late-result suppression, exact proof and completion retry, disabled dependency non-access, and missing/terminal lifecycle behavior. Static guards reject activation, ambient/native adapters, and normal runtime imports. No server route, database migration, hosted state, native build, feature flag, or real claimant data changed.
+
+Verification: 90 focused mobile tests and 13 focused isolation tests passed after the final refactor. Full workspace tests passed: 680 mobile, 171 web, 131 shared-types, 42 shared-validation, and 359 API (1,383 total), with three established mobile skips. All workspace typechecks and zero-warning root ESLint passed; ESLint excluded only generated `supabase/.temp/**` and the two protected local directories. Phase 1, repository security, GitHub Actions security, mobile secret scan, production dependency audit, the bridge isolation gate, and `git diff --check` passed. The production dependency audit retains only the pre-existing digest-verified `image-size` exception through 2026-09-30.

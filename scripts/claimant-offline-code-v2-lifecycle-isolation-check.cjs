@@ -2,6 +2,7 @@ const { join } = require("node:path");
 const ts = require("typescript");
 
 const lifecyclePath = "apps/mobile/src/features/claimant-offline-code/offline-code-v2-lifecycle.ts";
+const bridgePath = "apps/mobile/src/features/claimant-handoff/possession-bridge.ts";
 function validateLifecycleSources(sources) {
   const source = sources.get(lifecyclePath);
   if (!source || !source.includes("export const CLAIMANT_OFFLINE_CODE_V2_LIFECYCLE_APPROVED = false as const;"))
@@ -30,7 +31,7 @@ function validateLifecycleSources(sources) {
   }
   visit(ast);
   for (const [path, content] of sources) {
-    if (path === lifecyclePath || /\.test\.[cm]?[jt]sx?$/u.test(path)) continue;
+    if (path === lifecyclePath || path === bridgePath || /\.test\.[cm]?[jt]sx?$/u.test(path)) continue;
     if (["offline-code-v2-lifecycle", "createOfflineCodeV2Lifecycle", "CLAIMANT_OFFLINE_CODE_V2_LIFECYCLE_APPROVED"]
       .some((symbol) => content.includes(symbol)))
       throw new Error(`Offline-code V2 lifecycle is imported by normal runtime: ${path}`);
