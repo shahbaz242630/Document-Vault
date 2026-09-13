@@ -20,6 +20,7 @@ for (const path of collect(moduleRoot)) {
 }
 
 const runtimeRoots = [join(root, "apps/mobile"), join(root, "apps/web"), join(root, "services/api/src")];
+const bridgePath = join(root, "apps/mobile/src/features/claimant-handoff/possession-bridge.ts");
 const runtimeOnlySymbols = [
   "OFFLINE_CODE_V2_PROTOCOL_APPROVED",
   "assertOfflineCodeProtocolBundleV2",
@@ -35,6 +36,8 @@ for (const runtimeRoot of runtimeRoots) {
   for (const path of collect(runtimeRoot)) {
     if (path.endsWith(".test.ts") || path.endsWith(".test.tsx")) continue;
     if (path.includes("claimant-offline-code")
+      // This one literal-false composition has its own no-import/no-adapter guard.
+      || path === bridgePath
       || path.endsWith("offline-code-v2-challenge-coordinator.ts")
       || path.endsWith("offline-code-v2-proof-attempt-coordinator.ts")) continue;
     const source = readFileSync(path, "utf8");
