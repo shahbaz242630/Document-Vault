@@ -292,14 +292,14 @@ function createEncryptedBankRecord(title) {
     waitForNode("Saved records");
     tapNodeAfterScroll("Bank accounts");
   }
-  if (postSaveDestination.label !== title) waitForNode(title, 120_000);
+  if (postSaveDestination.label !== title) scrollToNode(title);
 }
 
 function openEncryptedBankRecord(title) {
   tapNodeAfterScroll("Records");
   waitForNode("Saved records");
   tapNodeAfterScroll("Bank accounts");
-  waitForNode(title, 120_000);
+  scrollToNode(title);
   tapNode(title);
   waitForNode("Stored sealed on this device");
   waitForNode("TestBank");
