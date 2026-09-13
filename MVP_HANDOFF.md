@@ -1,6 +1,10 @@
 # Sanduqkin MVP Handoff
 
-Last updated: 2026-09-05 (Asia/Dubai)
+## Current checkpoint — Slice 5Q lifecycle, 2026-09-13
+
+Slice 5P merged in PR #73 at `b6cd577`. Slice 5Q is published in PR #79 from `codex/claimant-handoff-lifecycle` and makes its synthetic mobile handoff safe across background, lock and session end while approvals remain literal false. It adds no claimant UI or production signer. Local tests, dependency audit and Docker-backed acceptance pass; the `pr-79-handoff-lifecycle-gates` watcher monitors CI and protected staging. The public `/claim` flow is informational, and neither claimant route is an integrated, enabled end-to-end experience. See `HANDOFF.md` and the 5Q verification record; earlier PR #73 unmerged snapshots are historical.
+
+Last updated: 2026-09-13 (Asia/Dubai)
 
 ## Current checkpoint — Slice 5P client, 2026-09-05
 
