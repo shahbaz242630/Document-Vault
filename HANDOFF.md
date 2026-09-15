@@ -1,5 +1,9 @@
 # Sanduqkin Project Handoff
 
+## Current checkpoint — Slice 5S local composition, 2026-09-15
+
+Slice 5S is implemented locally on `codex/claimant-session-bridge-composition`, stacked on the open documentation-only PR #83 head `74969b4`. It adds an independently literal-false, runtime-disconnected synthetic claimant-session-to-5R-bridge harness. Exact AAL2 claimant session continuity, foreground invalidation, late-result suppression and value-free draft reduction are covered; no normal app importer, hosted authentication, native custody, deployment, real data or capability activation was added. Local focused/full tests, all typechecks, lint, security/audit/isolation checks, API bundle and web production build pass. Scope and evidence: `docs/superpowers/specs/2026-09-15-claimant-slice-5s-session-bridge-composition.md` and `docs/verification/2026-09-15-claimant-slice-5s-session-bridge-composition.md`. Publish as a stacked PR and use a watcher for exact-head CI/preview green or actionable red; do not merge or activate on local evidence alone.
+
 ## Current checkpoint — 5Q and 5R merged, 2026-09-13
 
 PRs [#79](https://github.com/shahbaz242630/Document-Vault/pull/79) and [#80](https://github.com/shahbaz242630/Document-Vault/pull/80) are merged into `main`; final main CI and Vercel checks are green at `85223a3`. Protected-preview application smoke passed on both exact PR heads. Earlier entries below that describe an open PR, active watcher or SSO-blocked staging are historical. There is no active watcher for those PRs. The claimant flow remains disabled and is not end to end. The [2026-09-13 session closeout](docs/handoff/2026-09-13-claimant-5q-5r-session-close.md) records what is complete, what remains and how to resume.

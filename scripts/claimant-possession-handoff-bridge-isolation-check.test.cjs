@@ -18,3 +18,10 @@ test("rejects normal app importer", () => {
   sources.set("apps/mobile/app/claim.tsx", 'import { createPossessionHandoffBridge } from "../src/features/claimant-handoff/possession-bridge";');
   assert.throws(() => validateSources(sources), /runtime importer/);
 });
+
+test("permits only the isolated session composition importer", () => {
+  const sources = new Map(baseline);
+  sources.set("apps/mobile/src/features/claimant-handoff/other-runtime.ts",
+    'import { createPossessionHandoffBridge } from "./possession-bridge";');
+  assert.throws(() => validateSources(sources), /runtime importer/);
+});

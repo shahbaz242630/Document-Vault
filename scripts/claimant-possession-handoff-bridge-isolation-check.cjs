@@ -3,6 +3,7 @@ const ts = require("typescript");
 const { collectSources } = require("./claimant-offline-code-v2-client-coordinator-isolation-check.cjs");
 
 const path = "apps/mobile/src/features/claimant-handoff/possession-bridge.ts";
+const compositionPath = "apps/mobile/src/features/claimant-handoff/session-bridge-composition.ts";
 const imports = new Set(["@vault/shared-types", "zod", "../claimant-offline-code/offline-code-v2-lifecycle",
   "../claimant-offline-code/offline-code-v2-coordinator", "../claimant-offline-code/offline-code-v2-proof-core",
   "../claimant-offline-code/offline-code-v2-transport", "./contracts", "./lifecycle", "./transport"]);
@@ -29,7 +30,7 @@ function validateSources(sources) {
   }
   visit(ast);
   for (const [other, content] of sources) {
-    if (other === path || /\.test\.[cm]?[jt]sx?$/u.test(other)) continue;
+    if (other === path || other === compositionPath || /\.test\.[cm]?[jt]sx?$/u.test(other)) continue;
     if (["possession-bridge", "createPossessionHandoffBridge", "CLAIMANT_POSSESSION_HANDOFF_BRIDGE_APPROVED"]
       .some((symbol) => content.includes(symbol))) throw new Error(`Bridge runtime importer: ${other}`);
   }

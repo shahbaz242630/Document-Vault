@@ -1,5 +1,9 @@
 # Sanduqkin Security Handoff
 
+## Current checkpoint — Slice 5S local composition, 2026-09-15
+
+Slice 5S adds only an isolated, literal-false synthetic claimant-session-to-bridge harness. It freezes exact fresh-AAL2 claimant user/session/version binding, closes permanently on drift or hostile lifecycle ordering, clears retry/draft authority on background or cancellation, suppresses late results and reduces completion to a value-free draft summary without identifiers, bearer material, proof source or replay detail. Static guards reject activation, ambient authentication/network/native/storage adapters and normal runtime importers. Final local focused/full tests, typechecks, lint, Phase 1, security, workflow, secret, dependency, API bundle, web build and isolation gates pass. CI/preview evidence remains pending publication; use one watcher for green/red. No hosted mutation, production signer/custody, deployment, real claimant data or authority activation is permitted. Evidence: `docs/verification/2026-09-15-claimant-slice-5s-session-bridge-composition.md`.
+
 ## Current checkpoint — 5Q and 5R merged, 2026-09-13
 
 PRs [#79](https://github.com/shahbaz242630/Document-Vault/pull/79) and [#80](https://github.com/shahbaz242630/Document-Vault/pull/80) are merged into `main`. Exact-head protected-preview application probes returned concealed 404 responses without hostile-origin CORS on the bounded V2 and handoff routes; final `main` CI, security and Vercel checks passed at `85223a3`. Vercel Authentication remains enabled; the earlier SSO-blocked staging and active-watcher notes below are historical. No capability was activated, and only synthetic data was used. See the [session closeout](docs/handoff/2026-09-13-claimant-5q-5r-session-close.md) for limits and next work.

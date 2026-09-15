@@ -78,6 +78,7 @@
     "check:claimant-offline-code-v2-handoff-isolation": "node scripts/claimant-offline-code-v2-handoff-isolation-check.cjs",
     "check:claimant-handoff-client-isolation": "node scripts/claimant-handoff-client-isolation-check.cjs",
     "check:claimant-possession-handoff-bridge-isolation": "node scripts/claimant-possession-handoff-bridge-isolation-check.cjs",
+    "check:claimant-session-bridge-composition-isolation": "node scripts/claimant-session-bridge-composition-isolation-check.cjs",
     "check:claimant-offline-code-v2-handoff-db": "node scripts/claimant-offline-code-v2-handoff-db-test.cjs",
     "check:claimant-offline-code-v2-handoff-database-acceptance": "npm run test:offline-code-v2-handoff-database --workspace @vault/api",
     "check:claimant-owner-protection-isolation": "node scripts/claimant-owner-protection-isolation-check.cjs",
