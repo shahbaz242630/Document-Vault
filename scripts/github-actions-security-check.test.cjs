@@ -147,12 +147,12 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
   assert.match(workflow, /android-emulator-smoke:\s*\n\s*name: Android emulator smoke/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?needs: android-native-compile/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?environment: Preview/);
-  assert.match(
-    workflow,
-    /android-emulator-smoke:[\s\S]*?concurrency:\s*\n\s*group: android-recovery-e2e-preview\s*\n\s*cancel-in-progress: false/,
-  );
+  assert.match(workflow, /permissions:\s*\n\s*actions: read\s*\n\s*contents: read/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?if: github\.event_name == 'push'/);
-  assert.match(workflow, /android-emulator-smoke:[\s\S]*?timeout-minutes: 25/);
+  assert.match(workflow, /android-emulator-smoke:[\s\S]*?timeout-minutes: 45/);
+  assert.match(workflow, /name: Wait for older Android recovery smoke runs/);
+  assert.match(workflow, /node scripts\/wait-for-android-recovery-slot\.cjs/);
+  assert.match(workflow, /GITHUB_TOKEN: \$\{\{ github\.token \}\}/);
   assert.match(workflow, /name: android-release-apk/);
   assert.match(workflow, /export PATH="\$ANDROID_HOME\/platform-tools:\$PATH"/);
   assert.match(workflow, /timeout 180 adb wait-for-device/);

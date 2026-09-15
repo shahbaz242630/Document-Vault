@@ -5,6 +5,7 @@ on:
   push:
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -225,12 +226,9 @@ jobs:
     name: Android emulator smoke
     runs-on: ubuntu-latest
     environment: Preview
-    concurrency:
-      group: android-recovery-e2e-preview
-      cancel-in-progress: false
     needs: android-native-compile
     if: github.event_name == 'push'
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - name: Check out repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
@@ -242,6 +240,11 @@ jobs:
 
       - name: Install dependencies for protected recovery bootstrap
         run: npm ci
+
+      - name: Wait for older Android recovery smoke runs
+        run: node scripts/wait-for-android-recovery-slot.cjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Download standalone Android APK
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
