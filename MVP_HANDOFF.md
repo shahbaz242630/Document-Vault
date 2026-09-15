@@ -2,7 +2,7 @@
 
 ## Current checkpoint — Slice 5S local composition, 2026-09-15
 
-Slice 5S is locally complete on `codex/claimant-session-bridge-composition`, stacked on open documentation-only PR #83. The bounded mobile harness composes an injected synthetic fresh-AAL2 claimant session with the existing 5R bridge, invalidates on session/lifecycle change and returns only a value-free draft summary. It remains literal-false and disconnected from normal runtime. Full local tests, typechecks, lint, security/audit/isolation, API bundle and web build pass. Publish the stacked PR and delegate exact-head CI/preview monitoring to one watcher. This does not make the claimant journey end to end and does not authorize hosted MFA, UI activation, deployment, native custody, real data or external access. Evidence: `docs/verification/2026-09-15-claimant-slice-5s-session-bridge-composition.md`.
+Slice 5S is published in stacked PR #84 on open documentation-only PR #83. The bounded mobile harness composes an injected synthetic fresh-AAL2 claimant session with the existing 5R bridge, invalidates on session/lifecycle change and returns only a value-free draft summary. It remains literal-false and disconnected from normal runtime. Full local tests, typechecks, lint, security/audit/isolation, API bundle and web build pass. The active ten-minute `pr-83-84-claimant-5s-gates` watcher owns exact-head CI/preview monitoring and reports meaningful green/red without merging. This does not make the claimant journey end to end and does not authorize hosted MFA, UI activation, deployment, native custody, real data or external access. Evidence: `docs/verification/2026-09-15-claimant-slice-5s-session-bridge-composition.md`.
 
 ## Current checkpoint — 5Q and 5R merged, 2026-09-13
 
