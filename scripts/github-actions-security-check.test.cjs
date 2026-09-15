@@ -139,10 +139,18 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
     path.resolve(__dirname, "android-emulator-smoke.cjs"),
     "utf8",
   );
+  const failureEvidenceScript = fs.readFileSync(
+    path.resolve(__dirname, "android-emulator-failure-evidence.cjs"),
+    "utf8",
+  );
 
   assert.match(workflow, /android-emulator-smoke:\s*\n\s*name: Android emulator smoke/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?needs: android-native-compile/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?environment: Preview/);
+  assert.match(
+    workflow,
+    /android-emulator-smoke:[\s\S]*?concurrency:\s*\n\s*group: android-recovery-e2e-preview\s*\n\s*cancel-in-progress: false/,
+  );
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?if: github\.event_name == 'push'/);
   assert.match(workflow, /android-emulator-smoke:[\s\S]*?timeout-minutes: 25/);
   assert.match(workflow, /name: android-release-apk/);
@@ -172,10 +180,15 @@ test("runs bounded Android onboarding and returning-user unlock smoke tests afte
     'clearAndSignIn(credentials.email, credentials.temporaryPassword)',
     'clearAndSignIn(credentials.email, credentials.password)',
     "ensureOriginalRecoveryPassword(credentials)",
+    "fillVisibleFieldReliably",
+    "capturePreCleanupFailureEvidence",
     "finally",
   ]) {
     assert.match(smokeScript, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
+  assert.match(failureEvidenceScript, /failure-before-cleanup\.png/);
+  assert.match(failureEvidenceScript, /failure-before-cleanup\.xml/);
+  assert.match(failureEvidenceScript, /sanitizeUiXml\(dumpUi\(\)\)/);
 
   assert.match(
     smokeScript,

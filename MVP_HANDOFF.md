@@ -1,5 +1,9 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — Slice 5S local composition, 2026-09-15
+
+Slice 5S is published in stacked PR #84 on open documentation-only PR #83. The bounded mobile harness composes an injected synthetic fresh-AAL2 claimant session with the existing 5R bridge, invalidates on session/lifecycle change and returns only a value-free draft summary. It remains literal-false and disconnected from normal runtime. Full local tests, typechecks, lint, security/audit/isolation, API bundle and web build pass. The active ten-minute `pr-83-84-claimant-5s-gates` watcher owns exact-head CI/preview monitoring and reports meaningful green/red without merging. This does not make the claimant journey end to end and does not authorize hosted MFA, UI activation, deployment, native custody, real data or external access. Evidence: `docs/verification/2026-09-15-claimant-slice-5s-session-bridge-composition.md`.
+
 ## Current checkpoint — 5Q and 5R merged, 2026-09-13
 
 Slices 5Q and 5R are merged through PRs [#79](https://github.com/shahbaz242630/Document-Vault/pull/79) and [#80](https://github.com/shahbaz242630/Document-Vault/pull/80); final `main` checks passed at `85223a3`. Their mobile lifecycle and local bridge are disabled synthetic building blocks, not an enabled claimant experience. The public `/claim` page remains informational. The open-PR and watcher notes below are historical. See the [session closeout](docs/handoff/2026-09-13-claimant-5q-5r-session-close.md) for the remaining journey and suggested next slice.
