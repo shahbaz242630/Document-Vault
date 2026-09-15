@@ -1,5 +1,9 @@
 # Sanduqkin Security Handoff
 
+## Current checkpoint — 5Q and 5R merged, 2026-09-13
+
+PRs [#79](https://github.com/shahbaz242630/Document-Vault/pull/79) and [#80](https://github.com/shahbaz242630/Document-Vault/pull/80) are merged into `main`. Exact-head protected-preview application probes returned concealed 404 responses without hostile-origin CORS on the bounded V2 and handoff routes; final `main` CI, security and Vercel checks passed at `85223a3`. Vercel Authentication remains enabled; the earlier SSO-blocked staging and active-watcher notes below are historical. No capability was activated, and only synthetic data was used. See the [session closeout](docs/handoff/2026-09-13-claimant-5q-5r-session-close.md) for limits and next work.
+
 ## Current checkpoint — Slice 5Q lifecycle, 2026-09-13
 
 PR #73 merged Slice 5P at `b6cd577`. Slice 5Q is published in PR #79. Its foreground lifecycle root remains independently literal-false and runtime-disconnected. It invalidates in-flight work and exact completion retry on background/inactive, closes on lock/session end/disable and malformed or regressing events, suppresses late results, and offers awaitable disposal with a value-free snapshot. Local dependency audit and Docker-backed handoff acceptance pass; `pr-79-handoff-lifecycle-gates` monitors exact-head CI and protected staging without merging. No native signing, production custody, hosted mutation, activation or new external claimant authority was added. The historical 5P local staging note does not prove application-level handoff-route concealment or hostile-origin smoke before PR #73 merged. See the 5Q spec/verification record.

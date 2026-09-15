@@ -1,5 +1,9 @@
 # Sanduqkin Claimant Engineering Handoff
 
+## Current checkpoint — 5Q and 5R merged, 2026-09-13
+
+Slices 5Q and 5R are merged into `main` through PRs [#79](https://github.com/shahbaz242630/Document-Vault/pull/79) and [#80](https://github.com/shahbaz242630/Document-Vault/pull/80). Final `main` CI and Vercel checks passed at `85223a3`; protected-preview application smoke passed on both exact PR heads. The old open-PR, watcher and SSO-blocked checkpoints below are historical. No watcher remains for these PRs. The claimant journey is still disabled and incomplete. Read the [session closeout](docs/handoff/2026-09-13-claimant-5q-5r-session-close.md) for evidence, remaining work and the next-session opener.
+
 ## Current checkpoint — Slice 5R local bridge, 2026-09-13
 
 Owner-authorized Slice 5R is published in stacked PR #80 from `codex/claimant-v2-possession-handoff-bridge`, based on the still-open Slice 5Q PR #79 head `386482f`. It composes the disabled synthetic offline-code V2 possession and authenticated handoff lifecycles. The server-validated proof supplies the source challenge and binding digest; the bridge enforces claimant session continuity and shared lifecycle invalidation. See the [5R spec](docs/superpowers/specs/2026-09-13-claimant-slice-5r-possession-handoff-bridge.md) and [verification](docs/verification/2026-09-13-claimant-slice-5r-possession-handoff-bridge.md). The active `pr-79-80-claimant-gates` watcher reports actionable exact-head CI green/red for both PRs and continues PR #79's protected-preview staging smoke. PR #79 CI is green, but SSO still prevents the required application-level staging smoke; neither PR is merged or staging-verified. Keep approvals false and all data synthetic; preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging.

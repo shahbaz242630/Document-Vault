@@ -1,5 +1,9 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — 5Q and 5R merged, 2026-09-13
+
+Slices 5Q and 5R are merged through PRs [#79](https://github.com/shahbaz242630/Document-Vault/pull/79) and [#80](https://github.com/shahbaz242630/Document-Vault/pull/80); final `main` checks passed at `85223a3`. Their mobile lifecycle and local bridge are disabled synthetic building blocks, not an enabled claimant experience. The public `/claim` page remains informational. The open-PR and watcher notes below are historical. See the [session closeout](docs/handoff/2026-09-13-claimant-5q-5r-session-close.md) for the remaining journey and suggested next slice.
+
 ## Current checkpoint — Slice 5Q lifecycle, 2026-09-13
 
 Slice 5P merged in PR #73 at `b6cd577`. Slice 5Q is published in PR #79 from `codex/claimant-handoff-lifecycle` and makes its synthetic mobile handoff safe across background, lock and session end while approvals remain literal false. It adds no claimant UI or production signer. Local tests, dependency audit and Docker-backed acceptance pass; the `pr-79-handoff-lifecycle-gates` watcher monitors CI and protected staging. The public `/claim` flow is informational, and neither claimant route is an integrated, enabled end-to-end experience. See `HANDOFF.md` and the 5Q verification record; earlier PR #73 unmerged snapshots are historical.
