@@ -1,5 +1,15 @@
 # Sanduqkin Claimant Engineering Handoff
 
+## Current checkpoint — Slice 5W local acceptance, 2026-09-15
+
+Slice 5W is published in PR #87 from `codex/claimant-whole-journey-acceptance`; first code/evidence head `dcc027f`. Its separately guarded literal-false harness composes the merged 5U–5V synthetic session/possession path with the existing shared synthetic submission/state model through closure, while the seam and final report remain value-free. Eleven focused tests, all 1,429 workspace tests with three established skips, 285 serial script tests, typechecks, zero-warning lint, security/isolation, API bundle and the 24-page web build pass. See `docs/superpowers/specs/2026-09-15-claimant-slice-5w-whole-journey-acceptance.md` and `docs/verification/2026-09-15-claimant-slice-5w-whole-journey-acceptance.md`. The active `pr-87-slice-5w-green-red-watcher` handles exact-head CI, previews and logs, narrow repair/resubmission on confirmed red, and conclusive green reporting without merging or starting another slice. This does not authorize hosted MFA/Auth, normal UI/runtime wiring, production native custody/signing, providers, deployment, real data, downstream runtime authority or activation.
+
+## Current checkpoint and opener — Slices 5S–5V merged, 2026-09-15
+
+This is the authoritative resume point; the same-day local/stacked/watcher sections below are historical. PR #84 merged Slice 5S at `281e8c06bd58077f9fbc6c1a635c65afbf990b4e` from exact head `73c34e624555576e27c7afedfc1fe9b447e82989`. PR #85 merged Slice 5T plus the ordered Android recovery-slot repair at `be39979fe73553a91c1cedfb4e178e37fc660229` from exact head `10a2995e083010d8651a89245205105f22d1c9e4`. PR #86 merged combined Slices 5U–5V at `0a1f29c548c7fa4076e5fa5ed2288530599856e6` from exact head `8c6d90b1caa581ad8432bb85a1a085fefb462377`. All three exact heads are on `origin/main`; all required CI/security/native/hosted/Vercel gates completed green, and the watcher has been deleted.
+
+The result is still a synthetic-only, independently literal-false, runtime-disconnected claimant journey composition. It does not add normal app UI/navigation, hosted MFA/Auth, persistent sessions, production native custody/signing, provider adapters, deployment, real data, intake/review/release authority or external claimant access. Begin the next session with [the 2026-09-15 closeout](docs/handoff/2026-09-15-claimant-5s-5v-session-close.md), this file and the 5S/5T/5U–5V specs and verification records. No next slice has been authorized. The recommended candidate is a separately specified synthetic whole-journey acceptance slice (provisionally 5W) that composes only injected/local test boundaries and preserves every prohibition; confirm its acceptance cases and authorization before coding.
+
 ## Current checkpoint — combined Slices 5U–5V local composition, 2026-09-15
 
 Combined Slices 5U–5V are published in stacked PR #86 from `codex/claimant-session-journey-composition`, targeting repaired Slice 5T PR #85. The independently literal-false mobile controller binds one injected synthetic authenticated session and ordered lifecycle, activates the 5T claimant-portal session client, constructs 5S only after activation, freshly asserts the exact server session before bridge work/retries, and returns only the frozen value-free draft. Fourteen new journey tests, all 1,418 workspace tests with three established skips, 282 serial script tests, all typechecks, zero-warning lint, security/audit/isolation, API bundle and the 24-page web build pass. No hosted MFA/Auth, normal runtime importer, UI/navigation, persistence, native custody/signing, deployment, real data or downstream authority was added. Scope: `docs/superpowers/specs/2026-09-15-claimant-slice-5u-5v-session-journey-composition.md`; evidence: `docs/verification/2026-09-15-claimant-slice-5u-5v-session-journey-composition.md`. PR #84 is merged. The active sequential watcher owns repaired #85 delivery, then #86 retargeting and complete exact-head gating.
@@ -26,7 +36,7 @@ PR #73 merged Slice 5P at `b6cd577` on 2026-09-09. Slice 5Q is published in PR #
 
 The complete claimant journey is still not runtime-wired. Hosted MFA, production native custody/signing, UI/session composition, provider adapters and whole-journey acceptance remain open. Keep capabilities false and synthetic data only. Preserve `.codex-runtime/` and `.playwright-cli/` without inspection or staging. No further slice follows automatically.
 
-Last updated: 2026-09-13 (Asia/Dubai)
+Last updated: 2026-09-15 (Asia/Dubai)
 
 ## Current checkpoint and opener — Slice 5P client, 2026-09-05
 

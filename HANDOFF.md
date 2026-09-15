@@ -1,5 +1,13 @@
 # Sanduqkin Project Handoff
 
+## Current checkpoint — Slice 5W local acceptance, 2026-09-15
+
+Slice 5W is published in PR #87 from `codex/claimant-whole-journey-acceptance`, first code/evidence head `dcc027f`, based on merged Slices 5S–5V plus their preserved closeout. The independently literal-false, runtime-disconnected harness joins the actual synthetic session/possession-to-draft composition to the existing local synthetic submission/state-machine path through closure. It accepts only the frozen value-free draft and returns only a frozen value-free acceptance report. Eleven focused tests, 1,429 workspace tests with three established skips, 285 serial script tests, all typechecks/lint/security/isolation checks, the API bundle and the 24-page web build pass. Scope: `docs/superpowers/specs/2026-09-15-claimant-slice-5w-whole-journey-acceptance.md`; evidence: `docs/verification/2026-09-15-claimant-slice-5w-whole-journey-acceptance.md`. The active ten-minute `pr-87-slice-5w-green-red-watcher` owns exact-head CI/preview/log monitoring, focused repair and resubmission on confirmed red, and conclusive green reporting; it cannot merge or start another slice. This is local contract-continuity evidence only: no hosted MFA/Auth, claimant UI, production native custody/signing, provider, persistence, deployment, real data or activation was added.
+
+## Current checkpoint — Slices 5S–5V merged; session closed, 2026-09-15
+
+This opener supersedes the older same-day stacked-PR and watcher snapshots below. Claimant Slice 5S merged through PR #84 at `281e8c06bd58077f9fbc6c1a635c65afbf990b4e` (exact head `73c34e624555576e27c7afedfc1fe9b447e82989`), repaired Slice 5T merged through PR #85 at `be39979fe73553a91c1cedfb4e178e37fc660229` (exact head `10a2995e083010d8651a89245205105f22d1c9e4`), and combined Slices 5U–5V merged through PR #86 at `0a1f29c548c7fa4076e5fa5ed2288530599856e6` (exact head `8c6d90b1caa581ad8432bb85a1a085fefb462377`). Each exact head was verified as an ancestor of `origin/main`; required app-security, CodeQL, OWASP ZAP, Android native/emulator, iOS simulator, hosted Supabase/live-security, GitGuardian and Vercel gates finished green. The delivery watcher was deleted after merge. The claimant journey remains independently literal-false, synthetic-only and disconnected from normal runtime; nothing was deployed, activated or tested with real claimant data. Resume from [the 2026-09-15 closeout](docs/handoff/2026-09-15-claimant-5s-5v-session-close.md). No next engineering slice is authorized; scope the recommended synthetic whole-journey acceptance slice before coding.
+
 ## Current checkpoint — combined Slices 5U–5V local composition, 2026-09-15
 
 Combined Slices 5U–5V are published in stacked PR #86 from `codex/claimant-session-journey-composition`, targeting repaired Slice 5T PR #85. The independently literal-false mobile controller joins the injected 5T portal-session client to the 5S possession/handoff bridge, requires fresh server session assertion before bridge work or exact retry, governs the chain with one synthetic authenticated-session/lifecycle binding, and returns only the frozen value-free draft. Full local tests, typechecks, lint, security/audit/isolation, API bundle and the 24-page web build pass. No hosted MFA/Auth, UI/runtime mounting, persistence, native custody, deployment, real data or capability activation was added. Scope and evidence: `docs/superpowers/specs/2026-09-15-claimant-slice-5u-5v-session-journey-composition.md` and `docs/verification/2026-09-15-claimant-slice-5u-5v-session-journey-composition.md`. PR #84 is merged; the active sequential watcher gates repaired PR #85 before retargeting and gating #86.
@@ -26,7 +34,7 @@ Keep all claimant approvals false. No normal mobile UI/runtime importer, product
 
 PR #79's first head `96129f3` went red at `npm ci` before tests because npm 11.4.2 required an optional `react-native-worklets@0.8.3` lock entry removed by the newer local installer. A lock-only repair restores that entry; npm 11.4.2 clean install, audit, focused handoff tests, typechecks and security/isolation pass locally. Push the repair and let the existing watcher re-evaluate the new exact head. Do not interpret the earlier red runs or passing Vercel build contexts as complete staging evidence.
 
-Last updated: 2026-09-13 (Asia/Dubai)
+Last updated: 2026-09-15 (Asia/Dubai)
 
 ## Current checkpoint — Slice 5P client implemented locally, 2026-09-05
 
