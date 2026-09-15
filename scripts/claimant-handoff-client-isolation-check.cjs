@@ -6,6 +6,7 @@ const directory = "apps/mobile/src/features/claimant-handoff/";
 const files = ["contracts.ts", "transport.ts", "coordinator.ts", "lifecycle.ts"].map((name) => directory + name);
 const bridgePath = directory + "possession-bridge.ts";
 const journeyPath = "apps/mobile/src/features/claimant-journey/session-journey-composition.ts";
+const runtimeFoundationPath = "apps/mobile/src/features/claimant-journey/runtime-foundation.ts";
 const symbols = ["claimant-handoff/", "createHandoffTransport", "createHandoffCoordinator",
   "createHandoffLifecycle", "CLAIMANT_HANDOFF_TRANSPORT_APPROVED",
   "CLAIMANT_HANDOFF_COORDINATOR_APPROVED", "CLAIMANT_HANDOFF_LIFECYCLE_APPROVED"];
@@ -22,7 +23,8 @@ function validateSources(sources) {
   for (const [path, source] of sources) {
     if (/\.test\.[cm]?[jt]sx?$/u.test(path)) continue;
     if (!files.includes(path)) {
-      if (path === bridgePath || path === journeyPath) continue; // Separately guarded synthetic composition.
+      if (path === bridgePath || path === journeyPath || path === runtimeFoundationPath) continue;
+      // Each exception above is a separately guarded synthetic composition.
       if (symbols.some((symbol) => source.includes(symbol))) throw new Error(`Handoff client runtime importer: ${path}`);
       continue;
     }

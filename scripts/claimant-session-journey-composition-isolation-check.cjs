@@ -3,7 +3,8 @@ const ts = require("typescript");
 const { collectSources } = require("./claimant-offline-code-v2-client-coordinator-isolation-check.cjs");
 
 const path = "apps/mobile/src/features/claimant-journey/session-journey-composition.ts";
-const approvedWrapper = "apps/mobile/src/features/claimant-journey/whole-journey-acceptance.ts";
+const approvedWrappers = new Set(["apps/mobile/src/features/claimant-journey/whole-journey-acceptance.ts",
+  "apps/mobile/src/features/claimant-journey/runtime-foundation.ts"]);
 const imports = new Set(["zod", "../claimant-handoff/session-bridge-composition",
   "../claimant-session/portal-session-client"]);
 const forbidden = new Set(["fetch", "XMLHttpRequest", "WebSocket", "EventSource", "axios", "process",
@@ -32,7 +33,7 @@ function validateSources(sources) {
   }
   visit(ast);
   for (const [other, content] of sources) {
-    if (other === path || other === approvedWrapper || /\.test\.[cm]?[jt]sx?$/u.test(other)) continue;
+    if (other === path || approvedWrappers.has(other) || /\.test\.[cm]?[jt]sx?$/u.test(other)) continue;
     if (["claimant-journey/session-journey-composition", "createClaimantSessionJourneyComposition",
       "CLAIMANT_SESSION_JOURNEY_COMPOSITION_APPROVED"].some((symbol) => content.includes(symbol)))
       throw new Error(`Claimant session journey runtime importer: ${other}`);

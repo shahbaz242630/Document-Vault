@@ -1,5 +1,9 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — combined Slices 5X–5Z local runtime foundations, 2026-09-15
+
+Combined Slices 5X–5Z are locally complete on a branch stacked over Slice 5W. They add only disabled synthetic runtime-foundation contracts: strict injected fresh-AAL2 hosted identity, injected user-present/non-exportable test signing, and a separately guarded composition into the existing synthetic claimant journey. All local test, typecheck, lint, security, isolation and build gates pass; evidence is recorded in `docs/verification/2026-09-15-claimant-slices-5x-5z-runtime-foundations.md`. This is not a usable claimant feature: no UI, production provider/native wiring, hosted mutation, deployment, real data or activation exists. Publish the stacked PR and rely on its green/red watcher before progression.
+
 ## Current checkpoint — Slice 5W local acceptance, 2026-09-15
 
 Slice 5W is published in PR #87 from `codex/claimant-whole-journey-acceptance`. It adds a disabled, runtime-disconnected whole-journey acceptance harness from the existing synthetic authenticated offline-code route through the established local synthetic closed-case state. The boundary and result are value-free, all 1,429 workspace tests plus the complete static/build gate set pass, and no product surface is enabled. The active green/red watcher owns exact-head CI, preview and log monitoring plus narrow repair/resubmission on confirmed red; it reports conclusive green without merging. Hosted authentication, claimant UI, native production signing/custody, providers, deployment, real data and external access remain incomplete and unauthorized.
