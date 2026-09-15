@@ -225,6 +225,9 @@ jobs:
     name: Android emulator smoke
     runs-on: ubuntu-latest
     environment: Preview
+    concurrency:
+      group: android-recovery-e2e-preview
+      cancel-in-progress: false
     needs: android-native-compile
     if: github.event_name == 'push'
     timeout-minutes: 25

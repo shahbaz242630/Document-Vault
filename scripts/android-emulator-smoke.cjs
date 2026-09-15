@@ -1,4 +1,5 @@
 const { execFileSync } = require("node:child_process");
+const { capturePreCleanupFailureEvidence } = require("./android-emulator-failure-evidence.cjs");
 
 const appPackage = "com.sanduqkin.mobile";
 const waitTimeoutMs = 45_000;
@@ -207,6 +208,14 @@ function fillField(label, value, clear = false) {
   sleep(350);
 }
 
+function fillVisibleFieldReliably(label, value) {
+  fillField(label, value);
+  if (waitForNodeOptional(value)) return;
+
+  fillField(label, value, true);
+  waitForNode(value);
+}
+
 function fillRecoveryPhrase(label, phrase) {
   tapNodeAfterScroll(label);
   const words = phrase.trim().split(/\s+/);
@@ -283,8 +292,7 @@ function createEncryptedBankRecord(title) {
   fillField("institutionName field", "TestBank");
   fillField("country field", "UAE");
   fillField("currency field", "AED");
-  fillField("lastFourDigits field", "4242");
-  waitForNode("4242");
+  fillVisibleFieldReliably("lastFourDigits field", "4242");
   tapNodeAfterScroll("Save to vault");
   const postSaveDestination = waitForAnyNode([homeHeading, "Bank accounts", title], 120_000);
   if (postSaveDestination.label === homeHeading) {
@@ -417,6 +425,9 @@ function runRecoveryResetContinuitySmoke() {
     openEncryptedBankRecord(title);
     permanentlyDeleteOpenRecord();
     fixtureExists = false;
+  } catch (error) {
+    capturePreCleanupFailureEvidence({ dumpUi, sanitizeUiXml });
+    throw error;
   } finally {
     ensureOriginalRecoveryPassword(credentials);
     if (fixtureExists) {
