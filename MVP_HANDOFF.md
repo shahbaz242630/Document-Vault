@@ -1,5 +1,9 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — combined Slices 5U–5V local composition, 2026-09-15
+
+Stacked PR #86 combines Slices 5U and 5V into one disabled synthetic claimant-session journey composition. It activates and freshly asserts the injected portal session before composing the session-bound possession/handoff bridge, cancels on hostile lifecycle/authentication change, delegates only existing exact retries, and exposes no authority beyond a value-free draft. All 1,418 workspace tests with three established skips, 282 script tests, typechecks, lint, security/audit/isolation, API bundle and web build pass. It adds no hosted authentication, UI/runtime activation, persistence, production native custody, deployment, real data or external claimant access. The active watcher delivers repaired #85 before retargeting and gating #86. Evidence: `docs/verification/2026-09-15-claimant-slice-5u-5v-session-journey-composition.md`.
+
 ## Current checkpoint — Slice 5T local client, 2026-09-15
 
 Slice 5T is published in stacked PR #85 on Slice 5S PR #84. The bounded mobile client uses injected transport to activate, assert and revoke a synthetic fresh-AAL2 claimant-portal session, retains it only in memory, and exposes a synthetic session source for later composition. It remains literal-false and disconnected from normal runtime. Full local tests, typechecks, lint, security/audit/isolation, API bundle and web build pass. The active `pr-84-85-claimant-green-merge` watcher owns sequential exact-head gating and merge. This does not add hosted MFA, UI/lifecycle wiring, deployment, native custody, real data or external access. Evidence: `docs/verification/2026-09-15-claimant-slice-5t-portal-session-client.md`.

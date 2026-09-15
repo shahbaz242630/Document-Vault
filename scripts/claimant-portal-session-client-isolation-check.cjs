@@ -3,6 +3,7 @@ const ts = require("typescript");
 const { collectSources } = require("./claimant-offline-code-v2-client-coordinator-isolation-check.cjs");
 
 const path = "apps/mobile/src/features/claimant-session/portal-session-client.ts";
+const permittedComposition = "apps/mobile/src/features/claimant-journey/session-journey-composition.ts";
 const imports = new Set(["zod"]);
 const forbidden = new Set(["fetch", "XMLHttpRequest", "WebSocket", "EventSource", "axios", "process",
   "globalThis", "window", "document", "AppState", "localStorage", "sessionStorage", "indexedDB",
@@ -28,6 +29,7 @@ function validateSources(sources) {
   visit(ast);
   for (const [other, content] of sources) {
     if (other === path || /\.test\.[cm]?[jt]sx?$/u.test(other)) continue;
+    if (other === permittedComposition) continue;
     if (["claimant-session/portal-session-client", "createSyntheticClaimantPortalSessionClient",
       "CLAIMANT_PORTAL_SESSION_CLIENT_APPROVED"].some((symbol) => content.includes(symbol)))
       throw new Error(`Claimant session client runtime importer: ${other}`);

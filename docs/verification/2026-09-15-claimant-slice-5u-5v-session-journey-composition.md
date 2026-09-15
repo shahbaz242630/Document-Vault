@@ -1,0 +1,15 @@
+# Slices 5U–5V — synthetic claimant session journey composition verification
+
+Date: 2026-09-15 (Asia/Dubai). Branch: `codex/claimant-session-journey-composition`, stacked on repaired Slice 5T PR #85 head `10a2995`. Pull request: #86. First published code head: `25ae91e`.
+
+The combined slice adds one independently literal-false, runtime-disconnected mobile controller. It synchronously binds an injected synthetic fresh-AAL2 authenticated session and ordered lifecycle, activates the existing claimant-portal session client, constructs the existing session-bound possession/handoff bridge only after activation, and performs a fresh server portal-session assertion before initial bridge work and either exact bridge retry.
+
+Authentication drift, expiry, portal session/version loss, malformed or regressing lifecycle, and terminal lifecycle close permanently. Inactive/background and explicit cancellation clear child retry authority and suppress late portal or bridge results. Ambiguous activation and revoke delegate only the exact retained client request; proof and completion retries remain owned by the existing bounded bridge. Successful completion is reduced to the existing frozen, value-free draft summary. Snapshots expose only generic status plus portal-active/draft-available and literal-false downstream authority flags.
+
+Fourteen focused journey tests passed, including dormant dependency non-access, synchronous-source validation, end-to-end activation/assertion/draft, assertion-before-adapter denial, authentication drift/expiry, background and explicit cancellation, overlap, exact activation/proof/completion/revoke retries, lifecycle regression/terminal closure, safe snapshots and awaitable disposal. Nine focused 5S/5T/new-composition isolation regressions passed.
+
+The final local baseline passed: 715 mobile tests with three established skips, 171 web, 131 shared-types, 42 shared-validation and 359 API tests (1,418 total). All 282 serial `scripts/*.test.cjs` tests passed. All workspace typechecks, zero-warning ESLint excluding only generated `supabase/.temp/**` and the two protected local directories, Phase 1 DoD, repository security, GitHub Actions security, mobile-secret scan, production dependency audit, API Vercel bundle, and relevant isolation checks passed. The Next 16.3.5 production build generated all 24 static pages, and `git diff --check` passed.
+
+The new isolation guard permits this file as the sole separately guarded importer of the 5T portal client and 5S bridge composition. It rejects enabling the literal-false gate, ambient auth/network/browser/native/storage/provider access, dynamic imports, unapproved adapters and any normal application importer. CI runs the new guard regression explicitly.
+
+No hosted MFA/Auth integration, Supabase SDK, UI/navigation, storage, native custody/signing, server/database change, hosted mutation, deployment, native/EAS build, real claimant data, downstream intake/review/release behavior, provider/notification integration, or capability activation occurred. PR #86 local evidence is not merge or hosted acceptance evidence.
