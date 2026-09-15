@@ -1,5 +1,9 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — Slice 5W local acceptance, 2026-09-15
+
+Slice 5W is published in PR #87 from `codex/claimant-whole-journey-acceptance`. It adds a disabled, runtime-disconnected whole-journey acceptance harness from the existing synthetic authenticated offline-code route through the established local synthetic closed-case state. The boundary and result are value-free, all 1,429 workspace tests plus the complete static/build gate set pass, and no product surface is enabled. The active green/red watcher owns exact-head CI, preview and log monitoring plus narrow repair/resubmission on confirmed red; it reports conclusive green without merging. Hosted authentication, claimant UI, native production signing/custody, providers, deployment, real data and external access remain incomplete and unauthorized.
+
 ## Current checkpoint — Slices 5S–5V merged; session closed, 2026-09-15
 
 The disabled claimant composition chain is delivered on `main`: PR #84 / Slice 5S merged at `281e8c06bd58077f9fbc6c1a635c65afbf990b4e`, PR #85 / Slice 5T and the Android recovery-queue repair merged at `be39979fe73553a91c1cedfb4e178e37fc660229`, and PR #86 / combined Slices 5U–5V merged at `0a1f29c548c7fa4076e5fa5ed2288530599856e6`. Exact-head ancestry was verified and all required CI, security, native smoke, hosted integration and Vercel gates were green. The watcher is stopped. This delivers a tested synthetic session journey composition, not an enabled claimant experience: hosted MFA, claimant UI, production native custody/signing, providers, deployment, real data and external access remain outside scope. Resume with [the current closeout](docs/handoff/2026-09-15-claimant-5s-5v-session-close.md); select and approve the next bounded slice before implementation.

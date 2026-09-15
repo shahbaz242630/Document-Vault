@@ -1,5 +1,9 @@
 # Sanduqkin Claimant Engineering Handoff
 
+## Current checkpoint — Slice 5W local acceptance, 2026-09-15
+
+Slice 5W is published in PR #87 from `codex/claimant-whole-journey-acceptance`; first code/evidence head `dcc027f`. Its separately guarded literal-false harness composes the merged 5U–5V synthetic session/possession path with the existing shared synthetic submission/state model through closure, while the seam and final report remain value-free. Eleven focused tests, all 1,429 workspace tests with three established skips, 285 serial script tests, typechecks, zero-warning lint, security/isolation, API bundle and the 24-page web build pass. See `docs/superpowers/specs/2026-09-15-claimant-slice-5w-whole-journey-acceptance.md` and `docs/verification/2026-09-15-claimant-slice-5w-whole-journey-acceptance.md`. The active `pr-87-slice-5w-green-red-watcher` handles exact-head CI, previews and logs, narrow repair/resubmission on confirmed red, and conclusive green reporting without merging or starting another slice. This does not authorize hosted MFA/Auth, normal UI/runtime wiring, production native custody/signing, providers, deployment, real data, downstream runtime authority or activation.
+
 ## Current checkpoint and opener — Slices 5S–5V merged, 2026-09-15
 
 This is the authoritative resume point; the same-day local/stacked/watcher sections below are historical. PR #84 merged Slice 5S at `281e8c06bd58077f9fbc6c1a635c65afbf990b4e` from exact head `73c34e624555576e27c7afedfc1fe9b447e82989`. PR #85 merged Slice 5T plus the ordered Android recovery-slot repair at `be39979fe73553a91c1cedfb4e178e37fc660229` from exact head `10a2995e083010d8651a89245205105f22d1c9e4`. PR #86 merged combined Slices 5U–5V at `0a1f29c548c7fa4076e5fa5ed2288530599856e6` from exact head `8c6d90b1caa581ad8432bb85a1a085fefb462377`. All three exact heads are on `origin/main`; all required CI/security/native/hosted/Vercel gates completed green, and the watcher has been deleted.

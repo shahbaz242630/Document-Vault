@@ -1,0 +1,14 @@
+# Slice 5W — synthetic whole-journey acceptance
+
+Selected on 2026-09-15 after Slices 5S–5V merged through PRs #84–#86. Add one independently literal-false, runtime-disconnected mobile acceptance harness that joins the existing Slice 5U–5V session journey to the existing shared synthetic submission and claim-state model. The harness establishes the injected fresh-AAL2 claimant portal session, proves offline-code V2 route possession, completes the authenticated handoff to the value-free draft, then advances only the established local synthetic acceptance scenario through submission, owner protection, independent review, encrypted delivery and closure.
+
+The seam from the mobile draft into the shared scenario is intentionally value-free. It validates only the exact frozen draft contract and never exposes or attempts to join a user ID, session ID, case ID, challenge, binding digest, signature, token or idempotency material. The shared scenario remains the authority for its fixed synthetic case and audit ledger. This proves contract continuity across existing isolated/local boundaries; it does not claim that hosted services, normal application runtime or production identities are integrated.
+
+The harness may import only the Slice 5U–5V composition, Zod and approved shared synthetic scenario functions. It has no ambient authentication, network, storage, native, browser, provider, notification, UI or normal-runtime access. Its own approval constant is literal false. It passes an explicit test-only approval to the child composition only inside the separately guarded harness.
+
+Successful completion returns one recursively frozen value-free report: synthetic accepted status, offline-code V2 route profile, closed final state, case version and audit-event count, claimant-session binding, audit reconciliation, and literal-false identity, relationship, release, decryption and runtime-effect fields. No shared scenario snapshot, ledger entry, case/tenant identifier, adapter error or private binding leaves the harness.
+
+Failure, cancellation and retry acceptance covers dormant dependency non-access; exact portal activation; fresh assertion before route work; exact activation, proof, completion and revoke retry delegation; upstream failure without downstream progression; malformed or authority-expanded draft rejection; background/explicit cancellation with late-result suppression; terminal lifecycle closure; overlap denial; safe immutable snapshots/reports; complete reconciled synthetic progression through closure; and awaitable disposal.
+
+No hosted MFA/Auth integration, Supabase SDK, claimant UI/navigation, persistent session or scenario storage, production native custody/signing, server/database/migration change, provider/notification integration, deployment, native/EAS build, real claimant data, downstream runtime authority or capability activation is included.
+
