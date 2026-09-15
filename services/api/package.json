@@ -22,6 +22,6 @@
     "@vault/shared-types": "0.1.0",
     "tsx": "4.22.4",
     "typescript": "5.9.2",
-    "vitest": "4.1.9"
+    "vitest": "4.1.11"
   }
 }

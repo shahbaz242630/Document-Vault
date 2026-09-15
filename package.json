@@ -129,7 +129,7 @@
   },
   "devDependencies": {
     "@supabase/supabase-js": "2.108.2",
-    "@vitest/coverage-v8": "4.1.9",
+    "@vitest/coverage-v8": "4.1.11",
     "bip39": "3.1.0",
     "esbuild": "0.28.1",
     "eslint": "9.39.3",
