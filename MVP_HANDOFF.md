@@ -2,7 +2,7 @@
 
 ## Current checkpoint — Slice 5T local client, 2026-09-15
 
-Slice 5T is locally complete on `codex/claimant-portal-session-client`, based on Slice 5S PR #84. The bounded mobile client uses injected transport to activate, assert and revoke a synthetic fresh-AAL2 claimant-portal session, retains it only in memory, and exposes a synthetic session source for later composition. It remains literal-false and disconnected from normal runtime. Full local tests, typechecks, lint, security/audit/isolation, API bundle and web build pass. This does not add hosted MFA, UI/lifecycle wiring, deployment, native custody, real data or external access. Evidence: `docs/verification/2026-09-15-claimant-slice-5t-portal-session-client.md`.
+Slice 5T is published in stacked PR #85 on Slice 5S PR #84. The bounded mobile client uses injected transport to activate, assert and revoke a synthetic fresh-AAL2 claimant-portal session, retains it only in memory, and exposes a synthetic session source for later composition. It remains literal-false and disconnected from normal runtime. Full local tests, typechecks, lint, security/audit/isolation, API bundle and web build pass. The active `pr-84-85-claimant-green-merge` watcher owns sequential exact-head gating and merge. This does not add hosted MFA, UI/lifecycle wiring, deployment, native custody, real data or external access. Evidence: `docs/verification/2026-09-15-claimant-slice-5t-portal-session-client.md`.
 
 ## Current checkpoint — Slice 5S local composition, 2026-09-15
 
