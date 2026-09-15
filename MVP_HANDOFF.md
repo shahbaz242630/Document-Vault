@@ -1,5 +1,9 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — Slices 5S–5V merged; session closed, 2026-09-15
+
+The disabled claimant composition chain is delivered on `main`: PR #84 / Slice 5S merged at `281e8c06bd58077f9fbc6c1a635c65afbf990b4e`, PR #85 / Slice 5T and the Android recovery-queue repair merged at `be39979fe73553a91c1cedfb4e178e37fc660229`, and PR #86 / combined Slices 5U–5V merged at `0a1f29c548c7fa4076e5fa5ed2288530599856e6`. Exact-head ancestry was verified and all required CI, security, native smoke, hosted integration and Vercel gates were green. The watcher is stopped. This delivers a tested synthetic session journey composition, not an enabled claimant experience: hosted MFA, claimant UI, production native custody/signing, providers, deployment, real data and external access remain outside scope. Resume with [the current closeout](docs/handoff/2026-09-15-claimant-5s-5v-session-close.md); select and approve the next bounded slice before implementation.
+
 ## Current checkpoint — combined Slices 5U–5V local composition, 2026-09-15
 
 Stacked PR #86 combines Slices 5U and 5V into one disabled synthetic claimant-session journey composition. It activates and freshly asserts the injected portal session before composing the session-bound possession/handoff bridge, cancels on hostile lifecycle/authentication change, delegates only existing exact retries, and exposes no authority beyond a value-free draft. All 1,418 workspace tests with three established skips, 282 script tests, typechecks, lint, security/audit/isolation, API bundle and web build pass. It adds no hosted authentication, UI/runtime activation, persistence, production native custody, deployment, real data or external claimant access. The active watcher delivers repaired #85 before retargeting and gating #86. Evidence: `docs/verification/2026-09-15-claimant-slice-5u-5v-session-journey-composition.md`.
@@ -20,7 +24,7 @@ Slices 5Q and 5R are merged through PRs [#79](https://github.com/shahbaz242630/D
 
 Slice 5P merged in PR #73 at `b6cd577`. Slice 5Q is published in PR #79 from `codex/claimant-handoff-lifecycle` and makes its synthetic mobile handoff safe across background, lock and session end while approvals remain literal false. It adds no claimant UI or production signer. Local tests, dependency audit and Docker-backed acceptance pass; the `pr-79-handoff-lifecycle-gates` watcher monitors CI and protected staging. The public `/claim` flow is informational, and neither claimant route is an integrated, enabled end-to-end experience. See `HANDOFF.md` and the 5Q verification record; earlier PR #73 unmerged snapshots are historical.
 
-Last updated: 2026-09-13 (Asia/Dubai)
+Last updated: 2026-09-15 (Asia/Dubai)
 
 ## Current checkpoint — Slice 5P client, 2026-09-05
 

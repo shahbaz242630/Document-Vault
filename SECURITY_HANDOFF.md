@@ -1,5 +1,9 @@
 # Sanduqkin Security Handoff
 
+## Current checkpoint — Slices 5S–5V merged; gates green, 2026-09-15
+
+This opener supersedes the historical open-PR/watcher notes below. PR #84 merged exact head `73c34e624555576e27c7afedfc1fe9b447e82989` at `281e8c06bd58077f9fbc6c1a635c65afbf990b4e`; PR #85 merged exact head `10a2995e083010d8651a89245205105f22d1c9e4` at `be39979fe73553a91c1cedfb4e178e37fc660229`; PR #86 merged exact head `8c6d90b1caa581ad8432bb85a1a085fefb462377` at `0a1f29c548c7fa4076e5fa5ed2288530599856e6`. Ancestry is verified on `origin/main`, and the complete required gate set passed, including the repaired ordered Android recovery-slot path. The watcher was deleted. Literal-false gates, static runtime isolation, synthetic inputs, value-free outputs and all prohibitions remain unchanged. No hosted mutation, production authentication/custody, provider contact, deployment, real data or downstream authority activation occurred. Read [the 2026-09-15 closeout](docs/handoff/2026-09-15-claimant-5s-5v-session-close.md) before proposing further work; any next slice requires separate scope and authorization.
+
 ## Current checkpoint — combined Slices 5U–5V local composition, 2026-09-15
 
 Stacked PR #86 adds one isolated, literal-false synthetic controller over the 5T portal client and 5S session-bound bridge. Fresh server assertion precedes start/proof-retry/completion-retry; exact authenticated and portal-session binding, monotonic lifecycle, background cancellation, late-result suppression, terminal closure, exact retry delegation and value-free outputs fail closed under 14 focused tests. A dedicated static guard makes this the sole permitted composition importer and rejects ambient auth/network/browser/native/storage/provider access or normal runtime mounting. Full local test, typecheck, lint, security/audit, bundle and build gates pass. No hosted mutation, production authentication, native custody, deployment, real data or authority activation is permitted. The active watcher gates repaired #85 before #86. Evidence: `docs/verification/2026-09-15-claimant-slice-5u-5v-session-journey-composition.md`.
@@ -20,7 +24,7 @@ PRs [#79](https://github.com/shahbaz242630/Document-Vault/pull/79) and [#80](htt
 
 PR #73 merged Slice 5P at `b6cd577`. Slice 5Q is published in PR #79. Its foreground lifecycle root remains independently literal-false and runtime-disconnected. It invalidates in-flight work and exact completion retry on background/inactive, closes on lock/session end/disable and malformed or regressing events, suppresses late results, and offers awaitable disposal with a value-free snapshot. Local dependency audit and Docker-backed handoff acceptance pass; `pr-79-handoff-lifecycle-gates` monitors exact-head CI and protected staging without merging. No native signing, production custody, hosted mutation, activation or new external claimant authority was added. The historical 5P local staging note does not prove application-level handoff-route concealment or hostile-origin smoke before PR #73 merged. See the 5Q spec/verification record.
 
-Last updated: 2026-09-13 (Asia/Dubai)
+Last updated: 2026-09-15 (Asia/Dubai)
 
 ## Current checkpoint — Slice 5P client, 2026-09-05
 
