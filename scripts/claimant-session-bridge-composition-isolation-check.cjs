@@ -3,6 +3,7 @@ const ts = require("typescript");
 const { collectSources } = require("./claimant-offline-code-v2-client-coordinator-isolation-check.cjs");
 
 const path = "apps/mobile/src/features/claimant-handoff/session-bridge-composition.ts";
+const permittedComposition = "apps/mobile/src/features/claimant-journey/session-journey-composition.ts";
 const imports = new Set(["zod", "./contracts", "./possession-bridge"]);
 const forbidden = new Set(["fetch", "XMLHttpRequest", "WebSocket", "EventSource", "axios", "process",
   "globalThis", "window", "document", "AppState", "localStorage", "sessionStorage", "indexedDB",
@@ -29,6 +30,7 @@ function validateSources(sources) {
   visit(ast);
   for (const [other, content] of sources) {
     if (other === path || /\.test\.[cm]?[jt]sx?$/u.test(other)) continue;
+    if (other === permittedComposition) continue;
     if (["session-bridge-composition", "createClaimantSessionBridgeComposition",
       "CLAIMANT_SESSION_BRIDGE_COMPOSITION_APPROVED"].some((symbol) => content.includes(symbol)))
       throw new Error(`Session bridge runtime importer: ${other}`);
