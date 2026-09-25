@@ -146,6 +146,19 @@ describe("synthetic claimant portal session client", () => {
     expect(h.client.snapshot()).toEqual({ status: "ready", session_available: false, retry_available: false });
   });
 
+  it.each(["cancel", "dispose"] as const)("aborts a request that never responds on %s", async (action) => {
+    const h = harness(); let signal: AbortSignal | undefined;
+    h.send.mockImplementationOnce((_url, init) => { signal = init.signal; return new Promise<Response>(() => {}); });
+    const pending = h.client.activate({ authenticated: h.authenticated, idempotencyKey: id(3) });
+    await vi.waitFor(() => expect(h.send).toHaveBeenCalledOnce());
+    const settled = action === "cancel" ? (h.client.cancel(), Promise.resolve()) : h.client.dispose();
+    expect(signal?.aborted).toBe(true);
+    await expect(pending).rejects.toMatchObject(unavailable);
+    await expect(settled).resolves.toBeUndefined();
+    expect(h.client.snapshot().retry_available).toBe(false);
+    await expect(h.client.retryActivation()).rejects.toMatchObject(unavailable);
+  });
+
   it("disposes awaitably and makes the session source unavailable", async () => {
     const h = harness(); const listener = vi.fn(); h.client.source.subscribe(listener);
     await h.client.activate({ authenticated: h.authenticated, idempotencyKey: id(3) });
