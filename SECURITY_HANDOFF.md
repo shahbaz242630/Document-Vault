@@ -1,5 +1,9 @@
 # Sanduqkin Security Handoff
 
+## Current checkpoint — Slice 6B local bundled launch policy, 2026-09-25
+
+Slice 6A merged through PR #89 after all required exact-head gates passed or were intentionally skipped. Slice 6B adds one separately guarded bundled launch policy: approval false, feature false, kill switch true, synthetic-only and production-runtime false. It accepts no input, has no imports or ambient access, returns one frozen value-free object, and is consumed only by the 6A bootstrap before that bootstrap returns inertly. Static guards reject any control change, environment/remote/network/auth/storage/native/provider adapter, incomplete forwarding or second importer. Twelve focused tests, 1,474 workspace tests with three established skips, 296 serial script tests, typechecks, lint, security/audit/isolation, Expo Doctor and builds pass. No hosted mutation, production authentication/native/provider access, UI, persistence, deployment, real data or capability activation occurred.
+
 ## Current checkpoint — Slice 6A local disabled runtime bootstrap, 2026-09-25
 
 After green delivery of PRs #87 and #88, Slice 6A adds one normal-root lifecycle connection to the existing 5X–5Z foundation without enabling it. The bootstrap has a literal-false approval, disabled feature condition and engaged kill switch by default; dormant startup does not access its runtime input or factory. Static guards enforce exactly one foundation wrapper and one root-layout importer, reject ambient or dynamic adapters, and require background/inactive closure plus disposal. Its surface is value-free and never exposes identity or release authority. Ten focused tests, 1,472 workspace tests with three established skips, 292 serial script tests, typechecks, lint, security/audit/isolation, Expo Doctor and builds pass. No hosted mutation, production authentication/native/provider access, UI, persistence, deployment, real data or capability activation occurred.
