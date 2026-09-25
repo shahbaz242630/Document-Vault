@@ -15,6 +15,11 @@ import { createBiometricStorage } from "@/features/auth/biometric-storage";
 import { createMekStorage } from "@/features/auth/mek-storage";
 import * as ExpoSecureStore from "expo-secure-store";
 
+import type {
+  OwnerOfflineCodeSheet,
+  OwnerOfflineCodeSheetInput,
+} from "@/features/claimant-offline-code/owner-offline-code-sheet-factory";
+
 import type { AssetPlaintextPayload } from "./asset-payload";
 import {
   createSupabaseVaultRepository,
@@ -55,6 +60,7 @@ type VaultSessionContextValue = {
     repository: Pick<SealedEmergencyCodeGrantRepository, "revokeActiveSealedCodeGrants">,
     options?: { auditLog?: SealedEmergencyCodeSetupOptions["auditLog"] },
   ) => Promise<void>;
+  createOfflineCodeEmergencySheet: (input: OwnerOfflineCodeSheetInput) => Promise<OwnerOfflineCodeSheet>;
   restoreAsset: (id: string) => Promise<void>;
   signOut: () => void;
   softDeleteAsset: (id: string) => Promise<void>;
@@ -172,13 +178,21 @@ function useVaultEmergencyCodeActions(session: VaultSession | null) {
     [session],
   );
 
+  const createOfflineCodeEmergencySheet = useCallback(
+    (input: OwnerOfflineCodeSheetInput) =>
+      requireVaultSession(session).createOfflineCodeEmergencySheet(input),
+    [session],
+  );
+
   return useMemo(
     () => ({
+      createOfflineCodeEmergencySheet,
       createSealedEmergencyCodeSetup,
       regenerateSealedEmergencyCodeSetup,
       revokeSealedEmergencyCodeSetup,
     }),
     [
+      createOfflineCodeEmergencySheet,
       createSealedEmergencyCodeSetup,
       regenerateSealedEmergencyCodeSetup,
       revokeSealedEmergencyCodeSetup,

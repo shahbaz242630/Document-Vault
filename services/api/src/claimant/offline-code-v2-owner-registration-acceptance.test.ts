@@ -10,6 +10,12 @@ import { describe, expect, it, vi } from "vitest";
 import { createOfflineCodeV2PlatformProofProducer } from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-proof-producer";
 import { generateOfflineCodeV2EmergencySheet, type OfflineCodeV2SheetCrypto }
   from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-sheet-generator";
+import { createOwnerOfflineCodeClient }
+  from "../../../../apps/mobile/src/features/claimant-offline-code/owner-offline-code-client";
+import { createOwnerOfflineCodeSheet, type OwnerOfflineCodeSheet }
+  from "../../../../apps/mobile/src/features/claimant-offline-code/owner-offline-code-sheet-factory";
+import { createOwnerSheetFlow } from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-flow";
+import { renderOwnerSheetHtml } from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-html";
 import { createOfflineCodeV2Controller } from "./offline-code-v2-controller.js";
 import { createOfflineCodeV2OwnerRoute } from "./offline-code-v2-owner-routes.js";
 import { createOfflineCodeV2PersistenceTransactionClient } from "./offline-code-v2-persistence-transaction-client.js";
@@ -213,7 +219,7 @@ function harness() {
   const post = (path: string, body: unknown, headers: Record<string, string>) => app.request(`${apiOrigin}${path}`, {
     method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json",
       "Idempotency-Key": randomUUID(), ...headers } });
-  return { store, rpc, owner,
+  return { app, store, rpc, owner,
     register: (jwt: string, body: unknown, key = randomUUID()) => post("/owner/offline-code/v2/locators", body,
       { Authorization: `Bearer ${jwt}`, Origin: ownerOrigin, "Idempotency-Key": key }),
     revoke: (jwt: string, id: string) => post(`/owner/offline-code/v2/locators/${id}/revoke`, {},
@@ -298,5 +304,59 @@ describe("Slice 6G owner registration to claimant challenge acceptance", () => {
     const { result } = await decoy.json() as { result: { challenge: OfflineCodeChallengeV2 } };
     expect(result.challenge.locator_record_id).not.toBe(body.locatorRecordId);
     expect(result.challenge.record_binding_digest).not.toBe(body.recordBindingDigest);
+  }, 60_000);
+});
+
+describe("Slice 6H owner app flow to claimant acceptance", () => {
+  function ownerApp(system: ReturnType<typeof harness>, ownerId: string) {
+    const jwt = system.owner(ownerId); const printed: string[] = []; const made: OwnerOfflineCodeSheet[] = [];
+    const fetchImpl = (async (url: string, init: RequestInit) => system.app.request(url, init)) as unknown as typeof fetch;
+    const flow = createOwnerSheetFlow({
+      createSheet: async (input) => { const sheet = await createOwnerOfflineCodeSheet({ ...input, approved: true,
+        mek: sodium.randombytes_buf(32) }); made.push(sheet); return sheet; },
+      getOwnerId: async () => ownerId,
+      client: createOwnerOfflineCodeClient({ apiBaseUrl: apiOrigin, ownerOrigin, fetch: fetchImpl,
+        getAccessToken: async () => jwt }),
+      verifyFreshMfa: async () => false, renderSheetHtml: renderOwnerSheetHtml,
+      print: async (html) => { printed.push(html); }, randomUUID,
+    });
+    return { flow, printed, made };
+  }
+
+  it("generates, self-checks, registers through the real route and prints a sheet the claimant can prove", async () => {
+    await sodium.ready;
+    const system = harness(); const ownerId = randomUUID(); const owner = ownerApp(system, ownerId);
+    await owner.flow.start();
+    expect(owner.flow.getState().status).toBe("ready_to_print");
+    await owner.flow.print(); owner.flow.confirmPrinted();
+    expect(owner.flow.getState().status).toBe("done");
+    const [sheet] = owner.made; const [html] = owner.printed;
+    expect(system.store.locators.get(sheet!.registration.locatorRecordId)?.ownerUserId).toBe(ownerId);
+    expect(html).toContain(sheet!.printedLocator); expect(html).toContain(sheet!.printedSecret);
+    const registerCall = system.rpc.mock.calls.find(([name]) => name === "claimant_register_offline_code_v2_locator")!;
+    expect(JSON.stringify(registerCall[1])).not.toContain(sheet!.printedSecret);
+
+    const issued = await system.challenge(sheet!.printedLocator);
+    const { result } = await issued.json() as { result: { challenge: OfflineCodeChallengeV2;
+      challenge_bytes_base64url: string } };
+    expect(result.challenge.locator_record_id).toBe(sheet!.registration.locatorRecordId);
+    const proof = await createOfflineCodeV2PlatformProofProducer(true).produce({
+      ...parseOfflineCodeSheetV2(sheet!.sheetPayload), challenge: result.challenge, expectedOrigin: claimantOrigin });
+    const verified = await system.prove(result.challenge.challenge_id, { challenge: result.challenge,
+      challenge_bytes_base64url: result.challenge_bytes_base64url, possession_proof: proof });
+    expect((await verified.json() as { result: { route_possession_asserted: boolean } }).result
+      .route_possession_asserted).toBe(true);
+  }, 60_000);
+
+  it("revokes through the real route when the owner abandons before confirming, leaving only a decoy", async () => {
+    await sodium.ready;
+    const system = harness(); const owner = ownerApp(system, randomUUID());
+    await owner.flow.start(); await owner.flow.print();
+    await owner.flow.abandon();
+    const [sheet] = owner.made;
+    expect(system.store.locators.get(sheet!.registration.locatorRecordId)?.status).toBe("revoked");
+    const decoy = await system.challenge(sheet!.printedLocator);
+    const { result } = await decoy.json() as { result: { challenge: OfflineCodeChallengeV2 } };
+    expect(result.challenge.locator_record_id).not.toBe(sheet!.registration.locatorRecordId);
   }, 60_000);
 });

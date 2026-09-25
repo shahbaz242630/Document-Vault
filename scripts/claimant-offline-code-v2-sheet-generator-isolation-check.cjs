@@ -4,6 +4,7 @@ const { join, relative } = require("node:path");
 const root = join(__dirname, "..");
 const generatorPath = "apps/mobile/src/features/claimant-offline-code/offline-code-v2-sheet-generator.ts";
 const generator = readFileSync(join(root, generatorPath), "utf8");
+const factoryPath = "apps/mobile/src/features/claimant-offline-code/owner-offline-code-sheet-factory.ts";
 
 if (!/CLAIMANT_OFFLINE_CODE_V2_SHEET_GENERATOR_APPROVED\s*=\s*false\s+as\s+const/u.test(generator))
   throw new Error("Offline-code V2 sheet generator approval must remain literal false.");
@@ -19,7 +20,8 @@ if (JSON.stringify(imports) !== JSON.stringify(["./offline-code-v2-proof-core", 
 
 for (const file of productionFiles(join(root, "apps"))) {
   const path = relative(root, file).replaceAll("\\", "/");
-  if (path === generatorPath || /\.test\.[cm]?[jt]sx?$/u.test(path)) continue;
+  // Slice 6H: the owner sheet factory is the one approved importer.
+  if (path === generatorPath || path === factoryPath || /\.test\.[cm]?[jt]sx?$/u.test(path)) continue;
   if (readFileSync(file, "utf8").includes("offline-code-v2-sheet-generator"))
     throw new Error(`Offline-code V2 sheet generator is imported by ${path}.`);
 }
