@@ -13,12 +13,11 @@ const runtime = globalThis as typeof globalThis & {
   process?: { env?: Env };
 };
 
-export function getRevenueCatEnv(
-  env: Env = runtime.process?.env ?? {},
-): RevenueCatEnvResult {
-  const sharedKey = env.EXPO_PUBLIC_REVENUECAT_API_KEY?.trim();
-  const iosKey = env.EXPO_PUBLIC_REVENUECAT_IOS_KEY?.trim();
-  const androidKey = env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY?.trim();
+export function getRevenueCatEnv(env?: Env): RevenueCatEnvResult {
+  const resolved = resolveEnv(env);
+  const sharedKey = resolved.EXPO_PUBLIC_REVENUECAT_API_KEY?.trim();
+  const iosKey = resolved.EXPO_PUBLIC_REVENUECAT_IOS_KEY?.trim();
+  const androidKey = resolved.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY?.trim();
 
   if (!sharedKey && !iosKey && !androidKey) {
     return { isConfigured: false };
@@ -49,4 +48,22 @@ export function selectRevenueCatApiKey(
   }
 
   return env.sharedKey ?? env.iosKey ?? env.androidKey ?? null;
+}
+
+/**
+ * Expo inlines public values only for literal `process.env.EXPO_PUBLIC_*` reads; a dynamic lookup, or passing
+ * the whole `process.env` object, is empty in release builds. The runtime environment therefore re-reads the
+ * literals; an injected environment is used as is.
+ */
+function resolveEnv(env?: Env): Env {
+  if (env !== undefined && env !== runtime.process?.env) {
+    return env;
+  }
+
+  return {
+    ...env,
+    EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY,
+    EXPO_PUBLIC_REVENUECAT_API_KEY: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY,
+    EXPO_PUBLIC_REVENUECAT_IOS_KEY: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY,
+  };
 }
