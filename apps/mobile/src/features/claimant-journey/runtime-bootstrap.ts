@@ -1,4 +1,5 @@
 import { createClaimantRuntimeFoundation } from "./runtime-foundation";
+import { readClaimantRuntimeLaunchPolicy } from "./runtime-launch-policy";
 
 export const CLAIMANT_RUNTIME_BOOTSTRAP_APPROVED = false as const;
 
@@ -103,5 +104,10 @@ export function createClaimantRuntimeBootstrap(input: Input = {}) {
 }
 
 export function mountDisabledClaimantRuntimeBootstrap() {
-  return createClaimantRuntimeBootstrap();
+  const launchPolicy = readClaimantRuntimeLaunchPolicy();
+  return createClaimantRuntimeBootstrap({
+    approved: launchPolicy.approved,
+    enabled: launchPolicy.enabled,
+    killSwitchEngaged: launchPolicy.killSwitchEngaged,
+  });
 }

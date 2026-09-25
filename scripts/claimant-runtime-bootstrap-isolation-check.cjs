@@ -24,9 +24,10 @@ function validateBootstrap(source) {
     if (!source.includes(token)) throw new Error(`Missing claimant runtime bootstrap control: ${token}`);
 
   const ast = ts.createSourceFile(paths.bootstrap, source, ts.ScriptTarget.Latest, true);
+  const allowedImports = new Set(["./runtime-foundation", "./runtime-launch-policy"]);
   function visit(node) {
     if (ts.isImportDeclaration(node) && (!ts.isStringLiteral(node.moduleSpecifier)
-      || node.moduleSpecifier.text !== "./runtime-foundation"))
+      || !allowedImports.has(node.moduleSpecifier.text)))
       throw new Error("Claimant runtime bootstrap imports an unapproved adapter.");
     if (ts.isIdentifier(node) && forbiddenIdentifiers.has(node.text))
       throw new Error(`Claimant runtime bootstrap contains ambient access: ${node.text}`);
