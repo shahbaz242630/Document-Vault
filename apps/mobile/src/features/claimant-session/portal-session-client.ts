@@ -93,6 +93,14 @@ function authenticatedFrom(session: ClaimantPortalSession): SyntheticAuthenticat
     expiresAt: session.expiresAt, assuredAt: session.assuredAt });
 }
 
+function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(new Error());
+    void promise.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
+    if (signal.aborted) abort(); else signal.addEventListener("abort", abort, { once: true });
+  });
+}
+
 class PortalSessionClient {
   private readonly clock: () => number;
   private activeSession: ClaimantPortalSession | null = null;
@@ -101,6 +109,7 @@ class PortalSessionClient {
   private closed = false;
   private generation = 0;
   private activeCompletion: Promise<void> | null = null;
+  private activeController: AbortController | null = null;
   private status: "ready" | "working" | "active" | "unavailable" | "closed" = "ready";
   private readonly listeners = new Set<(value: unknown) => void>();
 
@@ -127,8 +136,8 @@ class PortalSessionClient {
 
   private async dispatch(request: Request, signal: AbortSignal): Promise<unknown> {
     let response: Response;
-    try { response = await this.input.send(request.url, { method: "POST", headers: request.headers,
-      body: EMPTY_BODY, signal }); }
+    try { response = await abortable(this.input.send(request.url, { method: "POST", headers: request.headers,
+      body: EMPTY_BODY, signal }), signal); }
     catch { throw new AmbiguousDispatchError(request); }
     const length = Number(response.headers.get("Content-Length") ?? "0");
     if (!response.ok || response.status !== 200 || (length && (!Number.isInteger(length) || length > 4096))
@@ -157,7 +166,7 @@ class PortalSessionClient {
     if (this.closed || this.active) throw new ClaimantPortalSessionUnavailableError();
     const currentGeneration = this.generation;
     const controller = new AbortController();
-    this.active = true; this.status = "working";
+    this.active = true; this.activeController = controller; this.status = "working";
     let finish!: () => void;
     this.activeCompletion = new Promise<void>((resolve) => { finish = resolve; });
     const assertCurrent = () => {
@@ -171,7 +180,7 @@ class PortalSessionClient {
       if (!this.closed && this.generation === currentGeneration) this.status = "unavailable";
       throw new ClaimantPortalSessionUnavailableError(retryable && error instanceof AmbiguousDispatchError);
     } finally {
-      this.active = false; this.activeCompletion = null; finish();
+      this.active = false; this.activeController = null; this.activeCompletion = null; finish();
       if (!this.closed && this.generation !== currentGeneration) this.status = this.activeSession ? "active" : "ready";
     }
   }
@@ -262,13 +271,13 @@ class PortalSessionClient {
 
   cancel(): void {
     if (this.closed) return;
-    this.generation += 1; this.pendingRetry = null;
+    this.generation += 1; this.pendingRetry = null; this.activeController?.abort();
   }
 
   private close(): void {
     if (this.closed) return;
     this.closed = true; this.generation += 1; this.pendingRetry = null; this.activeSession = null;
-    this.status = "closed"; this.notify(null); this.listeners.clear();
+    this.status = "closed"; this.notify(null); this.listeners.clear(); this.activeController?.abort();
   }
 
   async dispose(): Promise<void> {
