@@ -16,18 +16,34 @@ function extractDomain(urlString: string): string | null {
   }
 }
 
-function getSupabasePinHashes(
-  env: Env = (globalThis as typeof globalThis & { process?: { env?: Env } }).
-    process?.env ?? {},
-): string[] | null {
-  const primary = env.EXPO_PUBLIC_SUPABASE_PIN_PRIMARY?.trim();
-  const backup = env.EXPO_PUBLIC_SUPABASE_PIN_BACKUP?.trim();
+const runtime = globalThis as typeof globalThis & { process?: { env?: Env } };
+
+function getSupabasePinHashes(env?: Env): string[] | null {
+  const resolved = resolveEnv(env);
+  const primary = resolved.EXPO_PUBLIC_SUPABASE_PIN_PRIMARY?.trim();
+  const backup = resolved.EXPO_PUBLIC_SUPABASE_PIN_BACKUP?.trim();
 
   if (!primary || !backup) {
     return null;
   }
 
   return [primary, backup];
+}
+
+/**
+ * Expo inlines public values only for literal `process.env.EXPO_PUBLIC_*` reads; a dynamic lookup is empty in
+ * release builds, which would silently leave pinning off. The runtime environment therefore re-reads the literals.
+ */
+function resolveEnv(env?: Env): Env {
+  if (env !== undefined && env !== runtime.process?.env) {
+    return env;
+  }
+
+  return {
+    ...env,
+    EXPO_PUBLIC_SUPABASE_PIN_BACKUP: process.env.EXPO_PUBLIC_SUPABASE_PIN_BACKUP,
+    EXPO_PUBLIC_SUPABASE_PIN_PRIMARY: process.env.EXPO_PUBLIC_SUPABASE_PIN_PRIMARY,
+  };
 }
 
 /**

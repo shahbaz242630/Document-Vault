@@ -1,3 +1,9 @@
+import {
+  createOwnerOfflineCodeSheet,
+  type OwnerOfflineCodeSheet,
+  type OwnerOfflineCodeSheetInput,
+} from "@/features/claimant-offline-code/owner-offline-code-sheet-factory";
+
 import { type AssetPlaintextPayload } from "./asset-payload";
 import {
   createVaultStore,
@@ -56,6 +62,8 @@ export type VaultSession = {
     repository: Pick<SealedEmergencyCodeGrantRepository, "revokeActiveSealedCodeGrants">,
     options?: { auditLog?: SealedEmergencyCodeSetupOptions["auditLog"] },
   ) => Promise<void>;
+  /** Slice 6H: the vault key goes straight into the sheet factory and never leaves this session. */
+  createOfflineCodeEmergencySheet: (input: OwnerOfflineCodeSheetInput) => Promise<OwnerOfflineCodeSheet>;
   restoreAsset: (id: string) => Promise<VaultEncryptedAssetRecord | null>;
   softDeleteAsset: (id: string) => Promise<VaultEncryptedAssetRecord | null>;
   updateAsset: (id: string, payload: AssetPlaintextPayload) => Promise<VaultDecryptedAsset | null>;
@@ -103,6 +111,14 @@ export function createVaultSession({
       return revokeSealedEmergencyCodeSetup({
         ...options,
         repository,
+      });
+    },
+    createOfflineCodeEmergencySheet(input) {
+      return createOwnerOfflineCodeSheet({
+        ownerId: input.ownerId,
+        randomUUID: input.randomUUID,
+        now: input.now,
+        mek: key,
       });
     },
     restoreAsset: (id) => changeVaultAssetDeletion({ deleted: false, id, repository, store }),

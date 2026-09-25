@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
 import { defaultAuditLog } from "@/features/auth/audit-log";
+import { useOwnerSheetFlowHandle } from "@/features/claimant-offline-code/owner-sheet-runtime";
 import { EmergencyAccessScreen, type SealedCodeSetupStatus } from "@/features/settings";
 import {
   createSupabaseEmergencyGrantRepository,
@@ -16,6 +17,7 @@ import { Screen } from "@/shared/ui";
 export default function EmergencyAccessRoute() {
   const router = useRouter();
   const setupState = useEmergencyAccessSetupState();
+  const sheetFlow = useOwnerSheetFlowHandle();
 
   return (
     <Screen>
@@ -25,6 +27,9 @@ export default function EmergencyAccessRoute() {
         oneTimeCode={setupState.oneTimeCode}
         onConfirmSealedCodeWritten={setupState.confirmSealedCodeWritten}
         onCreateSealedCode={setupState.createSealedCode}
+        onOpenEmergencySheet={sheetFlow
+          ? () => router.push("/settings/emergency-sheet" as unknown as "/settings/re-auth")
+          : undefined}
         onOpenTrustedPerson={() =>
           router.push("/settings/trusted-person" as unknown as "/settings/re-auth")
         }

@@ -1,5 +1,24 @@
 # Sanduqkin Security Handoff
 
+## Current checkpoint — Slice 6H owner emergency-sheet screen, 2026-09-25
+
+Slice 6G merged through PR #96 at `3c68b57`. Slice 6H is locally complete on `claude/busy-franklin-xv1jah`. The owner approved the spec and all three decisions: add `qrcode-generator`, print only, and automatically revoke a sheet the owner has not confirmed.
+
+The owner app can now:
+1. generate a sheet through the vault session (the vault key never leaves it);
+2. re-open the release wrap from the printed material alone to prove it holds that key;
+3. register it through the 6G route, with a fresh-TOTP step-up that keeps the same idempotency key;
+4. print a QR sheet with `expo-print` `printAsync` only, with no file and no share option;
+5. drop the sheet from memory once the owner confirms the print.
+
+An unconfirmed sheet is revoked when the owner leaves the screen, locks the vault, backgrounds the app, or when registration fails. Backgrounding is ignored while printing or waiting for the TOTP code. Two literal-false constants keep the entry hidden, and the route shows "unavailable". An acceptance test runs the real owner flow through the actual 6G route to a verified claimant proof, and shows a decoy after abandonment. A new isolation check is wired into security CI. Scope: `docs/superpowers/specs/2026-09-25-claimant-slice-6h-owner-sheet-screen.md`; evidence: `docs/verification/2026-09-25-claimant-slice-6h-owner-sheet-screen.md`.
+
+Next slices:
+- 6I, the claimant camera QR scanner;
+- a "my emergency sheets" list with revoke, which needs an owner list route.
+
+The reviewer decision stays open until before go-live.
+
 ## Current checkpoint — Slice 6G owner sheet registration route, 2026-09-25
 
 Slice 6F merged through PR #95 at `a6e15b5`. Slice 6G, approved with revocation included, is locally complete on `claude/busy-franklin-xv1jah`. It adds two owner routes:

@@ -25,6 +25,7 @@ type EmergencyAccessScreenProps = {
   oneTimeCode?: string | null;
   onConfirmSealedCodeWritten?: () => void;
   onCreateSealedCode?: () => Promise<void> | void;
+  onOpenEmergencySheet?: () => void;
   onOpenTrustedPerson?: () => void;
   onRegenerateSealedCode?: () => Promise<void> | void;
   onRevokeSealedCode?: () => Promise<void> | void;
@@ -36,6 +37,7 @@ export function EmergencyAccessScreen({
   oneTimeCode = null,
   onConfirmSealedCodeWritten,
   onCreateSealedCode,
+  onOpenEmergencySheet,
   onOpenTrustedPerson,
   onRegenerateSealedCode,
   onRevokeSealedCode,
@@ -66,6 +68,22 @@ export function EmergencyAccessScreen({
         onPress={onOpenTrustedPerson}
         title="Pre-Authorized Kin"
       />
+
+      {onOpenEmergencySheet ? (
+        <EmergencyOptionCard
+          badge="Printable option"
+          buttonLabel="Print an emergency sheet"
+          description="Print a sheet with a QR code for your next of kin to keep with important papers. They scan it in the Sanduqkin app to start a claim."
+          details={[
+            "Nothing to remember or type in.",
+            "Your vault remains encrypted.",
+            "Every claim is reviewed before anything is released.",
+            "Keep the sheet as safe as you would a will.",
+          ]}
+          onPress={onOpenEmergencySheet}
+          title="Printed Emergency Sheet"
+        />
+      ) : null}
 
       <EmergencyOptionCard
         badge="Backup option"

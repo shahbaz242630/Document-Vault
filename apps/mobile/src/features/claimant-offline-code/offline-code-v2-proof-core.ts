@@ -33,6 +33,27 @@ export type OfflineCodeV2ProofCrypto = Readonly<{
   wipe(value: Uint8Array): void;
 }>;
 
+/** The owner-side primitives: fresh randomness and the XChaCha20-Poly1305 release wrap. */
+export type OfflineCodeV2WrapCrypto = Readonly<{
+  randomBytes(length: number): Uint8Array;
+  xchacha20poly1305Encrypt(message: Uint8Array, associatedData: Uint8Array, nonce: Uint8Array,
+    key: Uint8Array): Uint8Array;
+  xchacha20poly1305Decrypt(ciphertext: Uint8Array, associatedData: Uint8Array, nonce: Uint8Array,
+    key: Uint8Array): Uint8Array;
+}>;
+
+export type OfflineCodeV2WrapCheckInput = Readonly<{
+  publicLocator: OfflineCodePublicLocatorV2;
+  clientSecret: OfflineCodeClientSecretV2;
+  kdfProfile: OfflineCodeKdfProfileV2;
+  recordBinding: OfflineCodeRecordBindingV2;
+  wrapNonce: string;
+  wrapCiphertext: string;
+  wrapAssociatedDataDigest: string;
+  createdAt: string;
+  expectedMek: Uint8Array;
+}>;
+
 export type OfflineCodeV2ProofInput = Readonly<{
   publicLocator: OfflineCodePublicLocatorV2;
   clientSecret: OfflineCodeClientSecretV2;
@@ -138,6 +159,70 @@ async function produceProof(crypto: OfflineCodeV2ProofCrypto, enabled: boolean,
   }
 }
 
+/**
+ * Re-derives the release wrap key from the printed sheet material alone, as a claimant would, opens the wrap and
+ * confirms it holds exactly the expected vault key. Returns only a boolean; every derived secret is wiped.
+ */
+export async function checkOfflineCodeV2ReleaseWrap(input: Readonly<{
+  approved?: boolean;
+  crypto: OfflineCodeV2ProofCrypto & OfflineCodeV2WrapCrypto;
+  value: OfflineCodeV2WrapCheckInput;
+}>): Promise<boolean> {
+  if (!(input.approved ?? CLAIMANT_OFFLINE_CODE_V2_CLIENT_PROOF_APPROVED)) {
+    throw new OfflineCodeV2ClientProofError("disabled");
+  }
+  const { crypto, value } = input;
+  let root: Uint8Array | null = null;
+  let wrapKey: Uint8Array | null = null;
+  let opened: Uint8Array | null = null;
+  let proofSeed: Uint8Array | null = null;
+  let privateKey: Uint8Array | null = null;
+  try {
+    if (value.expectedMek.length !== 32) return false;
+    const material = await prepare(crypto, value);
+    root = material.root;
+    const proofContext = canonical({
+      protocol: OFFLINE_CODE_PROTOCOL_V2,
+      purpose: "possession_proof_seed",
+      label: OFFLINE_CODE_V2_LABELS.proofSeed,
+      binding_digest: encodeBase64Url(material.provisionalDigest),
+    });
+    proofSeed = crypto.hkdfSha256(root, await crypto.sha256(proofContext), proofContext, 32);
+    const keys = crypto.seedKeyPair(proofSeed);
+    privateKey = keys.privateKey;
+    equalBytes(keys.publicKey, decodeBase64Url(value.recordBinding.proof_public_key));
+    const bindingDigest = encodeBase64Url(material.recordBindingDigest);
+    const wrapContext = canonical({
+      protocol: OFFLINE_CODE_PROTOCOL_V2,
+      purpose: "release_wrap_key",
+      label: OFFLINE_CODE_V2_LABELS.wrapKey,
+      binding_digest: bindingDigest,
+    });
+    wrapKey = crypto.hkdfSha256(root, await crypto.sha256(wrapContext), wrapContext, 32);
+    const associatedData = canonical({
+      protocol: OFFLINE_CODE_PROTOCOL_V2,
+      purpose: "release_wrap_associated_data",
+      label: OFFLINE_CODE_V2_LABELS.wrapAssociatedData,
+      record_binding: value.recordBinding,
+      record_binding_digest: bindingDigest,
+      created_at: value.createdAt,
+    });
+    equalBytes(await crypto.sha256(associatedData), decodeBase64Url(value.wrapAssociatedDataDigest));
+    opened = crypto.xchacha20poly1305Decrypt(decodeBase64Url(value.wrapCiphertext), associatedData,
+      decodeBase64Url(value.wrapNonce), wrapKey);
+    equalBytes(opened, value.expectedMek);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    if (privateKey) crypto.wipe(privateKey);
+    if (proofSeed) crypto.wipe(proofSeed);
+    if (opened) crypto.wipe(opened);
+    if (wrapKey) crypto.wipe(wrapKey);
+    if (root) crypto.wipe(root);
+  }
+}
+
 async function benchmarkKdf(crypto: OfflineCodeV2ProofCrypto, enabled: boolean,
   value: OfflineCodeV2BenchmarkInput): Promise<OfflineCodeV2KdfBenchmark> {
   if (!enabled) throw new OfflineCodeV2ClientProofError("disabled");
@@ -178,7 +263,8 @@ async function benchmarkKdf(crypto: OfflineCodeV2ProofCrypto, enabled: boolean,
   }
 }
 
-async function prepare(crypto: OfflineCodeV2ProofCrypto, value: OfflineCodeV2ProofInput) {
+async function prepare(crypto: OfflineCodeV2ProofCrypto,
+  value: Omit<OfflineCodeV2ProofInput, "challenge" | "expectedOrigin" | "now">) {
   await crypto.ready();
   const material = validateMaterial(value);
   const locatorCommitment = await crypto.sha256(canonical({
