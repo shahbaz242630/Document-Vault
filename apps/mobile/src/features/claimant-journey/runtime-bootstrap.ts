@@ -7,6 +7,15 @@ type RuntimeFactory = typeof createClaimantRuntimeFoundation;
 type RuntimeInput = Parameters<RuntimeFactory>[0];
 type Runtime = ReturnType<RuntimeFactory>;
 
+type StartInput = Parameters<Runtime["start"]>[0];
+
+/** The only claimant operations a screen may reach, and only while the bootstrap is ready. */
+export type ClaimantClaimFlowRuntime = Readonly<{
+  activatePortal(key: string): Promise<void>;
+  start(value: StartInput): Promise<unknown>;
+  isOpen(): boolean;
+}>;
+
 type Input = Readonly<{
   approved?: boolean;
   enabled?: boolean;
@@ -30,6 +39,7 @@ function inert(status: "disabled" | "closed" = "disabled", disposal = Promise.re
   return Object.freeze({
     handleAppState(_state: string) {},
     engageKillSwitch() {},
+    claimFlowRuntime: (): ClaimantClaimFlowRuntime | null => null,
     dispose: () => disposal,
     snapshot: () => safeSnapshot(status),
   });
@@ -68,6 +78,19 @@ class RuntimeBootstrap {
     void this.close();
   }
 
+  claimFlowRuntime(): ClaimantClaimFlowRuntime | null {
+    if (this.closed || !this.runtime) return null;
+    const current = () => {
+      if (this.closed || !this.runtime) throw new Error();
+      return this.runtime;
+    };
+    return Object.freeze({
+      activatePortal: (key: string) => Promise.resolve().then(() => current().activatePortal(key)),
+      start: (value: StartInput) => Promise.resolve().then(() => current().start(value)),
+      isOpen: () => !this.closed,
+    });
+  }
+
   dispose(): Promise<void> {
     return this.close();
   }
@@ -96,6 +119,7 @@ export function createClaimantRuntimeBootstrap(input: Input = {}) {
     return Object.freeze({
       handleAppState: bootstrap.handleAppState.bind(bootstrap),
       engageKillSwitch: bootstrap.engageKillSwitch.bind(bootstrap),
+      claimFlowRuntime: bootstrap.claimFlowRuntime.bind(bootstrap),
       dispose: bootstrap.dispose.bind(bootstrap),
       snapshot: bootstrap.snapshot.bind(bootstrap),
     });
