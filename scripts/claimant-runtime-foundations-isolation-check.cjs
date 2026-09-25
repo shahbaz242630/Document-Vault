@@ -7,6 +7,7 @@ const paths = {
   signing: "apps/mobile/src/features/claimant-handoff/native-signing-boundary.ts",
   runtime: "apps/mobile/src/features/claimant-journey/runtime-foundation.ts",
 };
+const bootstrapPath = "apps/mobile/src/features/claimant-journey/runtime-bootstrap.ts";
 const imports = {
   identity: new Set(["zod"]), signing: new Set(["zod"]),
   runtime: new Set(["../claimant-handoff/native-signing-boundary",
@@ -53,6 +54,11 @@ function validateSources(sources) {
   validateFile(runtime, paths.runtime, imports.runtime);
   for (const [other, content] of sources) {
     if (Object.values(paths).includes(other) || /\.test\.[cm]?[jt]sx?$/u.test(other)) continue;
+    if (other === bootstrapPath) {
+      if (!content.includes('from "./runtime-foundation"'))
+        throw new Error(`Claimant runtime-foundation importer: ${other}`);
+      continue;
+    }
     if (["hosted-identity-boundary", "native-signing-boundary", "runtime-foundation",
       "createClaimantRuntimeFoundation", "CLAIMANT_RUNTIME_FOUNDATION_APPROVED"].some((value) => content.includes(value)))
       throw new Error(`Claimant runtime-foundation importer: ${other}`);

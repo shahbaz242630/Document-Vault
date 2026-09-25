@@ -1,5 +1,9 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — Slice 6A local disabled runtime bootstrap, 2026-09-25
+
+Slices 5W–5Z are merged through PRs #87 and #88. Slice 6A is locally complete and gives the mobile root a tested lifecycle bootstrap around those foundations, while three independent controls keep it unusable in the normal app: literal-false approval, feature disabled, and kill switch engaged. No claimant screen or business action is exposed. Full local tests, typechecks, lint, security/isolation, Expo Doctor and builds pass; evidence is in `docs/verification/2026-09-25-claimant-slice-6a-runtime-bootstrap.md`. This is still not a usable claimant feature: hosted authentication, production native custody/signing, providers, persistence, UI, deployment, real data and activation remain incomplete and unauthorized.
+
 ## Current checkpoint — combined Slices 5X–5Z local runtime foundations, 2026-09-15
 
 Combined Slices 5X–5Z are locally complete on a branch stacked over Slice 5W. They add only disabled synthetic runtime-foundation contracts: strict injected fresh-AAL2 hosted identity, injected user-present/non-exportable test signing, and a separately guarded composition into the existing synthetic claimant journey. All local test, typecheck, lint, security, isolation and build gates pass; evidence is recorded in `docs/verification/2026-09-15-claimant-slices-5x-5z-runtime-foundations.md`. This is not a usable claimant feature: no UI, production provider/native wiring, hosted mutation, deployment, real data or activation exists. Publish the stacked PR and rely on its green/red watcher before progression.

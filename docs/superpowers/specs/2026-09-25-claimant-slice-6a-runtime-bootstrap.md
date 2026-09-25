@@ -1,0 +1,13 @@
+# Slice 6A — disabled claimant runtime bootstrap
+
+Selected on 2026-09-25 after PR #87 and stacked PR #88 merged and their exact heads were verified on `main`. Slice 6A adds the first normal-application bootstrap boundary around the existing combined 5X–5Z claimant runtime foundation. This is lifecycle wiring only: the root layout mounts a disabled bootstrap, forwards application state, and disposes it during unmount.
+
+The bootstrap has its own literal-false approval constant, a feature enable condition, and an independent kill switch. The normal application mount supplies none of them, so it returns an inert value-free object before reading a runtime input or factory. An active construction path exists only for injected synthetic tests and requires explicit approval, explicit enablement, an explicitly disengaged kill switch, `syntheticOnly: true`, and `productionRuntime: false`.
+
+The bootstrap exposes no claimant journey operation. Its public surface is limited to application-state handling, kill-switch engagement, awaitable disposal, and a frozen value-free status snapshot. Background or inactive state, kill-switch engagement, malformed readiness, construction failure, cancellation failure, or disposal failure closes authority generically and idempotently. Identity and release authority remain literal false in every snapshot.
+
+Static isolation permits exactly one bootstrap import of the existing runtime foundation and exactly one normal application import of the bootstrap, in the mobile root layout. The guard rejects a second application importer, activation of the literal-false gate, ambient network/authentication/browser/storage/native/provider access, dynamic adapters, and removal of lifecycle closure. The existing 5X–5Z guard is narrowed only for this exact separately guarded wrapper.
+
+Acceptance covers dormant dependency non-access, disabled feature behavior, engaged kill-switch behavior, explicit synthetic construction, foreground no-op, background/inactive closure, duplicate lifecycle events, idempotent kill-switch/disposal, malformed readiness closure, generic value-free status, the permanently inert normal mount, dedicated static isolation, workspace tests and typechecks, zero-warning lint, security/audit checks, Expo Doctor, API bundle, and the web production build.
+
+No claimant UI or navigation, hosted Auth/MFA, Supabase SDK or hosted mutation, production native signer/custody, provider adapter, persistence, server/database/migration change, deployment, preview promotion, native/EAS build, real claimant data, journey operation exposure, intake/review/release authority, capability activation, or automatic next slice is included.

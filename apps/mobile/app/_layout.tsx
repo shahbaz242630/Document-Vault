@@ -28,6 +28,7 @@ import { StatusBar } from "expo-status-bar";
 
 import { AppLockOverlay } from "@/features/auth/components/app-lock-overlay";
 import { RecoveryPhraseSessionProvider } from "@/features/auth/recovery-phrase-session-context";
+import { mountDisabledClaimantRuntimeBootstrap } from "@/features/claimant-journey/runtime-bootstrap";
 import { VaultSessionProvider } from "@/features/vault/vault-session-context";
 import { initializeSslPinningIfAvailable } from "@/shared/security/ssl-pinning";
 import { colors } from "@/shared/theme/colors";
@@ -54,6 +55,18 @@ export default function RootLayout() {
     Newsreader_500Medium,
     Newsreader_600SemiBold,
   });
+
+  useEffect(() => {
+    const claimantRuntime = mountDisabledClaimantRuntimeBootstrap();
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      claimantRuntime.handleAppState(nextAppState);
+    });
+
+    return () => {
+      subscription.remove();
+      void claimantRuntime.dispose();
+    };
+  }, []);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
