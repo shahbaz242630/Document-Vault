@@ -1,8 +1,8 @@
 # Sanduqkin Security Handoff
 
-## Current checkpoint — Slice 6B local bundled launch policy, 2026-09-25
+## Current checkpoint — Slices 6A–6B merged; session closed, 2026-09-25
 
-Slice 6A merged through PR #89 after all required exact-head gates passed or were intentionally skipped. Slice 6B adds one separately guarded bundled launch policy: approval false, feature false, kill switch true, synthetic-only and production-runtime false. It accepts no input, has no imports or ambient access, returns one frozen value-free object, and is consumed only by the 6A bootstrap before that bootstrap returns inertly. Static guards reject any control change, environment/remote/network/auth/storage/native/provider adapter, incomplete forwarding or second importer. Twelve focused tests, 1,474 workspace tests with three established skips, 296 serial script tests, typechecks, lint, security/audit/isolation, Expo Doctor and builds pass. No hosted mutation, production authentication/native/provider access, UI, persistence, deployment, real data or capability activation occurred.
+Slice 6A merged through PR #89 at `0698623465e6de32caf092fd39eefc971150c4f4`; Slice 6B merged through PR #90 at `9012a75364738bc2220aeaf27d1b3d3cbab7dce5`. Exact heads `a1702a51262feb4d9526cb537570df8c94d5e5e1` and `779a46f3aa4c740964114051763ded0116b52357` are verified ancestors of `origin/main`, with required CI/security/native/hosted/GitGuardian/Vercel gates green or intentionally skipped. The normal app connection remains triple-disabled: bootstrap approval false, bundled feature false and bundled kill switch true. Static guards preserve sole importers, no ambient or dynamic adapters, lifecycle closure, immutable value-free policy and literal-false authority. No hosted mutation, production authentication/native/provider access, UI, persistence, deployment, real data or capability activation occurred. Resume from `docs/handoff/2026-09-25-claimant-6a-6b-session-close.md`; no next slice is authorized.
 
 ## Current checkpoint — Slice 6A local disabled runtime bootstrap, 2026-09-25
 

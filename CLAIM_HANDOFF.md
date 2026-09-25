@@ -1,8 +1,8 @@
 # Sanduqkin Claimant Engineering Handoff
 
-## Current checkpoint — Slice 6B local bundled launch policy, 2026-09-25
+## Current checkpoint — Slices 6A–6B merged; session closed, 2026-09-25
 
-Slice 6A is merged through PR #89 at `0698623` with exact-head gates green and ancestry verified. Slice 6B is locally complete on `codex/claimant-runtime-launch-policy`: a versioned bundled-only policy makes the normal app's runtime posture explicit—approval false, feature false, kill switch engaged—then supplies those controls to the existing 6A bootstrap. The policy accepts no input, imports no adapter and exposes only a frozen value-free synthetic/non-production posture with identity and release authority false. Full tests, typechecks, lint, security/audit/isolation, Expo Doctor, API bundle and web build pass. See `docs/superpowers/specs/2026-09-25-claimant-slice-6b-runtime-launch-policy.md` and `docs/verification/2026-09-25-claimant-slice-6b-runtime-launch-policy.md`. Hosted Auth/MFA, claimant UI, production signer/custody, providers, persistence, deployment, real data and activation remain outside scope and unauthorized.
+PR #89 merged Slice 6A at `0698623465e6de32caf092fd39eefc971150c4f4` from exact head `a1702a51262feb4d9526cb537570df8c94d5e5e1`; PR #90 merged Slice 6B at `9012a75364738bc2220aeaf27d1b3d3cbab7dce5` from exact head `779a46f3aa4c740964114051763ded0116b52357`. Required exact-head gates were green or intentionally skipped and both heads are verified on `origin/main`. The normal mobile root now mounts only a disabled, fail-closed claimant lifecycle bootstrap whose bundled immutable policy fixes approval false, feature false and kill switch true. No claimant operation or authority is exposed. Resume from `docs/handoff/2026-09-25-claimant-6a-6b-session-close.md`; no next slice is selected or authorized. Hosted Auth/MFA, claimant UI, production signer/custody, providers, persistence, deployment, real data and activation remain outside scope.
 
 ## Current checkpoint — Slice 6A local disabled runtime bootstrap, 2026-09-25
 

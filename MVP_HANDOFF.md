@@ -1,8 +1,8 @@
 # Sanduqkin MVP Handoff
 
-## Current checkpoint — Slice 6B local bundled launch policy, 2026-09-25
+## Current checkpoint — Slices 6A–6B merged; session closed, 2026-09-25
 
-Slice 6A is merged through PR #89. Slice 6B is locally complete and gives the normal mobile root one explicit bundled claimant launch posture: approval off, feature off and kill switch on. The immutable policy cannot read an environment or remote flag and still exposes no claimant screen or business action. Full local tests, typechecks, lint, security/isolation, Expo Doctor and builds pass; evidence is in `docs/verification/2026-09-25-claimant-slice-6b-runtime-launch-policy.md`. This is still not a usable claimant feature: hosted authentication, production native custody/signing, providers, persistence, UI, deployment, real data and activation remain incomplete and unauthorized.
+Slices 6A and 6B are delivered on `main` through PR #89 (`0698623465e6de32caf092fd39eefc971150c4f4`) and PR #90 (`9012a75364738bc2220aeaf27d1b3d3cbab7dce5`). Required exact-head gates passed or were intentionally skipped and ancestry is verified. The mobile root has a tested claimant lifecycle bootstrap, but the bundled launch posture remains approval off, feature off and kill switch on; no claimant screen or business action is exposed. This is not a usable claimant feature: hosted authentication, production native custody/signing, providers, persistence, UI, deployment, real data and activation remain incomplete and unauthorized. Resume from `docs/handoff/2026-09-25-claimant-6a-6b-session-close.md`; no next slice is selected.
 
 ## Current checkpoint — Slice 6A local disabled runtime bootstrap, 2026-09-25
 
