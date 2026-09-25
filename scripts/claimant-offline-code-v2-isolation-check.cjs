@@ -36,7 +36,8 @@ for (const runtimeRoot of runtimeRoots) {
     if (path.endsWith(".test.ts") || path.endsWith(".test.tsx")) continue;
     if (path.includes("claimant-offline-code")
       || path.endsWith("offline-code-v2-challenge-coordinator.ts")
-      || path.endsWith("offline-code-v2-proof-attempt-coordinator.ts")) continue;
+      || path.endsWith("offline-code-v2-proof-attempt-coordinator.ts")
+      || path.endsWith("offline-code-v2-owner-routes.ts")) continue;
     const source = readFileSync(path, "utf8");
     for (const symbol of runtimeOnlySymbols) {
       if (source.includes(symbol)) throw new Error(`Offline-code V2 protocol is wired into normal runtime at ${path}: ${symbol}`);

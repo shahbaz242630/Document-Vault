@@ -116,6 +116,7 @@
     "check:claimant-offline-code-v2-controller-isolation": "node scripts/claimant-offline-code-v2-controller-isolation-check.cjs",
     "check:claimant-offline-code-v2-client-proof-isolation": "node scripts/claimant-offline-code-v2-client-proof-isolation-check.cjs",
     "check:claimant-offline-code-v2-sheet-generator-isolation": "node scripts/claimant-offline-code-v2-sheet-generator-isolation-check.cjs",
+    "check:claimant-offline-code-v2-owner-routes-isolation": "node scripts/claimant-offline-code-v2-owner-routes-isolation-check.cjs",
     "check:claimant-offline-code-v2-kdf-evidence-isolation": "node scripts/claimant-offline-code-v2-kdf-evidence-isolation-check.cjs",
     "check:claimant-offline-code-v2-kdf-probe-isolation": "node scripts/claimant-offline-code-v2-kdf-probe-isolation-check.cjs",
     "check:claimant-offline-code-v2-client-coordinator-isolation": "node scripts/claimant-offline-code-v2-client-coordinator-isolation-check.cjs",

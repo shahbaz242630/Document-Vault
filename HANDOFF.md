@@ -1,5 +1,13 @@
 # Sanduqkin Project Handoff
 
+## Current checkpoint — Slice 6G owner sheet registration route, 2026-09-25
+
+Slice 6F merged through PR #95 at `a6e15b5`. Slice 6G, approved with revocation included, is locally complete on `claude/busy-franklin-xv1jah`. It adds two owner routes:
+- `POST /owner/offline-code/v2/locators` registers a sheet;
+- `POST /owner/offline-code/v2/locators/:locatorRecordId/revoke` revokes one.
+
+Both are literal-false and gated by the `offlineCodeV2` capability, so the mounted app returns 404 for them. They need an exact owner origin and a fresh AAL2 owner session that is still active. The owner ID comes only from the session. Before calling the 5B function, the server recomputes the locator commitment and the record-binding digest with the session owner, so another owner's sheet is refused. The locator index now comes from one shared module that the claimant challenge route also uses. An acceptance test registers a real 6F sheet, finds it through the actual challenge route, verifies the claimant's proof, and shows a decoy after revocation. A new isolation check is wired into security CI. Scope: `docs/superpowers/specs/2026-09-25-claimant-slice-6g-owner-registration-route.md`; evidence: `docs/verification/2026-09-25-claimant-slice-6g-owner-registration-route.md`. Next slices: 6H owner sheet generation and printing screen, 6I claimant camera QR scanner. The reviewer decision stays open until before go-live.
+
 ## Current checkpoint — Slice 6F local owner sheet generator, 2026-09-25
 
 Slice 6E merged through PR #94 at `1fcb816`. Slice 6F is locally complete on `claude/claimant-slice-6f-owner-sheet-generator`. It adds a literal-false, synthetic-only owner-side generator that creates the `SKQ2.` emergency-sheet payload, the printed locator and secret, and the exact inputs for the 5B locator-registration function. The owner's vault key is wrapped for release and never returned. With the vector's fixed bytes it reproduces the published synthetic vector byte for byte. Its sheet, fed to the claimant proof producer, yields the vector's exact possession proof. A new isolation check keeps it unmounted. Scope: `docs/superpowers/specs/2026-09-25-claimant-slice-6f-owner-sheet-generator.md`; evidence: `docs/verification/2026-09-25-claimant-slice-6f-owner-sheet-generator.md`. Next slices: 6G owner registration API route, 6H owner sheet generation and printing screen, 6I claimant camera QR scanner. The reviewer decision is still open.

@@ -1,5 +1,3 @@
-import { createHmac } from "node:crypto";
-
 import { createClient } from "@supabase/supabase-js";
 import type { Context } from "hono";
 import { z } from "zod";
@@ -8,6 +6,7 @@ import { createOfflineCodeV2ChallengeCoordinator,
   OfflineCodeV2ChallengeCoordinatorError,
   type OfflineCodeV2BoundaryIndexer }
   from "./offline-code-v2-challenge-coordinator.js";
+import { offlineCodeV2BoundaryDigest as keyedDigest } from "./offline-code-v2-locator-index.js";
 import { createOfflineCodeV2PersistenceTransactionClient,
   type OfflineCodeV2PersistenceTransactionClient }
   from "./offline-code-v2-persistence-transaction-client.js";
@@ -188,11 +187,6 @@ OfflineCodeV2BoundaryIndexer {
       ? { deviceBucketDigest: keyedDigest(rateKey, "device", input.deviceSignal) } : {}),
     globalBucketDigest: keyedDigest(rateKey, "global", "offline-code-v2"),
   }; } };
-}
-
-function keyedDigest(key: Buffer, scope: string, value: string): string {
-  return createHmac("sha256", key).update("sanduqkin:claim:offline-code:v2:boundary")
-    .update("\0").update(scope).update("\0").update(value).digest("base64url");
 }
 
 function originsMatch(context: Context, config: OfflineCodeV2ControllerConfig): boolean {
