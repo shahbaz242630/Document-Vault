@@ -14,6 +14,12 @@
     "@expo/fingerprint": {
       "brace-expansion": "5.0.9"
     },
+    "@react-native/community-cli-plugin": {
+      "metro": "0.84.5",
+      "metro-config": "0.84.5",
+      "metro-core": "0.84.5",
+      "metro-resolver": "0.84.5"
+    },
     "js-yaml": "5.2.3",
     "nanoid": "3.3.18",
     "next": {
