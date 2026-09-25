@@ -37,7 +37,8 @@ function inert(status: "disabled" | "closed" = "disabled", disposal = Promise.re
 
 function closeRuntime(runtime: Runtime): Promise<void> {
   try { runtime.cancel(); } catch { /* The bootstrap always fails closed. */ }
-  return Promise.resolve().then(() => runtime.dispose()).catch(() => undefined);
+  // Dispose synchronously so no runtime operation is accepted after the kill switch returns.
+  try { return Promise.resolve(runtime.dispose()).catch(() => undefined); } catch { return Promise.resolve(); }
 }
 
 class RuntimeBootstrap {

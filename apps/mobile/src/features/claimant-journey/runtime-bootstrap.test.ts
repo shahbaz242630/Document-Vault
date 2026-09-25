@@ -97,6 +97,17 @@ describe("claimant runtime bootstrap", () => {
       kill_switch_engaged: true, runtime_ready: false });
   });
 
+  it("disposes the runtime before the kill switch returns", () => {
+    const harness = activeHarness();
+    const bootstrap = createClaimantRuntimeBootstrap({ approved: true, enabled: true,
+      killSwitchEngaged: false, runtime: harness.input, createRuntime: harness.createRuntime });
+
+    bootstrap.engageKillSwitch();
+
+    expect(harness.runtime.cancel).toHaveBeenCalledTimes(1);
+    expect(harness.runtime.dispose).toHaveBeenCalledTimes(1);
+  });
+
   it("rejects a disabled underlying runtime without exposing detail", async () => {
     const harness = activeHarness("disabled");
     const bootstrap = createClaimantRuntimeBootstrap({ approved: true, enabled: true,

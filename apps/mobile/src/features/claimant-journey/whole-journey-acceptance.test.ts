@@ -45,7 +45,7 @@ function harness() {
   const portalResults = {
     activate: { context: "claimant_portal", sessionVersion: 1, displacedPrevious: false, replayed: false },
     assert: { context: "claimant_portal", sessionVersion: 1 },
-    revoke: { context: "claimant_portal", sessionVersion: 1, revoked: true, replayed: false },
+    revoke: { context: "claimant_portal", sessionVersion: 2, revoked: true, replayed: false },
   } as const;
   const portalSend = vi.fn<PortalSessionSend>(async (url) =>
     portalResponse(portalResults[url.split("/").at(-1) as keyof typeof portalResults]));
