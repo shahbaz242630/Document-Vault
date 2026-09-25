@@ -20,7 +20,8 @@ function validateBootstrap(source) {
   for (const token of ["input.enabled !== true", "input.killSwitchEngaged !== false",
     "runtimeInput?.syntheticOnly !== true", "runtimeInput.productionRuntime !== false",
     "createClaimantRuntimeFoundation", "runtime.cancel()", "runtime.dispose()", "closeRuntime(runtime)",
-    "identity_verified: false", "release_authorized: false", "mountDisabledClaimantRuntimeBootstrap"])
+    "identity_verified: false", "release_authorized: false", "mountDisabledClaimantRuntimeBootstrap",
+    "claimFlowRuntime: (): ClaimantClaimFlowRuntime | null => null", "if (this.closed || !this.runtime) return null;"])
     if (!source.includes(token)) throw new Error(`Missing claimant runtime bootstrap control: ${token}`);
 
   const ast = ts.createSourceFile(paths.bootstrap, source, ts.ScriptTarget.Latest, true);

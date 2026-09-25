@@ -1,5 +1,15 @@
 # Sanduqkin Claimant Engineering Handoff
 
+## Current checkpoint — session close with Slice 6E, 2026-09-25
+
+Canonical close-out and next-session opener: `docs/handoff/2026-09-25-claimant-6c-6e-session-close.md`. Owner decisions recorded there:
+- a single launch with the claimant handover included;
+- Shahbaz Malik as sole approver for code and launch, with legal review still sought for public documents;
+- the offline-code emergency sheet carries a QR payload;
+- an open choice between two human reviewers and a single reviewer with extra safeguards.
+
+Slice 6E is locally complete on `claude/claimant-slice-6e-offline-code-screens`, stacked on 6D PR #93. It adds a strict `SKQ2.` sheet codec, a claim-flow controller, a narrow `claimFlowRuntime()` bootstrap handle (null in the normal app) and the first claimant screen, `app/claim/offline-code`, which always shows "unavailable" in the normal app. 1,591 workspace tests with three established skips, 294 script tests and all checks pass. Scope: `docs/superpowers/specs/2026-09-25-claimant-slice-6e-offline-code-sheet-and-screen.md`; evidence: `docs/verification/2026-09-25-claimant-slice-6e-offline-code-sheet-and-screen.md`. Merge #93 before 6E.
+
 ## Current checkpoint — Slice 6D local reconciliation acceptance, 2026-09-25
 
 Slice 6C merged through PR #92 at `404945a`; its "locally complete" entry below is historical. Slice 6D is locally complete on `claude/claimant-slice-6d-reconciliation`. A test-only API suite runs the real mobile runtime chain against the actual portal-session, offline-code V2 and handoff routes, with only the database replaced by a store modelled on the cited migrations. It covers lost committed responses with exact retry, kill switch and background after a commit, restart after an ambiguous commit, stale-session displacement, reused-key conflicts and zero traffic after the kill switch. It found two defects, both fixed with regression tests. First, the 5T client rejected every revoke, because the SQL returns the advanced session version. Second, the 6A kill switch deferred disposal by one microtask, so one more request could reach the API. 1,560 workspace tests with three established skips, 294 script tests, typechecks, lint, security/audit, all 42 claimant isolation checks, Expo Doctor and the web build pass. Scope: `docs/superpowers/specs/2026-09-25-claimant-slice-6d-reconciliation-acceptance.md`; evidence: `docs/verification/2026-09-25-claimant-slice-6d-reconciliation-acceptance.md`. All controls stay false/false/engaged; no migration, hosted mutation, UI, deployment, real data or activation. Real-PostgreSQL race/RLS acceptance remains a separate Docker-based slice.

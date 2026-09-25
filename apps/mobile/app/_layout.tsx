@@ -1,7 +1,7 @@
 import "@/shared/runtime/buffer-polyfill";
 import "@/shared/crypto/secure-random-polyfill-expo";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppState, Platform } from "react-native";
 import Purchases from "react-native-purchases";
 import {
@@ -28,6 +28,8 @@ import { StatusBar } from "expo-status-bar";
 
 import { AppLockOverlay } from "@/features/auth/components/app-lock-overlay";
 import { RecoveryPhraseSessionProvider } from "@/features/auth/recovery-phrase-session-context";
+import type { ClaimFlowHandle } from "@/features/claimant-journey/claim-flow";
+import { ClaimFlowHandleContext } from "@/features/claimant-journey/claim-flow-context";
 import { mountDisabledClaimantRuntimeBootstrap } from "@/features/claimant-journey/runtime-bootstrap";
 import { VaultSessionProvider } from "@/features/vault/vault-session-context";
 import { initializeSslPinningIfAvailable } from "@/shared/security/ssl-pinning";
@@ -41,6 +43,23 @@ import { shouldUseRevenueCatNativeBridge } from "@/shared/config/revenuecat-runt
 void SplashScreen.preventAutoHideAsync().catch(() => {
   // The splash screen may already be hidden (e.g. during fast refresh).
 });
+
+function useClaimantRuntimeLifecycle(): ClaimFlowHandle | null {
+  const [claimantRuntime] = useState(() => mountDisabledClaimantRuntimeBootstrap());
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      claimantRuntime.handleAppState(nextAppState);
+    });
+
+    return () => {
+      subscription.remove();
+      void claimantRuntime.dispose();
+    };
+  }, [claimantRuntime]);
+
+  return useMemo(() => claimantRuntime.claimFlowRuntime(), [claimantRuntime]);
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -56,17 +75,7 @@ export default function RootLayout() {
     Newsreader_600SemiBold,
   });
 
-  useEffect(() => {
-    const claimantRuntime = mountDisabledClaimantRuntimeBootstrap();
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      claimantRuntime.handleAppState(nextAppState);
-    });
-
-    return () => {
-      subscription.remove();
-      void claimantRuntime.dispose();
-    };
-  }, []);
+  const claimFlowHandle = useClaimantRuntimeLifecycle();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -129,12 +138,14 @@ export default function RootLayout() {
       <RecoveryPhraseSessionProvider>
         <AppLockOverlay>
           <StatusBar style="dark" />
-          <Stack
-            screenOptions={{
-              contentStyle: { backgroundColor: colors.background },
-              headerShown: false,
-            }}
-          />
+          <ClaimFlowHandleContext.Provider value={claimFlowHandle}>
+            <Stack
+              screenOptions={{
+                contentStyle: { backgroundColor: colors.background },
+                headerShown: false,
+              }}
+            />
+          </ClaimFlowHandleContext.Provider>
         </AppLockOverlay>
       </RecoveryPhraseSessionProvider>
     </VaultSessionProvider>

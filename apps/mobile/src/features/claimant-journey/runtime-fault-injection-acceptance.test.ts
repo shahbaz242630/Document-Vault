@@ -124,7 +124,9 @@ describe("claimant runtime fault-injection acceptance", () => {
       kill_switch_engaged: true, runtime_ready: false, identity_verified: false, release_authorized: false });
     bootstrap.handleAppState("active"); bootstrap.engageKillSwitch();
     await expect(bootstrap.dispose()).resolves.toBeUndefined();
-    expect(Object.keys(bootstrap).sort()).toEqual(["dispose", "engageKillSwitch", "handleAppState", "snapshot"]);
+    expect(Object.keys(bootstrap).sort()).toEqual(["claimFlowRuntime", "dispose", "engageKillSwitch", "handleAppState",
+      "snapshot"]);
+    expect(bootstrap.claimFlowRuntime()).toBeNull();
   });
 
   it("drives the real bootstrap-to-journey chain to the value-free draft", async () => {
