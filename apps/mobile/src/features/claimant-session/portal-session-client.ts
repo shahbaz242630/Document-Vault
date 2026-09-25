@@ -231,7 +231,8 @@ class PortalSessionClient {
       try {
         const result = revokeResultSchema.parse(await this.dispatch(request, signal));
         assertCurrent();
-        if (result.sessionVersion !== this.activeSession.sessionVersion) throw new Error();
+        // The server's revoke advances the control row exactly once and reports that new version.
+        if (result.sessionVersion !== this.activeSession.sessionVersion + 1) throw new Error();
         this.pendingRetry = null; this.activeSession = null; this.status = "ready"; this.notify(null);
       } catch (error) {
         if (error instanceof AmbiguousDispatchError) {
@@ -264,7 +265,7 @@ class PortalSessionClient {
         this.activeSession = sessionFrom(authenticated, result.sessionVersion);
         this.status = "active"; this.notify(this.activeSession); return this.activeSession;
       }
-      if (!this.activeSession || result.sessionVersion !== this.activeSession.sessionVersion) throw new Error();
+      if (!this.activeSession || result.sessionVersion !== this.activeSession.sessionVersion + 1) throw new Error();
       this.activeSession = null; this.status = "ready"; this.notify(null); return undefined;
     }, true);
   }

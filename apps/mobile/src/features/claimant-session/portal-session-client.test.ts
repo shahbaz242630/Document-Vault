@@ -20,7 +20,7 @@ function harness() {
   const results = {
     activate: { context: "claimant_portal", sessionVersion: 3, displacedPrevious: false, replayed: false },
     assert: { context: "claimant_portal", sessionVersion: 3 },
-    revoke: { context: "claimant_portal", sessionVersion: 3, revoked: true, replayed: false },
+    revoke: { context: "claimant_portal", sessionVersion: 4, revoked: true, replayed: false },
   } as const;
   const send = vi.fn<PortalSessionSend>(async (url) => {
     const action = url.split("/").at(-1) as keyof typeof results;
@@ -109,6 +109,13 @@ describe("synthetic claimant portal session client", () => {
     expect(h.send.mock.calls[0][0]).toBe(h.send.mock.calls[1][0]);
     expect(h.send.mock.calls[0][1].body).toBe(h.send.mock.calls[1][1].body);
     expect(h.send.mock.calls[0][1].headers).toBe(h.send.mock.calls[1][1].headers);
+  });
+
+  it.each([3, 5])("rejects a revoke reporting session version %i instead of the advanced version", async (version) => {
+    const h = harness(); await h.client.activate({ authenticated: h.authenticated, idempotencyKey: id(3) });
+    h.send.mockResolvedValueOnce(response({ context: "claimant_portal", sessionVersion: version, revoked: true, replayed: false }));
+    await expect(h.client.revoke(id(5))).rejects.toMatchObject(unavailable);
+    expect(h.client.snapshot()).toMatchObject({ session_available: true, retry_available: false });
   });
 
   it("retries an ambiguous revoke but never grants assert retry authority", async () => {
