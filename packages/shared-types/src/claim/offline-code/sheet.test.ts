@@ -71,3 +71,13 @@ describe("offline-code V2 emergency sheet payload", () => {
       kdf_profile_id: "argon2id-other-profile" } })).toThrow();
   });
 });
+
+describe("offline-code V2 handover value formatting", () => {
+  it("reproduces the printed fixture locator and secret from their bytes", async () => {
+    const { formatOfflineCodeClientSecretV2, formatOfflineCodePublicLocatorV2 } = await import("./material");
+    const range = (start: number, length: number) => Uint8Array.from({ length }, (_, index) => (start + index) & 0xff);
+    expect(formatOfflineCodePublicLocatorV2(range(161, 16))).toBe(vector.public_locator.locator);
+    expect(formatOfflineCodeClientSecretV2(range(177, 24))).toBe(vector.synthetic_client_secret.secret);
+    expect(() => formatOfflineCodePublicLocatorV2(new Uint8Array(15))).toThrow();
+  });
+});

@@ -1,5 +1,9 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — Slice 6F local owner sheet generator, 2026-09-25
+
+Slice 6E merged through PR #94 at `1fcb816`. Slice 6F is locally complete on `claude/claimant-slice-6f-owner-sheet-generator`. It adds a literal-false, synthetic-only owner-side generator that creates the `SKQ2.` emergency-sheet payload, the printed locator and secret, and the exact inputs for the 5B locator-registration function. The owner's vault key is wrapped for release and never returned. With the vector's fixed bytes it reproduces the published synthetic vector byte for byte. Its sheet, fed to the claimant proof producer, yields the vector's exact possession proof. A new isolation check keeps it unmounted. Scope: `docs/superpowers/specs/2026-09-25-claimant-slice-6f-owner-sheet-generator.md`; evidence: `docs/verification/2026-09-25-claimant-slice-6f-owner-sheet-generator.md`. Next slices: 6G owner registration API route, 6H owner sheet generation and printing screen, 6I claimant camera QR scanner. The reviewer decision is still open.
+
 ## Current checkpoint — session close with Slice 6E, 2026-09-25
 
 Canonical close-out and next-session opener: `docs/handoff/2026-09-25-claimant-6c-6e-session-close.md`. Owner decisions recorded there:
