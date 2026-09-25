@@ -1,5 +1,9 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — `image-size` exception retired, 2026-09-25
+
+Slice 6B merged through PR #90 at `9012a75`. The temporary `image-size` exception (due 2026-09-30) is retired on `claude/tender-dirac-rmipdb`: a scoped root override aligns `@react-native/community-cli-plugin`'s Metro packages on `0.84.5`, the exact version Expo 56 already pins and within the plugin's `^0.84.3` range. Metro 0.84.5 reads image dimensions internally, so `image-size` is no longer installed. The parser patch, its hostile-buffer test and the audit allowlist/digest/deadline logic are removed; the production audit now fails on every high or critical advisory and currently reports none. See `docs/dependency-security-exceptions.md`. This is a dependency-only change: no claimant control, runtime wiring, hosted state, deployment or activation changed. Slice 6C is next and must be specified and authorized before coding.
+
 ## Current checkpoint — Slice 6B local bundled launch policy, 2026-09-25
 
 Slice 6A is merged through PR #89. Slice 6B is locally complete and gives the normal mobile root one explicit bundled claimant launch posture: approval off, feature off and kill switch on. The immutable policy cannot read an environment or remote flag and still exposes no claimant screen or business action. Full local tests, typechecks, lint, security/isolation, Expo Doctor and builds pass; evidence is in `docs/verification/2026-09-25-claimant-slice-6b-runtime-launch-policy.md`. This is still not a usable claimant feature: hosted authentication, production native custody/signing, providers, persistence, UI, deployment, real data and activation remain incomplete and unauthorized.
@@ -237,7 +241,7 @@ Use the current opener in `CLAIM_HANDOFF.md` and `docs/handoff/2026-09-03-sessio
 2. Keep Slice 1G/1H/1I/1J/2A-2J/3A-3G/4A-4J and 5A/5B/5C/5D/5E/5F/5G/5H/5I/5J approvals immutable false. Hosted schema presence, preview deployment, and mounted `404` routes do not authorize external claimant access.
 3. Preserve all parked hosted-MFA criteria and immutable-false claimant approvals; production native adapters, physical App Attest evidence, hosted migrations, edge abuse controls, and external activation remain prohibited.
 4. Keep any separately authorized next slice default-deny. Preserve the generic unavailable response and add no discovery/enumeration leak, UI/evidence access, production KDF/native binding, hosted migration, real files/providers, notifications, deployment, or external access.
-5. Replace or re-review the temporary `image-size` exception before its 2026-09-30 expiry; the audit must continue to fail closed for every unapproved high/critical advisory.
+5. Done 2026-09-25: the temporary `image-size` exception is retired; the audit fails closed for every high/critical advisory with no allowlist.
 6. Treat Build 7 as closed and passed; public App Store release and another build remain separately gated.
 7. The PR #68 watcher reports meaningful red or merges when all required checks are green and the PR is mergeable. It grants no production-promotion, Supabase-mutation, scanner-suppression, or claimant-activation authority.
 

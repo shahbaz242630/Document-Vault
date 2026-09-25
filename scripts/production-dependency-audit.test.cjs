@@ -3,62 +3,52 @@ const test = require("node:test");
 
 const { evaluateAuditReport } = require("./production-dependency-audit.cjs");
 
-const approvedAdvisory = {
+const imageSizeAdvisory = {
   name: "image-size",
   severity: "high",
   url: "https://github.com/advisories/GHSA-w3rx-r6r6-pgpr",
 };
 
-test("allows only patched image-size advisory dependency paths before review deadline", () => {
-  const report = {
+test("passes when no high or critical advisory is reported", () => {
+  const result = evaluateAuditReport({
     vulnerabilities: {
-      "image-size": { name: "image-size", severity: "high", via: [approvedAdvisory] },
-      metro: { name: "metro", severity: "high", via: ["image-size"] },
-      expo: { name: "expo", severity: "high", via: ["metro"] },
+      "low-risk": { name: "low-risk", severity: "moderate", via: [] },
     },
-  };
-
-  const result = evaluateAuditReport(report, {
-    patchVerified: true,
-    today: "2026-08-12",
   });
   assert.equal(result.ok, true);
-  assert.deepEqual(result.exempted, ["expo", "image-size", "metro"]);
+  assert.deepEqual(result.violations, []);
 });
 
-test("fails closed for a new advisory or a missing patch", () => {
-  const report = {
+test("fails on every high advisory path, including the retired image-size exception", () => {
+  const result = evaluateAuditReport({
     vulnerabilities: {
-      "image-size": { name: "image-size", severity: "high", via: [approvedAdvisory] },
+      "image-size": { name: "image-size", severity: "high", via: [imageSizeAdvisory] },
+      metro: { name: "metro", severity: "high", via: ["image-size"] },
+    },
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(
+    result.violations.map((violation) => [violation.name, violation.advisories]),
+    [
+      ["image-size", [imageSizeAdvisory.url]],
+      ["metro", [imageSizeAdvisory.url]],
+    ],
+  );
+});
+
+test("fails closed for critical advisories and unresolvable dependency paths", () => {
+  const result = evaluateAuditReport({
+    vulnerabilities: {
       "new-risk": {
         name: "new-risk",
         severity: "critical",
-        via: [{ name: "new-risk", url: "https://github.com/advisories/GHSA-new-risk" }],
+        via: ["missing-package", { name: "new-risk" }],
       },
     },
-  };
-
-  assert.equal(
-    evaluateAuditReport(report, { patchVerified: true, today: "2026-08-12" }).ok,
-    false,
-  );
-  assert.equal(
-    evaluateAuditReport(
-      { vulnerabilities: { "image-size": report.vulnerabilities["image-size"] } },
-      { patchVerified: false, today: "2026-08-12" },
-    ).ok,
-    false,
-  );
-});
-
-test("expires the temporary exception", () => {
-  const report = {
-    vulnerabilities: {
-      "image-size": { name: "image-size", severity: "high", via: [approvedAdvisory] },
-    },
-  };
-  assert.equal(
-    evaluateAuditReport(report, { patchVerified: true, today: "2026-10-01" }).ok,
-    false,
-  );
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.violations[0].advisories, [
+    "unknown-advisory:new-risk",
+    "unknown-package:missing-package",
+  ]);
 });
