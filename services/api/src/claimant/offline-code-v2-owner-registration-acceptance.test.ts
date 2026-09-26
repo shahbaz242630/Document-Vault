@@ -16,10 +16,13 @@ import { createOwnerOfflineCodeClient }
 import { createOwnerOfflineCodeSheet, type OwnerOfflineCodeSheet }
   from "../../../../apps/mobile/src/features/claimant-offline-code/owner-offline-code-sheet-factory";
 import { createOwnerSheetFlow } from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-flow";
+import { createOwnerSheetListFlow }
+  from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-list-flow";
 import { renderOwnerSheetHtml } from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-html";
 import { createOfflineCodeV2Controller } from "./offline-code-v2-controller.js";
-import { createOfflineCodeV2OwnerRoute } from "./offline-code-v2-owner-routes.js";
-import { createOfflineCodeV2PersistenceTransactionClient } from "./offline-code-v2-persistence-transaction-client.js";
+import { createOfflineCodeV2OwnerListRoute, createOfflineCodeV2OwnerRoute } from "./offline-code-v2-owner-routes.js";
+import { createOfflineCodeV2OwnerSheetReader, createOfflineCodeV2PersistenceTransactionClient }
+  from "./offline-code-v2-persistence-transaction-client.js";
 import { decodePrintedSheetQr } from "./printed-sheet-qr.fixtures.test.js";
 import { getClaimantRuntimeConfig } from "./runtime-config.js";
 
@@ -43,7 +46,7 @@ class SqlError extends Error { constructor(readonly code: string) { super(code);
 
 type Locator = { id: string; ownerUserId: string; indexDigest: string; commitment: string; grantId: string;
   proofPublicKey: string; recordBindingDigest: string; kdfSalt: string; status: "active" | "revoked";
-  expiresAt: number };
+  issuedAt: number; expiresAt: number; revokedAt: number | null };
 
 class SyntheticOfflineCodeStore {
   readonly locators = new Map<string, Locator>();
@@ -80,7 +83,7 @@ class SyntheticOfflineCodeStore {
     this.locators.set(id, { id, ownerUserId: text("p_owner_user_id"), indexDigest: text("p_locator_index_digest"),
       commitment: text("p_locator_commitment"), grantId: text("p_grant_id"),
       proofPublicKey: text("p_proof_public_key"), recordBindingDigest: text("p_record_binding_digest"),
-      kdfSalt: text("p_kdf_salt"), status: "active", expiresAt });
+      kdfSalt: text("p_kdf_salt"), status: "active", issuedAt, expiresAt, revokedAt: null });
     const result = { locator_record_id: id, locator_version: 2, status: "active",
       authority: "route_possession_only", synthetic_only: true, claim_created: false, release_authorized: false };
     this.remember("register_locator", id, key, digest, result);
@@ -97,7 +100,7 @@ class SyntheticOfflineCodeStore {
     if (!locator || locator.ownerUserId !== value.p_owner_user_id || locator.status !== "active") {
       throw new SqlError("42501");
     }
-    locator.status = "revoked";
+    locator.status = "revoked"; locator.revokedAt = Date.now();
     for (const entry of this.challenges.values()) {
       if (entry.challenge.locator_record_id === id && entry.status === "issued") entry.status = "revoked";
     }
@@ -144,10 +147,23 @@ class SyntheticOfflineCodeStore {
       replayed: false };
   }
 
+  // claimant_list_offline_code_v2_locators (20260926090000): the owner's own sheets, newest first, at most 50.
+  list(value: Record<string, unknown>) {
+    const iso = (ms: number) => new Date(ms).toISOString().replace("Z", "+00:00");
+    const sheets = [...this.locators.values()].filter((entry) => entry.ownerUserId === value.p_owner_user_id)
+      .sort((left, right) => right.issuedAt - left.issuedAt || left.id.localeCompare(right.id)).slice(0, 50)
+      .map((entry) => ({ locator_record_id: entry.id,
+        status: entry.status === "active" && entry.expiresAt <= Date.now() ? "expired" : entry.status,
+        issued_at: iso(entry.issuedAt), expires_at: iso(entry.expiresAt),
+        revoked_at: entry.revokedAt === null ? null : iso(entry.revokedAt) }));
+    return { sheets, synthetic_only: true, claim_created: false, release_authorized: false };
+  }
+
   async rpc(name: string, value: Record<string, unknown>) {
     try {
       const data = name === "claimant_register_offline_code_v2_locator" ? this.register(value)
         : name === "claimant_revoke_offline_code_v2_locator" ? this.revoke(value)
+          : name === "claimant_list_offline_code_v2_locators" ? this.list(value)
           : name === "claimant_issue_offline_code_v2_challenge" ? this.issueChallenge(value)
             : name === "claimant_record_offline_code_v2_attempt" ? this.recordAttempt(value) : null;
       if (!data) throw new Error(`Unexpected RPC ${name}`);
@@ -189,6 +205,7 @@ function harness() {
   const rpc = vi.fn((name: string, value: Record<string, unknown>) => store.rpc(name, value));
   const persistence = () => createOfflineCodeV2PersistenceTransactionClient(rpc);
   const sessions = new Map<string, string>();
+  const staleMfa = new Set<string>();
   const runtimeConfig = getClaimantRuntimeConfig({ NODE_ENV: "test", CLAIMANT_RUNTIME_ENABLED: "true",
     CLAIMANT_AUTHENTICATION_ENABLED: "true", CLAIMANT_OFFLINE_CODE_V2_ENABLED: "true" });
   const supabase = { supabaseUrl: "https://synthetic.supabase.test", serviceRoleKey: "unused-synthetic-service-role" };
@@ -197,14 +214,14 @@ function harness() {
       const userId = sessions.get(jwt); if (!userId) throw new Error("Unauthorized");
       const seconds = Math.floor(Date.now() / 1000);
       return { userId, sessionId: `${userId.slice(0, 35)}f`, aal: "aal2" as const, issuedAt: seconds - 30,
-        expiresAt: seconds + 600, amr: [{ method: "totp", timestamp: seconds }] };
+        expiresAt: seconds + 600, amr: [{ method: "totp", timestamp: staleMfa.has(jwt) ? seconds - 7_200 : seconds }] };
     }),
     assertActiveSession: vi.fn(async () => undefined),
     acceptInvitation: vi.fn(), activateSession: vi.fn(), issueInvitation: vi.fn(), manageLifecycle: vi.fn(),
     revokeInvitation: vi.fn(), revokeSession: vi.fn(),
   };
   const ownerDeps = { approved: true, runtimeConfig, createOwnerSessionClient: () => ownerSession,
-    createPersistence: persistence,
+    createPersistence: persistence, createSheetReader: () => createOfflineCodeV2OwnerSheetReader(rpc),
     getConfig: () => ({ ...supabase, apiOrigin, ownerOrigin, freshAssuranceSeconds: 600, locatorIndexKey }) };
   const claimantDeps = { approved: true, runtimeConfig, createPersistence: persistence,
     getConfig: () => ({ ...supabase, apiOrigin, claimantOrigin, locatorIndexKey,
@@ -213,6 +230,7 @@ function harness() {
   const app = new Hono();
   app.post("/owner/offline-code/v2/locators", createOfflineCodeV2OwnerRoute("register", ownerDeps));
   app.post("/owner/offline-code/v2/locators/:locatorRecordId/revoke", createOfflineCodeV2OwnerRoute("revoke", ownerDeps));
+  app.get("/owner/offline-code/v2/locators", createOfflineCodeV2OwnerListRoute(ownerDeps));
   app.post("/claimant/offline-code/v2/challenges", createOfflineCodeV2Controller("issueChallenge", claimantDeps));
   app.post("/claimant/offline-code/v2/challenges/:challengeId/proofs",
     createOfflineCodeV2Controller("verifyProof", claimantDeps));
@@ -221,7 +239,7 @@ function harness() {
   const post = (path: string, body: unknown, headers: Record<string, string>) => app.request(`${apiOrigin}${path}`, {
     method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json",
       "Idempotency-Key": randomUUID(), ...headers } });
-  return { app, store, rpc, owner,
+  return { app, store, rpc, owner, staleMfa,
     register: (jwt: string, body: unknown, key = randomUUID()) => post("/owner/offline-code/v2/locators", body,
       { Authorization: `Bearer ${jwt}`, Origin: ownerOrigin, "Idempotency-Key": key }),
     revoke: (jwt: string, id: string) => post(`/owner/offline-code/v2/locators/${id}/revoke`, {},
@@ -397,5 +415,80 @@ describe("Slice 6I printed sheet to claimant scan acceptance", () => {
       challenge_bytes_base64url: result.challenge_bytes_base64url, possession_proof: proof });
     expect((await verified.json() as { result: { route_possession_asserted: boolean } }).result
       .route_possession_asserted).toBe(true);
+  }, 60_000);
+});
+
+describe("Slice 6J my emergency sheets acceptance", () => {
+  function ownerDevice(system: ReturnType<typeof harness>, ownerId: string) {
+    const jwt = system.owner(ownerId); const printed: string[] = []; const made: OwnerOfflineCodeSheet[] = [];
+    const fetchImpl = (async (url: string, init: RequestInit) => system.app.request(url, init)) as unknown as typeof fetch;
+    const client = createOwnerOfflineCodeClient({ apiBaseUrl: apiOrigin, ownerOrigin, fetch: fetchImpl,
+      getAccessToken: async () => jwt });
+    const print = () => createOwnerSheetFlow({
+      createSheet: async (input) => { const sheet = await createOwnerOfflineCodeSheet({ ...input, approved: true,
+        mek: sodium.randombytes_buf(32) }); made.push(sheet); return sheet; },
+      getOwnerId: async () => ownerId, client, verifyFreshMfa: async () => false,
+      renderSheetHtml: renderOwnerSheetHtml, print: async (html) => { printed.push(html); }, randomUUID });
+    const verifyFreshMfa = vi.fn(async (code: string) => { if (code !== "123456") return false;
+      system.staleMfa.delete(jwt); return true; });
+    return { jwt, client, print, printed, made, verifyFreshMfa,
+      list: createOwnerSheetListFlow({ client, verifyFreshMfa, randomUUID }) };
+  }
+  async function proves(system: ReturnType<typeof harness>, sheet: OwnerOfflineCodeSheet) {
+    const issued = await system.challenge(sheet.printedLocator);
+    const { result } = await issued.json() as { result: { challenge: OfflineCodeChallengeV2;
+      challenge_bytes_base64url: string } };
+    if (result.challenge.locator_record_id !== sheet.registration.locatorRecordId) return false;
+    const proof = await createOfflineCodeV2PlatformProofProducer(true).produce({
+      ...parseOfflineCodeSheetV2(sheet.sheetPayload), challenge: result.challenge, expectedOrigin: claimantOrigin });
+    const verified = await system.prove(result.challenge.challenge_id, { challenge: result.challenge,
+      challenge_bytes_base64url: result.challenge_bytes_base64url, possession_proof: proof });
+    return (await verified.json() as { result: { route_possession_asserted: boolean } }).result
+      .route_possession_asserted;
+  }
+
+  it("lists two printed sheets, revokes one after a fresh code, and leaves the other working", async () => {
+    await sodium.ready;
+    const system = harness(); const device = ownerDevice(system, randomUUID());
+    for (let count = 0; count < 2; count += 1) {
+      const flow = device.print(); await flow.start(); await flow.print(); flow.confirmPrinted();
+    }
+    const [first, second] = device.made;
+    expect(device.printed[1]).toContain(`<dt>Reference</dt><dd>${second!.registration.locatorRecordId
+      .replaceAll("-", "").slice(0, 6).toUpperCase()}</dd>`);
+
+    // Listing needs no fresh code; revoking does.
+    system.staleMfa.add(device.jwt);
+    await device.list.load();
+    const listed = device.list.getState();
+    expect(listed.status).toBe("ready");
+    expect(new Set(listed.sheets.map((sheet) => sheet.locatorRecordId)))
+      .toEqual(new Set([first!.registration.locatorRecordId, second!.registration.locatorRecordId]));
+    expect(listed.sheets.every((sheet) => sheet.status === "active" && sheet.revokedAt === null)).toBe(true);
+    const listCalls = system.rpc.mock.calls.filter(([name]) => name === "claimant_list_offline_code_v2_locators");
+    expect(JSON.stringify(listed)).not.toContain(first!.printedSecret);
+
+    device.list.requestRevoke(first!.registration.locatorRecordId);
+    await device.list.confirmRevoke();
+    expect(device.list.getState().status).toBe("needs_fresh_mfa");
+    await device.list.submitMfaCode("123456");
+    expect(device.list.getState()).toMatchObject({ status: "ready", revoked: true });
+    expect(device.list.getState().sheets.find((sheet) =>
+      sheet.locatorRecordId === first!.registration.locatorRecordId)?.status).toBe("revoked");
+    expect(system.store.locators.get(first!.registration.locatorRecordId)?.status).toBe("revoked");
+    expect(listCalls.every(([, value]) => Object.keys(value).join() === "p_owner_user_id")).toBe(true);
+
+    expect(await proves(system, first!)).toBe(false);
+    expect(await proves(system, second!)).toBe(true);
+  }, 90_000);
+
+  it("never shows or revokes another owner's sheet", async () => {
+    await sodium.ready;
+    const system = harness(); const owner = ownerDevice(system, randomUUID()); const other = ownerDevice(system, randomUUID());
+    const flow = owner.print(); await flow.start(); await flow.print(); flow.confirmPrinted();
+    await other.list.load();
+    expect(other.list.getState()).toMatchObject({ status: "ready", sheets: [] });
+    await expect(other.client.revoke(owner.made[0]!.registration.locatorRecordId, randomUUID())).rejects.toThrow();
+    expect(system.store.locators.get(owner.made[0]!.registration.locatorRecordId)?.status).toBe("active");
   }, 60_000);
 });

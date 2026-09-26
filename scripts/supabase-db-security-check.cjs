@@ -123,7 +123,7 @@ const EXPECTED_SERVER_ONLY_FUNCTIONS = new Set([
   "claimant_declare_reviewer_conflict",
   "claimant_end_release_retrieval_access",
   "claimant_finalize_signed_release_package",
-  "claimant_issue_offline_code_v2_challenge",
+  "claimant_issue_offline_code_v2_challenge", "claimant_list_offline_code_v2_locators",
   "claimant_open_review_intervention",
   "claimant_prepare_encrypted_package_delivery",
   "claimant_prepare_encrypted_release_package",

@@ -12,6 +12,10 @@ const files = {
   runtime: `${feature}/owner-sheet-runtime.ts`,
   viewModel: `${feature}/owner-sheet-view-model.ts`,
   panel: `${feature}/owner-emergency-sheet-panel.tsx`,
+  listFlow: `${feature}/owner-sheet-list-flow.ts`,
+  listView: `${feature}/owner-sheet-list-view-model.ts`,
+  listPanel: `${feature}/owner-sheet-list-panel.tsx`,
+  reference: `${feature}/owner-sheet-reference.ts`,
 };
 const sources = Object.fromEntries(Object.entries(files).map(([name, path]) => [name, read(path)]));
 
@@ -22,8 +26,19 @@ if (!/OWNER_SHEET_FLOW_LAUNCH_APPROVED\s*=\s*false\s+as\s+const/u.test(sources.r
 for (const [name, token] of [["factory", "checkOfflineCodeV2ReleaseWrap("], ["factory", "syntheticOnly: true"],
   ["runtime", "if (!(input.approved ?? OWNER_SHEET_FLOW_LAUNCH_APPROVED)) return null;"],
   ["runtime", "if (!OWNER_SHEET_FLOW_LAUNCH_APPROVED) return null;"], ["panel", "usePreventScreenCapture()"],
-  ["panel", "flow.handleAppState(next)"], ["panel", "void flow.abandon()"], ["client", "Idempotency-Key"]])
+  ["panel", "flow.handleAppState(next)"], ["panel", "void flow.abandon()"], ["client", "Idempotency-Key"],
+  ["runtime", "export function createOwnerSheetListHandle"], ["listPanel", "useOwnerSheetListHandle()"],
+  ["listPanel", "return () => flow.close();"], ["listFlow", "await deps.client.revoke(selected, revokeKey, signal)"],
+  ["html", "ownerSheetReference(sheet.registration.locatorRecordId)"]])
   if (!sources[name].includes(token)) throw new Error(`Owner emergency sheet lost control in ${name}: ${token}`);
+
+const listHandle = sources.runtime.slice(sources.runtime.indexOf("export function createOwnerSheetListHandle"));
+if (!listHandle.includes("if (!(input.approved ?? OWNER_SHEET_FLOW_LAUNCH_APPROVED)) return null;"))
+  throw new Error("The owner sheet list must sit behind the owner sheet launch approval.");
+// The list screen shows dates, status and references only; it never reaches the sheet, crypto or printer.
+for (const name of ["listFlow", "listView", "listPanel"])
+  for (const token of ["printedSecret", "sheetPayload", "printAsync", "createSheet", "proof-producer", "generator"])
+    if (sources[name].includes(token)) throw new Error(`Owner sheet ${name} reaches sheet material: ${token}`);
 
 // No storage, logging, files or sharing: the sheet exists only in memory and in the print dialog.
 for (const [name, source] of Object.entries(sources))
@@ -36,7 +51,8 @@ for (const [name, source] of Object.entries(sources))
 const session = read("apps/mobile/src/features/vault/vault-session.ts");
 if (!/createOwnerOfflineCodeSheet\(\{[^}]*mek: key,[^}]*\}\)/su.test(session))
   throw new Error("The vault session must pass its own key to the owner sheet factory.");
-for (const name of ["client", "flow", "html", "runtime", "viewModel", "panel"])
+for (const name of ["client", "flow", "html", "runtime", "viewModel", "panel", "listFlow", "listView", "listPanel",
+  "reference"])
   if (/\bmek\b|masterKey|vaultKey/u.test(sources[name]))
     throw new Error(`Owner emergency sheet ${name} must never handle the vault key.`);
 
