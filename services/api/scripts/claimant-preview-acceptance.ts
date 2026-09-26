@@ -192,7 +192,7 @@ async function concealmentChecks(hosted: Hosted, bypassFetch: typeof fetch, bear
   for (const [name, origin] of [["another preview", hosted.otherPreview], ["production", hosted.production]] as const) {
     if (!origin) { console.log(`SKIP no ready ${name} deployment to check`); continue; }
     for (const [method, path] of [["GET", "/owner/offline-code/v2/locators"], ["POST", "/owner/offline-code/v2/locators"],
-      ["POST", "/claimant/offline-code/v2/challenges"]] as const) {
+      ["POST", "/claimant/offline-code/v2/challenges"], ["POST", "/owner/session/activate"]] as const) {
       const response: Response = await bypassFetch(`${origin}${path}`, { method, ...(method === "POST" ? { body: "{}" } : {}),
         headers: { "Content-Type": "application/json", Origin: method === "GET" ? ownerOrigin : claimantOrigin,
           "Idempotency-Key": randomUUID() } });

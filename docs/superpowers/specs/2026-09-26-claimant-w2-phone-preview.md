@@ -1,6 +1,6 @@
 # Staging wiring W2 — the emergency-sheet path on real phones against the claimant Preview
 
-Proposed on 2026-09-26, after W1 merged through PR #103 at `53c3d40`. Awaiting owner approval.
+Proposed on 2026-09-26, after W1 merged through PR #103 at `53c3d40`. Approved by the owner on 2026-09-26 with all five recommended decisions. The owner also asked that PR watchers merge automatically once CI is green.
 
 ## Why
 
@@ -89,6 +89,16 @@ W1 proved the owner and possession routes on the hosted Preview, driven from Nod
 3. **A separate "Sanduqkin Preview" app, not a flag in the real app.** It can't be shipped by mistake and sits next to the real app on a phone. The alternative is a flag in the normal app build.
 4. **Builds: you run `eas build --profile claimant-preview` on your machine, or I add a manual GitHub workflow that uses the `EXPO_TOKEN` already in the `Release` environment.** I recommend the workflow, restricted to the `claimant-preview` branch. Either way, Android comes first. iOS needs your phone's UDID registered for ad hoc builds.
 5. **The claimant "check a sheet" screen, in the Preview build only.** It proves the printed-sheet camera, KDF and proof path on a real phone now, without waiting for W2b. The alternative is to leave claimant phone evidence to W2b.
+
+## Implementation notes (2026-09-26)
+
+- **Where the gate and sign-in activation live.** The owner gate and the sign-in activation sit in `owner-sheet-launch.ts`, so the TOTP screen can activate the owner session without loading the vault or printer code. `owner-sheet-runtime.ts` re-exports the unchanged `OWNER_SHEET_FLOW_LAUNCH_APPROVED`.
+- **The Preview app marker.** It is read from `expo-constants` only in `claimant-preview-marker.native.ts`. On web and in tests the marker is always absent, so the gate is closed there by construction.
+- **Activation route errors.** A retry with changed input maps to 409. Otherwise the route reuses the owner routes' error handling: 401 for an unknown session, 403 for a stale MFA, and 404 when concealed.
+- **Custom domain.** `preview-api.sanduqkin.com` is attached to `sanduqkin-api` for the `claimant-preview` branch. It needs a DNS CNAME from the owner: `preview-api` → `cname.vercel-dns.com`. Until it resolves, the API origin stays on the branch alias. Once it's live, `OFFLINE_CODE_V2_API_ORIGIN` switches to `https://preview-api.sanduqkin.com`, and the acceptance runs with `CLAIMANT_PREVIEW_API_ORIGIN` set to the same value.
+- **Build workflow.** `claimant-preview-build.yml` is manual, runs from `main`, and uses the `Release` environment's `EXPO_TOKEN` and public Supabase variables. It only queues an EAS build and never submits one.
+  - The first Android build of the new package needs a keystore, which EAS won't generate non-interactively. The owner runs `eas credentials` (or one interactive `eas build --profile claimant-preview`) once.
+  - iOS ad hoc builds need the test phone's UDID registered with `eas device:create`.
 
 ## Non-goals
 
