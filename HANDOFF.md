@@ -1,5 +1,30 @@
 # Sanduqkin Project Handoff
 
+## Current checkpoint — staging wiring W2a, the Sanduqkin Preview app, 2026-09-26
+
+W2a is built. The owner approved the spec with all five recommended decisions and asked that PR watchers now merge automatically once CI is green.
+
+- **The W1 gap is closed.** The new route `POST /owner/session/activate` lets the owner app activate its own claimant session control. The app calls it after the sign-in TOTP check and after every fresh-TOTP step-up. The hosted acceptance now uses the real route and passes 11 of 11.
+- **The Sanduqkin Preview app.** It is a separate app, with its own bundle ID `com.sanduqkin.mobile.claimantpreview` and the EAS profile `claimant-preview`.
+  - In it, the owner print and list screens and a new "Check an emergency sheet" camera screen open. The check screen proves possession only and starts no claim.
+  - The real app is unchanged, and the build refuses the Preview switch anywhere else. Every approval constant is still literal false.
+- **Tooling.** The custom domain `preview-api.sanduqkin.com` is attached to the `claimant-preview` branch, and the manual build workflow is `claimant-preview-build.yml`.
+
+Scope: `docs/superpowers/specs/2026-09-26-claimant-w2-phone-preview.md`; evidence: `docs/verification/2026-09-26-claimant-w2a-phone-preview.md`.
+
+**Owner actions:**
+1. Add the DNS CNAME `preview-api` → `cname.vercel-dns.com`.
+2. Set up the Preview app's credentials once (`eas credentials` for Android; `eas device:create` for iOS).
+3. Run the build workflow.
+4. Do the phone print and scan run.
+
+**Next: W2b, claim start:**
+- claimant sign-in;
+- the claimant portal session;
+- the claim-screen runtime;
+- the sheet-key handoff signer;
+- the handoff routes on Preview.
+
 ## Current checkpoint — staging wiring W1, claimant features on in Vercel Preview only, 2026-09-26
 
 W1 is built and verified on the hosted Preview. The owner approved the spec with all six recommended decisions, and chose Vercel's own client-address header as the trusted edge signal.
