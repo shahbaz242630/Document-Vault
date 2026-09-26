@@ -1,6 +1,6 @@
 # Slice 7A — single human approver with automated pre-checks and safeguards
 
-Proposed on 2026-09-26, after Slice 6J merged through PR #101 at `9d07c65`. Awaiting owner approval before coding.
+Proposed on 2026-09-26, after Slice 6J merged through PR #101 at `9d07c65`. Approved by the owner on 2026-09-26 with all five recommended decisions.
 
 ## Why
 
@@ -35,7 +35,7 @@ These safeguards are already built. They stay, and some get stricter for single-
 
 1. **A review mode fixed per case, chosen by the server.**
    - Each review round gains `review_mode`, either `two_person` or `single_approver`.
-   - The mode comes from the case's policy pack, never from a request. Today's two-person path is kept intact for later, if more reviewers join.
+   - The mode comes from the case's policy pack, never from a request. A new service-only `claimant_review_policies` table holds, per policy pack, the review mode, the minimum cooldown and the dispute window. A database trigger refuses any round whose mode doesn't match the policy, and any later change of mode. Today's two-person path is kept intact for later, if more reviewers join.
    - The mode is recorded on the round and in the release authorization, so the audit shows which rule applied.
 
 2. **Automated pre-checks, recorded before any decision.**
@@ -45,7 +45,7 @@ These safeguards are already built. They stay, and some get stricter for single-
      - every clean evidence object present, with a matching digest;
      - the submission receipt matches the current case version;
      - no other open claim on the same vault;
-     - claimant not the owner, and not a recently created account;
+     - claimant not the owner;
      - the owner notice was verified and the cooldown has fully elapsed;
      - claimant keys and grants are current;
      - no open dispute or intervention.
@@ -66,7 +66,7 @@ These safeguards are already built. They stay, and some get stricter for single-
    - The owner is notified again ("A claim on your vault has been approved and will be released on …"), through the existing 3A/3B/3C owner-notice path, and the window starts only from verified delivery.
    - During the window:
      - the owner can cancel;
-     - the claimant, or another registered next of kin, can dispute;
+     - the claimant, or another registered next of kin (someone else whose invitation from the same owner was accepted), can dispute;
      - any new evidence, key or grant change reopens pre-checks.
 
      Any of these puts the case on hold.
@@ -80,11 +80,11 @@ These safeguards are already built. They stay, and some get stricter for single-
 
 5. **Escalation and appeal in single-approver mode (changes to 3G).**
    - There is no second person to resolve them, so an escalation or appeal **holds the case**.
-   - The same person may not resolve their own decision. The only way forward is a new review round, with fresh pre-checks and a new dispute window, after the reason for the hold is dealt with.
+   - The same person may not resolve their own decision. As in 4A, any escalation or appeal on a case permanently blocks release for that case, so the only way forward is a new claim, with its own owner notice, cooldown, pre-checks and dispute window.
    - Resolving the hold may happen outside the system (for example through a solicitor); the system records only the new round.
 
 6. **A tamper-evident audit trail.**
-   - Review, pre-check, intervention and release events for a case are chained: each event stores a SHA-256 of the previous event's hash plus its own canonical content.
+   - Reviewer assignment, review, pre-check, intervention, release and single-approval events for a case are chained: each event stores a SHA-256 of the previous event's hash plus its own canonical content.
    - A service-only function verifies the chain.
    - A per-case audit export (value-free: times, steps, outcomes and check versions, no evidence or keys) is added for the owner's records and any later dispute.
    - Existing events are not rewritten. The chain starts with events written after this migration.
@@ -133,7 +133,7 @@ These safeguards are already built. They stay, and some get stricter for single-
   - a Docker-backed DB step runs in security CI, and I also run it locally on PGlite.
 - **Checks.** Workspace tests, typecheck, lint, the security and isolation checks, and CI green.
 
-## Decisions needed from the owner
+## Owner decisions (approved 2026-09-26)
 
 1. **What "Claude pre-checks" means in the live product. Recommended: deterministic rules in code.**
    - At runtime, the pre-checks are fixed rules written into the code (I write and test them, but no AI reads anyone's documents).
@@ -142,6 +142,13 @@ These safeguards are already built. They stay, and some get stricter for single-
 3. **Length of the post-approval dispute window. Recommended: 7 days.** A longer window is safer but delays families; a shorter one gives objectors little time.
 4. **Blocking pre-checks cannot be overridden. Recommended: yes.** The alternative is to allow an override with a recorded reason. That is more flexible, but it is exactly the "one person decides alone" risk this slice is meant to reduce.
 5. **Escalations and appeals hold the case, with no self-resolution. Recommended: yes.** The alternative is letting you resolve them yourself with a recorded reason.
+
+## As built
+
+- **Pre-checks run as one SQL function** (`claimant_run_review_precheck`) inside the database transaction, so what they read cannot change underneath them. Each run is stored with its check-set version and per-check results.
+- **An account-age check was left out.** The standalone test schema has no account creation time to check it against. It can be added once hosted accounts exist.
+- **The 4B and 4C changes are generated, not hand-edited.** Each is the original function with one condition changed, and a static test proves nothing else differs.
+- **Time-dependent rules are tested by moving the dispute window's own timestamps.** Nothing in the database clock or the other tables is faked.
 
 ## Known limitations, recorded and not solved here
 

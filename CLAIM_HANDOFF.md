@@ -1,5 +1,31 @@
 # Sanduqkin Claimant Engineering Handoff
 
+## Current checkpoint — Slice 7A single human approver, 2026-09-26
+
+Slice 7A is locally complete. The owner approved the spec with all five recommended decisions: deterministic pre-checks only, a minimum 30-day cooldown, a 7-day dispute window, no override of blocking pre-checks, and no self-resolution of escalations or appeals.
+
+Claims can now be approved by one accountable human, Shahbaz Malik, instead of two independent reviewers:
+- **Mode by policy.** The server chooses the review mode per policy pack. The two-person path is untouched.
+- **Pre-checks.** Automated pre-checks can only block.
+- **Approval.** One allow from an `accountable_human_test` identity opens a post-approval dispute window.
+- **Dispute window.** The window starts only when the owner's approval notice is verified. During it:
+  - the owner can cancel;
+  - the claimant, or another next of kin, can dispute;
+  - a material change holds the approval.
+- **Release.** Release requires an elapsed, undisturbed window, a clear pre-check taken after it, and the same person re-confirming with fresh MFA.
+- **Audit.** Every review, intervention, release and single-approval step is hash-chained, and the chain can be verified and exported.
+- **Launch state.** Everything is synthetic, literal-false and unmounted.
+
+Evidence:
+- The full DB test passed on real Postgres (PGlite, all migrations), and 4 mutation tests prove its guards.
+- Every other claimant DB test still passes.
+- The catalog check shows 0 violations.
+- 1,692 workspace tests and 290 script tests pass.
+
+Scope: `docs/superpowers/specs/2026-09-26-claimant-slice-7a-single-approver-review.md`; evidence: `docs/verification/2026-09-26-claimant-slice-7a-single-approver-review.md`. `docs/verification/2026-08-18-interim-reviewer-test-roles.md` now carries the superseding single-approver go-live gate.
+
+Next: 7B, the reviewer console, built against staging; then staging wiring. Staging needs `SUPABASE_ACCESS_TOKEN` and `VERCEL_TOKEN`, added either to the cloud environment settings or as GitHub secrets.
+
 ## Current checkpoint — Slice 6J "My emergency sheets", 2026-09-26
 
 Slice 6J is locally complete, on top of Slice 6I (PR #100). The owner approved the spec and both decisions: print a short reference on each sheet, and list without a fresh TOTP.
