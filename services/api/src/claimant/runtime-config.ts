@@ -1,3 +1,5 @@
+import { isClaimantPreviewActivated } from "./preview-activation.js";
+
 export const CLAIMANT_PRODUCTION_ACTIVATION_APPROVED = false as const;
 
 export const claimantCapabilityNames = [
@@ -16,7 +18,10 @@ export const claimantCapabilityNames = [
 ] as const;
 
 export type ClaimantCapabilityName = (typeof claimantCapabilityNames)[number];
-export type ClaimantRuntimeEnvironment = "development" | "test" | "production";
+export type ClaimantRuntimeEnvironment = "development" | "test" | "preview" | "production";
+
+/** W1: the only capabilities an activated Vercel Preview may turn on. */
+export const claimantPreviewCapabilityNames = ["authentication", "offlineCodeV2"] as const;
 
 type ClaimantCapabilityRecord = Readonly<Record<ClaimantCapabilityName, boolean>>;
 
@@ -59,6 +64,17 @@ const prerequisites: Readonly<
   release: ["review"],
   nativeRetrieval: ["release"],
 };
+
+/** Vercel runs Preview with NODE_ENV=production, so VERCEL_ENV decides whenever Vercel sets it. */
+function resolveRuntimeEnvironment(env: Record<string, string | undefined>): ClaimantRuntimeEnvironment {
+  const vercelEnvironment = env.VERCEL_ENV?.trim();
+  if (vercelEnvironment) {
+    if (vercelEnvironment === "production" || vercelEnvironment === "preview"
+      || vercelEnvironment === "development") return vercelEnvironment;
+    throw new Error("VERCEL_ENV must be development, preview, or production.");
+  }
+  return parseRuntimeEnvironment(env.NODE_ENV);
+}
 
 function parseRuntimeEnvironment(value: string | undefined): ClaimantRuntimeEnvironment {
   const normalized = value?.trim() || "development";
@@ -115,10 +131,20 @@ function resolveEffectiveCapabilities(
   return effective;
 }
 
+function limitToActivatedPreview(
+  effective: Record<ClaimantCapabilityName, boolean>,
+  activated: boolean,
+): void {
+  const allowed: readonly ClaimantCapabilityName[] = claimantPreviewCapabilityNames;
+  for (const capability of claimantCapabilityNames) {
+    if (!activated || !allowed.includes(capability)) effective[capability] = false;
+  }
+}
+
 export function getClaimantRuntimeConfig(
   env: Record<string, string | undefined> = process.env,
 ): ClaimantRuntimeConfig {
-  const environment = parseRuntimeEnvironment(env.NODE_ENV);
+  const environment = resolveRuntimeEnvironment(env);
   const masterEnabled = parseBooleanFlag(env, MASTER_FLAG);
   const requested = readRequestedCapabilities(env);
 
@@ -129,6 +155,7 @@ export function getClaimantRuntimeConfig(
   }
 
   const effective = resolveEffectiveCapabilities(masterEnabled, requested);
+  if (environment === "preview") limitToActivatedPreview(effective, isClaimantPreviewActivated(env));
 
   return Object.freeze({
     environment,

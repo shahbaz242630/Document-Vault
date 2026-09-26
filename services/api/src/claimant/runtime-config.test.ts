@@ -4,6 +4,7 @@ import {
   CLAIMANT_PRODUCTION_ACTIVATION_APPROVED,
   ClaimantCapabilityDisabledError,
   claimantCapabilityNames,
+  claimantPreviewCapabilityNames,
   getClaimantRuntimeConfig,
   requireClaimantCapability,
 } from "./runtime-config.js";
@@ -133,6 +134,58 @@ describe("claimant runtime configuration", () => {
         CLAIMANT_RUNTIME_ENABLED: "true",
       }),
     ).toThrow("Claimant runtime activation is not approved for production");
+  });
+
+  it("treats Vercel Production as production whatever NODE_ENV says", () => {
+    const allFlags = Object.fromEntries([
+      ["CLAIMANT_RUNTIME_ENABLED", "true"],
+      ["CLAIMANT_AUTHENTICATION_ENABLED", "true"],
+      ["CLAIMANT_OFFLINE_CODE_V2_ENABLED", "true"],
+      ["CLAIMANT_PREVIEW_ACTIVATION", "synthetic-only"],
+    ]);
+    for (const nodeEnv of ["production", "development", "test", undefined]) {
+      expect(() =>
+        getClaimantRuntimeConfig({ ...allFlags, NODE_ENV: nodeEnv, VERCEL: "1", VERCEL_ENV: "production",
+          VERCEL_GIT_COMMIT_REF: "claimant-preview" }),
+      ).toThrow("Claimant runtime activation is not approved for production");
+    }
+    expect(getClaimantRuntimeConfig({ NODE_ENV: "production", VERCEL: "1", VERCEL_ENV: "production" })
+      .environment).toBe("production");
+    expect(() => getClaimantRuntimeConfig({ VERCEL_ENV: "staging" })).toThrow("VERCEL_ENV must be");
+  });
+
+  it("ignores every claimant flag on a preview that is not activated", () => {
+    const flags = { NODE_ENV: "production", VERCEL: "1", VERCEL_ENV: "preview",
+      CLAIMANT_RUNTIME_ENABLED: "true", CLAIMANT_AUTHENTICATION_ENABLED: "true",
+      CLAIMANT_OFFLINE_CODE_V2_ENABLED: "true" };
+    for (const env of [
+      { ...flags, VERCEL_GIT_COMMIT_REF: "main", CLAIMANT_PREVIEW_ACTIVATION: "synthetic-only" },
+      { ...flags, VERCEL_GIT_COMMIT_REF: "claimant-preview" },
+      { ...flags, VERCEL_GIT_COMMIT_REF: "claimant-preview", CLAIMANT_PREVIEW_ACTIVATION: "true" },
+    ]) {
+      const config = getClaimantRuntimeConfig(env);
+      expect(config.environment).toBe("preview");
+      expect(Object.values(config.effective).some(Boolean)).toBe(false);
+    }
+  });
+
+  it("opens only the W1 capabilities on the activated claimant-preview deployment", () => {
+    const config = getClaimantRuntimeConfig({
+      NODE_ENV: "production", VERCEL: "1", VERCEL_ENV: "preview", VERCEL_GIT_COMMIT_REF: "claimant-preview",
+      CLAIMANT_PREVIEW_ACTIVATION: "synthetic-only",
+      ...Object.fromEntries([
+        "CLAIMANT_RUNTIME_ENABLED", "CLAIMANT_AUTHENTICATION_ENABLED", "CLAIMANT_REGISTERED_RECIPIENT_ENABLED",
+        "CLAIMANT_OFFLINE_CODE_V2_ENABLED", "CLAIMANT_INTAKE_ENABLED", "CLAIMANT_EVIDENCE_UPLOAD_ENABLED",
+        "CLAIMANT_DASHBOARD_ENABLED", "CLAIMANT_CASE_PROCESSING_ENABLED", "CLAIMANT_OWNER_PROTECTION_ENABLED",
+        "CLAIMANT_NOTIFICATIONS_ENABLED", "CLAIMANT_REVIEW_ENABLED", "CLAIMANT_RELEASE_ENABLED",
+        "CLAIMANT_NATIVE_RETRIEVAL_ENABLED",
+      ].map((name) => [name, "true"])),
+    });
+
+    expect(config.environment).toBe("preview");
+    expect(config.productionActivationApproved).toBe(false);
+    expect(Object.entries(config.effective).filter(([, on]) => on).map(([name]) => name).sort())
+      .toEqual([...claimantPreviewCapabilityNames].sort());
   });
 
   it("provides a typed guard for future route and processor wiring", () => {

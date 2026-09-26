@@ -13,6 +13,7 @@ import { createOfflineCodeV2PersistenceTransactionClient,
 import { createOfflineCodeV2ProofAttemptCoordinator,
   OfflineCodeV2ProofAttemptCoordinatorError }
   from "./offline-code-v2-proof-attempt-coordinator.js";
+import { isClaimantPreviewActivated } from "./preview-activation.js";
 import { ClaimantCapabilityDisabledError, getClaimantRuntimeConfig,
   requireClaimantCapability, type ClaimantRuntimeConfig } from "./runtime-config.js";
 
@@ -145,7 +146,9 @@ export function createOfflineCodeV2PreflightController(deps: Deps = {}) {
 }
 
 function requireConfig(context: Context, deps: Deps): OfflineCodeV2ControllerConfig | Response {
-  if (!(deps.approved ?? CLAIMANT_OFFLINE_CODE_V2_CONTROLLER_APPROVED)) return notFound(context);
+  if (!(deps.approved ?? (CLAIMANT_OFFLINE_CODE_V2_CONTROLLER_APPROVED || isClaimantPreviewActivated()))) {
+    return notFound(context);
+  }
   try { requireClaimantCapability(deps.runtimeConfig ?? getClaimantRuntimeConfig(), "offlineCodeV2"); }
   catch (error) { if (error instanceof ClaimantCapabilityDisabledError) return notFound(context);
     throw error; }

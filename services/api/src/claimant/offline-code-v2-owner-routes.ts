@@ -20,6 +20,7 @@ import { createOfflineCodeV2OwnerSheetReader, createOfflineCodeV2PersistenceTran
 import { type ClaimantApiSession, createRegisteredRecipientSupabaseClient, RegisteredRecipientMutationError,
   type RegisteredRecipientClient, type RegisteredRecipientSupabaseConfig }
   from "./registered-recipient-client.js";
+import { isClaimantPreviewActivated } from "./preview-activation.js";
 import { ClaimantCapabilityDisabledError, getClaimantRuntimeConfig, requireClaimantCapability,
   type ClaimantRuntimeConfig } from "./runtime-config.js";
 import { ClaimantAssuranceError, requireFreshClaimantAssurance } from "./session-assurance.js";
@@ -213,7 +214,9 @@ async function readJson(context: Context, action: OfflineCodeV2OwnerAction): Pro
 }
 
 function requireConfig(context: Context, deps: Deps): OfflineCodeV2OwnerRoutesConfig | Response {
-  if (!(deps.approved ?? CLAIMANT_OFFLINE_CODE_V2_OWNER_ROUTES_APPROVED)) return notFound(context);
+  if (!(deps.approved ?? (CLAIMANT_OFFLINE_CODE_V2_OWNER_ROUTES_APPROVED || isClaimantPreviewActivated()))) {
+    return notFound(context);
+  }
   try { requireClaimantCapability(deps.runtimeConfig ?? getClaimantRuntimeConfig(), "offlineCodeV2"); }
   catch (error) {
     if (error instanceof ClaimantCapabilityDisabledError) return notFound(context);
