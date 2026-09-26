@@ -7,6 +7,7 @@ import { Hono } from "hono";
 import sodium from "libsodium-wrappers-sumo";
 import { describe, expect, it, vi } from "vitest";
 
+import { createClaimSheetScan } from "../../../../apps/mobile/src/features/claimant-journey/claim-sheet-scan";
 import { createOfflineCodeV2PlatformProofProducer } from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-proof-producer";
 import { generateOfflineCodeV2EmergencySheet, type OfflineCodeV2SheetCrypto }
   from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-sheet-generator";
@@ -19,6 +20,7 @@ import { renderOwnerSheetHtml } from "../../../../apps/mobile/src/features/claim
 import { createOfflineCodeV2Controller } from "./offline-code-v2-controller.js";
 import { createOfflineCodeV2OwnerRoute } from "./offline-code-v2-owner-routes.js";
 import { createOfflineCodeV2PersistenceTransactionClient } from "./offline-code-v2-persistence-transaction-client.js";
+import { decodePrintedSheetQr } from "./printed-sheet-qr.fixtures.test.js";
 import { getClaimantRuntimeConfig } from "./runtime-config.js";
 
 /*
@@ -358,5 +360,42 @@ describe("Slice 6H owner app flow to claimant acceptance", () => {
     const decoy = await system.challenge(sheet!.printedLocator);
     const { result } = await decoy.json() as { result: { challenge: OfflineCodeChallengeV2 } };
     expect(result.challenge.locator_record_id).not.toBe(sheet!.registration.locatorRecordId);
+  }, 60_000);
+});
+
+describe("Slice 6I printed sheet to claimant scan acceptance", () => {
+  it("scans the QR code the owner actually printed and proves possession through the real routes", async () => {
+    await sodium.ready;
+    const system = harness(); const ownerId = randomUUID(); const jwt = system.owner(ownerId);
+    const printed: string[] = []; const made: OwnerOfflineCodeSheet[] = [];
+    const fetchImpl = (async (url: string, init: RequestInit) => system.app.request(url, init)) as unknown as typeof fetch;
+    const flow = createOwnerSheetFlow({
+      createSheet: async (input) => { const sheet = await createOwnerOfflineCodeSheet({ ...input, approved: true,
+        mek: sodium.randombytes_buf(32) }); made.push(sheet); return sheet; },
+      getOwnerId: async () => ownerId,
+      client: createOwnerOfflineCodeClient({ apiBaseUrl: apiOrigin, ownerOrigin, fetch: fetchImpl,
+        getAccessToken: async () => jwt }),
+      verifyFreshMfa: async () => false, renderSheetHtml: renderOwnerSheetHtml,
+      print: async (html) => { printed.push(html); }, randomUUID,
+    });
+    await flow.start(); await flow.print(); flow.confirmPrinted();
+    const [sheet] = made; const [html] = printed;
+
+    const scanned: string[] = [];
+    const scan = createClaimSheetScan((text) => { scanned.push(text); });
+    const decoded = decodePrintedSheetQr(html!);
+    for (let frame = 0; frame < 3; frame += 1) scan.onScan({ type: "qr", data: decoded });
+    expect(scanned).toEqual([sheet!.sheetPayload]);
+
+    const issued = await system.challenge(sheet!.printedLocator);
+    const { result } = await issued.json() as { result: { challenge: OfflineCodeChallengeV2;
+      challenge_bytes_base64url: string } };
+    expect(result.challenge.locator_record_id).toBe(sheet!.registration.locatorRecordId);
+    const proof = await createOfflineCodeV2PlatformProofProducer(true).produce({
+      ...parseOfflineCodeSheetV2(scanned[0]), challenge: result.challenge, expectedOrigin: claimantOrigin });
+    const verified = await system.prove(result.challenge.challenge_id, { challenge: result.challenge,
+      challenge_bytes_base64url: result.challenge_bytes_base64url, possession_proof: proof });
+    expect((await verified.json() as { result: { route_possession_asserted: boolean } }).result
+      .route_possession_asserted).toBe(true);
   }, 60_000);
 });

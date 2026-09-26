@@ -46,6 +46,14 @@
           "faceIDPermission": "Allow Sanduqkin to use Face ID to unlock your encrypted vault."
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Sanduqkin to use the camera to scan the QR code on an emergency sheet.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
       "expo-splash-screen",
       "expo-sharing",
       "expo-font"

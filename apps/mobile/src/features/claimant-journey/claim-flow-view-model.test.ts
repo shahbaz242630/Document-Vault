@@ -7,11 +7,16 @@ const statuses: ClaimFlowStatus[] = ["unavailable", "ready", "checking", "claim_
   "sheet_not_recognised", "could_not_start", "closed"];
 
 describe("claim flow view model", () => {
-  it("offers sheet entry only while a claim can be submitted", () => {
-    expect(statuses.filter((status) => claimFlowView(status).showSheetField))
+  it("offers the camera only while a claim can be submitted", () => {
+    expect(statuses.filter((status) => claimFlowView(status).scanLabel !== null))
       .toEqual(["ready", "sheet_not_recognised"]);
-    expect(statuses.filter((status) => claimFlowView(status).submitLabel !== null))
-      .toEqual(["ready", "sheet_not_recognised"]);
+    expect(claimFlowView("ready").scanLabel).toBe("Scan the QR code");
+    expect(claimFlowView("sheet_not_recognised").scanLabel).toBe("Scan again");
+  });
+
+  it("offers no way to type or paste a sheet", () => {
+    for (const status of statuses) expect(Object.keys(claimFlowView(status)).sort())
+      .toEqual(["body", "notice", "scanLabel", "title"]);
   });
 
   it("shows the unavailable message in the normal app state", () => {

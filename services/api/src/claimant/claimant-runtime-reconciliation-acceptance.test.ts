@@ -4,21 +4,27 @@ import { createHash, createPrivateKey, randomBytes, randomUUID, sign } from "nod
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { canonicalJson, type OfflineCodeChallengeV2, type OfflineCodePossessionProofV2 } from "@vault/shared-types";
+import { canonicalJson, encodeOfflineCodeSheetV2, type OfflineCodeChallengeV2,
+  type OfflineCodePossessionProofV2 } from "@vault/shared-types";
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createClaimFlow, type ClaimFlowSnapshot } from "../../../../apps/mobile/src/features/claimant-journey/claim-flow";
+import { createClaimSheetScan } from "../../../../apps/mobile/src/features/claimant-journey/claim-sheet-scan";
 import { createClaimantRuntimeBootstrap } from "../../../../apps/mobile/src/features/claimant-journey/runtime-bootstrap";
 import { createClaimantRuntimeFoundation } from "../../../../apps/mobile/src/features/claimant-journey/runtime-foundation";
 import type { OfflineCodeV2SyntheticAttempt } from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-coordinator";
 import type { OfflineCodeV2ProofInput } from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-proof-core";
 import { createOfflineCodeV2PlatformProofProducer } from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-proof-producer";
+import type { OwnerOfflineCodeSheet } from "../../../../apps/mobile/src/features/claimant-offline-code/owner-offline-code-sheet-factory";
+import { renderOwnerSheetHtml } from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-html";
 import { createOfflineCodeV2Controller } from "./offline-code-v2-controller.js";
 import { createOfflineCodeV2HandoffRoute } from "./offline-code-v2-handoff-routes.js";
 import { createOfflineCodeV2HandoffTransactionClient } from "./offline-code-v2-handoff-transaction-client.js";
 import { createOfflineCodeV2PersistenceTransactionClient } from "./offline-code-v2-persistence-transaction-client.js";
 import { ClaimantPortalSessionError, type ClaimantPortalSessionClient } from "./portal-session-client.js";
 import { createClaimantPortalSessionRoute } from "./portal-session-routes.js";
+import { decodePrintedSheetQr } from "./printed-sheet-qr.fixtures.test.js";
 import { getClaimantRuntimeConfig } from "./runtime-config.js";
 
 /*
@@ -544,5 +550,35 @@ describe("claimant mobile-to-API reconciliation acceptance", () => {
       () => d.runtime.retryRevoke()]) await expect(operation()).rejects.toMatchObject(unavailable);
     expect(w.wire).toHaveLength(0); expect(w.rpc).not.toHaveBeenCalled();
     expect(d.produce).not.toHaveBeenCalled(); expect(d.signClaimantHandoffAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe("Slice 6I printed sheet scanned into the claim screen's flow", () => {
+  it("reads the printed QR code with the camera handler and starts exactly one claim through the actual routes", async () => {
+    const w = world(); const d = device(w, w.signIn(uuid()));
+    const printedSheet = { sheetPayload: encodeOfflineCodeSheetV2({ publicLocator: fixture.public_locator,
+      clientSecret: fixture.synthetic_client_secret, kdfProfile: fixture.kdf_profile,
+      recordBinding: fixture.record_binding }), printedLocator: fixture.public_locator.locator,
+    printedSecret: fixture.synthetic_client_secret.secret, expiresAt: new Date(start + 86_400_000).toISOString(),
+    registration: {} as OwnerOfflineCodeSheet["registration"] } as OwnerOfflineCodeSheet;
+    const html = renderOwnerSheetHtml(printedSheet);
+
+    const flow = createClaimFlow({ handle: d.bootstrap.claimFlowRuntime(), newKey: uuid });
+    const seen: ClaimFlowSnapshot[] = [];
+    flow.subscribe((snapshot) => { seen.push(snapshot); });
+    const submitted: Promise<void>[] = [];
+    const scan = createClaimSheetScan((text) => { submitted.push(flow.submit(text)); });
+    const decoded = decodePrintedSheetQr(html);
+    for (let frame = 0; frame < 3; frame += 1) scan.onScan({ type: "qr", data: decoded });
+    await Promise.all(submitted);
+
+    expect(submitted).toHaveLength(1);
+    expect(seen.map((snapshot) => snapshot.status)).toEqual(["checking", "claim_started"]);
+    expect(w.wire.map((entry) => [entry.path.split("/").slice(-1)[0], entry.status])).toEqual([
+      ["activate", 200], ["assert", 200], ["challenges", 200], ["proofs", 200], ["issue", 200], ["complete", 200]]);
+    expect(w.store.cases.size).toBe(1); expect(d.signClaimantHandoffAsync).toHaveBeenCalledOnce();
+    const secret = fixture.synthetic_client_secret.secret;
+    expect(JSON.stringify(seen)).not.toContain(secret);
+    expect(w.wire.some((entry) => entry.body.includes(secret) || entry.body.includes(decoded))).toBe(false);
   });
 });
