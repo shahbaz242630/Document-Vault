@@ -10,6 +10,9 @@ const index = readFileSync(join(root, "services/api/src/index.ts"), "utf8");
 
 if (!/CLAIMANT_OFFLINE_CODE_V2_OWNER_ROUTES_APPROVED\s*=\s*false\s+as\s+const/u.test(routes))
   throw new Error("Offline-code V2 owner routes approval must remain literal false.");
+// W1: the only other way in is the activated claimant-preview deployment, and nothing looser.
+if (!routes.includes("deps.approved ?? (CLAIMANT_OFFLINE_CODE_V2_OWNER_ROUTES_APPROVED || isClaimantPreviewActivated())"))
+  throw new Error("Offline-code V2 owner routes gate must be the approval constant or the claimant Preview only.");
 for (const token of ['requireClaimantCapability(deps.runtimeConfig ?? getClaimantRuntimeConfig(), "offlineCodeV2")',
   "requireFreshClaimantAssurance", "assertActiveSession(session.userId, session.sessionId)",
   "ownerUserId: session.userId", "owner_id: ownerUserId", "z.strictObject", 'reason: "owner_revoked"',

@@ -18,6 +18,22 @@ const claimantOrigin = "https://app.sanduqkin.test";
 const locator = "SK2-L-M6HA-7955-MTKT-HADA-NEPA-VBNF-P0-F";
 
 describe("offline-code V2 controller", () => {
+  it("opens only on the activated claimant-preview deployment (W1)", async () => {
+    const preview = { VERCEL: "1", VERCEL_ENV: "preview", VERCEL_GIT_COMMIT_REF: "claimant-preview",
+      CLAIMANT_PREVIEW_ACTIVATION: "synthetic-only" };
+    try {
+      for (const [name, value] of Object.entries(preview)) vi.stubEnv(name, value);
+      const { approved: _approved, ...deps } = approved();
+      expect((await routeApp("issueChallenge", deps).request(challengeUrl(), request({ locator }))).status)
+        .toBe(200);
+      vi.stubEnv("VERCEL_GIT_COMMIT_REF", "dependabot/npm_and_yarn/hono");
+      const closed = approved(); const { approved: _off, ...closedDeps } = closed;
+      expect((await routeApp("issueChallenge", closedDeps).request(challengeUrl(), request({ locator }))).status)
+        .toBe(404);
+      expect(closed.getConfig).not.toHaveBeenCalled();
+    } finally { vi.unstubAllEnvs(); }
+  });
+
   it("keeps both mounted routes concealed before configuration or dependencies are touched", async () => {
     expect(CLAIMANT_OFFLINE_CODE_V2_CONTROLLER_APPROVED).toBe(false);
     const getConfig = vi.fn(); const getTrustedSignals = vi.fn();

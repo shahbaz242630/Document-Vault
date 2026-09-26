@@ -59,6 +59,24 @@ describe("owner offline-code V2 registration and revocation routes", () => {
     }
   });
 
+  it("opens only on the activated claimant-preview deployment (W1)", async () => {
+    const preview = { VERCEL: "1", VERCEL_ENV: "preview", VERCEL_GIT_COMMIT_REF: "claimant-preview",
+      CLAIMANT_PREVIEW_ACTIVATION: "synthetic-only" };
+    try {
+      for (const [name, value] of Object.entries(preview)) vi.stubEnv(name, value);
+      const { approved: _approved, ...deps } = approved();
+      expect((await routeApp("register", deps).request(url("register"), request())).status).toBe(200);
+      for (const [name, value] of [["VERCEL_GIT_COMMIT_REF", "main"], ["VERCEL_ENV", "production"],
+        ["CLAIMANT_PREVIEW_ACTIVATION", ""]] as const) {
+        vi.stubEnv(name, value);
+        const concealed = approved(); const { approved: _off, ...closed } = concealed;
+        expect((await routeApp("register", closed).request(url("register"), request())).status).toBe(404);
+        expect(concealed.getConfig).not.toHaveBeenCalled();
+        vi.stubEnv(name, preview[name]);
+      }
+    } finally { vi.unstubAllEnvs(); }
+  });
+
   it("registers under the session owner with the same locator index the challenge route derives", async () => {
     const deps = approved();
     const response = await routeApp("register", deps).request(url("register"), request());

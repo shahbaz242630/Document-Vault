@@ -493,7 +493,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = {
-  analyzeCatalog,
-  runSupabaseDbSecurityCheck,
-};
+module.exports = { CATALOG_SQL, analyzeCatalog, runSupabaseDbSecurityCheck };

@@ -8,6 +8,9 @@ const index = readFileSync(join(root, "services/api/src/index.ts"), "utf8");
 
 if (!/CLAIMANT_OFFLINE_CODE_V2_CONTROLLER_APPROVED\s*=\s*false\s+as\s+const/u.test(controller))
   throw new Error("Offline-code V2 controller approval must remain literal false.");
+// W1: the only other way in is the activated claimant-preview deployment, and nothing looser.
+if (!controller.includes("deps.approved ?? (CLAIMANT_OFFLINE_CODE_V2_CONTROLLER_APPROVED || isClaimantPreviewActivated())"))
+  throw new Error("Offline-code V2 controller gate must be the approval constant or the claimant Preview only.");
 for (const token of ["requireClaimantCapability", '"offlineCodeV2"', "getTrustedSignals",
   "MAX_BODY_BYTES = 16_384", "new URL(context.req.url).origin === config.apiOrigin",
   "context.req.header(\"Authorization\")", "context.req.header(\"Cookie\")",

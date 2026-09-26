@@ -50,6 +50,8 @@ recovery phrases, raw emergency codes, signing material, or protected logs.
 - [ ] Account-deletion and audit-retention processors have a recent successful run or explicit acceptance.
 - [ ] Scheduled-workflow failure monitoring or the documented operational review was completed.
 - [ ] Rollback, credential-revocation, and incident contacts are available to the release owner.
+- [ ] Claimant go-live only: synthetic claimant-preview data was removed from the shared Supabase project with `node scripts/claimant-preview-synthetic-cleanup.cjs --apply`, and a dry run then reported 0 users, 0 sheets and 0 challenges:
+- [ ] Claimant go-live only: `node scripts/claimant-vercel-env-guard.cjs` passed, so no claimant or offline-code V2 variable targets Production or an unscoped Preview:
 
 ## Native device QA
 

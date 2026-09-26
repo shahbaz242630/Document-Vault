@@ -8,6 +8,7 @@ import {
   type ClaimantPortalSessionClient,
 } from "./portal-session-client.js";
 import type { RegisteredRecipientSupabaseConfig } from "./registered-recipient-client.js";
+import { isClaimantPreviewActivated } from "./preview-activation.js";
 import { ClaimantAssuranceError, requireFreshClaimantAssurance } from "./session-assurance.js";
 import {
   ClaimantCapabilityDisabledError, getClaimantRuntimeConfig,
@@ -109,6 +110,9 @@ function prepareRequest(context: Context, deps: PortalRouteDeps) {
 }
 
 function requirePortalConfig(context: Context, deps: PortalRouteDeps): PortalRouteConfig | Response {
+  // W1 turns "authentication" on in the claimant-preview deployment only as the offline-code V2 prerequisite.
+  // The claimant portal session belongs to W2, so it stays concealed there.
+  if (isClaimantPreviewActivated()) return context.json({ error: "Not found" }, 404);
   try {
     requireClaimantCapability(deps.runtimeConfig ?? getClaimantRuntimeConfig(), "authentication");
   } catch (error) {

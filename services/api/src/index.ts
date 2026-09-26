@@ -38,6 +38,7 @@ import { createOfflineCodeV2HandoffPreflightRoute, createOfflineCodeV2HandoffRou
   from "./claimant/offline-code-v2-handoff-routes.js";
 import { createOfflineCodeV2OwnerListRoute, createOfflineCodeV2OwnerPreflightRoute, createOfflineCodeV2OwnerRoute }
   from "./claimant/offline-code-v2-owner-routes.js";
+import { createVercelTrustedSignals } from "./claimant/vercel-trusted-signals.js";
 import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
 
 export const app = new Hono();
@@ -138,7 +139,8 @@ for (const [path, action] of [
   ["/claimant/offline-code/v2/challenges", "issueChallenge"],
   ["/claimant/offline-code/v2/challenges/:challengeId/proofs", "verifyProof"],
 ] as const) {
-  app.post(path, createOfflineCodeV2Controller(action, { runtimeConfig: claimantRuntimeConfig }));
+  app.post(path, createOfflineCodeV2Controller(action, { runtimeConfig: claimantRuntimeConfig,
+    getTrustedSignals: createVercelTrustedSignals() }));
   app.options(path, createOfflineCodeV2PreflightController({ runtimeConfig: claimantRuntimeConfig }));
 }
 for (const [path, action] of [
