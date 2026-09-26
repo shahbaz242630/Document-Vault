@@ -1,5 +1,18 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — session close with Slices 6F–6H, 2026-09-25
+
+The canonical close-out and next-session opener is `docs/handoff/2026-09-25-claimant-6f-6h-session-close.md`.
+
+Merged this session:
+- 6F through PR #95 (`a6e15b5`);
+- 6G through PR #96 (`3c68b57`);
+- 6H, plus the release-build `EXPO_PUBLIC_*` inlining fix, through PR #98 (`18e451f`).
+
+The inlining fix restores the API URL, the RevenueCat keys and SSL pinning in release builds. The "locally complete" entries below for 6F, 6G and 6H are historical.
+
+Next: 6I, the claimant camera QR scanner; or the reviewer decision; or a "my emergency sheets" list with revoke.
+
 ## Current checkpoint — Slice 6H owner emergency-sheet screen, 2026-09-25
 
 Slice 6G merged through PR #96 at `3c68b57`. Slice 6H is locally complete on `claude/busy-franklin-xv1jah`. The owner approved the spec and all three decisions: add `qrcode-generator`, print only, and automatically revoke a sheet the owner has not confirmed.
