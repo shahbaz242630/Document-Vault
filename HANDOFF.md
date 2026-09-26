@@ -1,5 +1,15 @@
 # Sanduqkin Project Handoff
 
+## Current checkpoint — hosted migration through Slice 7A, 2026-09-26
+
+The hosted Supabase project `pxwtexjjttpgtairpepz` now matches the repository: all 48 migrations, through Slice 7A. The four that were missing (5M case binding, 5N authenticated handoff, 6J owner sheet list, 7A single approver) were applied with the owner's authorisation through the Supabase Management API, because this cloud session cannot open a direct Postgres connection for `supabase db push`. Each migration and its history row went in one transaction.
+
+Hosted checks: 84 claimant tables, all with forced RLS; zero client table privileges; 67 claimant functions, none security definer and none executable by clients. The Security Advisor shows only the known leaked-password-protection warning. No capability, route, Auth/Storage setting, deployment or real data changed. Evidence: `docs/verification/2026-09-26-hosted-claimant-migration-through-slice-7a.md`.
+
+`SUPABASE_ACCESS_TOKEN` is now in the cloud environment and works. The owner approved applying future migrations the same way.
+
+Next: staging wiring W1, which still needs `VERCEL_TOKEN`.
+
 ## Current checkpoint — session close with Slices 6I–7A, 2026-09-26
 
 The canonical close-out and next-session opener is `docs/handoff/2026-09-26-claimant-6i-7a-session-close.md`.
