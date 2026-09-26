@@ -65,11 +65,21 @@ export type OfflineCodeV2RevocationResult = Readonly<{
   replayed: boolean;
 }>;
 
+export type OfflineCodeV2OwnerSheet = Readonly<{
+  locatorRecordId: string; status: "active" | "revoked" | "expired";
+  issuedAt: string; expiresAt: string; revokedAt: string | null;
+}>;
+
 export type OfflineCodeV2PersistenceTransactionClient = Readonly<{
   register(input: OfflineCodeV2RegistrationInput): Promise<OfflineCodeV2RegistrationResult>;
   issueChallenge(input: OfflineCodeV2ChallengeInput): Promise<OfflineCodeV2ChallengeResult>;
   recordAttempt(input: OfflineCodeV2AttemptInput): Promise<OfflineCodeV2AttemptResult>;
   revoke(input: OfflineCodeV2RevocationInput): Promise<OfflineCodeV2RevocationResult>;
+}>;
+
+/** Slice 6J: reads the owner's own sheets through the service-only list function. */
+export type OfflineCodeV2OwnerSheetReader = Readonly<{
+  listOwnerSheets(ownerUserId: string): Promise<readonly OfflineCodeV2OwnerSheet[]>;
 }>;
 
 export class OfflineCodeV2PersistenceTransactionError extends Error {
@@ -168,6 +178,24 @@ export function createOfflineCodeV2PersistenceTransactionClient(
   };
 }
 
+export function createOfflineCodeV2OwnerSheetReader(rpc: Rpc): OfflineCodeV2OwnerSheetReader {
+  return {
+    async listOwnerSheets(ownerUserId) {
+      const response = await rpc("claimant_list_offline_code_v2_locators", { p_owner_user_id: ownerUserId });
+      if (response.error) throw new OfflineCodeV2PersistenceTransactionError(response.error.code);
+      const parsed = ownerSheetListSchema.safeParse(response.data);
+      if (!parsed.success) throw new Error("Offline-code V2 persistence returned an invalid result.");
+      return parsed.data.sheets.map((sheet) => {
+        if (sheet.status !== "expired" && (sheet.status === "revoked") !== (sheet.revoked_at !== null))
+          throw new Error("Offline-code V2 persistence returned an invalid sheet.");
+        return { locatorRecordId: sheet.locator_record_id, status: sheet.status,
+          issuedAt: new Date(sheet.issued_at).toISOString(), expiresAt: new Date(sheet.expires_at).toISOString(),
+          revokedAt: sheet.revoked_at === null ? null : new Date(sheet.revoked_at).toISOString() };
+      });
+    },
+  };
+}
+
 const uuid = z.string().uuid();
 const base64url16 = z.string().regex(/^[A-Za-z0-9_-]{21}[AQgw]$/u);
 const base64url32 = z.string().regex(/^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/u);
@@ -204,6 +232,12 @@ const attemptResultSchema = z.strictObject({ ...safeBase, challenge_id: uuid,
 const revocationResultSchema = z.strictObject({ ...safeBase, locator_record_id: uuid,
   locator_version: z.literal(2), status: z.literal("revoked"),
   future_challenges_allowed: z.literal(false) });
+
+const timestamp = z.string().datetime({ offset: true });
+const ownerSheetListSchema = z.strictObject({ synthetic_only: z.literal(true), claim_created: z.literal(false),
+  release_authorized: z.literal(false), sheets: z.array(z.strictObject({ locator_record_id: uuid,
+    status: z.enum(["active", "revoked", "expired"]), issued_at: timestamp, expires_at: timestamp,
+    revoked_at: timestamp.nullable() })).max(50) });
 
 function requireEqual(left: string, right: string): void {
   if (left !== right) throw new Error("Offline-code V2 persistence returned an invalid binding.");

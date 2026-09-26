@@ -560,7 +560,8 @@ describe("Slice 6I printed sheet scanned into the claim screen's flow", () => {
       clientSecret: fixture.synthetic_client_secret, kdfProfile: fixture.kdf_profile,
       recordBinding: fixture.record_binding }), printedLocator: fixture.public_locator.locator,
     printedSecret: fixture.synthetic_client_secret.secret, expiresAt: new Date(start + 86_400_000).toISOString(),
-    registration: {} as OwnerOfflineCodeSheet["registration"] } as OwnerOfflineCodeSheet;
+    registration: { locatorRecordId: fixture.record_binding.locator_record_id } as
+      OwnerOfflineCodeSheet["registration"] } as OwnerOfflineCodeSheet;
     const html = renderOwnerSheetHtml(printedSheet);
 
     const flow = createClaimFlow({ handle: d.bootstrap.claimFlowRuntime(), newKey: uuid });

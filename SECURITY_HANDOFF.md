@@ -1,5 +1,20 @@
 # Sanduqkin Security Handoff
 
+## Current checkpoint — Slice 6J "My emergency sheets", 2026-09-26
+
+Slice 6J is locally complete, on top of Slice 6I (PR #100). The owner approved the spec and both decisions: print a short reference on each sheet, and list without a fresh TOTP.
+
+The owner can now see their emergency sheets and revoke one:
+- **Server.** A new service-only, read-only SQL function `claimant_list_offline_code_v2_locators` returns only the owner's own sheets, with dates and a status. It never returns the locator digest, commitment, proof key, wrap, salt or grant. It sits behind a concealed `GET /owner/offline-code/v2/locators` route that needs an active AAL2 owner session. Revoking still needs a fresh TOTP, and the retry reuses the same idempotency key.
+- **App.** A "My emergency sheets" screen shows each sheet's reference ("Ref 3F9A1C"), printed date, validity and status, with a confirmed Revoke. The 6H printed sheet now shows the same reference.
+- **Launch state.** It sits behind the same literal-false launch approval as 6H.
+
+An acceptance test prints two sheets, lists them, revokes one after a fresh code, and shows that one yields only a decoy while the other still proves possession. The SQL was checked locally on real Postgres (PGlite), and a new Docker-backed DB step runs in security CI. Scope: `docs/superpowers/specs/2026-09-26-claimant-slice-6j-owner-sheet-list.md`; evidence: `docs/verification/2026-09-26-claimant-slice-6j-owner-sheet-list.md`.
+
+**Owner working rule (2026-09-26).** No pull request for documentation or admin changes alone. Handoffs, specs, verification records and decisions always travel with the code they describe.
+
+Next: the reviewer-model slice (single human approver with Claude pre-checks, cooling-off, dispute window and audit), then staging wiring on the existing Supabase and Vercel projects. Staging wiring needs `SUPABASE_ACCESS_TOKEN` and `VERCEL_TOKEN` in the cloud environment.
+
 ## Current checkpoint — Slice 6I camera QR scanner, 2026-09-26
 
 Slice 6I is locally complete on `claude/handoff-review-72h2i9`, on `main` at `18e451f` plus the open close-out PR #99. The owner approved the spec, the native `expo-camera` dependency, removing the claimant paste field and adding `jsqr` for tests only.

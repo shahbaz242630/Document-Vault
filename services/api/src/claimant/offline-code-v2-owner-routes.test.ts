@@ -8,9 +8,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { app as mountedApp } from "../index.js";
 import { offlineCodeV2BoundaryDigest } from "./offline-code-v2-locator-index.js";
-import { CLAIMANT_OFFLINE_CODE_V2_OWNER_ROUTES_APPROVED, createOfflineCodeV2OwnerPreflightRoute,
-  createOfflineCodeV2OwnerRoute } from "./offline-code-v2-owner-routes.js";
-import { OfflineCodeV2PersistenceTransactionError } from "./offline-code-v2-persistence-transaction-client.js";
+import { CLAIMANT_OFFLINE_CODE_V2_OWNER_ROUTES_APPROVED, createOfflineCodeV2OwnerListRoute,
+  createOfflineCodeV2OwnerPreflightRoute, createOfflineCodeV2OwnerRoute } from "./offline-code-v2-owner-routes.js";
+import { createOfflineCodeV2OwnerSheetReader, OfflineCodeV2PersistenceTransactionError }
+  from "./offline-code-v2-persistence-transaction-client.js";
 import { RegisteredRecipientMutationError } from "./registered-recipient-client.js";
 import { getClaimantRuntimeConfig } from "./runtime-config.js";
 
@@ -264,3 +265,109 @@ function session(changes = {}) {
   return { aal: "aal2" as const, amr: [{ method: "totp", timestamp: epoch() }], expiresAt: epoch() + 3_600,
     issuedAt: epoch() - 60, sessionId: ids.session, userId: ids.owner, ...changes };
 }
+
+describe("owner offline-code V2 sheet list route (Slice 6J)", () => {
+  const listPath = "/owner/offline-code/v2/locators";
+  const sheets = [{ locatorRecordId: ids.locator, status: "active" as const, issuedAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + 30 * 86_400_000).toISOString(), revokedAt: null }];
+  function listDeps(overrides: Record<string, unknown> = {}) {
+    const reader = { listOwnerSheets: vi.fn().mockResolvedValue(sheets) };
+    return { ...approved(), reader, createSheetReader: vi.fn(() => reader), ...overrides };
+  }
+  function listApp(deps: Parameters<typeof createOfflineCodeV2OwnerListRoute>[0]) {
+    const app = new Hono();
+    app.get(listPath, createOfflineCodeV2OwnerListRoute(deps));
+    app.options(listPath, createOfflineCodeV2OwnerPreflightRoute(deps));
+    app.options(paths.revoke, createOfflineCodeV2OwnerPreflightRoute(deps));
+    return app;
+  }
+  const get = (headers: Record<string, string> = {}) => ({ method: "GET",
+    headers: { Authorization: "Bearer jwt", Origin: ownerOrigin, ...headers } });
+
+  it("stays concealed on the mounted app and before configuration is read", async () => {
+    expect((await mountedApp.request(`${apiOrigin}${listPath}`, get())).status).toBe(404);
+    const getConfig = vi.fn();
+    expect((await listApp({ getConfig }).request(`${apiOrigin}${listPath}`, get())).status).toBe(404);
+    expect(getConfig).not.toHaveBeenCalled();
+  });
+
+  it("lists only the session owner's sheets, with dates and status and nothing else", async () => {
+    const deps = listDeps();
+    const response = await listApp(deps).request(`${apiOrigin}${listPath}`, get());
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(await response.json()).toEqual({ sheets: [{ locator_record_id: ids.locator, status: "active",
+      issued_at: sheets[0]!.issuedAt, expires_at: sheets[0]!.expiresAt, revoked_at: null }] });
+    expect(deps.reader.listOwnerSheets).toHaveBeenCalledExactlyOnceWith(ids.owner);
+    expect(deps.owner.assertActiveSession).toHaveBeenCalledWith(ids.owner, ids.session);
+    expect(deps.persistence.register).not.toHaveBeenCalled();
+  });
+
+  it("needs AAL2 without recovery but not a fresh MFA step-up", async () => {
+    const stale = listDeps();
+    stale.owner.getSession.mockResolvedValueOnce(session({ amr: [{ method: "totp", timestamp: epoch() - 7_200 }] }));
+    expect((await listApp(stale).request(`${apiOrigin}${listPath}`, get())).status).toBe(200);
+    for (const changes of [{ aal: "aal1" }, { expiresAt: epoch() - 1 },
+      { amr: [{ method: "recovery", timestamp: epoch() }] }]) {
+      const deps = listDeps();
+      deps.owner.getSession.mockResolvedValueOnce(session(changes));
+      expect((await listApp(deps).request(`${apiOrigin}${listPath}`, get())).status).toBe(403);
+      expect(deps.reader.listOwnerSheets).not.toHaveBeenCalled();
+    }
+  });
+
+  it("refuses a missing token, the wrong origin, a request body and a failed database read", async () => {
+    const deps = listDeps();
+    expect((await listApp(deps).request(`${apiOrigin}${listPath}`, { method: "GET",
+      headers: { Origin: ownerOrigin } })).status).toBe(401);
+    expect((await listApp(deps).request(`${apiOrigin}${listPath}`, get({ Origin: claimantOrigin }))).status)
+      .toBe(404);
+    expect((await listApp(deps).request(`${apiOrigin}${listPath}`, get({ "Content-Length": "2" }))).status)
+      .toBe(400);
+    const failing = listDeps();
+    failing.reader.listOwnerSheets.mockRejectedValueOnce(new OfflineCodeV2PersistenceTransactionError("XX000"));
+    const failed = await listApp(failing).request(`${apiOrigin}${listPath}`, get());
+    expect(failed.status).toBe(503);
+    expect(await failed.text()).toBe('{"error":"Request could not be completed"}');
+  });
+
+  it("answers a GET preflight on the list path only, with the authorization header only", async () => {
+    const deps = listDeps();
+    const preflight = (path: string, method: string, headers: string) => listApp(deps).request(`${apiOrigin}${path}`,
+      { method: "OPTIONS", headers: { Origin: ownerOrigin, "Access-Control-Request-Method": method,
+        "Access-Control-Request-Headers": headers } });
+    const ok = await preflight(listPath, "GET", "authorization");
+    expect(ok.status).toBe(204);
+    expect(ok.headers.get("Access-Control-Allow-Methods")).toBe("GET");
+    expect(ok.headers.get("Access-Control-Allow-Headers")).toBe("Authorization");
+    expect((await preflight(listPath, "GET", "authorization, content-type")).status).toBe(404);
+    expect((await preflight(paths.revoke.replace(":locatorRecordId", ids.locator), "GET", "authorization"))
+      .status).toBe(404);
+    expect((await preflight(listPath, "POST", "authorization, content-type, idempotency-key")).status).toBe(204);
+  });
+});
+
+describe("owner sheet reader (Slice 6J)", () => {
+  const row = { locator_record_id: ids.locator, status: "active", issued_at: "2026-09-25T09:00:00.123456+00:00",
+    expires_at: "2026-10-25T09:00:00+00:00", revoked_at: null };
+  const reader = (data: unknown, error: { code?: string } | null = null) =>
+    createOfflineCodeV2OwnerSheetReader(async () => ({ data, error }));
+  const envelope = (sheets: unknown[]) => ({ sheets, synthetic_only: true, claim_created: false,
+    release_authorized: false });
+
+  it("normalises PostgreSQL timestamps and keeps only the allowed fields", async () => {
+    await expect(reader(envelope([row])).listOwnerSheets(ids.owner)).resolves.toEqual([{
+      locatorRecordId: ids.locator, status: "active", issuedAt: "2026-09-25T09:00:00.123Z",
+      expiresAt: "2026-10-25T09:00:00.000Z", revokedAt: null }]);
+  });
+
+  it("rejects extra fields, inconsistent revocation facts and database errors", async () => {
+    await expect(reader(envelope([{ ...row, locator_commitment: "x" }])).listOwnerSheets(ids.owner)).rejects.toThrow();
+    await expect(reader(envelope([{ ...row, status: "revoked" }])).listOwnerSheets(ids.owner)).rejects.toThrow();
+    await expect(reader(envelope([{ ...row, revoked_at: "2026-09-26T09:00:00+00:00" }])).listOwnerSheets(ids.owner))
+      .rejects.toThrow();
+    await expect(reader({ ...envelope([]), release_authorized: true }).listOwnerSheets(ids.owner)).rejects.toThrow();
+    await expect(reader(null, { code: "42501" }).listOwnerSheets(ids.owner))
+      .rejects.toBeInstanceOf(OfflineCodeV2PersistenceTransactionError);
+  });
+});

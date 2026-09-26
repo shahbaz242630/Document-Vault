@@ -13,10 +13,11 @@ import { z } from "zod";
 
 import { readBearerToken } from "../security/http.js";
 import { offlineCodeV2BoundaryDigest } from "./offline-code-v2-locator-index.js";
-import { createOfflineCodeV2PersistenceTransactionClient, OfflineCodeV2PersistenceTransactionError,
+import { createOfflineCodeV2OwnerSheetReader, createOfflineCodeV2PersistenceTransactionClient,
+  OfflineCodeV2PersistenceTransactionError, type OfflineCodeV2OwnerSheetReader,
   type OfflineCodeV2PersistenceTransactionClient }
   from "./offline-code-v2-persistence-transaction-client.js";
-import { createRegisteredRecipientSupabaseClient, RegisteredRecipientMutationError,
+import { type ClaimantApiSession, createRegisteredRecipientSupabaseClient, RegisteredRecipientMutationError,
   type RegisteredRecipientClient, type RegisteredRecipientSupabaseConfig }
   from "./registered-recipient-client.js";
 import { ClaimantCapabilityDisabledError, getClaimantRuntimeConfig, requireClaimantCapability,
@@ -39,6 +40,7 @@ type Deps = Readonly<{
   approved?: boolean;
   createOwnerSessionClient?: (config: RegisteredRecipientSupabaseConfig) => RegisteredRecipientClient;
   createPersistence?: (config: OfflineCodeV2OwnerRoutesConfig) => OfflineCodeV2PersistenceTransactionClient;
+  createSheetReader?: (config: OfflineCodeV2OwnerRoutesConfig) => OfflineCodeV2OwnerSheetReader;
   getConfig?: () => OfflineCodeV2OwnerRoutesConfig | null;
   now?: () => Date;
   runtimeConfig?: ClaimantRuntimeConfig;
@@ -96,6 +98,32 @@ export function createOfflineCodeV2OwnerRoute(action: OfflineCodeV2OwnerAction, 
   };
 }
 
+/*
+ * Slice 6J: the owner's own sheets, dates and status only. Listing reveals no secret, so it needs an active AAL2
+ * owner session without recovery but not a fresh MFA step-up; revoking still needs one.
+ */
+export function createOfflineCodeV2OwnerListRoute(deps: Deps = {}) {
+  return async (context: Context): Promise<Response> => {
+    const config = requireConfig(context, deps); if (config instanceof Response) return config;
+    if (!originsMatch(context, config)) return notFound(context);
+    setHeaders(context, config.ownerOrigin);
+    const jwt = readBearerToken(context.req.header("Authorization"));
+    if (!jwt) return context.json({ error: "Unauthorized" }, 401);
+    const declared = context.req.header("Content-Length")?.trim();
+    if (declared && declared !== "0") return invalid(context);
+    try {
+      const ownerSession = (deps.createOwnerSessionClient ?? createRegisteredRecipientSupabaseClient)(config);
+      const session = await authenticate(ownerSession, jwt);
+      requireActiveOwnerAssurance(session, Math.floor(now(deps).getTime() / 1000));
+      await ownerSession.assertActiveSession(session.userId, session.sessionId);
+      const sheets = await (deps.createSheetReader ?? createSheetReader)(config).listOwnerSheets(session.userId);
+      return context.json({ sheets: sheets.map((sheet) => ({ locator_record_id: sheet.locatorRecordId,
+        status: sheet.status, issued_at: sheet.issuedAt, expires_at: sheet.expiresAt,
+        revoked_at: sheet.revokedAt })) }, 200);
+    } catch (error) { return routeError(context, error); }
+  };
+}
+
 export function createOfflineCodeV2OwnerPreflightRoute(deps: Deps = {}) {
   return (context: Context): Response => {
     const config = requireConfig(context, deps); if (config instanceof Response) return config;
@@ -103,12 +131,14 @@ export function createOfflineCodeV2OwnerPreflightRoute(deps: Deps = {}) {
     const method = context.req.header("Access-Control-Request-Method")?.trim().toUpperCase();
     const headers = new Set(context.req.header("Access-Control-Request-Headers")?.split(",")
       .map((value) => value.trim().toLowerCase()).filter(Boolean));
-    const allowed = new Set(["authorization", "content-type", "idempotency-key"]);
-    if (method !== "POST" || headers.size !== allowed.size
+    const listing = method === "GET" && context.req.param("locatorRecordId") === undefined;
+    const allowed = new Set(listing ? ["authorization"] : ["authorization", "content-type", "idempotency-key"]);
+    if ((method !== "POST" && !listing) || headers.size !== allowed.size
       || [...headers].some((value) => !allowed.has(value))) return notFound(context);
     setHeaders(context, config.ownerOrigin);
-    context.header("Access-Control-Allow-Headers", "Authorization, Content-Type, Idempotency-Key");
-    context.header("Access-Control-Allow-Methods", "POST");
+    context.header("Access-Control-Allow-Headers",
+      listing ? "Authorization" : "Authorization, Content-Type, Idempotency-Key");
+    context.header("Access-Control-Allow-Methods", listing ? "GET" : "POST");
     context.header("Access-Control-Max-Age", "600");
     return context.body(null, 204);
   };
@@ -209,11 +239,25 @@ function routeError(context: Context, error: unknown): Response {
 
 class AuthenticationError extends Error {}
 
+function requireActiveOwnerAssurance(session: ClaimantApiSession, nowEpochSeconds: number): void {
+  if (session.aal !== "aal2" || session.expiresAt <= nowEpochSeconds
+    || session.amr.some(({ method }) => method === "recovery" || method === "password_recovery")) {
+    throw new ClaimantAssuranceError();
+  }
+}
+
 function createPersistence(config: OfflineCodeV2OwnerRoutesConfig) {
   const client = createClient(config.supabaseUrl, config.serviceRoleKey, { auth: {
     autoRefreshToken: false, detectSessionInUrl: false, persistSession: false,
   } });
   return createOfflineCodeV2PersistenceTransactionClient((name, input) => client.rpc(name, input));
+}
+
+function createSheetReader(config: OfflineCodeV2OwnerRoutesConfig) {
+  const client = createClient(config.supabaseUrl, config.serviceRoleKey, { auth: {
+    autoRefreshToken: false, detectSessionInUrl: false, persistSession: false,
+  } });
+  return createOfflineCodeV2OwnerSheetReader((name, input) => client.rpc(name, input));
 }
 
 function now(deps: Deps): Date { return deps.now?.() ?? new Date(); }

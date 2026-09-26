@@ -26,6 +26,7 @@ type EmergencyAccessScreenProps = {
   onConfirmSealedCodeWritten?: () => void;
   onCreateSealedCode?: () => Promise<void> | void;
   onOpenEmergencySheet?: () => void;
+  onOpenEmergencySheets?: () => void;
   onOpenTrustedPerson?: () => void;
   onRegenerateSealedCode?: () => Promise<void> | void;
   onRevokeSealedCode?: () => Promise<void> | void;
@@ -38,6 +39,7 @@ export function EmergencyAccessScreen({
   onConfirmSealedCodeWritten,
   onCreateSealedCode,
   onOpenEmergencySheet,
+  onOpenEmergencySheets,
   onOpenTrustedPerson,
   onRegenerateSealedCode,
   onRevokeSealedCode,
@@ -83,6 +85,9 @@ export function EmergencyAccessScreen({
           onPress={onOpenEmergencySheet}
           title="Printed Emergency Sheet"
         />
+      ) : null}
+      {onOpenEmergencySheets ? (
+        <OutlineButton label="My emergency sheets" onPress={onOpenEmergencySheets} />
       ) : null}
 
       <EmergencyOptionCard

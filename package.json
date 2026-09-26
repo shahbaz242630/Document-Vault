@@ -119,6 +119,7 @@
     "check:claimant-offline-code-v2-owner-routes-isolation": "node scripts/claimant-offline-code-v2-owner-routes-isolation-check.cjs",
     "check:claimant-owner-emergency-sheet-isolation": "node scripts/claimant-owner-emergency-sheet-isolation-check.cjs",
     "check:claimant-sheet-scanner-isolation": "node scripts/claimant-sheet-scanner-isolation-check.cjs",
+    "check:claimant-offline-code-v2-owner-list-db": "node scripts/claimant-offline-code-v2-owner-list-db-test.cjs",
     "check:claimant-offline-code-v2-kdf-evidence-isolation": "node scripts/claimant-offline-code-v2-kdf-evidence-isolation-check.cjs",
     "check:claimant-offline-code-v2-kdf-probe-isolation": "node scripts/claimant-offline-code-v2-kdf-probe-isolation-check.cjs",
     "check:claimant-offline-code-v2-client-coordinator-isolation": "node scripts/claimant-offline-code-v2-client-coordinator-isolation-check.cjs",

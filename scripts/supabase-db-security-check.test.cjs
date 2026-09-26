@@ -243,6 +243,7 @@ function createCatalog() {
     { functionName: "claimant_end_release_retrieval_access", securityDefiner: false },
     { functionName: "claimant_finalize_signed_release_package", securityDefiner: false },
     { functionName: "claimant_issue_offline_code_v2_challenge", securityDefiner: false },
+    { functionName: "claimant_list_offline_code_v2_locators", securityDefiner: false },
     { functionName: "claimant_open_review_intervention", securityDefiner: false },
     { functionName: "claimant_prepare_encrypted_package_delivery", securityDefiner: false },
     { functionName: "claimant_prepare_encrypted_release_package", securityDefiner: false },

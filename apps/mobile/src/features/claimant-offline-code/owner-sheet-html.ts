@@ -1,6 +1,7 @@
 import createQrCode from "qrcode-generator";
 
 import type { OwnerOfflineCodeSheet } from "./owner-offline-code-sheet-factory";
+import { ownerSheetReference } from "./owner-sheet-reference";
 
 /*
  * Slice 6H: the printable emergency sheet. The QR code carries the `SKQ2.` payload; the locator and secret are
@@ -41,6 +42,7 @@ export function renderOwnerSheetHtml(sheet: OwnerOfflineCodeSheet): string {
   <dt>Sheet code</dt><dd>${escapeHtml(sheet.printedLocator)}</dd>
   <dt>Secret code</dt><dd>${escapeHtml(sheet.printedSecret)}</dd>
   <dt>Valid until</dt><dd>${escapeHtml(expires)}</dd>
+  <dt>Reference</dt><dd>${escapeHtml(ownerSheetReference(sheet.registration.locatorRecordId))}</dd>
 </dl>
 <ol>
   <li>Open the Sanduqkin app and choose <strong>Start a claim with an emergency sheet</strong>.</li>

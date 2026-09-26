@@ -34,6 +34,23 @@ for (const token of ['"/owner/offline-code/v2/locators"', '"/owner/offline-code/
   "createOfflineCodeV2OwnerRoute", "createOfflineCodeV2OwnerPreflightRoute"])
   if (!index.includes(token)) throw new Error(`Offline-code V2 owner route is missing: ${token}`);
 
+// Slice 6J: the owner list is concealed like the other owner routes, reads only the session owner's sheets
+// through the service-only list function, and never needs or returns anything secret.
+const listRoute = routes.slice(routes.indexOf("export function createOfflineCodeV2OwnerListRoute"),
+  routes.indexOf("export function createOfflineCodeV2OwnerPreflightRoute"));
+for (const token of ["requireConfig(context, deps)", "originsMatch(context, config)", "requireActiveOwnerAssurance(",
+  "assertActiveSession(session.userId, session.sessionId)", ".listOwnerSheets(session.userId)"])
+  if (!listRoute.includes(token)) throw new Error(`Offline-code V2 owner list lost boundary: ${token}`);
+for (const token of ["context.req.query", "context.req.param", "readJson(", "register(", "revoke("])
+  if (listRoute.includes(token)) throw new Error(`Offline-code V2 owner list takes caller input: ${token}`);
+if (!index.includes('app.get("/owner/offline-code/v2/locators", createOfflineCodeV2OwnerListRoute('))
+  throw new Error("Offline-code V2 owner list route is missing.");
+const client = readFileSync(join(root, "services/api/src/claimant/offline-code-v2-persistence-transaction-client.ts"), "utf8");
+const listSchema = client.slice(client.indexOf("const ownerSheetListSchema"), client.indexOf("function requireEqual"));
+for (const forbidden of ["locator_commitment", "proof_public_key", "wrap_", "kdf_salt", "grant_id", "passthrough"])
+  if (listSchema.includes(forbidden)) throw new Error(`Offline-code V2 owner list schema allows ${forbidden}.`);
+if (!listSchema.includes("z.strictObject")) throw new Error("Offline-code V2 owner list schema must be strict.");
+
 console.log("Claimant offline-code V2 owner routes isolation check passed.");
 
 function sourceFiles(directory) {
