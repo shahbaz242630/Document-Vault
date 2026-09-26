@@ -1,5 +1,22 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — Slice 6I camera QR scanner, 2026-09-26
+
+Slice 6I is locally complete on `claude/handoff-review-72h2i9`, on `main` at `18e451f` plus the open close-out PR #99. The owner approved the spec, the native `expo-camera` dependency, removing the claimant paste field and adding `jsqr` for tests only.
+
+The claim screen now scans the emergency sheet's QR code with the camera:
+- camera permission only (no microphone), requested only after the claimant taps "Scan the QR code";
+- QR codes only, one sheet per scan, with foreign or over-long codes ignored;
+- the camera is unmounted as soon as a sheet is read, screen capture is blocked, and nothing is stored or logged.
+
+In the normal app the handle is still null, so the route shows "unavailable" and the camera is never reached. An acceptance test decodes the QR image the owner actually prints and drives it through the real claim flow and routes to exactly one started claim. A new isolation check is wired into security CI. Scope: `docs/superpowers/specs/2026-09-26-claimant-slice-6i-camera-qr-scanner.md`; evidence: `docs/verification/2026-09-26-claimant-slice-6i-camera-qr-scanner.md`. It needs a new native build; physical-phone scanning evidence belongs to the first staging wiring phase.
+
+**Reviewer decision (owner, 2026-09-26).** Shahbaz Malik is the only human who approves a claim release. Claude runs automated pre-checks that inform his decision but is never a reviewer or an approver of a real claim. One-human review is backed by a cooling-off period, a dispute window and a full audit trail, delivered as its own slice. This replaces the two-human-reviewer requirement from Slices 3E/3F.
+
+**Owner direction (2026-09-26).** Offline-only slices stop after 6I and the "my emergency sheets" list. Work then moves to wiring the claimant side into a hosted test environment and on to production. The owner granted authorisation for hosting changes. The owner prefers reusing the existing Supabase and Vercel projects to keep costs down; the environment choice is being settled before any hosted change.
+
+Next: the "my emergency sheets" list with revoke, the reviewer-model slice, then staging wiring.
+
 ## Current checkpoint — session close with Slices 6F–6H, 2026-09-25
 
 The canonical close-out and next-session opener is `docs/handoff/2026-09-25-claimant-6f-6h-session-close.md`.

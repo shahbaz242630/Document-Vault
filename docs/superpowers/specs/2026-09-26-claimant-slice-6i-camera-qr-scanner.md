@@ -1,6 +1,6 @@
 # Slice 6I — claimant camera QR scanner
 
-Proposed on 2026-09-26, after Slice 6H merged through PR #98 at `18e451f`. The owner has approved the native camera dependency; the spec itself awaits owner approval before coding. This is the next step named in the 6H spec and in the 6F–6H session close.
+Proposed on 2026-09-26, after Slice 6H merged through PR #98 at `18e451f`. Approved by the owner on 2026-09-26, including the native camera dependency and both decisions below. This is the next step named in the 6H spec and in the 6F–6H session close.
 
 ## Gap
 
@@ -8,7 +8,7 @@ The owner can now print an emergency sheet whose QR code carries the `SKQ2.` pay
 
 ## Scope
 
-1. **Dependency.** Add `expo-camera` `~56.0.8`, the SDK 56 line (MIT). Its `CameraView` scans barcodes on the device through the platform scanner, so no image is uploaded or saved. Its only dependency is `barcode-detector`, which is used on web only. Because it is a native module, a new native build is needed.
+1. **Dependency.** Add `expo-camera` `~56.0.8`, the SDK 56 line (MIT). Its `CameraView` scans barcodes on the device through the platform scanner, so no image is uploaded or saved. Its only dependency is `barcode-detector` (with `zxing-wasm`), which is used on web only. On Android it bundles Google ML Kit barcode scanning; on iOS it uses AVFoundation. Because it is a native module, a new native build is needed.
 
 2. **App config** (`app.json` plugins):
    ```json
@@ -29,13 +29,13 @@ The owner can now print an emergency sheet whose QR code carries the `SKQ2.` pay
 4. **Scanner view** (`src/features/claimant-journey/claim-sheet-scanner.tsx`). This is the only file that imports `expo-camera`.
    - It uses `CameraView` with `barcodeScannerSettings: { barcodeTypes: ["qr"] }`, the back camera and no capture, recording or photo API.
    - **Permission.** It asks for the camera only when the claimant taps "Scan the QR code", never on app start. If permission is refused, the screen explains how to allow it and offers an "Open Settings" button (`Linking.openSettings`). Nothing else changes.
-   - **Mounted only while useful.** The camera is mounted only while the flow is `ready` or `sheet_not_recognised`, the app is in the foreground and the screen is focused. It is unmounted during `checking` and after any result, so the camera light goes off as soon as the sheet is read.
+   - **Mounted only while useful.** The camera is mounted only while the flow is `ready` or `sheet_not_recognised`, the app is in the foreground and the screen is focused. It is unmounted as soon as one sheet is read and stays unmounted during `checking` and after any result, so the camera light goes off straight away. This also matters because `CameraView` keeps its last scan event in memory for de-duplication; unmounting releases it.
    - **Screen protection.** The claim screen blocks screenshots and screen recording through `expo-screen-capture`, as the 6H owner screen does. The camera preview shows the sheet, and the sheet holds the secret.
 
 5. **Claim screen** (`claim-flow-panel.tsx` and `claim-flow-view-model.ts`).
    - The paste field is replaced by the scanner: a "Scan the QR code" button, then the camera view with a framing guide and one line of help ("Hold the emergency sheet flat, with the QR code inside the frame.").
    - New view states for the camera: `needs_permission` and `permission_denied`. The claim flow's own states are unchanged.
-   - `sheet_not_recognised` keeps its current message and reopens the camera.
+   - `sheet_not_recognised` keeps its current message and offers "Scan again". The camera does not reopen by itself, so a bad code held in view cannot loop.
    - In the normal app the handle is still null. The screen shows "Claiming with an emergency sheet isn't available yet", no camera is mounted and **no permission prompt can ever appear**.
 
 6. **Static isolation.** A new check, `check:claimant-sheet-scanner-isolation`, is wired into security CI. It requires:
@@ -45,7 +45,7 @@ The owner can now print an emergency sheet whose QR code carries the `SKQ2.` pay
    - the microphone and audio-recording permissions switched off in the plugin config;
    - the paste field removed.
 
-   The existing 6E claim-flow check is updated for the new files.
+   No earlier check covered the claim screen's contents, so none needed changing.
 
 ## Acceptance
 
@@ -60,9 +60,12 @@ The owner can now print an emergency sheet whose QR code carries the `SKQ2.` pay
   - A non-QR barcode, a foreign QR, an over-long QR and a second frame after a lock are each ignored.
   - A malformed `SKQ2.` value moves the flow to `sheet_not_recognised` and unlocks the handler.
   - The same sheet scanned twice in quick succession starts exactly one claim.
-- **Camera lifecycle.** With a mocked `CameraView`:
-  - the camera is unmounted during `checking`, on background, on blur and after every result;
-  - a scan event that arrives after unmount or dispose does nothing.
+- **Camera lifecycle.** With a mocked `CameraView`, rendered on the server because the repo has no DOM test environment:
+  - the camera is rendered only when access is granted and the screen is focused and in the foreground;
+  - it scans QR codes only, with the back camera, and has no capture or recording props;
+  - a scan event after the handler is closed does nothing.
+
+  The panel unmounts the scanner as soon as a sheet is read, and the isolation check pins that line.
 - **Permission.**
   - The camera is requested only after the tap.
   - When refused, the screen shows the Settings route and makes no network call.
@@ -83,10 +86,10 @@ CI cannot point a camera at paper. After merge, the real test needs an internal 
 
 An EAS build needs your go-ahead. This step belongs in the first staging wiring phase, not in this slice.
 
-## Decisions needed from the owner
+## Owner decisions (approved 2026-09-26)
 
-1. **Remove the paste field (recommended).** No real claimant can use it, because the payload is never printed as text. It also invites people to paste the secret into chats or notes. The alternative is to keep it hidden as a developer-only fallback.
-2. **Add a QR decoder as a dev-only dependency (recommended).** `jsqr` (Apache-2.0, no dependencies) is used in tests only and never ships in the app. It lets the acceptance test prove that the printed QR decodes, rather than trusting the encoder. Without it, the test hands the encoded string straight to the handler and skips that step.
+1. **Remove the paste field. Approved.** No real claimant can use it, because the payload is never printed as text. It also invites people to paste the secret into chats or notes. The alternative is to keep it hidden as a developer-only fallback.
+2. **Add a QR decoder as a dev-only dependency. Approved.** `jsqr` (Apache-2.0, no dependencies) is used in tests only and never ships in the app. It lets the acceptance test prove that the printed QR decodes, rather than trusting the encoder. Without it, the test hands the encoded string straight to the handler and skips that step.
 
 ## Known limitations, recorded and not solved here
 
@@ -97,7 +100,7 @@ An EAS build needs your go-ahead. This step belongs in the first staging wiring 
 ## Later slices
 
 - A "my emergency sheets" list with revoke, which needs a small owner list route (owner-approved, next).
-- The reviewer-model slice, once the owner confirms the reviewer decision.
+- The reviewer-model slice. The owner confirmed on 2026-09-26: Shahbaz Malik is the only human who approves a release; Claude runs automated pre-checks that inform his decision but is never a reviewer or approver; one-human review is backed by a cooling-off period, a dispute window and a full audit trail.
 - The wiring phases that move the claimant side from synthetic and offline to staging, and then to production.
 
 ## Non-goals

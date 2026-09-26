@@ -1,20 +1,30 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { View } from "react-native";
 import * as Crypto from "expo-crypto";
+import { usePreventScreenCapture } from "expo-screen-capture";
 
-import { BodyText, NoticeBox, PrimaryButton, ScreenHeader, SerifTitle, TextAreaField } from "@/shared/ui";
+import { BodyText, NoticeBox, PrimaryButton, ScreenHeader, SerifTitle } from "@/shared/ui";
 
 import { createClaimFlow } from "./claim-flow";
 import { useClaimFlowHandle } from "./claim-flow-context";
 import { claimFlowView } from "./claim-flow-view-model";
+import { ClaimSheetScanner } from "./claim-sheet-scanner";
 
 export function ClaimFlowPanel() {
   const handle = useClaimFlowHandle();
   const flow = useMemo(() => createClaimFlow({ handle, newKey: () => Crypto.randomUUID() }), [handle]);
-  const status = useSyncExternalStore(flow.subscribe, () => flow.snapshot().status);
-  const [sheetText, setSheetText] = useState("");
+  const readStatus = () => flow.snapshot().status;
+  const status = useSyncExternalStore(flow.subscribe, readStatus, readStatus);
+  const [scanning, setScanning] = useState(false);
 
+  usePreventScreenCapture();
   useEffect(() => () => flow.dispose(), [flow]);
+
+  const onSheetScanned = useCallback((sheetText: string) => {
+    setScanning(false);
+    void flow.submit(sheetText);
+  }, [flow]);
+  const onCancel = useCallback(() => setScanning(false), []);
 
   const view = claimFlowView(status);
   return (
@@ -27,27 +37,12 @@ export function ClaimFlowPanel() {
       {view.notice ? (
         <NoticeBox title={view.notice.title} variant={view.notice.variant}>{view.notice.message}</NoticeBox>
       ) : null}
-      {view.showSheetField ? (
-        <TextAreaField
-          accessibilityLabel="Emergency sheet code"
-          autoCapitalize="none"
-          autoCorrect={false}
-          label="Emergency sheet code"
-          onChangeText={setSheetText}
-          value={sheetText}
-        />
+      {view.scanLabel && scanning ? (
+        <ClaimSheetScanner onCancel={onCancel} onSheetScanned={onSheetScanned} />
       ) : null}
-      {view.submitLabel ? (
+      {view.scanLabel && !scanning ? (
         <View style={{ marginTop: "auto" }}>
-          <PrimaryButton
-            disabled={sheetText.length === 0}
-            label={view.submitLabel}
-            onPress={() => {
-              const text = sheetText;
-              setSheetText("");
-              void flow.submit(text);
-            }}
-          />
+          <PrimaryButton label={view.scanLabel} onPress={() => setScanning(true)} />
         </View>
       ) : null}
     </View>
