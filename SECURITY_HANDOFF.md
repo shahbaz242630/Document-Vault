@@ -13,7 +13,7 @@ In the normal app the handle is still null, so the route shows "unavailable" and
 
 **Reviewer decision (owner, 2026-09-26).** Shahbaz Malik is the only human who approves a claim release. Claude runs automated pre-checks that inform his decision but is never a reviewer or an approver of a real claim. One-human review is backed by a cooling-off period, a dispute window and a full audit trail, delivered as its own slice. This replaces the two-human-reviewer requirement from Slices 3E/3F.
 
-**Owner direction (2026-09-26).** Offline-only slices stop after 6I and the "my emergency sheets" list. Work then moves to wiring the claimant side into a hosted test environment and on to production. The owner granted authorisation for hosting changes. The owner prefers reusing the existing Supabase and Vercel projects to keep costs down; the environment choice is being settled before any hosted change.
+**Owner direction (2026-09-26).** Offline-only slices stop after 6I and the "my emergency sheets" list. Work then moves to wiring the claimant side into a hosted test environment and on to production. The owner granted authorisation for hosting changes. Owner decision: reuse the existing Supabase and Vercel projects, with no separate staging projects. Claimant features are switched on only in Vercel's protected Preview environment, never in Production, and synthetic claimant data is cleared before go-live. Hosted work needs `SUPABASE_ACCESS_TOKEN` and `VERCEL_TOKEN` in the cloud environment.
 
 Next: the "my emergency sheets" list with revoke, the reviewer-model slice, then staging wiring.
 
