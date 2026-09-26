@@ -51,7 +51,7 @@ Date: 2026-09-26. Built on Slice 7A (PR #102, `b8c0cde`). Scope: `docs/superpowe
 
 - **Env guard** (live, both projects): passed.
 - **Hosted database** (read-only): all 48 local migrations are applied, with none missing and none unknown, and there are 0 catalog violations. The one exception is Supabase's own `rls_auto_enable()`, which no API role can execute.
-- **Hosted acceptance**, run from the session against claimant-preview deployment `dpl_4TeU5RgZw1VHQ8hUMFfgFDSt9psW` (commit `7e6bdc5`, identical server code): all 11 checks passed.
+- **Hosted acceptance**, run from the session against claimant-preview deployment `dpl_4UPEs3TCginMEvbUFv2mTcFZRHNh` (commit `38ff81f`): all 11 checks passed. It also passed earlier against `dpl_4TeU5RgZw1VHQ8hUMFfgFDSt9psW` (commit `7e6bdc5`).
   1. API `/health` responds.
   2. Two synthetic owners sign in with password and TOTP (AAL2).
   3. Owner 1 generates and registers two sheets through the real 6H flow.
