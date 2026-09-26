@@ -40,3 +40,27 @@ Before any real claimant data, external claimant access, package creation, or re
 5. complete synthetic tabletop exercises, independent assurance, and the applicable legal/privacy/security/operations approvals.
 
 This record changes interim testing ownership only. It does not change the release predicate, production activation lock, reviewer separation requirement, or launch status.
+
+## Superseded in part — owner decision of 2026-09-26 (Slice 7A)
+
+The owner decided that claim releases will have **one accountable human approver, Shahbaz Malik**, instead of two independent human reviewers. Slice 7A (`docs/superpowers/specs/2026-09-26-claimant-slice-7a-single-approver-review.md`) builds the single-approver path. The two-person path above remains in the code for later use.
+
+What does not change:
+- Claude remains a non-human engineering assistant. It is never a reviewer, approver or release authorizer of a real claim.
+- In single-approver mode the database accepts a decision only from a reviewer identity of class `accountable_human_test`, never `non_human_test_actor`.
+- Every identity stays synthetic-only, with live authority structurally false.
+
+The go-live gate for single-approver cases replaces items 1–3 of "Go-live replacement gate" above. It becomes:
+1. one named, trained human approver (the owner), with a separate least-privilege identity and completed conflict and access reviews;
+2. hosted MFA, device security and account-recovery rules for that approver's account, because it is now the single most important credential;
+3. the safeguards active:
+   - automated pre-checks that can only block;
+   - a minimum 30-day owner cooldown;
+   - a 7-day post-approval dispute window started by a verified owner notice;
+   - a fresh-MFA re-confirmation before release;
+   - no self-resolution of escalations or appeals;
+   - the tamper-evident audit chain;
+4. an email provider for owner notices (without one, nothing can be released);
+5. legal review confirming that a single approver with these safeguards is acceptable in each launch market.
+
+Items 4 and 5 of the original gate (removing interim synthetic identities; tabletop exercises and legal, privacy, security and operations approvals) still apply.
