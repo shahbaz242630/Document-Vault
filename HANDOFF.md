@@ -1,5 +1,23 @@
 # Sanduqkin Project Handoff
 
+## Current checkpoint — session close with Slices 6I–7A, 2026-09-26
+
+The canonical close-out and next-session opener is `docs/handoff/2026-09-26-claimant-6i-7a-session-close.md`.
+
+Merged this session:
+- 6I, the camera QR scanner, through PR #100 (`0edd2a8`);
+- 6J, "My emergency sheets", through PR #101 (`9d07c65`);
+- 7A, the single human approver with safeguards, through PR #102, which merges at session close once CI is green.
+
+Owner decisions:
+- a single human approver (Shahbaz Malik), with Claude pre-checks and the 7A safeguards;
+- reuse the existing Supabase and Vercel projects, with claimant features on in Preview only;
+- offline-only coding stops here, and wiring to hosted staging and production is next;
+- docs always travel with code;
+- PR watchers merge when green.
+
+Next: staging wiring W1 once the tokens exist, otherwise the 7B reviewer console spec.
+
 ## Current checkpoint — Slice 7A single human approver, 2026-09-26
 
 Slice 7A is locally complete. The owner approved the spec with all five recommended decisions: deterministic pre-checks only, a minimum 30-day cooldown, a 7-day dispute window, no override of blocking pre-checks, and no self-resolution of escalations or appeals.
