@@ -1,4 +1,5 @@
-// Staging wiring W1: removes the synthetic claimant-preview owners and every offline-code V2 row they own from
+// Staging wiring W1: removes the synthetic claimant-preview owners, their claimant session controls and every
+// offline-code V2 row they own from
 // the shared Supabase project. It can only ever touch users on the reserved synthetic address pattern, which is
 // written into the SQL itself, so no caller input can widen it. It is a required go-live step
 // (docs/release-checklist.md). Dry run by default; pass --apply to delete.
@@ -30,6 +31,9 @@ delete from public.claimant_offline_code_v2_idempotency
        where result::text like '%' || l.id::text || '%'));
 delete from public.claimant_offline_code_v2_challenges where id in (select id from synthetic_challenges);
 delete from public.claimant_offline_code_v2_locators where id in (select id from synthetic_locators);
+delete from public.claimant_session_events where actor_user_id in (select id from synthetic_users);
+delete from public.claimant_idempotency_records where actor_user_id in (select id from synthetic_users);
+delete from public.claimant_session_controls where user_id in (select id from synthetic_users);
 delete from auth.users where id in (select id from synthetic_users);
 commit;`;
 

@@ -1,5 +1,37 @@
 # Sanduqkin Security Handoff
 
+## Current checkpoint — staging wiring W1, claimant features on in Vercel Preview only, 2026-09-26
+
+W1 is built and verified on the hosted Preview. The owner approved the spec with all six recommended decisions, and chose Vercel's own client-address header as the trusted edge signal.
+
+- **Where it's on.** The owner emergency-sheet routes (6G/6J) and the claimant challenge and proof routes now open only on the Vercel Preview of the single `claimant-preview` branch. That Preview must also have `CLAIMANT_PREVIEW_ACTIVATION=synthetic-only`. Production, local runs and every other preview stay closed. Every production approval constant is still literal false.
+- **Environment detection.** `VERCEL_ENV` now decides the environment on Vercel. Production still refuses any claimant flag. An activated Preview is capped to `authentication` and `offlineCodeV2`.
+- **Hosted settings.**
+  - `sanduqkin-api` has 12 Preview variables scoped to the `claimant-preview` branch, including new Preview-only locator-index and rate-limit keys. Production is unchanged.
+  - The Supabase migrations were already all applied: 48 of 48, with 0 catalog violations, confirmed read-only.
+- **Hosted acceptance passed 11 of 11 checks** against the Preview:
+  - owner print, list and revoke with TOTP;
+  - owner isolation;
+  - decoy for a revoked sheet;
+  - claimant possession proof;
+  - 404 for everything outside W1, on another preview and on Production.
+
+  Synthetic owners exist only for the run and are removed afterwards (0 left).
+- **Tooling.**
+  - Scripts: an env guard, a read-only hosted catalog check, and a synthetic cleanup (now a go-live step in `docs/release-checklist.md`).
+  - A manual workflow, `claimant-preview-acceptance.yml`.
+  - A new isolation check.
+
+Scope: `docs/superpowers/specs/2026-09-26-claimant-w1-preview-activation.md`; evidence: `docs/verification/2026-09-26-claimant-w1-preview-activation.md`.
+
+**Owner action:** add `SUPABASE_ACCESS_TOKEN` and `VERCEL_TOKEN` as secrets in the GitHub `Preview` environment so the workflow can run. Keep `claimant-preview` in step with `main` after each merge.
+
+**W2 must add:**
+- an owner-app step that activates the owner's claimant session control (the routes require it; the acceptance activates it with the service-only function);
+- the mobile build-time gate and the EAS preview profile;
+- phone print and scan evidence;
+- claim start.
+
 ## Current checkpoint — session close with Slices 6I–7A, 2026-09-26
 
 The canonical close-out and next-session opener is `docs/handoff/2026-09-26-claimant-6i-7a-session-close.md`.

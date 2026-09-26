@@ -124,7 +124,24 @@ async function createSyntheticOwner(keys: Awaited<ReturnType<typeof supabaseKeys
   if (enrolled.error) throw new Error(`Synthetic owner TOTP enrolment failed: ${enrolled.error.message}`);
   const owner = { id: created.data.user.id, client, factorId: enrolled.data.id, secret: enrolled.data.totp.secret };
   await verifyTotp(owner);
+  await activateClaimantSession(admin, owner);
   return owner;
+}
+
+/*
+ * The owner routes also require an active claimant session control (claimant_assert_active_session). The owner
+ * app has no route that creates one yet (a W2 item), so the harness activates it with the same service-only
+ * function /claimant/session/activate calls, bound to the owner's real session ID and TOTP time.
+ */
+async function activateClaimantSession(admin: SupabaseClient, owner: Owner) {
+  const token = await accessToken(owner);
+  const claims = JSON.parse(Buffer.from(token!.split(".")[1]!, "base64url").toString("utf8")) as {
+    session_id: string; amr: { method: string; timestamp: number }[] };
+  const mfaAt = Math.max(...claims.amr.filter(({ method }) => method === "totp").map(({ timestamp }) => timestamp));
+  const activated = await admin.rpc("claimant_activate_session", { p_user_id: owner.id,
+    p_session_id: claims.session_id, p_authenticated_at: new Date(mfaAt * 1000).toISOString(),
+    p_idempotency_key: randomUUID() });
+  if (activated.error) throw new Error(`Synthetic owner session activation failed: ${activated.error.message}`);
 }
 
 async function verifyTotp(owner: Owner) {
@@ -142,7 +159,14 @@ async function main() {
   const keys = await supabaseKeys();
   const withBypass = (init: RequestInit = {}): RequestInit => ({ ...init,
     headers: { ...(init.headers as Record<string, string> | undefined), "x-vercel-protection-bypass": hosted.bypass } });
-  const bypassFetch = ((url: string, init?: RequestInit) => fetch(url, withBypass(init))) as typeof fetch;
+  const bypassFetch = (async (url: string, init?: RequestInit) => {
+    const response = await fetch(url, withBypass(init));
+    if (response.status !== 200) {
+      console.log(`  ${init?.method ?? "GET"} ${new URL(url).pathname} -> ${response.status} ${
+        await response.clone().text().then((text) => text.slice(0, 120)).catch(() => "")}`);
+    }
+    return response;
+  }) as typeof fetch;
   console.log(`claimant-preview commit ${hosted.previewCommit.slice(0, 12)}`);
 
   const health = await fetch(`${hosted.apiOrigin}/health`, withBypass());
@@ -221,7 +245,8 @@ async function main() {
     pass("a claimant proves possession of the live sheet through the hosted challenge and proof routes");
 
     const closedOnPreview = ["/claimant/offline-code/v2/handoffs/issue", "/claimant/offline-code/v2/handoffs/complete",
-      "/claimant/session/activate", "/claimant/registered-recipient/invitations", "/claimant/native-enrollment/challenges",
+      "/claimant/session/activate", "/claimant/portal/session/activate", "/claimant/portal/session/assert",
+      "/claimant/registered-recipient/invitations", "/claimant/native-enrollment/challenges",
       `/claimant/cases/${randomUUID()}/submissions`];
     for (const path of closedOnPreview) {
       const response = await bypassFetch(`${hosted.apiOrigin}${path}`, { method: "POST", body: "{}",

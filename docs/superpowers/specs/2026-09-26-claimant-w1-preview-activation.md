@@ -1,6 +1,6 @@
 # Staging wiring W1 — claimant features on in Vercel Preview only
 
-Proposed on 2026-09-26, after Slice 7A merged through PR #102 at `b8c0cde`. It is the first hosted step after the owner's decision to stop coding offline-only. Awaiting owner approval.
+Proposed on 2026-09-26, after Slice 7A merged through PR #102 at `b8c0cde`. It is the first hosted step after the owner's decision to stop coding offline-only. Approved by the owner on 2026-09-26 with all six recommended decisions. On the same day the owner also chose Vercel's own client-address header as the trusted edge signal (see Implementation notes).
 
 ## Why
 
@@ -26,17 +26,18 @@ The gate cannot be a simple environment flag. Today both environment guards deci
    - `VERCEL_GIT_COMMIT_REF === "claimant-preview"` (a single long-lived branch, see decision 2);
    - `CLAIMANT_PREVIEW_ACTIVATION === "synthetic-only"`.
 
-   It reads nothing else, has no side effects, and is evaluated once per cold start, like `getClaimantRuntimeConfig`.
+   It reads nothing else and has no side effects.
 
 2. **Production detection fixed.** `getClaimantRuntimeConfig` works out the environment from `VERCEL_ENV` when it is present (`production` → production, `preview` → preview, `development` → development), and only otherwise from `NODE_ENV`.
    - In production it still refuses to start if any claimant flag is set, exactly as today.
    - In a preview that is not activated, claimant flags are ignored (every capability is off).
    - `CLAIMANT_PRODUCTION_ACTIVATION_APPROVED` stays `false as const` and untouched.
 
-3. **The W1 route set, and only it, opened by the gate.** Each of the five gates on the offline-code V2 owner and possession path changes from `deps.approved ?? CONST` to `deps.approved ?? (CONST || isClaimantPreviewActivated())`. The constants themselves stay `false as const`: they still mean "approved for production", and remain false. The W1 set is:
+3. **The W1 route set, and only it, opened by the gate.** The two route-level gates on the offline-code V2 owner and possession path change from `deps.approved ?? CONST` to `deps.approved ?? (CONST || isClaimantPreviewActivated())`. The constants themselves stay `false as const`: they still mean "approved for production", and remain false. The W1 set is:
    - owner routes (6G register and revoke, 6J list): `CLAIMANT_OFFLINE_CODE_V2_OWNER_ROUTES_APPROVED`;
-   - locator persistence: `CLAIMANT_OFFLINE_CODE_V2_PERSISTENCE_APPROVED`;
-   - the claimant challenge and proof path: `CLAIMANT_OFFLINE_CODE_V2_CONTROLLER_APPROVED`, `…_CHALLENGE_COORDINATOR_APPROVED`, `…_PROOF_ATTEMPT_COORDINATOR_APPROVED`.
+   - the claimant challenge and proof routes: `CLAIMANT_OFFLINE_CODE_V2_CONTROLLER_APPROVED`.
+
+   The challenge and proof-attempt coordinators are already opened by the controller that owns them. The standalone persistence service has no runtime caller. So their constants, like every other one, are unchanged.
 
    The shared `OFFLINE_CODE_V2_PROTOCOL_APPROVED` is a descriptive constant that no gate reads, so it stays as it is.
 
@@ -97,6 +98,16 @@ The gate cannot be a simple environment flag. Today both environment guards deci
 4. **Allow read-only catalog checks against the hosted database from CI.** These read only system catalogs (grants, row-level security, function settings), never table rows. The alternative is to trust the recorded migration list alone.
 5. **Where the hosted steps run: a GitHub Actions workflow, using GitHub secrets.** This keeps credentials out of chat sessions and makes each run a linkable record. It needs `SUPABASE_ACCESS_TOKEN`, `VERCEL_TOKEN` and the two TOTP seeds as repository secrets. The alternative is running the steps from the Claude session that holds the tokens, with no GitHub secrets needed.
 6. **Synthetic accounts in the live Auth project, cleared by the cleanup script before go-live.** This follows your reuse decision. The alternative is a separate Supabase project for staging, which you already declined.
+
+## Implementation notes (2026-09-26)
+
+- **Trusted edge signal (owner decision, 2026-09-26).** The challenge route refuses every request until it has a trusted network signal for rate limiting, and "trusted-edge signals" was its own unapproved gate. The owner chose to use Vercel's own `x-vercel-forwarded-for` header. `vercel-trusted-signals.ts` reads only that header, and only when `VERCEL=1`, which Vercel's edge sets and overwrites. It accepts a single IP address, and the address only leaves as the keyed rate-limit digest. Other forwarding headers are ignored. This needs a second Preview-only key, `OFFLINE_CODE_V2_RATE_LIMIT_KEY`.
+- **Portal session kept closed.** W1 turns on `authentication` only as the prerequisite of `offlineCodeV2`. The claimant portal session routes check that capability alone, so on the activated Preview they now return 404 explicitly until W2. The runtime config also caps an activated Preview to `authentication` and `offlineCodeV2`, whatever flags are set.
+- **Owner session activation (W2 gap).** The owner routes also require an active claimant session control (`claimant_assert_active_session`). Today only `/claimant/session/activate` creates one, and it stays closed in W1. The owner app does not call it yet. The hosted acceptance therefore activates each synthetic owner's session with the same service-only function, bound to the owner's real session ID and TOTP time. W2 must give the owner app a real activation step.
+- **Synthetic owners per run.** Instead of two stored owners with TOTP seeds in GitHub secrets, each acceptance run creates two owners on the reserved pattern `claimant-preview-synthetic-<12 hex>@sanduqkin.invalid`, with a random password and a fresh TOTP factor. It removes them, and everything they created, when the run ends. No password or seed outlives a run.
+- **Automation bypass.** `sanduqkin-api` already had one Vercel automation bypass. The acceptance reads it through the Vercel API at run time instead of creating a second one or storing it in GitHub.
+- **Workflow secrets.** The workflow needs only `SUPABASE_ACCESS_TOKEN` and `VERCEL_TOKEN` in the GitHub `Preview` environment. Everything else, including the Supabase keys, the bypass and the API origin, is looked up at run time.
+- **Hosted catalog exception.** `public.rls_auto_enable()` exists on the hosted project because Supabase creates it; no migration does. Migration `20260819091516` revokes its execution from every API role. The hosted check accepts it only while neither `anon` nor `authenticated` can execute it.
 
 ## Non-goals
 
