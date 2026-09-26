@@ -87,7 +87,9 @@ async function deployments() {
   const aliases = await vercel<{ aliases: { alias: string }[] }>(`/v2/deployments/${preview.uid}/aliases`);
   const branchAlias = aliases.aliases.map(({ alias }) => alias).find((alias) => alias.includes(`-git-${BRANCH}-`));
   assert.ok(branchAlias, "The claimant-preview branch alias was not found.");
-  return { bypass, apiOrigin: `https://${branchAlias}`, previewCommit: preview.meta?.githubCommitSha ?? "",
+  // Once the preview-api custom domain is live, set CLAIMANT_PREVIEW_API_ORIGIN to it (it must match the API origin).
+  const apiOrigin = process.env.CLAIMANT_PREVIEW_API_ORIGIN?.trim() || `https://${branchAlias}`;
+  return { bypass, apiOrigin, previewCommit: preview.meta?.githubCommitSha ?? "",
     otherPreview: otherPreview ? `https://${otherPreview.url}` : null,
     production: production ? `https://${production.url}` : null };
 }
@@ -124,24 +126,15 @@ async function createSyntheticOwner(keys: Awaited<ReturnType<typeof supabaseKeys
   if (enrolled.error) throw new Error(`Synthetic owner TOTP enrolment failed: ${enrolled.error.message}`);
   const owner = { id: created.data.user.id, client, factorId: enrolled.data.id, secret: enrolled.data.totp.secret };
   await verifyTotp(owner);
-  await activateClaimantSession(admin, owner);
   return owner;
 }
 
-/*
- * The owner routes also require an active claimant session control (claimant_assert_active_session). The owner
- * app has no route that creates one yet (a W2 item), so the harness activates it with the same service-only
- * function /claimant/session/activate calls, bound to the owner's real session ID and TOTP time.
- */
-async function activateClaimantSession(admin: SupabaseClient, owner: Owner) {
-  const token = await accessToken(owner);
-  const claims = JSON.parse(Buffer.from(token!.split(".")[1]!, "base64url").toString("utf8")) as {
-    session_id: string; amr: { method: string; timestamp: number }[] };
-  const mfaAt = Math.max(...claims.amr.filter(({ method }) => method === "totp").map(({ timestamp }) => timestamp));
-  const activated = await admin.rpc("claimant_activate_session", { p_user_id: owner.id,
-    p_session_id: claims.session_id, p_authenticated_at: new Date(mfaAt * 1000).toISOString(),
-    p_idempotency_key: randomUUID() });
-  if (activated.error) throw new Error(`Synthetic owner session activation failed: ${activated.error.message}`);
+/* W2a: the owner activates its claimant session control through the real owner route, as the app does. */
+async function activateOwnerSession(apiOrigin: string, bypassFetch: typeof fetch, owner: Owner) {
+  const response = await bypassFetch(`${apiOrigin}/owner/session/activate`, { method: "POST", body: "{}",
+    headers: { Authorization: `Bearer ${await accessToken(owner)}`, "Content-Type": "application/json",
+      "Idempotency-Key": randomUUID(), Origin: ownerOrigin } });
+  assert.equal(response.status, 200, `owner session activation returned ${response.status}`);
 }
 
 async function verifyTotp(owner: Owner) {
@@ -232,7 +225,8 @@ async function main() {
   try {
     owners.push(await createSyntheticOwner(keys), await createSyntheticOwner(keys));
     const [first, second] = owners as [Owner, Owner];
-    pass("two synthetic owners signed in with password and TOTP (AAL2)");
+    for (const owner of owners) await activateOwnerSession(hosted.apiOrigin, bypassFetch, owner);
+    pass("two synthetic owners signed in with password and TOTP (AAL2) and activated through /owner/session/activate");
 
     const client = (owner: Owner) => createOwnerOfflineCodeClient({ apiBaseUrl: hosted.apiOrigin, ownerOrigin,
       fetch: bypassFetch, getAccessToken: () => accessToken(owner) });

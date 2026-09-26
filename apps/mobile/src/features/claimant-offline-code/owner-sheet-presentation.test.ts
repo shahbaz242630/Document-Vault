@@ -88,7 +88,12 @@ describe("owner emergency sheet composition", () => {
     const good = auth();
     const responses = [new Response("{}", { status: 403 }), new Response(JSON.stringify({
       locator_record_id: sheet.registration.locatorRecordId, status: "active", replayed: false }), { status: 200 })];
-    const fetchImpl = vi.fn(async () => responses.shift()!);
+    const activations: string[] = [];
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (!url.endsWith("/owner/session/activate")) return responses.shift()!;
+      activations.push(url);
+      return new Response(JSON.stringify({ session_version: 1, replayed: false }), { status: 200 });
+    });
     const flow = createOwnerSheetFlowHandle({ approved: true, createSheet: vi.fn(async () => sheet), auth: good,
       env, fetch: fetchImpl as unknown as typeof fetch, print: vi.fn(async () => undefined) })!;
     await flow.start();
@@ -99,6 +104,8 @@ describe("owner emergency sheet composition", () => {
     await flow.submitMfaCode("123456");
     expect(good.mfa.verify).toHaveBeenCalledWith({ challengeId: "challenge", code: "123456", factorId: "factor" });
     expect(good.refreshSession).toHaveBeenCalledTimes(1);
+    // W2a: the fresh TOTP check also activates the owner's claimant session control before the retry.
+    expect(activations).toEqual(["https://api.test/owner/session/activate"]);
     expect(flow.getState().status).toBe("ready_to_print");
 
     for (const failing of [auth("unverified"), auth("verified", { message: "bad" })]) {

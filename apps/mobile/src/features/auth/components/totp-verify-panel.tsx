@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { View } from "react-native";
 import * as ExpoSecureStore from "expo-secure-store";
 
+import { activateOwnerClaimantSessionAfterMfa } from "@/features/claimant-offline-code/owner-sheet-launch";
 import { createSupabaseClient } from "@/shared/api/supabase-client";
 import {
   BodyText,
@@ -85,6 +86,7 @@ export function TotpVerifyPanel({ factorId, variant = "onboarding" }: TotpVerify
       setResult(nextResult);
 
       if (nextResult.status === "ok") {
+        await activateOwnerClaimantSessionAfterMfa();
         const progressStorage = createSignupProgressStorage(ExpoSecureStore);
         const existing = await progressStorage.load();
         if (existing) {

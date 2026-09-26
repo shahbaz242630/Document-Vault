@@ -9,7 +9,8 @@ import { describe, expect, it, vi } from "vitest";
 import { app as mountedApp } from "../index.js";
 import { offlineCodeV2BoundaryDigest } from "./offline-code-v2-locator-index.js";
 import { CLAIMANT_OFFLINE_CODE_V2_OWNER_ROUTES_APPROVED, createOfflineCodeV2OwnerListRoute,
-  createOfflineCodeV2OwnerPreflightRoute, createOfflineCodeV2OwnerRoute } from "./offline-code-v2-owner-routes.js";
+  createOfflineCodeV2OwnerPreflightRoute, createOfflineCodeV2OwnerRoute, createOfflineCodeV2OwnerSessionActivateRoute }
+  from "./offline-code-v2-owner-routes.js";
 import { createOfflineCodeV2OwnerSheetReader, OfflineCodeV2PersistenceTransactionError }
   from "./offline-code-v2-persistence-transaction-client.js";
 import { RegisteredRecipientMutationError } from "./registered-recipient-client.js";
@@ -387,5 +388,62 @@ describe("owner sheet reader (Slice 6J)", () => {
     await expect(reader({ ...envelope([]), release_authorized: true }).listOwnerSheets(ids.owner)).rejects.toThrow();
     await expect(reader(null, { code: "42501" }).listOwnerSheets(ids.owner))
       .rejects.toBeInstanceOf(OfflineCodeV2PersistenceTransactionError);
+  });
+});
+
+describe("owner session activation route (W2a)", () => {
+  const activatePath = "/owner/session/activate";
+  function activateApp(deps: Record<string, unknown>) {
+    const result = new Hono();
+    result.post(activatePath, createOfflineCodeV2OwnerSessionActivateRoute(deps));
+    return result;
+  }
+  function activateRequest(body = "{}", headers: Record<string, string> = {}) {
+    return { method: "POST", body, headers: { Authorization: "Bearer jwt", "Content-Type": "application/json",
+      "Idempotency-Key": ids.request, Origin: ownerOrigin, ...headers } };
+  }
+  function activationDeps() {
+    const deps = approved();
+    deps.owner.activateSession.mockResolvedValue({ displacedPrevious: false, replayed: false, sessionVersion: 3 });
+    return deps;
+  }
+
+  it("activates the caller's own session with its MFA time and returns only the version", async () => {
+    const deps = activationDeps();
+    const response = await activateApp(deps).request(`${apiOrigin}${activatePath}`, activateRequest());
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ session_version: 3, replayed: false });
+    expect(deps.owner.activateSession).toHaveBeenCalledWith({ authenticatedAt: new Date(epoch() * 1000).toISOString(),
+      idempotencyKey: ids.request, sessionId: ids.session, userId: ids.owner });
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+  });
+
+  it("is concealed on the mounted app and without approval", async () => {
+    expect((await mountedApp.request(`${apiOrigin}${activatePath}`, activateRequest())).status).toBe(404);
+    const { approved: _approved, ...closed } = activationDeps();
+    expect((await activateApp(closed).request(`${apiOrigin}${activatePath}`, activateRequest())).status).toBe(404);
+    expect(closed.owner.activateSession).not.toHaveBeenCalled();
+  });
+
+  it("refuses a stale MFA, AAL1, recovery, a wrong origin or a non-empty body", async () => {
+    const cases: [Record<string, unknown>, Record<string, string>, string, number][] = [
+      [session({ amr: [{ method: "totp", timestamp: epoch() - 3_600 }] }), {}, "{}", 403],
+      [session({ aal: "aal1" }), {}, "{}", 403],
+      [session({ amr: [{ method: "totp", timestamp: epoch() }, { method: "recovery", timestamp: epoch() }] }), {}, "{}", 403],
+      [session(), { Origin: claimantOrigin }, "{}", 404],
+      [session(), {}, JSON.stringify({ userId: ids.other }), 400],
+    ];
+    for (const [value, headers, body, status] of cases) {
+      const deps = activationDeps(); deps.owner.getSession.mockResolvedValue(value);
+      const response = await activateApp(deps).request(`${apiOrigin}${activatePath}`, activateRequest(body, headers));
+      expect(response.status, JSON.stringify({ headers, body })).toBe(status);
+      expect(deps.owner.activateSession).not.toHaveBeenCalled();
+    }
+  });
+
+  it("maps a changed retry to 409", async () => {
+    const deps = activationDeps();
+    deps.owner.activateSession.mockRejectedValue(new RegisteredRecipientMutationError({ code: "22023", message: "x" }));
+    expect((await activateApp(deps).request(`${apiOrigin}${activatePath}`, activateRequest())).status).toBe(409);
   });
 });

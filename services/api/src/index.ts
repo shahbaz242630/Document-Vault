@@ -36,7 +36,8 @@ import { createOfflineCodeV2Controller, createOfflineCodeV2PreflightController }
   from "./claimant/offline-code-v2-controller.js";
 import { createOfflineCodeV2HandoffPreflightRoute, createOfflineCodeV2HandoffRoute }
   from "./claimant/offline-code-v2-handoff-routes.js";
-import { createOfflineCodeV2OwnerListRoute, createOfflineCodeV2OwnerPreflightRoute, createOfflineCodeV2OwnerRoute }
+import { createOfflineCodeV2OwnerListRoute, createOfflineCodeV2OwnerPreflightRoute, createOfflineCodeV2OwnerRoute,
+  createOfflineCodeV2OwnerSessionActivateRoute }
   from "./claimant/offline-code-v2-owner-routes.js";
 import { createVercelTrustedSignals } from "./claimant/vercel-trusted-signals.js";
 import { revenueCatWebhookHandler } from "./webhooks/revenuecat.js";
@@ -158,6 +159,8 @@ for (const [path, action] of [
   app.options(path, createOfflineCodeV2OwnerPreflightRoute({ runtimeConfig: claimantRuntimeConfig }));
 }
 app.get("/owner/offline-code/v2/locators", createOfflineCodeV2OwnerListRoute({ runtimeConfig: claimantRuntimeConfig }));
+app.post("/owner/session/activate", createOfflineCodeV2OwnerSessionActivateRoute({ runtimeConfig: claimantRuntimeConfig }));
+app.options("/owner/session/activate", createOfflineCodeV2OwnerPreflightRoute({ runtimeConfig: claimantRuntimeConfig }));
 
 for (const [path, action, method] of [
   ["/claimant/evidence/cases/:caseId/upload-capabilities", "issue", "post"],

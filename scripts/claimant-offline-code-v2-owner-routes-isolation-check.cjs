@@ -48,6 +48,17 @@ for (const token of ["context.req.query", "context.req.param", "readJson(", "reg
   if (listRoute.includes(token)) throw new Error(`Offline-code V2 owner list takes caller input: ${token}`);
 if (!index.includes('app.get("/owner/offline-code/v2/locators", createOfflineCodeV2OwnerListRoute('))
   throw new Error("Offline-code V2 owner list route is missing.");
+// W2a: owner session activation binds only the caller's own session and MFA time, behind the same gate.
+const activateRoute = routes.slice(routes.indexOf("export function createOfflineCodeV2OwnerSessionActivateRoute"),
+  routes.indexOf("export function createOfflineCodeV2OwnerListRoute"));
+for (const token of ['prepare(context, "activateSession", deps)', "requireFreshClaimantAssurance(session,",
+  "authenticatedAt: assurance.authenticatedAt", "sessionId: session.sessionId, userId: session.userId",
+  'readJson(context, "activateSession")'])
+  if (!activateRoute.includes(token)) throw new Error(`Owner session activation lost boundary: ${token}`);
+for (const token of ["body.", "context.req.query", "context.req.param"])
+  if (activateRoute.includes(token)) throw new Error(`Owner session activation takes caller input: ${token}`);
+if (!index.includes('app.post("/owner/session/activate", createOfflineCodeV2OwnerSessionActivateRoute('))
+  throw new Error("Owner session activation route is missing.");
 const client = readFileSync(join(root, "services/api/src/claimant/offline-code-v2-persistence-transaction-client.ts"), "utf8");
 const listSchema = client.slice(client.indexOf("const ownerSheetListSchema"), client.indexOf("function requireEqual"));
 for (const forbidden of ["locator_commitment", "proof_public_key", "wrap_", "kdf_salt", "grant_id", "passthrough"])

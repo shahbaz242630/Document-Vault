@@ -1,5 +1,7 @@
 import { parseOfflineCodeSheetV2 } from "@vault/shared-types";
 
+import { isClaimantPreviewBuild } from "../../shared/config/claimant-preview-build";
+
 import {
   checkOfflineCodeV2ReleaseWrap,
   type OfflineCodeV2ProofCrypto,
@@ -49,7 +51,7 @@ export async function createOwnerOfflineCodeSheet(input: OwnerOfflineCodeSheetIn
   crypto?: OfflineCodeV2ProofCrypto & OfflineCodeV2WrapCrypto;
   mek: Uint8Array;
 }>): Promise<OwnerOfflineCodeSheet> {
-  const approved = input.approved ?? OWNER_OFFLINE_CODE_SHEET_APPROVED;
+  const approved = input.approved ?? (OWNER_OFFLINE_CODE_SHEET_APPROVED || isClaimantPreviewBuild());
   if (!approved) throw new OwnerOfflineCodeSheetError();
   const crypto = input.crypto ?? offlineCodeV2PlatformSheetCrypto;
   try {
