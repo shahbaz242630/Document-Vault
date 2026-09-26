@@ -83,6 +83,7 @@
     "check:claimant-offline-code-v2-case-binding-db": "node scripts/claimant-offline-code-v2-case-binding-db-test.cjs",
     "check:claimant-offline-code-v2-handoff-isolation": "node scripts/claimant-offline-code-v2-handoff-isolation-check.cjs",
     "check:claimant-preview-activation-isolation": "node scripts/claimant-preview-activation-isolation-check.cjs",
+    "check:claimant-sheet-check-isolation": "node scripts/claimant-sheet-check-isolation-check.cjs",
     "check:claimant-handoff-client-isolation": "node scripts/claimant-handoff-client-isolation-check.cjs",
     "check:claimant-possession-handoff-bridge-isolation": "node scripts/claimant-possession-handoff-bridge-isolation-check.cjs",
     "check:claimant-session-bridge-composition-isolation": "node scripts/claimant-session-bridge-composition-isolation-check.cjs",

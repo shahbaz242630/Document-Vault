@@ -3,6 +3,9 @@ const staticConfig = require("./app.json").expo;
 const PROBE_TARGET = "claimant_custody_probe";
 const APP_ATTEST_PROBE_TARGET = "claimant_app_attest_probe";
 const OFFLINE_CODE_KDF_PROBE_TARGET = "claimant_offline_code_kdf_probe";
+// Staging wiring W2a: the separate "Sanduqkin Preview" app. Only it may carry the claimant Preview switch.
+const CLAIMANT_PREVIEW_TARGET = "claimant_preview";
+const CLAIMANT_PREVIEW_ID = "com.sanduqkin.mobile.claimantpreview";
 
 module.exports = ({ config = staticConfig } = {}) => {
   const base = config;
@@ -10,6 +13,13 @@ module.exports = ({ config = staticConfig } = {}) => {
   const isAppAttestProbe = process.env.SANDUQKIN_BUILD_TARGET === APP_ATTEST_PROBE_TARGET;
   const isOfflineCodeKdfProbe = process.env.SANDUQKIN_BUILD_TARGET === OFFLINE_CODE_KDF_PROBE_TARGET;
   const isIsolatedProbe = isProbe || isAppAttestProbe || isOfflineCodeKdfProbe;
+  const isClaimantPreview = process.env.SANDUQKIN_BUILD_TARGET === CLAIMANT_PREVIEW_TARGET;
+  if (process.env.EXPO_PUBLIC_CLAIMANT_PREVIEW_BUILD && !isClaimantPreview) {
+    throw new Error("EXPO_PUBLIC_CLAIMANT_PREVIEW_BUILD is only allowed in the claimant_preview build.");
+  }
+  if (isClaimantPreview && process.env.EAS_BUILD_PROFILE === "production") {
+    throw new Error("The claimant_preview build target cannot use the production EAS profile.");
+  }
   const plugins = base.plugins.map((plugin) => {
     const name = Array.isArray(plugin) ? plugin[0] : plugin;
     if (name !== "expo-router") return plugin;
@@ -22,24 +32,26 @@ module.exports = ({ config = staticConfig } = {}) => {
   return {
     ...base,
     name: isProbe ? "Sanduqkin Custody Probe" : isAppAttestProbe ? "Sanduqkin App Attest Probe"
-      : isOfflineCodeKdfProbe ? "Sanduqkin KDF Probe" : base.name,
+      : isOfflineCodeKdfProbe ? "Sanduqkin KDF Probe" : isClaimantPreview ? "Sanduqkin Preview" : base.name,
     slug: base.slug,
     scheme: isProbe
       ? "sanduqkin-claimant-custody-probe"
       : isAppAttestProbe ? "sanduqkin-claimant-app-attest-probe"
-        : isOfflineCodeKdfProbe ? "sanduqkin-claimant-kdf-probe" : base.scheme,
+        : isOfflineCodeKdfProbe ? "sanduqkin-claimant-kdf-probe"
+          : isClaimantPreview ? "sanduqkin-claimant-preview" : base.scheme,
     android: {
       ...base.android,
       package: isOfflineCodeKdfProbe
         ? "com.sanduqkin.mobile.claimantkdfprobe"
-        : base.android.package,
+        : isClaimantPreview ? CLAIMANT_PREVIEW_ID : base.android.package,
     },
     ios: {
       ...base.ios,
       bundleIdentifier: isProbe
         ? "com.sanduqkin.mobile.claimantprobe"
         : isAppAttestProbe ? "com.sanduqkin.mobile.claimantappattestprobe"
-          : isOfflineCodeKdfProbe ? "com.sanduqkin.mobile.claimantkdfprobe" : base.ios.bundleIdentifier,
+          : isOfflineCodeKdfProbe ? "com.sanduqkin.mobile.claimantkdfprobe"
+            : isClaimantPreview ? CLAIMANT_PREVIEW_ID : base.ios.bundleIdentifier,
       deploymentTarget: isAppAttestProbe ? "27.0" : base.ios.deploymentTarget,
       entitlements: isAppAttestProbe
         ? { "com.apple.developer.devicecheck.appattest-environment": "development" }
@@ -56,6 +68,7 @@ module.exports = ({ config = staticConfig } = {}) => {
       claimantAppAttestProbeBuild: isAppAttestProbe,
       claimantOfflineCodeKdfProbeBuild: isOfflineCodeKdfProbe,
       claimantIsolatedProbeBuild: isIsolatedProbe,
+      claimantPreviewBuild: isClaimantPreview,
     },
   };
 };
@@ -63,3 +76,4 @@ module.exports = ({ config = staticConfig } = {}) => {
 module.exports.PROBE_TARGET = PROBE_TARGET;
 module.exports.APP_ATTEST_PROBE_TARGET = APP_ATTEST_PROBE_TARGET;
 module.exports.OFFLINE_CODE_KDF_PROBE_TARGET = OFFLINE_CODE_KDF_PROBE_TARGET;
+module.exports.CLAIMANT_PREVIEW_TARGET = CLAIMANT_PREVIEW_TARGET;

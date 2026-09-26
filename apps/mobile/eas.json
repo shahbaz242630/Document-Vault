@@ -50,6 +50,25 @@
         "simulator": false
       }
     },
+    "claimant-preview": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "environment": "preview",
+      "env": {
+        "SANDUQKIN_BUILD_TARGET": "claimant_preview",
+        "EXPO_PUBLIC_CLAIMANT_PREVIEW_BUILD": "synthetic-only",
+        "EXPO_PUBLIC_API_URL": "https://preview-api.sanduqkin.com",
+        "EXPO_PUBLIC_OFFLINE_CODE_V2_OWNER_ORIGIN": "https://owner.claimant-preview.sanduqkin.invalid",
+        "EXPO_PUBLIC_OFFLINE_CODE_V2_CLAIMANT_ORIGIN": "https://claimant.claimant-preview.sanduqkin.invalid"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "credentialsSource": "remote",
+        "simulator": false
+      }
+    },
     "production": {
       "autoIncrement": true,
       "environment": "production",

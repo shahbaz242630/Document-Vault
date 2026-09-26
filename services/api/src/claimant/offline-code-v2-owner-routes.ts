@@ -33,7 +33,7 @@ import { ClaimantAssuranceError, requireFreshClaimantAssurance } from "./session
  */
 export const CLAIMANT_OFFLINE_CODE_V2_OWNER_ROUTES_APPROVED = false as const;
 
-export type OfflineCodeV2OwnerAction = "register" | "revoke";
+export type OfflineCodeV2OwnerAction = "register" | "revoke" | "activateSession";
 export type OfflineCodeV2OwnerRoutesConfig = RegisteredRecipientSupabaseConfig & Readonly<{
   apiOrigin: string; ownerOrigin: string; freshAssuranceSeconds: number; locatorIndexKey: string;
 }>;
@@ -66,7 +66,7 @@ const registerSchema = z.strictObject({
   wrapCiphertext: z.string().regex(/^[A-Za-z0-9_-]{64}$/u),
   wrapAssociatedDataDigest: base64url32, issuedAt: canonicalTimestamp, expiresAt: canonicalTimestamp,
 });
-const revokeSchema = z.strictObject({});
+const emptySchema = z.strictObject({});
 
 export function createOfflineCodeV2OwnerRoute(action: OfflineCodeV2OwnerAction, deps: Deps = {}) {
   return async (context: Context): Promise<Response> => {
@@ -96,6 +96,31 @@ export function createOfflineCodeV2OwnerRoute(action: OfflineCodeV2OwnerAction, 
       return context.json({ locator_record_id: result.locatorRecordId, status: result.status,
         replayed: result.replayed }, 200);
     } catch (error) { return routeError(context, error); }
+  };
+}
+
+/*
+ * Staging wiring W2a: the owner app activates its own claimant session control right after a TOTP check, which
+ * the owner routes then assert. Only the session's own user, session and MFA time are used; nothing is read from
+ * the body, which must be empty.
+ */
+export function createOfflineCodeV2OwnerSessionActivateRoute(deps: Deps = {}) {
+  return async (context: Context): Promise<Response> => {
+    const prepared = prepare(context, "activateSession", deps); if (prepared instanceof Response) return prepared;
+    try {
+      const session = await authenticate(prepared.ownerSession, prepared.jwt);
+      const assurance = requireFreshClaimantAssurance(session,
+        Math.floor(now(deps).getTime() / 1000), prepared.config.freshAssuranceSeconds);
+      const body = await readJson(context, "activateSession"); if (body instanceof Response) return body;
+      const result = await prepared.ownerSession.activateSession({ authenticatedAt: assurance.authenticatedAt,
+        idempotencyKey: prepared.idempotencyKey, sessionId: session.sessionId, userId: session.userId });
+      return context.json({ session_version: result.sessionVersion, replayed: result.replayed }, 200);
+    } catch (error) {
+      if (error instanceof RegisteredRecipientMutationError && ["22023", "23505", "40001"].includes(error.code ?? "")) {
+        return generic(context, 409);
+      }
+      return routeError(context, error);
+    }
   };
 }
 
@@ -208,7 +233,7 @@ async function readJson(context: Context, action: OfflineCodeV2OwnerAction): Pro
     if (new TextEncoder().encode(text).byteLength > MAX_BODY_BYTES) {
       return context.json({ error: "Payload too large" }, 413);
     }
-    const parsed = (action === "register" ? registerSchema : revokeSchema).safeParse(JSON.parse(text));
+    const parsed = (action === "register" ? registerSchema : emptySchema).safeParse(JSON.parse(text));
     return parsed.success ? parsed.data : invalid(context);
   } catch { return invalid(context); }
 }

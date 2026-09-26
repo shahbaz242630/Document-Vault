@@ -11,13 +11,14 @@ import { createOwnerOfflineCodeClient } from "./owner-offline-code-client";
 import { createOwnerSheetFlow, type OwnerSheetFlow, type OwnerSheetFlowDeps } from "./owner-sheet-flow";
 import { createOwnerSheetListFlow, type OwnerSheetListFlow } from "./owner-sheet-list-flow";
 import { renderOwnerSheetHtml } from "./owner-sheet-html";
+import { ownerSheetsOpen } from "./owner-sheet-launch";
 
 /*
  * Slice 6H composition: the only place the owner sheet flow meets the vault session, Supabase, the API and the
- * printer. While OWNER_SHEET_FLOW_LAUNCH_APPROVED is false the handle is null before anything is created, so the
- * entry is hidden and the screen shows "unavailable".
+ * printer. While the owner sheets are closed (owner-sheet-launch.ts) the handle is null before anything is
+ * created, so the entry is hidden and the screen shows "unavailable".
  */
-export const OWNER_SHEET_FLOW_LAUNCH_APPROVED = false as const;
+export { OWNER_SHEET_FLOW_LAUNCH_APPROVED } from "./owner-sheet-launch";
 
 type Env = Partial<Record<string, string>>;
 type OwnerSupabaseAuth = Readonly<{
@@ -39,18 +40,19 @@ export function createOwnerSheetFlowHandle(input: Readonly<{
   fetch?: typeof fetch;
   print?: (html: string) => Promise<void>;
 }>): OwnerSheetFlow | null {
-  if (!(input.approved ?? OWNER_SHEET_FLOW_LAUNCH_APPROVED)) return null;
+  if (!(input.approved ?? ownerSheetsOpen())) return null;
   const api = getApiEnv(input.env);
   const ownerOrigin = input.env.EXPO_PUBLIC_OFFLINE_CODE_V2_OWNER_ORIGIN?.trim();
   const auth = input.auth;
   if (!auth || !api.isConfigured || !ownerOrigin) return null;
   const session = async () => (await auth.getSession()).data.session;
+  const client = createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin, fetch: input.fetch,
+    getAccessToken: async () => (await session())?.access_token ?? null });
   return createOwnerSheetFlow({
     createSheet: input.createSheet,
     getOwnerId: async () => (await session())?.user.id ?? null,
-    client: createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin, fetch: input.fetch,
-      getAccessToken: async () => (await session())?.access_token ?? null }),
-    verifyFreshMfa: (code) => verifyFreshOwnerMfa(auth, code),
+    client,
+    verifyFreshMfa: (code) => verifyFreshOwnerMfa(auth, client, code),
     renderSheetHtml: renderOwnerSheetHtml,
     print: input.print ?? (async (html) => { await printAsync({ html }); }),
     randomUUID,
@@ -64,33 +66,38 @@ export function createOwnerSheetListHandle(input: Readonly<{
   env: Env;
   fetch?: typeof fetch;
 }>): OwnerSheetListFlow | null {
-  if (!(input.approved ?? OWNER_SHEET_FLOW_LAUNCH_APPROVED)) return null;
+  if (!(input.approved ?? ownerSheetsOpen())) return null;
   const api = getApiEnv(input.env);
   const ownerOrigin = input.env.EXPO_PUBLIC_OFFLINE_CODE_V2_OWNER_ORIGIN?.trim();
   const auth = input.auth;
   if (!auth || !api.isConfigured || !ownerOrigin) return null;
+  const client = createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin, fetch: input.fetch,
+    getAccessToken: async () => (await auth.getSession()).data.session?.access_token ?? null });
   return createOwnerSheetListFlow({
-    client: createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin, fetch: input.fetch,
-      getAccessToken: async () => (await auth.getSession()).data.session?.access_token ?? null }),
-    verifyFreshMfa: (code) => verifyFreshOwnerMfa(auth, code),
+    client,
+    verifyFreshMfa: (code) => verifyFreshOwnerMfa(auth, client, code),
     randomUUID,
   });
 }
 
-async function verifyFreshOwnerMfa(auth: OwnerSupabaseAuth, code: string): Promise<boolean> {
+type SessionActivator = Pick<ReturnType<typeof createOwnerOfflineCodeClient>, "activateSession">;
+
+async function verifyFreshOwnerMfa(auth: OwnerSupabaseAuth, client: SessionActivator, code: string): Promise<boolean> {
   const factors = await auth.mfa?.listFactors?.();
   const factor = factors?.data?.totp?.find((entry) => entry.status === "verified");
   if (!factor || !/^\d{6}$/u.test(code)) return false;
   const result = await createTotpVerifyService({ auth: { mfa: auth.mfa } }).verify(factor.id, code);
   if (result.status !== "ok") return false;
   await auth.refreshSession();
+  // W2a: the owner routes assert an active claimant session control; activating it needs this fresh TOTP check.
+  await client.activateSession(randomUUID()).catch(() => undefined);
   return true;
 }
 
 /** The list handle for "My emergency sheets", or null while the feature is not approved. */
 export function useOwnerSheetListHandle(): OwnerSheetListFlow | null {
   return useMemo(() => {
-    if (!OWNER_SHEET_FLOW_LAUNCH_APPROVED) return null;
+    if (!ownerSheetsOpen()) return null;
     return createOwnerSheetListHandle({
       auth: (createSupabaseClient()?.auth ?? null) as unknown as OwnerSupabaseAuth | null,
       // Literal reads so Expo inlines the public build-time values.
@@ -104,7 +111,7 @@ export function useOwnerSheetFlowHandle(): OwnerSheetFlow | null {
   const vault = useVaultSession();
   const createSheet = vault.createOfflineCodeEmergencySheet;
   return useMemo(() => {
-    if (!OWNER_SHEET_FLOW_LAUNCH_APPROVED) return null;
+    if (!ownerSheetsOpen()) return null;
     return createOwnerSheetFlowHandle({ createSheet,
       auth: (createSupabaseClient()?.auth ?? null) as unknown as OwnerSupabaseAuth | null,
       // Literal reads so Expo inlines the public build-time values.

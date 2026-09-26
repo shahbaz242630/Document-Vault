@@ -16,16 +16,21 @@ const files = {
   listView: `${feature}/owner-sheet-list-view-model.ts`,
   listPanel: `${feature}/owner-sheet-list-panel.tsx`,
   reference: `${feature}/owner-sheet-reference.ts`,
+  launch: `${feature}/owner-sheet-launch.ts`,
 };
 const sources = Object.fromEntries(Object.entries(files).map(([name, path]) => [name, read(path)]));
 
 if (!/OWNER_OFFLINE_CODE_SHEET_APPROVED\s*=\s*false\s+as\s+const/u.test(sources.factory))
   throw new Error("Owner emergency sheet approval must remain literal false.");
-if (!/OWNER_SHEET_FLOW_LAUNCH_APPROVED\s*=\s*false\s+as\s+const/u.test(sources.runtime))
+if (!/OWNER_SHEET_FLOW_LAUNCH_APPROVED\s*=\s*false\s+as\s+const/u.test(sources.launch))
   throw new Error("Owner emergency sheet launch approval must remain literal false.");
 for (const [name, token] of [["factory", "checkOfflineCodeV2ReleaseWrap("], ["factory", "syntheticOnly: true"],
-  ["runtime", "if (!(input.approved ?? OWNER_SHEET_FLOW_LAUNCH_APPROVED)) return null;"],
-  ["runtime", "if (!OWNER_SHEET_FLOW_LAUNCH_APPROVED) return null;"], ["panel", "usePreventScreenCapture()"],
+  ["runtime", "if (!(input.approved ?? ownerSheetsOpen())) return null;"],
+  ["runtime", "if (!ownerSheetsOpen()) return null;"], ["panel", "usePreventScreenCapture()"],
+  // W2a: the only other way in is the separate Sanduqkin Preview app, never anything looser.
+  ["launch", "return OWNER_SHEET_FLOW_LAUNCH_APPROVED || isClaimantPreviewBuild();"],
+  ["launch", "if (!ownerSheetsOpen()) return;"],
+  ["factory", "input.approved ?? (OWNER_OFFLINE_CODE_SHEET_APPROVED || isClaimantPreviewBuild())"],
   ["panel", "flow.handleAppState(next)"], ["panel", "void flow.abandon()"], ["client", "Idempotency-Key"],
   ["runtime", "export function createOwnerSheetListHandle"], ["listPanel", "useOwnerSheetListHandle()"],
   ["listPanel", "return () => flow.close();"], ["listFlow", "await deps.client.revoke(selected, revokeKey, signal)"],
@@ -33,7 +38,7 @@ for (const [name, token] of [["factory", "checkOfflineCodeV2ReleaseWrap("], ["fa
   if (!sources[name].includes(token)) throw new Error(`Owner emergency sheet lost control in ${name}: ${token}`);
 
 const listHandle = sources.runtime.slice(sources.runtime.indexOf("export function createOwnerSheetListHandle"));
-if (!listHandle.includes("if (!(input.approved ?? OWNER_SHEET_FLOW_LAUNCH_APPROVED)) return null;"))
+if (!listHandle.includes("if (!(input.approved ?? ownerSheetsOpen())) return null;"))
   throw new Error("The owner sheet list must sit behind the owner sheet launch approval.");
 // The list screen shows dates, status and references only; it never reaches the sheet, crypto or printer.
 for (const name of ["listFlow", "listView", "listPanel"])
@@ -52,7 +57,7 @@ const session = read("apps/mobile/src/features/vault/vault-session.ts");
 if (!/createOwnerOfflineCodeSheet\(\{[^}]*mek: key,[^}]*\}\)/su.test(session))
   throw new Error("The vault session must pass its own key to the owner sheet factory.");
 for (const name of ["client", "flow", "html", "runtime", "viewModel", "panel", "listFlow", "listView", "listPanel",
-  "reference"])
+  "reference", "launch"])
   if (/\bmek\b|masterKey|vaultKey/u.test(sources[name]))
     throw new Error(`Owner emergency sheet ${name} must never handle the vault key.`);
 
@@ -70,6 +75,19 @@ for (const file of sourceFiles(join(root, "apps/mobile"))) {
 }
 if (JSON.stringify(factoryImporters) !== JSON.stringify(["apps/mobile/src/features/vault/vault-session.ts"]))
   throw new Error(`Only the vault session may create owner sheets: ${factoryImporters.join(", ")}`);
+
+// W2a: the Preview-build gate reads exactly the inlined switch and the Preview app marker.
+const previewGate = read("apps/mobile/src/shared/config/claimant-preview-build.ts");
+for (const token of ['CLAIMANT_PREVIEW_BUILD_VALUE = "synthetic-only" as const',
+  "flag: process.env.EXPO_PUBLIC_CLAIMANT_PREVIEW_BUILD,",
+  "return signals.flag === CLAIMANT_PREVIEW_BUILD_VALUE && signals.extra?.claimantPreviewBuild === true;"])
+  if (!previewGate.includes(token)) throw new Error(`Claimant Preview build gate lost condition: ${token}`);
+const appConfig = read("apps/mobile/app.config.js");
+for (const token of ['const CLAIMANT_PREVIEW_ID = "com.sanduqkin.mobile.claimantpreview";',
+  "if (process.env.EXPO_PUBLIC_CLAIMANT_PREVIEW_BUILD && !isClaimantPreview) {",
+  'if (isClaimantPreview && process.env.EAS_BUILD_PROFILE === "production") {',
+  "claimantPreviewBuild: isClaimantPreview,"])
+  if (!appConfig.includes(token)) throw new Error(`Claimant Preview app identity lost: ${token}`);
 
 console.log("Claimant owner emergency sheet isolation passed.");
 

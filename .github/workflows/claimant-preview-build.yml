@@ -1,0 +1,62 @@
+name: Claimant Preview app build
+
+# Staging wiring W2a. Manual only, from main. Builds the separate "Sanduqkin Preview" app (its own bundle ID) with
+# the claimant-preview EAS profile for internal installation. It never submits to a store.
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: android or ios
+        required: true
+        type: choice
+        options:
+          - android
+          - ios
+      confirmation:
+        description: Type claimant-preview to build the Preview app.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: claimant-preview-build
+  cancel-in-progress: false
+
+jobs:
+  build-preview-app:
+    name: Build Sanduqkin Preview app
+    if: inputs.confirmation == 'claimant-preview' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: Release
+    timeout-minutes: 30
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.3.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Queue the Preview app build on EAS
+        working-directory: apps/mobile
+        env:
+          PLATFORM: ${{ inputs.platform }}
+        run: >-
+          npx --yes eas-cli@21.0.0 build
+          --platform "$PLATFORM"
+          --profile claimant-preview
+          --non-interactive
+          --no-wait

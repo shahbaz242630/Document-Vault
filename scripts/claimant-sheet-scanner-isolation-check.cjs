@@ -10,6 +10,7 @@ const files = {
   scannerView: `${feature}/claim-sheet-scanner-view-model.ts`,
   panel: `${feature}/claim-flow-panel.tsx`,
   panelView: `${feature}/claim-flow-view-model.ts`,
+  checkPanel: `${feature}/sheet-check-panel.tsx`,
 };
 const sources = Object.fromEntries(Object.entries(files).map(([name, path]) => [name, read(path)]));
 
@@ -41,14 +42,14 @@ if (!camera || camera[1].microphonePermission !== false || camera[1].recordAudio
   || typeof camera[1].cameraPermission !== "string")
   throw new Error("The camera plugin must request the camera only, with its own explanation.");
 
-// Only the scanner opens the camera, and only the claim screen renders the scanner.
+// Only the scanner opens the camera, and only the claim screen and the W2a sheet check render the scanner.
 for (const file of sourceFiles(join(root, "apps/mobile"))) {
   const path = relative(root, file).replaceAll("\\", "/");
   if (/\.test\.[cm]?[jt]sx?$/u.test(path)) continue;
   const source = readFileSync(file, "utf8");
   if (source.includes("expo-camera") && path !== files.scanner)
     throw new Error(`Only the claim sheet scanner may use the camera: ${path}`);
-  if (source.includes("./claim-sheet-scanner\"") && path !== files.panel)
+  if (source.includes("./claim-sheet-scanner\"") && path !== files.panel && path !== files.checkPanel)
     throw new Error(`Only the claim screen may render the sheet scanner: ${path}`);
 }
 

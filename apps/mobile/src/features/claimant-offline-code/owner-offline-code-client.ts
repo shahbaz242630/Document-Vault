@@ -107,7 +107,37 @@ export function createOwnerOfflineCodeClient(deps: OwnerOfflineCodeClientDeps) {
       signal?.removeEventListener("abort", abort);
     }
   };
+  /** W2a: activates the owner's own claimant session control after a fresh TOTP check. */
+  const activateSession = async (idempotencyKey: string, signal?: AbortSignal): Promise<void> => {
+    if (!uuidV4.test(idempotencyKey)) throw new OwnerOfflineCodeClientError("failed");
+    const token = await deps.getAccessToken().catch(() => null);
+    if (!token) throw new OwnerOfflineCodeClientError("failed");
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    signal?.addEventListener("abort", abort);
+    const timer = setTimeout(abort, deps.timeoutMs ?? 15_000);
+    try {
+      if (signal?.aborted) throw new Error("aborted");
+      const response = await (deps.fetch ?? fetch)(`${base}/owner/session/activate`, { method: "POST", body: "{}",
+        signal: controller.signal, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey, Origin: deps.ownerOrigin } });
+      if (response.status === 403) throw new OwnerOfflineCodeClientError("fresh_mfa_required");
+      if (response.status !== 200) throw new OwnerOfflineCodeClientError("failed");
+      const value = await response.json() as Record<string, unknown>;
+      if (!value || typeof value !== "object" || Object.keys(value).sort().join(",") !== "replayed,session_version"
+        || !Number.isInteger(value.session_version) || typeof value.replayed !== "boolean") {
+        throw new OwnerOfflineCodeClientError("failed");
+      }
+    } catch (error) {
+      if (error instanceof OwnerOfflineCodeClientError) throw error;
+      throw new OwnerOfflineCodeClientError("failed");
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+    }
+  };
   return {
+    activateSession,
     list,
     register: (registration: OwnerOfflineCodeSheetRegistration, idempotencyKey: string, signal?: AbortSignal) =>
       post("/owner/offline-code/v2/locators", registration, idempotencyKey, "active",

@@ -5,6 +5,7 @@ import * as SecureStore from "expo-secure-store";
 
 import { defaultAuditLog } from "@/features/auth/audit-log";
 import { useOwnerSheetFlowHandle, useOwnerSheetListHandle } from "@/features/claimant-offline-code/owner-sheet-runtime";
+import { useSheetCheckHandle } from "@/features/claimant-offline-code/sheet-check-runtime";
 import { EmergencyAccessScreen, type SealedCodeSetupStatus } from "@/features/settings";
 import {
   createSupabaseEmergencyGrantRepository,
@@ -19,6 +20,7 @@ export default function EmergencyAccessRoute() {
   const setupState = useEmergencyAccessSetupState();
   const sheetFlow = useOwnerSheetFlowHandle();
   const sheetList = useOwnerSheetListHandle();
+  const sheetCheck = useSheetCheckHandle();
 
   return (
     <Screen>
@@ -28,6 +30,9 @@ export default function EmergencyAccessRoute() {
         oneTimeCode={setupState.oneTimeCode}
         onConfirmSealedCodeWritten={setupState.confirmSealedCodeWritten}
         onCreateSealedCode={setupState.createSealedCode}
+        onCheckEmergencySheet={sheetCheck
+          ? () => router.push("/claim/check-sheet" as unknown as "/settings/re-auth")
+          : undefined}
         onOpenEmergencySheet={sheetFlow
           ? () => router.push("/settings/emergency-sheet" as unknown as "/settings/re-auth")
           : undefined}
