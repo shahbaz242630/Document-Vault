@@ -153,6 +153,62 @@ async function accessToken(owner: Owner) {
   return (await owner.client.auth.getSession()).data.session?.access_token ?? null;
 }
 
+type Hosted = Awaited<ReturnType<typeof deployments>>;
+
+async function claimantChecks(hosted: Hosted, bypassFetch: typeof fetch, revokedSheet: OwnerOfflineCodeSheet,
+  liveSheet: OwnerOfflineCodeSheet) {
+  const challenge = async (locator: string) => {
+    const response = await bypassFetch(`${hosted.apiOrigin}/claimant/offline-code/v2/challenges`, {
+      method: "POST", body: JSON.stringify({ locator }), headers: { "Content-Type": "application/json",
+        "Idempotency-Key": randomUUID(), Origin: claimantOrigin } });
+    assert.equal(response.status, 200, `challenge returned ${response.status}`);
+    return (await response.json() as { result: { challenge: OfflineCodeChallengeV2;
+      challenge_bytes_base64url: string } }).result;
+  };
+  const decoy = await challenge(revokedSheet.printedLocator);
+  assert.notEqual(decoy.challenge.locator_record_id, revokedSheet.registration.locatorRecordId);
+  pass("the revoked sheet yields only a decoy challenge");
+
+  const issued = await challenge(liveSheet.printedLocator);
+  assert.equal(issued.challenge.locator_record_id, liveSheet.registration.locatorRecordId);
+  const proof = await createOfflineCodeV2PlatformProofProducer(true).produce({
+    ...parseOfflineCodeSheetV2(liveSheet.sheetPayload), challenge: issued.challenge, expectedOrigin: claimantOrigin });
+  const verified = await bypassFetch(`${hosted.apiOrigin}/claimant/offline-code/v2/challenges/${
+    issued.challenge.challenge_id}/proofs`, { method: "POST", body: JSON.stringify({ challenge: issued.challenge,
+    challenge_bytes_base64url: issued.challenge_bytes_base64url, possession_proof: proof }),
+  headers: { "Content-Type": "application/json", "Idempotency-Key": randomUUID(), Origin: claimantOrigin } });
+  assert.equal(verified.status, 200);
+  assert.equal((await verified.json() as { result: { route_possession_asserted: boolean } }).result
+    .route_possession_asserted, true);
+  pass("a claimant proves possession of the live sheet through the hosted challenge and proof routes");
+}
+
+async function concealmentChecks(hosted: Hosted, bypassFetch: typeof fetch, bearer: string | null) {
+  const closedOnPreview = ["/claimant/offline-code/v2/handoffs/issue", "/claimant/offline-code/v2/handoffs/complete",
+    "/claimant/session/activate", "/claimant/portal/session/activate", "/claimant/portal/session/assert",
+    "/claimant/registered-recipient/invitations", "/claimant/native-enrollment/challenges",
+    `/claimant/cases/${randomUUID()}/submissions`];
+  for (const path of closedOnPreview) {
+    const response = await bypassFetch(`${hosted.apiOrigin}${path}`, { method: "POST", body: "{}",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${bearer}`,
+        "Idempotency-Key": randomUUID(), Origin: claimantOrigin } });
+    assert.equal(response.status, 404, `${path} returned ${response.status} on the claimant-preview deployment`);
+  }
+  pass("claim start, portal session, recipients, enrollment and submission stay concealed on the Preview");
+
+  for (const [name, origin] of [["another preview", hosted.otherPreview], ["production", hosted.production]] as const) {
+    if (!origin) { console.log(`SKIP no ready ${name} deployment to check`); continue; }
+    for (const [method, path] of [["GET", "/owner/offline-code/v2/locators"], ["POST", "/owner/offline-code/v2/locators"],
+      ["POST", "/claimant/offline-code/v2/challenges"]] as const) {
+      const response: Response = await bypassFetch(`${origin}${path}`, { method, ...(method === "POST" ? { body: "{}" } : {}),
+        headers: { "Content-Type": "application/json", Origin: method === "GET" ? ownerOrigin : claimantOrigin,
+          "Idempotency-Key": randomUUID() } });
+      assert.equal(response.status, 404, `${method} ${path} returned ${response.status} on ${name}`);
+    }
+    pass(`the W1 routes are concealed on ${name}`);
+  }
+}
+
 async function main() {
   await sodium.ready;
   const hosted = await deployments();
@@ -219,54 +275,8 @@ async function main() {
     await assert.rejects(client(second).revoke(liveSheet.registration.locatorRecordId, randomUUID()));
     pass("owner 2 sees none of owner 1's sheets and cannot revoke them");
 
-    const challenge = async (locator: string) => {
-      const response = await bypassFetch(`${hosted.apiOrigin}/claimant/offline-code/v2/challenges`, {
-        method: "POST", body: JSON.stringify({ locator }), headers: { "Content-Type": "application/json",
-          "Idempotency-Key": randomUUID(), Origin: claimantOrigin } });
-      assert.equal(response.status, 200, `challenge returned ${response.status}`);
-      return (await response.json() as { result: { challenge: OfflineCodeChallengeV2;
-        challenge_bytes_base64url: string } }).result;
-    };
-    const decoy = await challenge(revokedSheet.printedLocator);
-    assert.notEqual(decoy.challenge.locator_record_id, revokedSheet.registration.locatorRecordId);
-    pass("the revoked sheet yields only a decoy challenge");
-
-    const issued = await challenge(liveSheet.printedLocator);
-    assert.equal(issued.challenge.locator_record_id, liveSheet.registration.locatorRecordId);
-    const proof = await createOfflineCodeV2PlatformProofProducer(true).produce({
-      ...parseOfflineCodeSheetV2(liveSheet.sheetPayload), challenge: issued.challenge, expectedOrigin: claimantOrigin });
-    const verified = await bypassFetch(`${hosted.apiOrigin}/claimant/offline-code/v2/challenges/${
-      issued.challenge.challenge_id}/proofs`, { method: "POST", body: JSON.stringify({ challenge: issued.challenge,
-      challenge_bytes_base64url: issued.challenge_bytes_base64url, possession_proof: proof }),
-    headers: { "Content-Type": "application/json", "Idempotency-Key": randomUUID(), Origin: claimantOrigin } });
-    assert.equal(verified.status, 200);
-    assert.equal((await verified.json() as { result: { route_possession_asserted: boolean } }).result
-      .route_possession_asserted, true);
-    pass("a claimant proves possession of the live sheet through the hosted challenge and proof routes");
-
-    const closedOnPreview = ["/claimant/offline-code/v2/handoffs/issue", "/claimant/offline-code/v2/handoffs/complete",
-      "/claimant/session/activate", "/claimant/portal/session/activate", "/claimant/portal/session/assert",
-      "/claimant/registered-recipient/invitations", "/claimant/native-enrollment/challenges",
-      `/claimant/cases/${randomUUID()}/submissions`];
-    for (const path of closedOnPreview) {
-      const response = await bypassFetch(`${hosted.apiOrigin}${path}`, { method: "POST", body: "{}",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${await accessToken(first)}`,
-          "Idempotency-Key": randomUUID(), Origin: claimantOrigin } });
-      assert.equal(response.status, 404, `${path} returned ${response.status} on the claimant-preview deployment`);
-    }
-    pass("claim start, portal session, recipients, enrollment and submission stay concealed on the Preview");
-
-    for (const [name, origin] of [["another preview", hosted.otherPreview], ["production", hosted.production]] as const) {
-      if (!origin) { console.log(`SKIP no ready ${name} deployment to check`); continue; }
-      for (const [method, path] of [["GET", "/owner/offline-code/v2/locators"], ["POST", "/owner/offline-code/v2/locators"],
-        ["POST", "/claimant/offline-code/v2/challenges"]] as const) {
-        const response: Response = await bypassFetch(`${origin}${path}`, { method, ...(method === "POST" ? { body: "{}" } : {}),
-          headers: { "Content-Type": "application/json", Origin: method === "GET" ? ownerOrigin : claimantOrigin,
-            "Idempotency-Key": randomUUID() } });
-        assert.equal(response.status, 404, `${method} ${path} returned ${response.status} on ${name}`);
-      }
-      pass(`the W1 routes are concealed on ${name}`);
-    }
+    await claimantChecks(hosted, bypassFetch, revokedSheet, liveSheet);
+    await concealmentChecks(hosted, bypassFetch, await accessToken(first));
   } finally {
     await Promise.allSettled(owners.map((owner) => owner.client.auth.signOut()));
     await cleanup({ apply: true, token: supabaseToken, projectRef, log: (line) => console.log(line) });
