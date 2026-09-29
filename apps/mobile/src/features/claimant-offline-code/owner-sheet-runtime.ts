@@ -6,6 +6,7 @@ import { createTotpVerifyService } from "@/features/auth/totp-verify-service";
 import { useVaultSession } from "@/features/vault";
 import { createSupabaseClient } from "@/shared/api/supabase-client";
 import { getApiEnv } from "@/shared/config/api-env";
+import { withClaimantPreviewBypass } from "@/shared/config/claimant-preview-fetch";
 
 import { createOwnerOfflineCodeClient } from "./owner-offline-code-client";
 import { createOwnerSheetFlow, type OwnerSheetFlow, type OwnerSheetFlowDeps } from "./owner-sheet-flow";
@@ -46,7 +47,8 @@ export function createOwnerSheetFlowHandle(input: Readonly<{
   const auth = input.auth;
   if (!auth || !api.isConfigured || !ownerOrigin) return null;
   const session = async () => (await auth.getSession()).data.session;
-  const client = createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin, fetch: input.fetch,
+  const client = createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin,
+    fetch: input.fetch ?? withClaimantPreviewBypass(fetch),
     getAccessToken: async () => (await session())?.access_token ?? null });
   return createOwnerSheetFlow({
     createSheet: input.createSheet,
@@ -71,7 +73,8 @@ export function createOwnerSheetListHandle(input: Readonly<{
   const ownerOrigin = input.env.EXPO_PUBLIC_OFFLINE_CODE_V2_OWNER_ORIGIN?.trim();
   const auth = input.auth;
   if (!auth || !api.isConfigured || !ownerOrigin) return null;
-  const client = createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin, fetch: input.fetch,
+  const client = createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin,
+    fetch: input.fetch ?? withClaimantPreviewBypass(fetch),
     getAccessToken: async () => (await auth.getSession()).data.session?.access_token ?? null });
   return createOwnerSheetListFlow({
     client,

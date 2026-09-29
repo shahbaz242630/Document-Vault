@@ -7,6 +7,7 @@ import { createSheetCheckFlow, type SheetCheckFlow, type SheetCheckPort,
   type SheetCheckSeen } from "@/features/claimant-journey/sheet-check-flow";
 import { getApiEnv } from "@/shared/config/api-env";
 import { isClaimantPreviewBuild } from "@/shared/config/claimant-preview-build";
+import { withClaimantPreviewBypass } from "@/shared/config/claimant-preview-fetch";
 
 import { CLAIMANT_OFFLINE_CODE_V2_LIFECYCLE_APPROVED, createOfflineCodeV2Lifecycle,
   type OfflineCodeV2LifecycleSource } from "./offline-code-v2-lifecycle";
@@ -43,7 +44,7 @@ export function createSheetCheckHandle(input: Readonly<{
   if (!apiOrigin || !claimantOrigin || apiOrigin === claimantOrigin) return null;
   return Object.freeze({
     open: () => createSheetCheckFlow({ newKey: input.newKey ?? randomUUID, port: createSheetCheckPort({
-      approved, apiOrigin, claimantOrigin, send: input.send ?? (expoFetch as unknown as Send),
+      approved, apiOrigin, claimantOrigin, send: input.send ?? withClaimantPreviewBypass(expoFetch as unknown as Send),
       producer: input.producer ?? createOfflineCodeV2PlatformProofProducer(approved),
       lifecycle: input.lifecycle ?? appLifecycle(), now: input.now }) }),
   });

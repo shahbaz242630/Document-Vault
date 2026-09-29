@@ -73,3 +73,31 @@ Date: 2026-09-26. Built on W1 (PR #103, `53c3d40`). Scope: `docs/superpowers/spe
   - New unit tests accept a device clock up to 2 minutes slow or fast, and still reject anything beyond that. They cover both the producer and the coordinator.
   - Existing boundary tests moved to the new limits.
   - Cleanup reported 0 leftovers.
+
+## Owner's local rerun on Windows (2026-09-29, after PR #105)
+
+Run by the owner on a Windows laptop against `main` at `d85ef55`, using the owner's own tokens. The laptop clock was still about 1 second behind the server, as in the failing run.
+
+- Env guard: PASS (`sanduqkin-api`, `sanduqkin-web`).
+- Hosted catalog: PASS (48 migrations applied; 0 catalog violations).
+- **Hosted acceptance: PASS, 11 of 11:**
+  1. `/health`;
+  2. two synthetic owners with TOTP, activated through `/owner/session/activate`;
+  3. two sheets registered through the 6H flow;
+  4. both listed as active;
+  5. revoke after a fresh TOTP;
+  6. owner 2's isolation;
+  7. a decoy for the revoked sheet;
+  8. claimant possession proof;
+  9. concealment on the Preview;
+  10. concealment on another preview;
+  11. concealment on Production.
+- Cleanup dry run: 0 users, 0 sheets, 0 challenges.
+- **Note:** `npm install` reported 8 moderate advisories. No audit fix was run. The production dependency audit in CI stays clean for high and critical findings, and the moderate ones are covered by Dependabot PR #97, which is waiting on the owner.
+
+## Phone access correction (2026-09-29)
+
+- **DNS is done.** The owner added the CNAME `preview-api` → `cname.vercel-dns.com` in Hostinger. Vercel verified the domain for `claimant-preview` and issued a certificate (`cert_ric5bcwytw9SJzVzvhGLfPK0`).
+- **Still behind the login.** From the owner's laptop, `https://preview-api.sanduqkin.com/health` returned a 302 to the Vercel login: standard protection covers preview custom domains, and the Hobby plan has no exceptions.
+- **Fix (owner decision): a dedicated bypass in the Preview build only.** The new `withClaimantPreviewBypass` is covered by tests: the header is added only in the Preview build with a well-formed value, and the original fetch is returned untouched otherwise. The isolation check pins its three users and that the value is never in `eas.json` or read anywhere else. The Preview app's API URL is now the branch alias.
+- **Local checks:** typecheck, lint, 1,748 workspace tests (3 established skips), the security, mobile-secret and Phase 1 checks, and every security-CI script set pass.

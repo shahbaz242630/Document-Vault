@@ -3,6 +3,7 @@ import { randomUUID } from "expo-crypto";
 import { createSupabaseClient } from "@/shared/api/supabase-client";
 import { getApiEnv } from "@/shared/config/api-env";
 import { isClaimantPreviewBuild } from "@/shared/config/claimant-preview-build";
+import { withClaimantPreviewBypass } from "@/shared/config/claimant-preview-fetch";
 
 import { createOwnerOfflineCodeClient } from "./owner-offline-code-client";
 
@@ -30,7 +31,7 @@ export async function activateOwnerClaimantSessionAfterMfa(): Promise<void> {
   const api = getApiEnv({ EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL });
   const ownerOrigin = process.env.EXPO_PUBLIC_OFFLINE_CODE_V2_OWNER_ORIGIN?.trim();
   if (!auth || !api.isConfigured || !ownerOrigin) return;
-  const client = createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin,
+  const client = createOwnerOfflineCodeClient({ apiBaseUrl: api.url, ownerOrigin, fetch: withClaimantPreviewBypass(fetch),
     getAccessToken: async () => (await auth.getSession()).data.session?.access_token ?? null });
   await client.activateSession(randomUUID()).catch(() => undefined);
 }

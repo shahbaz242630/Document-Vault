@@ -26,6 +26,7 @@ const values: Record<string, string> = {
   EXPO_PUBLIC_SUPABASE_PIN_PRIMARY: "pin_primary_inlined",
   EXPO_PUBLIC_SUPABASE_PIN_BACKUP: "pin_backup_inlined",
   EXPO_PUBLIC_CLAIMANT_PREVIEW_BUILD: "synthetic-only-inlined",
+  EXPO_PUBLIC_CLAIMANT_PREVIEW_API_BYPASS: "bypass_inlined_value_0123",
   EXPO_PUBLIC_OFFLINE_CODE_V2_OWNER_ORIGIN: "https://owner.inlined.test",
   EXPO_PUBLIC_OFFLINE_CODE_V2_CLAIMANT_ORIGIN: "https://claimant.inlined.test",
 };
@@ -35,6 +36,7 @@ const readers: Record<string, readonly string[]> = {
     "EXPO_PUBLIC_REVENUECAT_ANDROID_KEY"],
   "../security/ssl-pinning.ts": ["EXPO_PUBLIC_SUPABASE_PIN_PRIMARY", "EXPO_PUBLIC_SUPABASE_PIN_BACKUP"],
   "claimant-preview-build.ts": ["EXPO_PUBLIC_CLAIMANT_PREVIEW_BUILD"],
+  "claimant-preview-fetch.ts": ["EXPO_PUBLIC_CLAIMANT_PREVIEW_API_BYPASS"],
   "../../features/claimant-offline-code/owner-sheet-runtime.ts": ["EXPO_PUBLIC_API_URL",
     "EXPO_PUBLIC_OFFLINE_CODE_V2_OWNER_ORIGIN"],
   "../../features/claimant-offline-code/sheet-check-runtime.ts": ["EXPO_PUBLIC_API_URL",

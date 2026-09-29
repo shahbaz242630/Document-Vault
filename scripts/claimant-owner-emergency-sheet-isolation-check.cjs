@@ -89,6 +89,27 @@ for (const token of ['const CLAIMANT_PREVIEW_ID = "com.sanduqkin.mobile.claimant
   "claimantPreviewBuild: isClaimantPreview,"])
   if (!appConfig.includes(token)) throw new Error(`Claimant Preview app identity lost: ${token}`);
 
+// W2a: the Vercel bypass is sent only by the Preview build, never logged, and only by the three claimant clients.
+const bypass = read("apps/mobile/src/shared/config/claimant-preview-fetch.ts");
+for (const token of ["bypass: process.env.EXPO_PUBLIC_CLAIMANT_PREVIEW_API_BYPASS",
+  "if (!(input.preview ?? isClaimantPreviewBuild()) || !bypass",
+  'const BYPASS_HEADER = "x-vercel-protection-bypass";'])
+  if (!bypass.includes(token)) throw new Error(`Claimant Preview bypass lost control: ${token}`);
+if (/console\.|SecureStore|AsyncStorage/u.test(bypass)) throw new Error("Claimant Preview bypass must not be logged or stored.");
+const bypassUsers = [];
+for (const file of sourceFiles(join(root, "apps/mobile"))) {
+  const path = relative(root, file).replaceAll("\\", "/");
+  if (/\.test\.[cm]?[jt]sx?$/u.test(path) || path.endsWith("claimant-preview-fetch.ts")) continue;
+  const source = readFileSync(file, "utf8");
+  if (source.includes("EXPO_PUBLIC_CLAIMANT_PREVIEW_API_BYPASS"))
+    throw new Error(`Claimant Preview bypass value is read outside its wrapper: ${path}`);
+  if (source.includes("withClaimantPreviewBypass")) bypassUsers.push(path.split("/").pop());
+}
+if (JSON.stringify(bypassUsers.sort()) !== JSON.stringify(["owner-sheet-launch.ts", "owner-sheet-runtime.ts",
+  "sheet-check-runtime.ts"])) throw new Error(`Claimant Preview bypass has unexpected users: ${bypassUsers.join(", ")}`);
+if (read("apps/mobile/eas.json").includes("CLAIMANT_PREVIEW_API_BYPASS"))
+  throw new Error("The Vercel bypass value belongs in the EAS environment, never in eas.json.");
+
 console.log("Claimant owner emergency sheet isolation passed.");
 
 function sourceFiles(directory) {

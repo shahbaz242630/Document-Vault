@@ -47,7 +47,9 @@ This is the current checkpoint and the opener for the next session. It supersede
 
 ## Follow-up on 2026-09-29
 
-The owner's local run on Windows found a zero-tolerance device clock check in the claimant proof path. It is fixed with a ±2-minute tolerance and reproduced on the hosted Preview with a slow clock; see the W2a verification record. Rerun the local acceptance after the fix merges.
+The owner's local run on Windows found a zero-tolerance device clock check in the claimant proof path. It is fixed with a ±2-minute tolerance (PR #105, `d85ef55`) and was reproduced on the hosted Preview with a slow clock. The owner's rerun on Windows then passed all four checks, with the acceptance at 11 of 11. See the W2a verification record.
+
+**Phone access (2026-09-29).** The DNS for `preview-api.sanduqkin.com` works and its certificate is issued, but Vercel still protects preview custom domains, and the Hobby plan can't exempt one. By owner decision, the Preview app now sends a dedicated Vercel bypass. It lives only in the Expo `preview` environment as `EXPO_PUBLIC_CLAIMANT_PREVIEW_API_BYPASS`, and the app calls the branch alias. **Owner steps:** create a separate "Protection Bypass for Automation" secret in Vercel for `sanduqkin-api`, and add it to the EAS `preview` environment with `eas env:create`. Delete the secret after phone testing.
 
 ## Pending — owner-held (needed before phone evidence)
 
