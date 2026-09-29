@@ -47,7 +47,7 @@ This is the current checkpoint and the opener for the next session. It supersede
 
 ## Follow-up on 2026-09-29
 
-The owner's local run on Windows found a zero-tolerance device clock check in the claimant proof path. It is fixed with a ±2-minute tolerance and reproduced on the hosted Preview with a slow clock; see the W2a verification record. Rerun the local acceptance after the fix merges.
+The owner's local run on Windows found a zero-tolerance device clock check in the claimant proof path. It is fixed with a ±2-minute tolerance (PR #105, `d85ef55`) and was reproduced on the hosted Preview with a slow clock. The owner's rerun on Windows then passed all four checks, with the acceptance at 11 of 11. See the W2a verification record.
 
 ## Pending — owner-held (needed before phone evidence)
 
