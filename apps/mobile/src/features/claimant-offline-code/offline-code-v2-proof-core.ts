@@ -321,11 +321,19 @@ function validateMaterial(value: Omit<OfflineCodeV2ProofInput, "challenge" | "ex
   };
 }
 
+/**
+ * Device clocks drift. The server stamps and enforces the real challenge window, so the device only refuses a
+ * challenge that is clearly outside it: up to two minutes of clock difference either way is accepted.
+ */
+export const OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS = 120_000;
+
 function bindChallenge(challenge: OfflineCodeChallengeV2, binding: OfflineCodeRecordBindingV2,
   bindingDigest: Uint8Array, expectedOrigin: string, now: Date): void {
   assertOfflineCodeChallengeV2(challenge);
   if (challenge.origin !== expectedOrigin || new URL(expectedOrigin).origin !== expectedOrigin) fail();
-  if (now.toISOString() < challenge.issued_at || now.toISOString() >= challenge.expires_at) fail();
+  const at = now.getTime();
+  if (!Number.isFinite(at) || at < Date.parse(challenge.issued_at) - OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS
+    || at >= Date.parse(challenge.expires_at) + OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS) fail();
   if (challenge.locator_record_id !== binding.locator_record_id
     || challenge.locator_version !== binding.locator_version
     || challenge.locator_commitment !== binding.locator_commitment

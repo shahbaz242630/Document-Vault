@@ -1,5 +1,27 @@
 # Sanduqkin MVP Handoff
 
+## Current checkpoint — session close with W1 and W2a, 2026-09-26
+
+The canonical close-out and next-session opener is `docs/handoff/2026-09-26-claimant-w1-w2a-session-close.md`. It lives on branch `claude/gifted-turing-lm2en4` until the first W2b PR carries it to `main`.
+
+Merged this session:
+- W1, claimant features on in Vercel Preview only, through PR #103 (`53c3d40`);
+- W2a, owner session activation and the separate Sanduqkin Preview app, through PR #104 (`eeb178e`).
+
+Owner decisions:
+- W2 is split into W2a (phones) and W2b (claim start);
+- the trusted edge signal is Vercel's own header;
+- PR watchers now merge automatically once CI is green.
+
+Owner actions before the phone run:
+1. the DNS CNAME `preview-api` → `cname.vercel-dns.com`;
+2. first EAS credentials for `com.sanduqkin.mobile.claimantpreview`;
+3. the "Claimant Preview app build" workflow;
+4. the phone print and scan run;
+5. rotating the Supabase and Vercel tokens.
+
+Next: record the phone evidence, then the W2b claim-start spec.
+
 ## Current checkpoint — staging wiring W2a, the Sanduqkin Preview app, 2026-09-26
 
 W2a is built. The owner approved the spec with all five recommended decisions and asked that PR watchers now merge automatically once CI is green.

@@ -10,7 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { OfflineCodeV2SyntheticAttempt } from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-coordinator";
 import { createOfflineCodeV2Lifecycle } from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-lifecycle";
-import type { OfflineCodeV2ProofInput } from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-proof-core";
+import { OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS, type OfflineCodeV2ProofInput }
+  from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-proof-core";
 import { createOfflineCodeV2PlatformProofProducer } from "../../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-proof-producer";
 import { app as mountedApp } from "../index.js";
 import { createOfflineCodeV2Controller } from "./offline-code-v2-controller.js";
@@ -212,7 +213,8 @@ describe("offline-code V2 mobile/API integration acceptance", () => {
   });
 
   it("rechecks expiry after an otherwise valid API challenge", async () => {
-    const h = harness(); h.control.afterChallengeResponse = () => { h.control.now = new Date(h.fixture.challenge.expires_at); };
+    const h = harness(); h.control.afterChallengeResponse = () => {
+      h.control.now = new Date(Date.parse(h.fixture.challenge.expires_at) + OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS); };
     await expect(h.runtime.start(h.attempt)).rejects.toMatchObject(unavailable);
     expect(h.wire[0].status).toBe(200); expect(h.produce).not.toHaveBeenCalled();
     expect(h.recorded.size).toBe(0);

@@ -61,3 +61,15 @@ Date: 2026-09-26. Built on W1 (PR #103, `53c3d40`). Scope: `docs/superpowers/spe
 
 - **Claim start (W2b).** Claimant sign-in, the claimant portal session, the claim-screen runtime, the sheet-key handoff signer, and the handoff routes on Preview.
 - **The sheet check's network adapter** (`expo/fetch`, needed for streaming response bodies) and its outcome classification are proved with fakes and the real libsodium producer in tests. They still need the phone run above. A wrong claimant origin or a badly wrong phone clock would show "can't be used" rather than "try again".
+
+## Follow-up fix (2026-09-29): device clock tolerance
+
+- **Found by** the owner's first local acceptance run on a Windows laptop. Owner print, list, revoke, isolation and the decoy passed, but the claimant proof step failed with "Offline-code proof production is unavailable". After an NTP sync the laptop was still about 1 second behind (`w32tm` offset +0.975 s).
+- **Cause.** The device-side checks in `offline-code-v2-proof-core.ts` (`bindChallenge`) and `offline-code-v2-coordinator.ts` (`time`) had zero tolerance. They refused a challenge whenever the device clock was even a millisecond before the server's `issued_at`. A claimant phone that runs slightly slow would therefore get "This sheet can't be used" for a valid sheet.
+- **Fix.** Both checks now accept a device clock up to 2 minutes slow or fast (`OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS = 120_000`), and the coordinator's retry-expiry timer allows the same margin. The server still stamps and enforces the real 5-minute window, so security is unchanged.
+- **Evidence.**
+  - The hosted acceptance, run with this machine's clock shifted 5 seconds slow, **failed on the old code** at exactly the owner's step, after the same 7 passing checks. On the fixed code it **passed 11 of 11**.
+  - With the clock 60 seconds fast, the run stopped earlier at the harness's own TOTP sign-in: the test tool derives its codes from the shifted clock, and Supabase rejects codes that far off. The fast-clock case is covered by unit tests instead.
+  - New unit tests accept a device clock up to 2 minutes slow or fast, and still reject anything beyond that. They cover both the producer and the coordinator.
+  - Existing boundary tests moved to the new limits.
+  - Cleanup reported 0 leftovers.

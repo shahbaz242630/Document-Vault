@@ -6,7 +6,7 @@ import { canonicalJson, type OfflineCodeChallengeV2, type OfflineCodePossessionP
 import { describe, expect, it, vi } from "vitest";
 
 import { createOfflineCodeV2Coordinator, type OfflineCodeV2SyntheticAttempt } from "./offline-code-v2-coordinator";
-import type { OfflineCodeV2ProofInput } from "./offline-code-v2-proof-core";
+import { OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS, type OfflineCodeV2ProofInput } from "./offline-code-v2-proof-core";
 import { createOfflineCodeV2PlatformProofProducer } from "./offline-code-v2-proof-producer";
 import { createOfflineCodeV2Transport, OfflineCodeV2UnavailableError,
   type OfflineCodeV2IssuedChallenge, type OfflineCodeV2ProofRequest } from "./offline-code-v2-transport";
@@ -175,7 +175,7 @@ describe("offline-code V2 synthetic coordinator", () => {
     try {
       const h = harness(); h.verifyProof.mockRejectedValueOnce(new OfflineCodeV2UnavailableError(true));
       await expect(h.coordinator.start(h.attempt)).rejects.toMatchObject(unavailable);
-      await vi.advanceTimersByTimeAsync(300_000);
+      await vi.advanceTimersByTimeAsync(300_000 + OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS);
       await expect(h.coordinator.retryProof()).rejects.toMatchObject(unavailable);
       expect(h.verifyProof).toHaveBeenCalledOnce();
     } finally { vi.useRealTimers(); }
@@ -188,7 +188,7 @@ describe("offline-code V2 synthetic coordinator", () => {
     await expect(h.coordinator.retryProof()).rejects.toMatchObject(unavailable);
     expect(h.verifyProof).toHaveBeenCalledOnce();
     const slow = harness(); slow.verifyProof.mockImplementationOnce(async () => {
-      slow.now.mockReturnValue(new Date(slow.fixture.challenge.expires_at)); return success;
+      slow.now.mockReturnValue(pastWindow(slow.fixture.challenge.expires_at)); return success;
     });
     await expect(slow.coordinator.start(slow.attempt)).rejects.toMatchObject(unavailable);
     await expect(slow.coordinator.retryProof()).rejects.toMatchObject(unavailable);
@@ -198,19 +198,29 @@ describe("offline-code V2 synthetic coordinator", () => {
   it("rejects expiry, clock rollback, and future issuance, including after slow proof production", async () => {
     for (const stage of ["future", "expired", "slow", "rollback", "retry-expired"]) {
       const h = harness();
-      if (stage === "future") h.now.mockReturnValue(new Date(Date.parse(h.fixture.challenge.issued_at) - 1));
-      if (stage === "expired") h.now.mockReturnValue(new Date(h.fixture.challenge.expires_at));
+      if (stage === "future") h.now.mockReturnValue(new Date(Date.parse(h.fixture.challenge.issued_at) - OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS - 1));
+      if (stage === "expired") h.now.mockReturnValue(pastWindow(h.fixture.challenge.expires_at));
       if (stage === "slow" || stage === "rollback") h.produce.mockImplementationOnce(async () => {
-        h.now.mockReturnValue(new Date(stage === "slow" ? h.fixture.challenge.expires_at : h.fixture.challenge.issued_at));
+        h.now.mockReturnValue(stage === "slow" ? pastWindow(h.fixture.challenge.expires_at) : new Date(h.fixture.challenge.issued_at));
         return h.fixture.possession_proof;
       });
       if (stage === "retry-expired") h.verifyProof.mockRejectedValueOnce(new OfflineCodeV2UnavailableError(true));
       await expect(h.coordinator.start(h.attempt)).rejects.toMatchObject(unavailable);
       if (stage === "retry-expired") {
-        h.now.mockReturnValue(new Date(h.fixture.challenge.expires_at));
+        h.now.mockReturnValue(pastWindow(h.fixture.challenge.expires_at));
         await expect(h.coordinator.retryProof()).rejects.toMatchObject(unavailable);
         expect(h.verifyProof).toHaveBeenCalledOnce();
       } else expect(h.verifyProof).not.toHaveBeenCalled();
+    }
+  });
+
+  it("accepts a device clock up to two minutes slow or fast against the server's window", async () => {
+    for (const offset of [-OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS + 1_000, -90_000, 90_000]) {
+      const h = harness();
+      const base = offset < 0 ? Date.parse(h.fixture.challenge.issued_at) : Date.parse(h.fixture.challenge.expires_at);
+      h.now.mockReturnValue(new Date(base + offset));
+      await expect(h.coordinator.start(h.attempt)).resolves.toBeDefined();
+      expect(h.verifyProof).toHaveBeenCalledOnce();
     }
   });
 
@@ -252,4 +262,8 @@ function deferred<T>() {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((done) => { resolve = done; });
   return { promise, resolve };
+}
+
+function pastWindow(expiresAt: string): Date {
+  return new Date(Date.parse(expiresAt) + OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS);
 }
