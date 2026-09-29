@@ -1,5 +1,29 @@
 # Sanduqkin Project Handoff
 
+## Current checkpoint — session close, W2a phone access, 2026-09-29
+
+The canonical close-out and next-session opener is `docs/handoff/2026-09-29-claimant-w2a-phone-access-session-close.md`. It lives on branch `claude/gifted-turing-lm2en4` until the next code PR carries it to `main`.
+
+Merged this session:
+- the device clock tolerance fix, PR #105 (`d85ef55`);
+- the Preview app's dedicated Vercel bypass, PR #106 (`5edc637`).
+
+Verified: the owner's Windows run passed 11 of 11 hosted acceptance checks.
+
+Owner setup done:
+- the DNS CNAME for `preview-api.sanduqkin.com` (attached but unused, because Vercel still protects it);
+- the Preview app's Vercel bypass;
+- the EAS `preview` variables.
+
+Next, owner-held:
+1. the Android keystore (`eas credentials`);
+2. the "Claimant Preview app build";
+3. the phone run;
+4. deleting the bypass afterwards;
+5. rotating the tokens.
+
+Then the W2b claim-start spec.
+
 ## Current checkpoint — session close with W1 and W2a, 2026-09-26
 
 The canonical close-out and next-session opener is `docs/handoff/2026-09-26-claimant-w1-w2a-session-close.md`. It lives on branch `claude/gifted-turing-lm2en4` until the first W2b PR carries it to `main`.
