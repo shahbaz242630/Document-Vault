@@ -10,7 +10,7 @@ import type {
 } from "@vault/shared-types";
 import { describe, expect, it } from "vitest";
 
-import { OfflineCodeV2ClientProofError } from "./offline-code-v2-proof-core";
+import { OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS, OfflineCodeV2ClientProofError } from "./offline-code-v2-proof-core";
 import { createOfflineCodeV2PlatformProofProducer } from "./offline-code-v2-proof-producer";
 
 type Vector = Readonly<{
@@ -40,12 +40,25 @@ describe("offline-code V2 client proof producer", () => {
     expect(proof).not.toHaveProperty("grant_id");
   });
 
+  it("accepts a device clock that is up to two minutes slow or fast", async () => {
+    const fixture = vector();
+    const producer = createOfflineCodeV2PlatformProofProducer(true);
+    for (const at of [Date.parse(fixture.challenge.issued_at) - OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS,
+      Date.parse(fixture.challenge.expires_at) + OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS - 1]) {
+      await expect(producer.produce({ ...proofInput(fixture), now: () => new Date(at) })).resolves.toMatchObject({
+        challenge_id: fixture.challenge.challenge_id });
+    }
+  }, 60_000);
+
   it("rejects origin, expiry, locator, record, proof-key, and challenge substitutions", async () => {
     const fixture = vector();
     const producer = createOfflineCodeV2PlatformProofProducer(true);
     const hostile = [
       { ...proofInput(fixture), expectedOrigin: "https://evil.example" },
-      { ...proofInput(fixture), now: () => new Date(fixture.challenge.expires_at) },
+      { ...proofInput(fixture), now: () => new Date(Date.parse(fixture.challenge.expires_at)
+        + OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS) },
+      { ...proofInput(fixture), now: () => new Date(Date.parse(fixture.challenge.issued_at)
+        - OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS - 1) },
       { ...proofInput(fixture), publicLocator: { ...fixture.public_locator,
         locator: validAlternative(fixture.public_locator.locator) } },
       { ...proofInput(fixture), clientSecret: { ...fixture.synthetic_client_secret,

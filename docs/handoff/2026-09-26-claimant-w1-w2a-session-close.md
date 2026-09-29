@@ -45,6 +45,10 @@ This is the current checkpoint and the opener for the next session. It supersede
 3. **Working rule:** PR watchers now merge automatically once CI is green (a merge commit), then move `claimant-preview` up to `main`. The auto-approval system in these sessions still blocks an unprompted merge, so the owner's go-ahead is recorded in each watcher's check-in message.
 4. **Tokens:** the hosted acceptance may run locally from a `.env` file. GitHub `Preview` environment secrets are optional; if used, restrict the environment to the `claimant-preview` branch. Rotate the Supabase and Vercel tokens after this session.
 
+## Follow-up on 2026-09-29
+
+The owner's local run on Windows found a zero-tolerance device clock check in the claimant proof path. It is fixed with a ±2-minute tolerance and reproduced on the hosted Preview with a slow clock; see the W2a verification record. Rerun the local acceptance after the fix merges.
+
 ## Pending — owner-held (needed before phone evidence)
 
 1. **DNS:** a CNAME `preview-api` → `cname.vercel-dns.com` at the `sanduqkin.com` registrar (nameservers `*.dns-parking.com`). After that, switch `OFFLINE_CODE_V2_API_ORIGIN` for the `claimant-preview` branch to `https://preview-api.sanduqkin.com`, redeploy, and rerun the acceptance with `CLAIMANT_PREVIEW_API_ORIGIN` set to that value.

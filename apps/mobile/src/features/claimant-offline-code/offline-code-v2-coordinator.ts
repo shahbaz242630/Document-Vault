@@ -8,7 +8,7 @@ import {
   type OfflineCodePossessionProofV2,
 } from "@vault/shared-types";
 
-import type { OfflineCodeV2ProofInput } from "./offline-code-v2-proof-core";
+import { OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS, type OfflineCodeV2ProofInput } from "./offline-code-v2-proof-core";
 import {
   assertOfflineCodeV2IdempotencyKey,
   assertOfflineCodeV2Origin,
@@ -89,8 +89,8 @@ function time(state: CoordinatorState, challenge?: OfflineCodeChallengeV2): Date
   const timestamp = current.getTime();
   if (!Number.isFinite(timestamp) || timestamp < state.lastTime) throw new Error();
   state.lastTime = timestamp;
-  if (challenge && (timestamp < Date.parse(challenge.issued_at)
-    || timestamp >= Date.parse(challenge.expires_at))) throw new Error();
+  if (challenge && (timestamp < Date.parse(challenge.issued_at) - OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS
+    || timestamp >= Date.parse(challenge.expires_at) + OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS)) throw new Error();
   return current;
 }
 
@@ -165,7 +165,8 @@ async function startAttempt(state: CoordinatorState,
       expectedOrigin: state.origin, now: () => time(state, issued.challenge) });
     material = null;
     checkpoint(state, controller, issued.challenge);
-    const remaining = Date.parse(issued.challenge.expires_at) - time(state, issued.challenge).getTime();
+    const remaining = Date.parse(issued.challenge.expires_at) + OFFLINE_CODE_V2_CLIENT_CLOCK_SKEW_MS
+      - time(state, issued.challenge).getTime();
     state.pending = validateOfflineCodeV2ProofRequest({ challenge: issued.challenge,
       challengeBytesBase64url: issued.challengeBytesBase64url,
       possessionProof: proof, idempotencyKey: proofKey }, state.origin);
