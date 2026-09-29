@@ -100,6 +100,16 @@ W1 proved the owner and possession routes on the hosted Preview, driven from Nod
   - The first Android build of the new package needs a keystore, which EAS won't generate non-interactively. The owner runs `eas credentials` (or one interactive `eas build --profile claimant-preview`) once.
   - iOS ad hoc builds need the test phone's UDID registered with `eas device:create`.
 
+## Correction (2026-09-29): phone access to the Preview
+
+- **Decision 2's assumption was wrong.** Vercel's standard protection (`all_except_custom_domains`) exempts only *production* custom domains. `preview-api.sanduqkin.com` is attached to a preview branch, so it still answers with the Vercel login (a 302 from the owner's laptop). The team is on the Hobby plan, which can't exempt a single domain.
+- **Owner decision (2026-09-29): a dedicated bypass for the Preview app.**
+  - **Where the value lives.** The owner creates a separate Vercel "Protection Bypass for Automation" secret and stores it only in the Expo `preview` environment as `EXPO_PUBLIC_CLAIMANT_PREVIEW_API_BYPASS`. It never goes in the repository or `eas.json`.
+  - **How it's sent.** `withClaimantPreviewBypass` in `apps/mobile/src/shared/config/claimant-preview-fetch.ts` adds the `x-vercel-protection-bypass` header only when `isClaimantPreviewBuild()` is true and the value is well formed. Only the owner-session, owner-sheet and sheet-check clients use it. The isolation check pins this.
+  - **What an extracted value would open.** Anyone who pulled it out of the internal APK could get past the login on any `sanduqkin-api` preview. But only `claimant-preview` has database credentials, and its routes still need an MFA session or a real sheet.
+  - **Lifetime.** Delete the secret after phone testing.
+- **The app uses the stable branch address** `https://sanduqkin-api-git-claimant-preview-shahbaz-ali-maliks-projects.vercel.app`, which is already the server's configured API origin. The custom domain stays attached but unused. It would only become useful with a paid plan's protection exceptions, or for production.
+
 ## Non-goals
 
 - Claim start, claimant sign-in, the claimant portal session, the handoff routes and the signer. These are W2b.

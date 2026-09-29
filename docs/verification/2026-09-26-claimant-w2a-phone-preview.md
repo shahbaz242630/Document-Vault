@@ -94,3 +94,10 @@ Run by the owner on a Windows laptop against `main` at `d85ef55`, using the owne
   11. concealment on Production.
 - Cleanup dry run: 0 users, 0 sheets, 0 challenges.
 - **Note:** `npm install` reported 8 moderate advisories. No audit fix was run. The production dependency audit in CI stays clean for high and critical findings, and the moderate ones are covered by Dependabot PR #97, which is waiting on the owner.
+
+## Phone access correction (2026-09-29)
+
+- **DNS is done.** The owner added the CNAME `preview-api` → `cname.vercel-dns.com` in Hostinger. Vercel verified the domain for `claimant-preview` and issued a certificate (`cert_ric5bcwytw9SJzVzvhGLfPK0`).
+- **Still behind the login.** From the owner's laptop, `https://preview-api.sanduqkin.com/health` returned a 302 to the Vercel login: standard protection covers preview custom domains, and the Hobby plan has no exceptions.
+- **Fix (owner decision): a dedicated bypass in the Preview build only.** The new `withClaimantPreviewBypass` is covered by tests: the header is added only in the Preview build with a well-formed value, and the original fetch is returned untouched otherwise. The isolation check pins its three users and that the value is never in `eas.json` or read anywhere else. The Preview app's API URL is now the branch alias.
+- **Local checks:** typecheck, lint, 1,748 workspace tests (3 established skips), the security, mobile-secret and Phase 1 checks, and every security-CI script set pass.
