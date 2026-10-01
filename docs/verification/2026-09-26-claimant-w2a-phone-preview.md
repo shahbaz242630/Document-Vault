@@ -148,3 +148,24 @@ A password-only sign-in therefore cannot load the list. That matches the emulato
   - Expo Doctor: patch versions newer than the lockfile, `expo` 56.0.23 and `expo-constants` 56.0.27.
 
 **Owner rerun:** rebuild the Preview APK from the merged `main`, then follow the steps in `docs/handoff/2026-10-01-claimant-preview-mfa-fix-session-close.md`.
+
+## Owner emulator rerun after the MFA fix (2026-10-01): owner-reported
+
+This was reported by the owner's local Claude Code session. It was **not observed independently** by the cloud session, and these are emulator results, not physical-device evidence.
+
+- **Setup:** EAS build `1b00c951-8f04-4c02-b3e5-e09891d4650e` from commit `cf86de4`, profile `claimant-preview`, on a Pixel 7 emulator with Android 16.
+  - `npm ci` passed locally on Node 24.19.0 with npm 11.17.0.
+  - The old Preview app was uninstalled and the new APK installed; the APK checksum matched the downloaded build.
+- **Second lock:** the owner added the authenticator and the PIN, and the unlocked vault dashboard appeared.
+- **Sheet list:** "My emergency sheets" loaded, empty at first.
+- **First sheet:** the owner generated a sheet and saved its PDF; the sheet later showed as **Revoked**. The code confirms a likely cause, not reproduced on the device: the 6H flow revokes any sheet that isn't confirmed as printed when the owner leaves or backgrounds the screen. The PDF-first spec addresses this.
+- **Second sheet:** after repeating the flow, the list shows a new **Active** sheet and the earlier **Revoked** one. The PDF was saved in the emulator's Downloads folder.
+- **Tapping the Active sheet** does not open it.
+- **Still pending:**
+  - an explicit revoke with a fresh TOTP;
+  - the live and revoked sheet checks from a second device;
+  - the second sign-in ("Second lock" with no QR code);
+  - physical-device evidence;
+  - the cleanup.
+
+Next: `docs/superpowers/specs/2026-10-01-claimant-owner-sheet-pdf-first.md` (awaiting approval).

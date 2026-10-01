@@ -66,6 +66,18 @@ The owner's laptop could not run `npm ci`. Newer npm (11.21) requires every opti
    - delete the "Sanduqkin Preview app" Vercel bypass and its EAS variable;
    - rotate the Supabase and Vercel tokens.
 
+## Emulator rerun and next step (2026-10-01)
+
+Owner-reported, on the emulator, from build `1b00c951` at `cf86de4`:
+- the second lock and the vault both work;
+- the sheet list loads;
+- the first sheet saved as a PDF ended up Revoked, because the print flow revokes unconfirmed sheets;
+- a second sheet is Active, and tapping it does nothing.
+
+The full record is in the W2a verification file.
+
+The owner asked for a PDF-first flow, with viewing and saving again later. The spec is `docs/superpowers/specs/2026-10-01-claimant-owner-sheet-pdf-first.md`, **awaiting approval**; nothing is built yet.
+
 ## Open items
 
 - **CI on `main` is red for two reasons this change doesn't cause:**
