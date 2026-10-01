@@ -31,6 +31,10 @@ On the hosted Preview, the sheet list returns 403 for a password-only session an
 - **Sign-up resume** restarts an interrupted enrolment instead of using a placeholder factor.
 - **Hosted acceptance** has a 12th check: the list's answer at each step of an owner's sign-in.
 
+## Lockfile fix for newer npm (2026-10-01)
+
+The owner's laptop could not run `npm ci`. Newer npm (11.21) requires every optional platform package in the lockfile, and the lockfile on `main` lists only two of rolldown's platform builds. It was also missing `fsevents` and the `@emnapi/*` packages they need. 17 entries were added, with no version changes and nothing removed; the extra `react-native-worklets` entry under `expo` was kept as npm 10 installs it. `npm ci` passes on a clean clone with npm 10.9.4, 11.4.2 and 11.21.0. Use Node 22.13 or later (CI and EAS builds use Node 24.3.0).
+
 ## Rebuild and test (owner)
 
 1. **Get a build with this change. Either:**
