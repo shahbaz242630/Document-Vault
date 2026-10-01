@@ -22,6 +22,8 @@ import { createOwnerOfflineCodeClient, OwnerOfflineCodeClientError }
   from "../../../apps/mobile/src/features/claimant-offline-code/owner-offline-code-client";
 import { createOwnerOfflineCodeSheet, type OwnerOfflineCodeSheet }
   from "../../../apps/mobile/src/features/claimant-offline-code/owner-offline-code-sheet-factory";
+import { createOwnerSheetDetailFlow }
+  from "../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-detail-flow";
 import { createOwnerSheetFlow } from "../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-flow";
 import { createOwnerSheetListFlow }
   from "../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-list-flow";
@@ -260,20 +262,25 @@ async function main() {
       fetch: bypassFetch, getAccessToken: () => accessToken(owner) });
     const made: OwnerOfflineCodeSheet[] = [];
     for (let index = 0; index < 2; index += 1) {
+      // PDF-first flow: the device copy store and the PDF save are stand-ins here; the server sees no difference.
       const flow = createOwnerSheetFlow({
         createSheet: async (input) => { const sheet = await createOwnerOfflineCodeSheet({ ...input, approved: true,
           mek: sodium.randombytes_buf(32) }); made.push(sheet); return sheet; },
         getOwnerId: async () => first.id, client: client(first),
         verifyFreshMfa: async () => false, renderSheetHtml: renderOwnerSheetHtml,
-        print: async () => undefined, randomUUID,
+        copies: { save: async () => undefined },
+        exporter: { canPickFolder: false, print: async () => true,
+          save: async () => ({ status: "shared" as const, fileName: "sheet.pdf" }) },
+        randomUUID,
       });
-      await flow.start(); await flow.print(); flow.confirmPrinted();
-      assert.equal(flow.getState().status, "done");
+      await flow.start(); await flow.save();
+      assert.equal(flow.getState().status, "ready");
+      await flow.abandon();
     }
     const [revokedSheet, liveSheet] = made as [OwnerOfflineCodeSheet, OwnerOfflineCodeSheet];
-    pass("owner 1 generated and registered two sheets through the real 6H flow");
+    pass("owner 1 created two sheets through the real PDF-first flow; leaving afterwards revoked neither");
 
-    const list = createOwnerSheetListFlow({ client: client(first), randomUUID,
+    const list = createOwnerSheetListFlow({ client: client(first),
       verifyFreshMfa: async () => { await verifyTotp(first); return true; } });
     await list.load();
     const listed = list.getState().sheets.filter((sheet) =>
@@ -282,15 +289,21 @@ async function main() {
     pass("owner 1's list shows both sheets as active");
 
     await nextTotpWindow(); await verifyTotp(first);
-    list.requestRevoke(revokedSheet.registration.locatorRecordId); await list.confirmRevoke();
-    if (list.getState().status === "needs_fresh_mfa") { await nextTotpWindow(); await list.submitMfaCode("fresh"); }
+    const detail = createOwnerSheetDetailFlow({ locatorRecordId: revokedSheet.registration.locatorRecordId,
+      client: client(first), copies: { load: async () => ({ status: "missing" as const }), remove: async () => undefined },
+      exporter: { canPickFolder: false, print: async () => true, save: async () => ({ status: "failed" as const }) },
+      renderSheetHtml: renderOwnerSheetHtml, getOwnerId: async () => first.id, isLocked: () => false, randomUUID,
+      verifyFreshMfa: async () => { await nextTotpWindow(); await verifyTotp(first); return true; } });
+    await detail.load(); detail.requestRevoke(); await detail.confirmRevoke();
+    if (detail.getState().status === "needs_fresh_mfa") await detail.submitMfaCode("fresh");
+    assert.equal(detail.getState().status, "revoked");
+    await list.load();
     const afterRevoke = list.getState();
-    assert.equal(afterRevoke.revoked, true);
     assert.equal(afterRevoke.sheets.find((sheet) =>
       sheet.locatorRecordId === revokedSheet.registration.locatorRecordId)?.status, "revoked");
     assert.equal(afterRevoke.sheets.find((sheet) =>
       sheet.locatorRecordId === liveSheet.registration.locatorRecordId)?.status, "active");
-    pass("owner 1 revoked one sheet after a fresh TOTP, and the list shows it as revoked");
+    pass("owner 1 revoked one sheet from its own screen after a fresh TOTP; the other stays active");
 
     const secondList = await client(second).list();
     assert.equal(secondList.length, 0);

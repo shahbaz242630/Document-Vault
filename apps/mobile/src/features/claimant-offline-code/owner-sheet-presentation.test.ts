@@ -1,22 +1,27 @@
 import createQrCode from "qrcode-generator";
 import { describe, expect, it, vi } from "vitest";
 
-import type { OwnerOfflineCodeSheet } from "./owner-offline-code-sheet-factory";
+import type { OwnerSheetCopy } from "./owner-sheet-copy";
 import type { OwnerSheetFlowState } from "./owner-sheet-flow";
 import { renderOwnerSheetHtml } from "./owner-sheet-html";
-import { createOwnerSheetFlowHandle, OWNER_SHEET_FLOW_LAUNCH_APPROVED } from "./owner-sheet-runtime";
+import { createOwnerSheetDetailHandle, createOwnerSheetFlowHandle, OWNER_SHEET_FLOW_LAUNCH_APPROVED }
+  from "./owner-sheet-runtime";
 import { ownerSheetView } from "./owner-sheet-view-model";
 
-vi.mock("expo-print", () => ({ printAsync: vi.fn() }));
+vi.mock("expo-print", () => ({ printAsync: vi.fn(), printToFileAsync: vi.fn() }));
+vi.mock("expo-file-system", () => ({ Directory: class {}, File: class {}, Paths: {} }));
+vi.mock("expo-sharing", () => ({ shareAsync: vi.fn() }));
+vi.mock("react-native", () => ({ Platform: { OS: "android" } }));
 vi.mock("expo-crypto", () => ({ randomUUID: () => "60000000-0000-4000-8000-000000000006" }));
 vi.mock("@/features/vault", () => ({ useVaultSession: vi.fn() }));
 vi.mock("@/shared/api/supabase-client", () => ({ createSupabaseClient: vi.fn() }));
 
 const sheet = { sheetPayload: "SKQ2.eyJzeW50aGV0aWMiOnRydWV9", printedLocator: "SK2-L-ABCD-EFGH",
   printedSecret: "SK2-S-WXYZ-1234", expiresAt: "2027-09-25T09:00:00.000Z",
-  registration: { locatorRecordId: "20000000-0000-4000-8000-000000000002" } } as unknown as OwnerOfflineCodeSheet;
+  locatorRecordId: "20000000-0000-4000-8000-000000000002" } satisfies OwnerSheetCopy;
+const factorySheet = { ...sheet, registration: { locatorRecordId: sheet.locatorRecordId } } as never;
 
-describe("owner emergency sheet print layout", () => {
+describe("owner emergency sheet PDF layout", () => {
   it("embeds the QR code of exactly the sheet payload with the printed codes and expiry", () => {
     const html = renderOwnerSheetHtml(sheet);
     const expected = createQrCode(0, "M"); expected.addData(sheet.sheetPayload, "Byte"); expected.make();
@@ -34,31 +39,50 @@ describe("owner emergency sheet print layout", () => {
   });
 });
 
-describe("owner emergency sheet view", () => {
+describe("owner emergency sheet view (PDF first)", () => {
   const state = (status: OwnerSheetFlowState["status"], changes: Partial<OwnerSheetFlowState> = {}) =>
-    ({ status, expiresAt: null, mfaRejected: false, printFailed: false, ...changes });
+    ({ status, reference: null, expiresAt: null, mfaRejected: false, saveResult: null, printFailed: false,
+      canPickFolder: true, ...changes });
 
   it("shows unavailable with no action when there is no flow handle", () => {
     expect(ownerSheetView(null)).toMatchObject({ body: "Emergency sheets aren't available yet.", primary: null,
-      secondary: null, showAcknowledgement: false });
+      secondary: [], showAcknowledgement: false });
   });
 
-  it("walks the owner through acknowledgement, MFA, printing and confirmation", () => {
-    expect(ownerSheetView(state("idle"))).toMatchObject({ showAcknowledgement: true,
-      primary: { action: "start" } });
-    for (const status of ["generating", "registering", "verifying_mfa", "printing"] as const) {
+  it("creates and saves, with printing optional and no print confirmation", () => {
+    const idle = ownerSheetView(state("idle"));
+    expect(idle).toMatchObject({ title: "Create an emergency sheet", showAcknowledgement: true,
+      primary: { label: "Create emergency sheet", action: "start" } });
+    expect(idle.body).toContain("save it as a PDF");
+    expect(idle.body).toContain("This PDF can unlock your vault");
+    for (const status of ["generating", "registering", "verifying_mfa", "storing", "saving", "printing"] as const) {
       expect(ownerSheetView(state(status))).toMatchObject({ busy: true, primary: null });
     }
     expect(ownerSheetView(state("needs_fresh_mfa", { mfaRejected: true }))).toMatchObject({ showMfaField: true,
       primary: { action: "submit_mfa" }, notice: { variant: "danger" } });
-    expect(ownerSheetView(state("ready_to_print", { printFailed: true }))).toMatchObject({
-      primary: { action: "print" }, notice: { title: "Printing didn't finish" } });
-    expect(ownerSheetView(state("printed"))).toMatchObject({ showPrintCheck: true, primary: { action: "confirm" },
-      secondary: { action: "print" } });
-    expect(ownerSheetView(state("done", { expiresAt: "2027-09-25T09:00:00.000Z" })).notice?.message)
-      .toBe("It is valid until 25 September 2027.");
+    const ready = ownerSheetView(state("ready", { reference: "200000", expiresAt: "2027-09-25T09:00:00.000Z" }));
+    expect(ready).toMatchObject({ primary: { label: "Save PDF", action: "save" }, notice: null });
+    expect(ready.secondary.map((entry) => entry.action)).toEqual(["share", "print", "open_list"]);
+    expect(ready.body).toBe("Sheet 200000 is active until 25 September 2027. Save it as a PDF now. You can open it "
+      + "and save it again any time from My emergency sheets.");
+    expect(ownerSheetView(state("ready", { canPickFolder: false })).secondary.map((entry) => entry.action))
+      .toEqual(["print", "open_list"]);
+    expect(JSON.stringify(Object.values({ idle, ready }))).not.toMatch(/sharp|Confirm sheet printed|cancelled\./u);
     expect(ownerSheetView(state("failed"))).toMatchObject({ primary: { action: "start" },
-      notice: { message: "Nothing was printed and no sheet is active." } });
+      notice: { message: "Nothing was saved and no sheet is active." } });
+  });
+
+  it("explains every save outcome without claiming a save the platform can't prove", () => {
+    const notice = (saveResult: OwnerSheetFlowState["saveResult"]) => ownerSheetView(state("ready", { saveResult })).notice;
+    expect(notice({ status: "saved", fileName: "Sanduqkin-emergency-sheet-200000.pdf", folder: "Download" }))
+      .toEqual({ variant: "success", title: "PDF saved",
+        message: "Saved as Sanduqkin-emergency-sheet-200000.pdf in Download." });
+    expect(notice({ status: "shared", fileName: "x.pdf" })).toMatchObject({ title: "Save dialog closed",
+      message: expect.stringContaining("We can't confirm where it was saved") });
+    expect(notice({ status: "cancelled" })).toMatchObject({ title: "Not saved",
+      message: expect.stringContaining("still active") });
+    expect(notice({ status: "failed" })).toMatchObject({ title: "Couldn't save the PDF" });
+    expect(ownerSheetView(state("ready", { printFailed: true })).notice).toMatchObject({ title: "Printing didn't finish" });
   });
 });
 
@@ -74,28 +98,34 @@ describe("owner emergency sheet composition", () => {
     };
   }
 
+  const sealer = { seal: vi.fn(), open: vi.fn() };
+  const copies = { save: vi.fn(async () => undefined), load: vi.fn(), remove: vi.fn() };
+  const exporter = { canPickFolder: true, save: vi.fn(), print: vi.fn() };
+
   it("is null by default and while configuration is missing, before anything is created", () => {
     expect(OWNER_SHEET_FLOW_LAUNCH_APPROVED).toBe(false);
     const createSheet = vi.fn();
-    expect(createOwnerSheetFlowHandle({ createSheet, auth: auth(), env })).toBeNull();
-    expect(createOwnerSheetFlowHandle({ approved: true, createSheet, auth: null, env })).toBeNull();
-    expect(createOwnerSheetFlowHandle({ approved: true, createSheet, auth: auth(),
+    expect(createOwnerSheetFlowHandle({ createSheet, sealer, auth: auth(), env })).toBeNull();
+    expect(createOwnerSheetFlowHandle({ approved: true, createSheet, sealer, auth: null, env })).toBeNull();
+    expect(createOwnerSheetFlowHandle({ approved: true, createSheet, sealer, auth: auth(),
       env: { EXPO_PUBLIC_API_URL: env.EXPO_PUBLIC_API_URL } })).toBeNull();
+    expect(createOwnerSheetDetailHandle({ locatorRecordId: sheet.locatorRecordId, sealer, isLocked: () => false,
+      auth: auth(), env })).toBeNull();
     expect(createSheet).not.toHaveBeenCalled();
   });
 
   it("steps up with the verified TOTP factor and refreshes the session before retrying", async () => {
     const good = auth();
     const responses = [new Response("{}", { status: 403 }), new Response(JSON.stringify({
-      locator_record_id: sheet.registration.locatorRecordId, status: "active", replayed: false }), { status: 200 })];
+      locator_record_id: sheet.locatorRecordId, status: "active", replayed: false }), { status: 200 })];
     const activations: string[] = [];
     const fetchImpl = vi.fn(async (url: string) => {
       if (!url.endsWith("/owner/session/activate")) return responses.shift()!;
       activations.push(url);
       return new Response(JSON.stringify({ session_version: 1, replayed: false }), { status: 200 });
     });
-    const flow = createOwnerSheetFlowHandle({ approved: true, createSheet: vi.fn(async () => sheet), auth: good,
-      env, fetch: fetchImpl as unknown as typeof fetch, print: vi.fn(async () => undefined) })!;
+    const flow = createOwnerSheetFlowHandle({ approved: true, createSheet: vi.fn(async () => factorySheet), sealer,
+      auth: good, env, fetch: fetchImpl as unknown as typeof fetch, copies, exporter })!;
     await flow.start();
     expect(flow.getState().status).toBe("needs_fresh_mfa");
     await flow.submitMfaCode("12345");
@@ -106,11 +136,13 @@ describe("owner emergency sheet composition", () => {
     expect(good.refreshSession).toHaveBeenCalledTimes(1);
     // W2a: the fresh TOTP check also activates the owner's claimant session control before the retry.
     expect(activations).toEqual(["https://api.test/owner/session/activate"]);
-    expect(flow.getState().status).toBe("ready_to_print");
+    expect(flow.getState().status).toBe("ready");
+    expect(copies.save).toHaveBeenCalledOnce();
 
     for (const failing of [auth("unverified"), auth("verified", { message: "bad" })]) {
-      const stepUp = createOwnerSheetFlowHandle({ approved: true, createSheet: vi.fn(async () => sheet),
-        auth: failing, env, fetch: vi.fn(async () => new Response("{}", { status: 403 })) as unknown as typeof fetch })!;
+      const stepUp = createOwnerSheetFlowHandle({ approved: true, createSheet: vi.fn(async () => factorySheet), sealer,
+        auth: failing, env, fetch: vi.fn(async () => new Response("{}", { status: 403 })) as unknown as typeof fetch,
+        copies, exporter })!;
       await stepUp.start(); await stepUp.submitMfaCode("123456");
       expect(stepUp.getState()).toMatchObject({ status: "needs_fresh_mfa", mfaRejected: true });
       expect(failing.refreshSession).not.toHaveBeenCalled();

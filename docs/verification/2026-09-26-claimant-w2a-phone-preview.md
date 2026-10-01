@@ -169,3 +169,38 @@ This was reported by the owner's local Claude Code session. It was **not observe
   - the cleanup.
 
 Next: `docs/superpowers/specs/2026-10-01-claimant-owner-sheet-pdf-first.md` (awaiting approval).
+
+## PDF-first emergency sheets (2026-10-01)
+
+**Spec:** `docs/superpowers/specs/2026-10-01-claimant-owner-sheet-pdf-first.md`, approved by the owner with decisions 1–5.
+
+**Verified in the cloud session (independently observed):**
+- **Hosted acceptance PASS, 12 of 12**, against the live `claimant-preview` deployment, which still runs `5edc637`; no server change was needed. It now drives the PDF-first create flow and the sheet screen:
+  - two sheets were created, and leaving afterwards revoked neither;
+  - the list shows both as active;
+  - one was revoked from its own screen after a fresh TOTP, and the other stayed active;
+  - owner 2 sees none of owner 1's sheets;
+  - the revoked sheet gets a decoy challenge;
+  - the live sheet proves possession.
+
+  The cleanup removed 3 synthetic users, and a dry run then reported 0.
+- **Tests:** 1,797 workspace tests pass (3 established skips). The new ones cover:
+  - create and a successful save, with the file name and folder message;
+  - cancelled and failed saves retrying the same sheet (one generation, one registration);
+  - viewing and saving the same sheet again after an app restart, with the real vault encryption;
+  - owner isolation (another vault key, another owner's address, another account's record);
+  - the locked vault (nothing opened);
+  - an explicit revoke with a confirmation, a fresh TOTP and one idempotency key, with the copy deleted and the other sheets unchanged;
+  - Active, Revoked and Expired badges and actions;
+  - the honest missing-copy state (nothing generated);
+  - temporary PDF deletion on success, cancel and failure;
+  - no secret or payload in state or in stored files.
+- **Checks:** lint, typecheck, coverage thresholds, the Phase 1 size limits, the security and mobile-secret checks, every claimant isolation check, and the 320 script tests. `npm ci` passes on a clean clone with npm 10.9.4, 11.4.2 and 11.21.0.
+
+**Pending (owner, emulator):** the new APK. Steps are in `docs/handoff/2026-10-01-claimant-preview-mfa-fix-session-close.md`, under "PDF-first rebuild and rerun":
+- the folder-picker save to Downloads;
+- view and save again after restarting the app;
+- a revoke on the device;
+- the second sign-in.
+
+Physical-device evidence is also still pending.

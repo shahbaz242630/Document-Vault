@@ -75,17 +75,17 @@ export function EmergencyAccessScreen({
 
       {onOpenEmergencySheet ? (
         <EmergencyOptionCard
-          badge="Printable option"
-          buttonLabel="Print an emergency sheet"
-          description="Print a sheet with a QR code for your next of kin to keep with important papers. They scan it in the Sanduqkin app to start a claim."
+          badge="PDF option"
+          buttonLabel="Create an emergency sheet"
+          description="Create a sheet with a QR code and save it as a PDF for your next of kin to keep with important papers. Printing is optional. They scan it in the Sanduqkin app to start a claim."
           details={[
             "Nothing to remember or type in.",
             "Your vault remains encrypted.",
             "Every claim is reviewed before anything is released.",
-            "Keep the sheet as safe as you would a will.",
+            "Keep the PDF as safe as you would a will.",
           ]}
           onPress={onOpenEmergencySheet}
-          title="Printed Emergency Sheet"
+          title="Emergency Sheet (PDF)"
         />
       ) : null}
       {onOpenEmergencySheets ? (

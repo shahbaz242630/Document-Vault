@@ -1,5 +1,6 @@
 import type { OwnerSheetListState } from "./owner-sheet-list-flow";
 import { ownerSheetReference } from "./owner-sheet-reference";
+import { ownerSheetStatusBadge, type OwnerSheetBadge } from "./owner-sheet-status";
 
 export type OwnerSheetListRow = Readonly<{
   id: string;
@@ -7,7 +8,9 @@ export type OwnerSheetListRow = Readonly<{
   printed: string;
   validity: string;
   statusLabel: "Active" | "Revoked" | "Expired";
-  canRevoke: boolean;
+  badge: OwnerSheetBadge;
+  /** Active sheets offer View, Save PDF and Revoke from their menu; the others only open their details. */
+  actions: readonly ("view" | "save" | "revoke")[];
 }>;
 
 export type OwnerSheetListView = Readonly<{
@@ -16,49 +19,35 @@ export type OwnerSheetListView = Readonly<{
   notice: Readonly<{ variant: "success" | "danger"; title: string; message: string }> | null;
   busy: boolean;
   rows: readonly OwnerSheetListRow[];
-  /** Set while the owner confirms revoking the sheet with this reference. */
-  confirmReference: string | null;
   showMfaField: boolean;
   showRetry: boolean;
 }>;
 
 const title = "My emergency sheets";
-const none = { notice: null, busy: false, rows: [], confirmReference: null, showMfaField: false,
-  showRetry: false } as const;
+const none = { notice: null, busy: false, rows: [], showMfaField: false, showRetry: false } as const;
 
-/** Slice 6J: what the "My emergency sheets" screen shows. It only ever holds dates, status and references. */
+/** "My emergency sheets": references, dates and status only. Opening a row leads to the sheet's own screen. */
 export function ownerSheetListView(state: OwnerSheetListState | null): OwnerSheetListView {
   if (!state) return { ...none, title, body: "Emergency sheets aren't available yet." };
-  const rows = state.sheets.map(row);
-  const selected = state.selected ? ownerSheetReference(state.selected) : null;
   switch (state.status) {
     case "loading":
       return { ...none, title, busy: true, body: "Loading your sheets." };
+    case "verifying_mfa":
+      return { ...none, title, busy: true, body: "Checking your code." };
     case "failed":
       return { ...none, title, showRetry: true, body: "We couldn't load your sheets.",
         notice: { variant: "danger", title: "Sheets not loaded", message: failureMessage(state.loadFailure) } };
-    case "confirming":
-      return { ...none, title, rows, confirmReference: selected,
-        body: `Revoke sheet ${selected}? Anyone holding this sheet will no longer be able to start a claim with it.` };
-    case "revoking":
-    case "verifying_mfa":
-      return { ...none, title, rows, busy: true,
-        body: selected ? "Revoking the sheet securely. Keep the app open." : "Checking your code." };
     case "needs_fresh_mfa":
-      return { ...none, title, rows, showMfaField: true, confirmReference: selected,
-        body: selected ? "Enter the 6-digit code from your authenticator app to confirm it's you."
-          : "To see your sheets, enter the 6-digit code from your authenticator app to confirm it's you.",
+      return { ...none, title, showMfaField: true,
+        body: "To see your sheets, enter the 6-digit code from your authenticator app to confirm it's you.",
         notice: state.mfaRejected
           ? { variant: "danger", title: "Code not accepted", message: "Check the code and try again." } : null };
-    case "ready":
+    case "ready": {
+      const rows = state.sheets.map(row);
       return { ...none, title, rows,
-        body: rows.length === 0 ? "You haven't printed any emergency sheets yet."
-          : "Each sheet shows the reference printed on it. Revoke any sheet that is lost or no longer with someone you trust.",
-        notice: state.revokeFailed
-          ? { variant: "danger", title: "Sheet not revoked", message: "Nothing changed. Please try again." }
-          : state.revoked
-            ? { variant: "success", title: "Sheet revoked", message: "It can no longer be used to start a claim." }
-            : null };
+        body: rows.length === 0 ? "You haven't created any emergency sheets yet."
+          : "Tap a sheet to view it, save its PDF again or revoke it. Each sheet shows the reference printed on it." };
+    }
   }
 }
 
@@ -71,13 +60,14 @@ function failureMessage(failure: OwnerSheetListState["loadFailure"]): string {
 function row(sheet: OwnerSheetListState["sheets"][number]): OwnerSheetListRow {
   const statusLabel = sheet.status === "active" ? "Active" : sheet.status === "revoked" ? "Revoked" : "Expired";
   return { id: sheet.locatorRecordId, reference: ownerSheetReference(sheet.locatorRecordId),
-    printed: `Printed ${formatDate(sheet.issuedAt)}`,
+    printed: `Created ${formatDate(sheet.issuedAt)}`,
     validity: sheet.status === "revoked" && sheet.revokedAt ? `Revoked ${formatDate(sheet.revokedAt)}`
       : sheet.status === "expired" ? `Expired ${formatDate(sheet.expiresAt)}` : `Valid until ${formatDate(sheet.expiresAt)}`,
-    statusLabel, canRevoke: sheet.status === "active" };
+    statusLabel, badge: ownerSheetStatusBadge(sheet.status),
+    actions: sheet.status === "active" ? ["view", "save", "revoke"] : [] };
 }
 
-function formatDate(value: string): string {
+export function formatDate(value: string): string {
   return new Date(value).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric",
     timeZone: "UTC" });
 }

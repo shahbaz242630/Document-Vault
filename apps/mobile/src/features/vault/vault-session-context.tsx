@@ -61,6 +61,8 @@ type VaultSessionContextValue = {
     options?: { auditLog?: SealedEmergencyCodeSetupOptions["auditLog"] },
   ) => Promise<void>;
   createOfflineCodeEmergencySheet: (input: OwnerOfflineCodeSheetInput) => Promise<OwnerOfflineCodeSheet>;
+  sealOwnerSheetCopy: VaultSession["sealOwnerSheetCopy"];
+  openOwnerSheetCopy: VaultSession["openOwnerSheetCopy"];
   restoreAsset: (id: string) => Promise<void>;
   signOut: () => void;
   softDeleteAsset: (id: string) => Promise<void>;
@@ -183,16 +185,29 @@ function useVaultEmergencyCodeActions(session: VaultSession | null) {
       requireVaultSession(session).createOfflineCodeEmergencySheet(input),
     [session],
   );
+  // A locked or signed-out vault has no session, so a sheet copy can be neither sealed nor opened.
+  const sealOwnerSheetCopy = useCallback<VaultSession["sealOwnerSheetCopy"]>(
+    (input) => requireVaultSession(session).sealOwnerSheetCopy(input),
+    [session],
+  );
+  const openOwnerSheetCopy = useCallback<VaultSession["openOwnerSheetCopy"]>(
+    (input) => requireVaultSession(session).openOwnerSheetCopy(input),
+    [session],
+  );
 
   return useMemo(
     () => ({
       createOfflineCodeEmergencySheet,
+      openOwnerSheetCopy,
+      sealOwnerSheetCopy,
       createSealedEmergencyCodeSetup,
       regenerateSealedEmergencyCodeSetup,
       revokeSealedEmergencyCodeSetup,
     }),
     [
       createOfflineCodeEmergencySheet,
+      openOwnerSheetCopy,
+      sealOwnerSheetCopy,
       createSealedEmergencyCodeSetup,
       regenerateSealedEmergencyCodeSetup,
       revokeSealedEmergencyCodeSetup,

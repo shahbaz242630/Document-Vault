@@ -1,6 +1,6 @@
 # Owner emergency sheets — PDF first, view and save again
 
-Proposed on 2026-10-01, after the owner's emulator rerun of the MFA fix (EAS build `1b00c951-8f04-4c02-b3e5-e09891d4650e`, commit `cf86de4`). **Status: awaiting owner approval. Nothing below is built yet.**
+Proposed on 2026-10-01, after the owner's emulator rerun of the MFA fix (EAS build `1b00c951-8f04-4c02-b3e5-e09891d4650e`, commit `cf86de4`). **Approved by the owner on 2026-10-01 with decisions 1–5 as recommended, and built the same day** (see "Implementation notes").
 
 ## Why
 
@@ -104,6 +104,27 @@ The owner wants the sheet to be a PDF they create and save. Printing becomes opt
 - **Lifecycle:** leaving after the copy is stored doesn't revoke; a failed copy store does revoke.
 - **The isolation check** pins decision 4.
 - **The hosted acceptance** keeps passing; the server is unchanged.
+
+## Implementation notes (2026-10-01)
+
+- **Modules** (`apps/mobile/src/features/claimant-offline-code/`):
+  - `owner-sheet-copy.ts`: pure types;
+  - `owner-sheet-copy-store.ts`: the ciphertext files under `<documents>/owner-emergency-sheets/`;
+  - `owner-sheet-export.ts`: the temporary PDF, the Android folder picker, the share sheet and print;
+  - `owner-sheet-flow.ts`: create;
+  - `owner-sheet-detail-flow.ts`, with its view model and panel: one sheet's screen, at the new route `app/settings/emergency-sheet-detail.tsx`;
+  - `owner-sheet-status.ts` and `owner-sheet-badge.tsx`: status badges and save messages;
+  - the list is now read-only, with a "⋯" menu.
+- **Encryption:** `apps/mobile/src/features/vault/owner-sheet-copy-crypto.ts` uses XChaCha20-Poly1305 under a BLAKE2b subkey of the vault key (label `sanduqkin.owner-sheet-copy.v1`). The associated data is that label plus the owner ID and the record ID. `vault-session.ts` exposes `sealOwnerSheetCopy` and `openOwnerSheetCopy`, so the key never leaves the session, and a locked vault has no session to open with.
+- **Preview build:** `allowBackup: false` for the `claimant_preview` target only. `expo-file-system` ~56.0.11 is now a direct dependency; it was already in the lockfile.
+- **Isolation check** (`claimant-owner-emergency-sheet-isolation-check.cjs`):
+  - files are allowed only in the copy store and the exporter, and pinned to those two in the whole app;
+  - the exporter's `finally` clean-up is pinned;
+  - so is the rule that the store writes only sealed data;
+  - so is the active-only auto-revoke rule;
+  - so is the detail screen's server-status check, the explicit revoke and the lock handling;
+  - so is vault-session-only sealing.
+- **Revoking moved** from the list to the sheet's own screen. The hosted acceptance and the services/api acceptance suites drive the new flows.
 
 ## Non-goals
 

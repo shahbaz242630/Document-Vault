@@ -562,7 +562,7 @@ describe("Slice 6I printed sheet scanned into the claim screen's flow", () => {
     printedSecret: fixture.synthetic_client_secret.secret, expiresAt: new Date(start + 86_400_000).toISOString(),
     registration: { locatorRecordId: fixture.record_binding.locator_record_id } as
       OwnerOfflineCodeSheet["registration"] } as OwnerOfflineCodeSheet;
-    const html = renderOwnerSheetHtml(printedSheet);
+    const html = renderOwnerSheetHtml({ ...printedSheet, locatorRecordId: printedSheet.registration.locatorRecordId });
 
     const flow = createClaimFlow({ handle: d.bootstrap.claimFlowRuntime(), newKey: uuid });
     const seen: ClaimFlowSnapshot[] = [];

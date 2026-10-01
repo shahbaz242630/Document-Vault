@@ -15,8 +15,16 @@ Fixed in the mobile app only:
 
 No server, schema or approval change. The hosted acceptance passed 12 of 12.
 
+**Then, the same day, PDF-first emergency sheets** (spec approved with decisions 1–5, and built):
+- create, then "Save PDF" (Android folder picker), with printing optional;
+- an encrypted copy on the device, under the vault key, so a sheet can be viewed and saved again;
+- a sheet screen with View, Save and Revoke (confirmation and fresh TOTP);
+- a saved sheet is never auto-revoked.
+
+The hosted acceptance passed 12 of 12 again.
+
 Next, owner-held:
-1. rebuild and install the Preview APK, then rerun on the emulator;
+1. rebuild and install the Preview APK, then follow "PDF-first rebuild and rerun" in the close-out;
 2. approve the dependency and Expo Doctor fixes that turn CI red on `main`;
 3. clean up and rotate the tokens.
 

@@ -16,6 +16,10 @@ import { createOwnerOfflineCodeClient }
 import { createOwnerOfflineCodeSheet, type OwnerOfflineCodeSheet }
   from "../../../../apps/mobile/src/features/claimant-offline-code/owner-offline-code-sheet-factory";
 import { createOwnerSheetFlow } from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-flow";
+import type { OwnerSheetCopy, OwnerSheetCopyLoad, OwnerSheetSaveResult }
+  from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-copy";
+import { createOwnerSheetDetailFlow }
+  from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-detail-flow";
 import { createOwnerSheetListFlow }
   from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-list-flow";
 import { renderOwnerSheetHtml } from "../../../../apps/mobile/src/features/claimant-offline-code/owner-sheet-html";
@@ -327,9 +331,25 @@ describe("Slice 6G owner registration to claimant challenge acceptance", () => {
   }, 60_000);
 });
 
+/* PDF-first: in-memory stand-ins for the device copy store and the PDF save; the routes are the real ones. */
+function sheetDevice() {
+  const saved = new Map<string, OwnerSheetCopy>(); const pdfs: string[] = [];
+  const copies = {
+    saved,
+    save: async (owner: string, copy: OwnerSheetCopy) => { saved.set(`${owner}:${copy.locatorRecordId}`, copy); },
+    load: async (owner: string, id: string): Promise<OwnerSheetCopyLoad> => {
+      const copy = saved.get(`${owner}:${id}`); return copy ? { status: "available", copy } : { status: "missing" }; },
+    remove: async (owner: string, id: string) => { saved.delete(`${owner}:${id}`); },
+  };
+  const exporter = { canPickFolder: true, print: async () => true,
+    save: async (html: string): Promise<OwnerSheetSaveResult> => { pdfs.push(html);
+      return { status: "saved", fileName: "Sanduqkin-emergency-sheet.pdf", folder: "Download" }; } };
+  return { copies, exporter, pdfs };
+}
+
 describe("Slice 6H owner app flow to claimant acceptance", () => {
   function ownerApp(system: ReturnType<typeof harness>, ownerId: string) {
-    const jwt = system.owner(ownerId); const printed: string[] = []; const made: OwnerOfflineCodeSheet[] = [];
+    const jwt = system.owner(ownerId); const made: OwnerOfflineCodeSheet[] = []; const device = sheetDevice();
     const fetchImpl = (async (url: string, init: RequestInit) => system.app.request(url, init)) as unknown as typeof fetch;
     const flow = createOwnerSheetFlow({
       createSheet: async (input) => { const sheet = await createOwnerOfflineCodeSheet({ ...input, approved: true,
@@ -338,18 +358,18 @@ describe("Slice 6H owner app flow to claimant acceptance", () => {
       client: createOwnerOfflineCodeClient({ apiBaseUrl: apiOrigin, ownerOrigin, fetch: fetchImpl,
         getAccessToken: async () => jwt }),
       verifyFreshMfa: async () => false, renderSheetHtml: renderOwnerSheetHtml,
-      print: async (html) => { printed.push(html); }, randomUUID,
+      copies: device.copies, exporter: device.exporter, randomUUID,
     });
-    return { flow, printed, made };
+    return { flow, printed: device.pdfs, made, device };
   }
 
-  it("generates, self-checks, registers through the real route and prints a sheet the claimant can prove", async () => {
+  it("generates, self-checks, registers through the real route and saves a PDF the claimant can prove", async () => {
     await sodium.ready;
     const system = harness(); const ownerId = randomUUID(); const owner = ownerApp(system, ownerId);
     await owner.flow.start();
-    expect(owner.flow.getState().status).toBe("ready_to_print");
-    await owner.flow.print(); owner.flow.confirmPrinted();
-    expect(owner.flow.getState().status).toBe("done");
+    expect(owner.flow.getState().status).toBe("ready");
+    await owner.flow.save();
+    expect(owner.flow.getState()).toMatchObject({ status: "ready", saveResult: { status: "saved" } });
     const [sheet] = owner.made; const [html] = owner.printed;
     expect(system.store.locators.get(sheet!.registration.locatorRecordId)?.ownerUserId).toBe(ownerId);
     expect(html).toContain(sheet!.printedLocator); expect(html).toContain(sheet!.printedSecret);
@@ -368,11 +388,19 @@ describe("Slice 6H owner app flow to claimant acceptance", () => {
       .route_possession_asserted).toBe(true);
   }, 60_000);
 
-  it("revokes through the real route when the owner abandons before confirming, leaving only a decoy", async () => {
+  it("keeps an active sheet registered when the owner leaves after saving it", async () => {
     await sodium.ready;
     const system = harness(); const owner = ownerApp(system, randomUUID());
-    await owner.flow.start(); await owner.flow.print();
-    await owner.flow.abandon();
+    await owner.flow.start(); await owner.flow.save(); await owner.flow.abandon();
+    expect(system.store.locators.get(owner.made[0]!.registration.locatorRecordId)?.status).toBe("active");
+  }, 60_000);
+
+  it("revokes through the real route when the copy can't be stored, leaving only a decoy", async () => {
+    await sodium.ready;
+    const system = harness(); const owner = ownerApp(system, randomUUID());
+    owner.device.copies.save = async () => { throw new Error("disk full"); };
+    await owner.flow.start();
+    expect(owner.flow.getState().status).toBe("failed");
     const [sheet] = owner.made;
     expect(system.store.locators.get(sheet!.registration.locatorRecordId)?.status).toBe("revoked");
     const decoy = await system.challenge(sheet!.printedLocator);
@@ -385,7 +413,7 @@ describe("Slice 6I printed sheet to claimant scan acceptance", () => {
   it("scans the QR code the owner actually printed and proves possession through the real routes", async () => {
     await sodium.ready;
     const system = harness(); const ownerId = randomUUID(); const jwt = system.owner(ownerId);
-    const printed: string[] = []; const made: OwnerOfflineCodeSheet[] = [];
+    const made: OwnerOfflineCodeSheet[] = []; const device = sheetDevice();
     const fetchImpl = (async (url: string, init: RequestInit) => system.app.request(url, init)) as unknown as typeof fetch;
     const flow = createOwnerSheetFlow({
       createSheet: async (input) => { const sheet = await createOwnerOfflineCodeSheet({ ...input, approved: true,
@@ -394,10 +422,10 @@ describe("Slice 6I printed sheet to claimant scan acceptance", () => {
       client: createOwnerOfflineCodeClient({ apiBaseUrl: apiOrigin, ownerOrigin, fetch: fetchImpl,
         getAccessToken: async () => jwt }),
       verifyFreshMfa: async () => false, renderSheetHtml: renderOwnerSheetHtml,
-      print: async (html) => { printed.push(html); }, randomUUID,
+      copies: device.copies, exporter: device.exporter, randomUUID,
     });
-    await flow.start(); await flow.print(); flow.confirmPrinted();
-    const [sheet] = made; const [html] = printed;
+    await flow.start(); await flow.save();
+    const [sheet] = made; const [html] = device.pdfs;
 
     const scanned: string[] = [];
     const scan = createClaimSheetScan((text) => { scanned.push(text); });
@@ -420,7 +448,7 @@ describe("Slice 6I printed sheet to claimant scan acceptance", () => {
 
 describe("Slice 6J my emergency sheets acceptance", () => {
   function ownerDevice(system: ReturnType<typeof harness>, ownerId: string) {
-    const jwt = system.owner(ownerId); const printed: string[] = []; const made: OwnerOfflineCodeSheet[] = [];
+    const jwt = system.owner(ownerId); const made: OwnerOfflineCodeSheet[] = []; const device = sheetDevice();
     const fetchImpl = (async (url: string, init: RequestInit) => system.app.request(url, init)) as unknown as typeof fetch;
     const client = createOwnerOfflineCodeClient({ apiBaseUrl: apiOrigin, ownerOrigin, fetch: fetchImpl,
       getAccessToken: async () => jwt });
@@ -428,11 +456,14 @@ describe("Slice 6J my emergency sheets acceptance", () => {
       createSheet: async (input) => { const sheet = await createOwnerOfflineCodeSheet({ ...input, approved: true,
         mek: sodium.randombytes_buf(32) }); made.push(sheet); return sheet; },
       getOwnerId: async () => ownerId, client, verifyFreshMfa: async () => false,
-      renderSheetHtml: renderOwnerSheetHtml, print: async (html) => { printed.push(html); }, randomUUID });
+      renderSheetHtml: renderOwnerSheetHtml, copies: device.copies, exporter: device.exporter, randomUUID });
     const verifyFreshMfa = vi.fn(async (code: string) => { if (code !== "123456") return false;
       system.staleMfa.delete(jwt); return true; });
-    return { jwt, client, print, printed, made, verifyFreshMfa,
-      list: createOwnerSheetListFlow({ client, verifyFreshMfa, randomUUID }) };
+    const detail = (locatorRecordId: string) => createOwnerSheetDetailFlow({ locatorRecordId, client,
+      copies: device.copies, exporter: device.exporter, renderSheetHtml: renderOwnerSheetHtml,
+      getOwnerId: async () => ownerId, isLocked: () => false, verifyFreshMfa, randomUUID });
+    return { jwt, client, print, printed: device.pdfs, made, verifyFreshMfa, detail, device,
+      list: createOwnerSheetListFlow({ client, verifyFreshMfa }) };
   }
   async function proves(system: ReturnType<typeof harness>, sheet: OwnerOfflineCodeSheet) {
     const issued = await system.challenge(sheet.printedLocator);
@@ -451,7 +482,7 @@ describe("Slice 6J my emergency sheets acceptance", () => {
     await sodium.ready;
     const system = harness(); const device = ownerDevice(system, randomUUID());
     for (let count = 0; count < 2; count += 1) {
-      const flow = device.print(); await flow.start(); await flow.print(); flow.confirmPrinted();
+      const flow = device.print(); await flow.start(); await flow.save();
     }
     const [first, second] = device.made;
     expect(device.printed[1]).toContain(`<dt>Reference</dt><dd>${second!.registration.locatorRecordId
@@ -468,11 +499,17 @@ describe("Slice 6J my emergency sheets acceptance", () => {
     const listCalls = system.rpc.mock.calls.filter(([name]) => name === "claimant_list_offline_code_v2_locators");
     expect(JSON.stringify(listed)).not.toContain(first!.printedSecret);
 
-    device.list.requestRevoke(first!.registration.locatorRecordId);
-    await device.list.confirmRevoke();
-    expect(device.list.getState().status).toBe("needs_fresh_mfa");
-    await device.list.submitMfaCode("123456");
-    expect(device.list.getState()).toMatchObject({ status: "ready", revoked: true });
+    // The saved sheet opens again with the same QR payload, then is revoked from its own screen.
+    const sheetScreen = device.detail(first!.registration.locatorRecordId);
+    await sheetScreen.load(); sheetScreen.reveal();
+    expect(sheetScreen.revealedSheet()?.sheetPayload).toBe(first!.sheetPayload);
+    sheetScreen.requestRevoke();
+    await sheetScreen.confirmRevoke();
+    expect(sheetScreen.getState().status).toBe("needs_fresh_mfa");
+    await sheetScreen.submitMfaCode("123456");
+    expect(sheetScreen.getState()).toMatchObject({ status: "revoked", justRevoked: true });
+    expect(device.device.copies.saved.size).toBe(1);
+    await device.list.load();
     expect(device.list.getState().sheets.find((sheet) =>
       sheet.locatorRecordId === first!.registration.locatorRecordId)?.status).toBe("revoked");
     expect(system.store.locators.get(first!.registration.locatorRecordId)?.status).toBe("revoked");
@@ -485,8 +522,11 @@ describe("Slice 6J my emergency sheets acceptance", () => {
   it("never shows or revokes another owner's sheet", async () => {
     await sodium.ready;
     const system = harness(); const owner = ownerDevice(system, randomUUID()); const other = ownerDevice(system, randomUUID());
-    const flow = owner.print(); await flow.start(); await flow.print(); flow.confirmPrinted();
+    const flow = owner.print(); await flow.start(); await flow.save();
     await other.list.load();
+    const otherScreen = other.detail(owner.made[0]!.registration.locatorRecordId);
+    await otherScreen.load();
+    expect(otherScreen.getState().status).toBe("not_found");
     expect(other.list.getState()).toMatchObject({ status: "ready", sheets: [] });
     await expect(other.client.revoke(owner.made[0]!.registration.locatorRecordId, randomUUID())).rejects.toThrow();
     expect(system.store.locators.get(owner.made[0]!.registration.locatorRecordId)?.status).toBe("active");

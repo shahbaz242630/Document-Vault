@@ -17,6 +17,15 @@ const files = {
   listPanel: `${feature}/owner-sheet-list-panel.tsx`,
   reference: `${feature}/owner-sheet-reference.ts`,
   launch: `${feature}/owner-sheet-launch.ts`,
+  // PDF-first sheets (owner decisions 2026-10-01).
+  copy: `${feature}/owner-sheet-copy.ts`,
+  copyStore: `${feature}/owner-sheet-copy-store.ts`,
+  exporter: `${feature}/owner-sheet-export.ts`,
+  detailFlow: `${feature}/owner-sheet-detail-flow.ts`,
+  detailView: `${feature}/owner-sheet-detail-view-model.ts`,
+  detailPanel: `${feature}/owner-sheet-detail-panel.tsx`,
+  status: `${feature}/owner-sheet-status.ts`,
+  badge: `${feature}/owner-sheet-badge.tsx`,
 };
 const sources = Object.fromEntries(Object.entries(files).map(([name, path]) => [name, read(path)]));
 
@@ -33,31 +42,53 @@ for (const [name, token] of [["factory", "checkOfflineCodeV2ReleaseWrap("], ["fa
   ["factory", "input.approved ?? (OWNER_OFFLINE_CODE_SHEET_APPROVED || isClaimantPreviewBuild())"],
   ["panel", "flow.handleAppState(next)"], ["panel", "void flow.abandon()"], ["client", "Idempotency-Key"],
   ["runtime", "export function createOwnerSheetListHandle"], ["listPanel", "useOwnerSheetListHandle()"],
-  ["listPanel", "return () => flow.close();"], ["listFlow", "await deps.client.revoke(selected, revokeKey, signal)"],
-  ["html", "ownerSheetReference(sheet.registration.locatorRecordId)"]])
+  ["listPanel", "return () => flow.close();"], ["html", "ownerSheetReference(sheet.locatorRecordId)"],
+  // A sheet is revoked automatically only if it never became active (registered AND its copy stored).
+  ["flow", "const pending = !core.committed() && core.registrationAttempted && core.pendingSheet"],
+  ["flow", "await deps.copies.save(ownerId, copy);"],
+  // The copy store writes only what the vault session sealed.
+  ["copyStore", "const sealed = await deps.sealer.seal({ ...address, plaintext });"],
+  ["copyStore", "nonce: sealed.nonce, ciphertext: sealed.ciphertext }));"],
+  // The exporter always deletes its temporary PDFs.
+  ["exporter", "} finally {\n        discard(shared);\n        discard(rendered);"],
+  // The detail screen: server status first, explicit revoke, copies dropped for sheets that are no longer active.
+  ["detailFlow", "if (summary.status !== \"active\") {"], ["detailFlow", "await deps.copies.remove(ownerId, summary.locatorRecordId);"],
+  ["detailFlow", "await deps.client.revoke(summary.locatorRecordId, revokeKey);"],
+  ["detailFlow", "if (deps.isLocked()) { core.set({ status: \"locked\" }); return; }"],
+  ["detailPanel", "usePreventScreenCapture();"], ["detailPanel", "return () => { cancelled = true; flow.close(); };"],
+  ["detailPanel", "useEffect(() => { if (flow && isLocked) flow.close(); }, [flow, isLocked]);"]])
   if (!sources[name].includes(token)) throw new Error(`Owner emergency sheet lost control in ${name}: ${token}`);
 
 const listHandle = sources.runtime.slice(sources.runtime.indexOf("export function createOwnerSheetListHandle"));
 if (!listHandle.includes("if (!(input.approved ?? ownerSheetsOpen())) return null;"))
   throw new Error("The owner sheet list must sit behind the owner sheet launch approval.");
-// The list screen shows dates, status and references only; it never reaches the sheet, crypto or printer.
-for (const name of ["listFlow", "listView", "listPanel"])
-  for (const token of ["printedSecret", "sheetPayload", "printAsync", "createSheet", "proof-producer", "generator"])
+// The list screen shows dates, status and references only; it never reaches the sheet, crypto, copies or printer.
+for (const name of ["listFlow", "listView", "listPanel", "status", "badge"])
+  for (const token of ["printedSecret", "sheetPayload", "printAsync", "createSheet", "proof-producer", "generator",
+    "sealer", "copy-store", "revoke("])
     if (sources[name].includes(token)) throw new Error(`Owner sheet ${name} reaches sheet material: ${token}`);
 
-// No storage, logging, files or sharing: the sheet exists only in memory and in the print dialog.
+// No storage, logging or clipboard anywhere. Files are touched only by the copy store (ciphertext) and the
+// exporter (temporary PDFs it deletes); sharing and PDF rendering only by the exporter.
+const fileAllowed = { copyStore: ["expo-file-system"],
+  exporter: ["expo-file-system", "printToFileAsync", "shareAsync", "expo-sharing"] };
 for (const [name, source] of Object.entries(sources))
   for (const token of ["SecureStore", "AsyncStorage", "localStorage", "sessionStorage", "expo-file-system",
     "FileSystem", "printToFileAsync", "shareAsync", "expo-sharing", "Share.share", "Clipboard", "console.",
     "Math.random", "production_approved: true", "import("])
-    if (source.includes(token)) throw new Error(`Owner emergency sheet ${name} contains forbidden behavior: ${token}`);
+    if (source.includes(token) && !(fileAllowed[name] ?? []).includes(token))
+      throw new Error(`Owner emergency sheet ${name} contains forbidden behavior: ${token}`);
 
 // The vault key enters only through the vault session and never crosses into the flow, client or screen.
 const session = read("apps/mobile/src/features/vault/vault-session.ts");
 if (!/createOwnerOfflineCodeSheet\(\{[^}]*mek: key,[^}]*\}\)/su.test(session))
   throw new Error("The vault session must pass its own key to the owner sheet factory.");
+// PDF-first: sheet copies are sealed and opened only by the vault session, with its own key.
+if (!session.includes("sealOwnerSheetCopy: (input) => sealOwnerSheetCopy({ ...input, key }),")
+  || !session.includes("openOwnerSheetCopy: (input) => openOwnerSheetCopy({ ...input, key }),"))
+  throw new Error("Owner sheet copies must be sealed and opened inside the vault session.");
 for (const name of ["client", "flow", "html", "runtime", "viewModel", "panel", "listFlow", "listView", "listPanel",
-  "reference", "launch"])
+  "reference", "launch", "copy", "copyStore", "exporter", "detailFlow", "detailView", "detailPanel", "status", "badge"])
   if (/\bmek\b|masterKey|vaultKey/u.test(sources[name]))
     throw new Error(`Owner emergency sheet ${name} must never handle the vault key.`);
 
@@ -69,10 +100,19 @@ for (const file of sourceFiles(join(root, "apps/mobile"))) {
   if (source.includes("createOwnerOfflineCodeSheet(") && path !== files.factory) factoryImporters.push(path);
   if (path.startsWith("apps/mobile/app/")) {
     for (const token of ["owner-offline-code-sheet-factory", "owner-offline-code-client", "owner-sheet-flow\"",
-      "offline-code-v2-sheet-generator", "offline-code-v2-proof", "qrcode-generator", "expo-print"])
+      "offline-code-v2-sheet-generator", "offline-code-v2-proof", "qrcode-generator", "expo-print",
+      "owner-sheet-copy-store", "owner-sheet-export", "owner-sheet-detail-flow", "expo-file-system", "expo-sharing"])
       if (source.includes(token)) throw new Error(`Route ${path} reaches past the owner sheet handle: ${token}`);
   }
 }
+const fileSystemUsers = [];
+for (const file of sourceFiles(join(root, "apps/mobile"))) {
+  const path = relative(root, file).replaceAll("\\", "/");
+  if (!/\.test\.[cm]?[jt]sx?$/u.test(path) && readFileSync(file, "utf8").includes("expo-file-system"))
+    fileSystemUsers.push(path.split("/").pop());
+}
+if (JSON.stringify(fileSystemUsers.sort()) !== JSON.stringify(["owner-sheet-copy-store.ts", "owner-sheet-export.ts"]))
+  throw new Error(`Only the owner sheet copy store and exporter may use files: ${fileSystemUsers.join(", ")}`);
 if (JSON.stringify(factoryImporters) !== JSON.stringify(["apps/mobile/src/features/vault/vault-session.ts"]))
   throw new Error(`Only the vault session may create owner sheets: ${factoryImporters.join(", ")}`);
 

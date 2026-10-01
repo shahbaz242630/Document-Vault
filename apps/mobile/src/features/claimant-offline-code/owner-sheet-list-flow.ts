@@ -5,16 +5,15 @@ import {
 } from "./owner-offline-code-client";
 
 /*
- * Slice 6J: "My emergency sheets". The owner sees their sheets (dates and status only) and can revoke an active
- * one. Revoking needs a fresh MFA step-up; a retry after the step-up reuses the same idempotency key, so one
- * confirmed revoke is one server-side revocation however many times it is retried.
+ * Slice 6J, PDF-first since 2026-10-01: "My emergency sheets". The owner sees their sheets (dates and status only)
+ * and opens one to view, save or revoke it on its own screen (owner-sheet-detail-flow.ts); the list itself
+ * changes nothing.
  *
  * Loading needs an AAL2 owner session with an active claimant session control. When the API says either is missing
  * (403 or 401) the owner is asked for a TOTP step-up, which also activates the session control, and the list is
  * loaded once more; a second refusal is reported as a session problem rather than another prompt.
  */
-export type OwnerSheetListStatus = "loading" | "ready" | "confirming" | "revoking" | "needs_fresh_mfa"
-  | "verifying_mfa" | "failed";
+export type OwnerSheetListStatus = "loading" | "ready" | "needs_fresh_mfa" | "verifying_mfa" | "failed";
 
 /** Why the list could not be loaded: no answer from the API, a session it still refused, or anything else. */
 export type OwnerSheetListLoadFailure = "unreachable" | "session" | "server";
@@ -22,22 +21,17 @@ export type OwnerSheetListLoadFailure = "unreachable" | "session" | "server";
 export type OwnerSheetListState = Readonly<{
   status: OwnerSheetListStatus;
   sheets: readonly OwnerOfflineCodeSheetSummary[];
-  /** The sheet being revoked, while a revoke is being confirmed or carried out. */
-  selected: string | null;
   mfaRejected: boolean;
-  revokeFailed: boolean;
-  revoked: boolean;
   loadFailure: OwnerSheetListLoadFailure | null;
 }>;
 
 export type OwnerSheetListDeps = Readonly<{
-  client: Pick<OwnerOfflineCodeClient, "list" | "revoke">;
+  client: Pick<OwnerOfflineCodeClient, "list">;
   verifyFreshMfa: (code: string) => Promise<boolean>;
-  randomUUID: () => string;
 }>;
 
-const initial: OwnerSheetListState = Object.freeze({ status: "loading", sheets: Object.freeze([]), selected: null,
-  mfaRejected: false, revokeFailed: false, revoked: false, loadFailure: null });
+const initial: OwnerSheetListState = Object.freeze({ status: "loading", sheets: Object.freeze([]),
+  mfaRejected: false, loadFailure: null });
 const sessionRefused = (error: unknown) => error instanceof OwnerOfflineCodeClientError
   && (error.kind === "fresh_mfa_required" || error.kind === "unauthorized");
 const loadFailureOf = (error: unknown): OwnerSheetListLoadFailure => sessionRefused(error) ? "session"
@@ -45,7 +39,6 @@ const loadFailureOf = (error: unknown): OwnerSheetListLoadFailure => sessionRefu
 
 export function createOwnerSheetListFlow(deps: OwnerSheetListDeps) {
   let state = initial;
-  let revokeKey: string | null = null;
   let controller: AbortController | null = null;
   let epoch = 0;
   const listeners = new Set<(value: OwnerSheetListState) => void>();
@@ -56,53 +49,25 @@ export function createOwnerSheetListFlow(deps: OwnerSheetListDeps) {
       try { listener(state); } catch { /* A screen listener cannot change the list. */ }
     }
   };
-  const begin = () => {
-    controller?.abort();
-    controller = new AbortController();
-    epoch += 1;
-    return { run: epoch, signal: controller.signal };
-  };
-  const current = (run: number) => run === epoch;
 
   async function load(afterStepUp = false): Promise<void> {
-    const { run, signal } = begin();
-    set({ status: "loading", selected: null, mfaRejected: false, loadFailure: null });
+    controller?.abort();
+    controller = new AbortController();
+    const run = ++epoch; const signal = controller.signal;
+    set({ status: "loading", mfaRejected: false, loadFailure: null });
     try {
       const sheets = await deps.client.list(signal);
-      if (current(run)) set({ status: "ready", sheets });
+      if (run === epoch) set({ status: "ready", sheets });
     } catch (error) {
-      if (!current(run)) return;
+      if (run !== epoch) return;
       if (sessionRefused(error) && !afterStepUp) set({ status: "needs_fresh_mfa", sheets: Object.freeze([]) });
       else set({ status: "failed", sheets: Object.freeze([]), loadFailure: loadFailureOf(error) });
     }
   }
 
-  async function revoke(): Promise<void> {
-    const selected = state.selected;
-    if (!selected || !revokeKey) return;
-    const { run, signal } = begin();
-    set({ status: "revoking", mfaRejected: false, revokeFailed: false, revoked: false });
-    try {
-      await deps.client.revoke(selected, revokeKey, signal);
-      if (!current(run)) return;
-      revokeKey = null;
-      const sheets = await deps.client.list(signal).catch(() => state.sheets.map((sheet) =>
-        sheet.locatorRecordId === selected ? Object.freeze({ ...sheet, status: "revoked" as const }) : sheet));
-      if (current(run)) set({ status: "ready", sheets: Object.freeze([...sheets]), selected: null, revoked: true });
-    } catch (error) {
-      if (!current(run)) return;
-      if (error instanceof OwnerOfflineCodeClientError && error.kind === "fresh_mfa_required") {
-        set({ status: "needs_fresh_mfa" });
-        return;
-      }
-      revokeKey = null;
-      set({ status: "ready", selected: null, revokeFailed: true });
-    }
-  }
-
   return Object.freeze({
     async load(): Promise<void> {
-      if (state.status === "revoking" || state.status === "verifying_mfa") return;
+      if (state.status === "verifying_mfa") return;
       await load();
     },
     getState: () => state,
@@ -110,35 +75,18 @@ export function createOwnerSheetListFlow(deps: OwnerSheetListDeps) {
       listeners.add(listener);
       return () => { listeners.delete(listener); };
     },
-    /** Asks the owner to confirm revoking one of their active sheets. */
-    requestRevoke(locatorRecordId: string): void {
-      const sheet = state.sheets.find((entry) => entry.locatorRecordId === locatorRecordId);
-      if (state.status !== "ready" || !sheet || sheet.status !== "active") return;
-      set({ status: "confirming", selected: locatorRecordId, revokeFailed: false, revoked: false });
-    },
-    cancelRevoke(): void {
-      if ((state.status !== "confirming" && state.status !== "needs_fresh_mfa") || !state.selected) return;
-      controller?.abort(); epoch += 1; revokeKey = null;
-      set({ status: "ready", selected: null, mfaRejected: false });
-    },
-    async confirmRevoke(): Promise<void> {
-      if (state.status !== "confirming") return;
-      revokeKey = deps.randomUUID();
-      await revoke();
-    },
     async submitMfaCode(code: string): Promise<void> {
       if (state.status !== "needs_fresh_mfa") return;
       const run = ++epoch;
       set({ status: "verifying_mfa", mfaRejected: false });
       const verified = await deps.verifyFreshMfa(code).catch(() => false);
-      if (!current(run)) return;
+      if (run !== epoch) return;
       if (!verified) { set({ status: "needs_fresh_mfa", mfaRejected: true }); return; }
-      if (state.selected) await revoke();
-      else await load(true);
+      await load(true);
     },
-    /** Leaving the screen stops any request, drops a pending revoke and resets; late results are ignored. */
+    /** Leaving the screen stops any request and resets; late results are ignored. */
     close(): void {
-      controller?.abort(); controller = null; epoch += 1; revokeKey = null;
+      controller?.abort(); controller = null; epoch += 1;
       state = initial;
     },
   });

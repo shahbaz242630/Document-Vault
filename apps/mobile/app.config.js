@@ -41,6 +41,8 @@ module.exports = ({ config = staticConfig } = {}) => {
           : isClaimantPreview ? "sanduqkin-claimant-preview" : base.scheme,
     android: {
       ...base.android,
+      // PDF-first sheets: the Preview app keeps encrypted sheet copies in its files, so it opts out of Android backup.
+      ...(isClaimantPreview ? { allowBackup: false } : {}),
       package: isOfflineCodeKdfProbe
         ? "com.sanduqkin.mobile.claimantkdfprobe"
         : isClaimantPreview ? CLAIMANT_PREVIEW_ID : base.android.package,

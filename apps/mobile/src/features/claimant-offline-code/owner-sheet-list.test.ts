@@ -2,14 +2,16 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createOwnerOfflineCodeClient, OwnerOfflineCodeClientError, type OwnerOfflineCodeSheetSummary }
   from "./owner-offline-code-client";
-import type { OwnerOfflineCodeSheet } from "./owner-offline-code-sheet-factory";
 import { renderOwnerSheetHtml } from "./owner-sheet-html";
 import { createOwnerSheetListFlow, type OwnerSheetListState } from "./owner-sheet-list-flow";
 import { ownerSheetListView } from "./owner-sheet-list-view-model";
 import { ownerSheetReference } from "./owner-sheet-reference";
 import { createOwnerSheetListHandle, OWNER_SHEET_FLOW_LAUNCH_APPROVED } from "./owner-sheet-runtime";
 
-vi.mock("expo-print", () => ({ printAsync: vi.fn() }));
+vi.mock("expo-print", () => ({ printAsync: vi.fn(), printToFileAsync: vi.fn() }));
+vi.mock("expo-file-system", () => ({ Directory: class {}, File: class {}, Paths: {} }));
+vi.mock("expo-sharing", () => ({ shareAsync: vi.fn() }));
+vi.mock("react-native", () => ({ Platform: { OS: "android" } }));
 vi.mock("expo-crypto", () => ({ randomUUID: () => "60000000-0000-4000-8000-000000000006" }));
 vi.mock("@/features/vault", () => ({ useVaultSession: vi.fn() }));
 vi.mock("@/shared/api/supabase-client", () => ({ createSupabaseClient: vi.fn() }));
@@ -37,7 +39,7 @@ describe("owner sheet reference", () => {
   it("is the first six characters of the record ID in capitals, and is printed on the sheet", () => {
     expect(ownerSheetReference(ids.first)).toBe("3F9A1C");
     const html = renderOwnerSheetHtml({ sheetPayload: "SKQ2.eyJ4Ijp0cnVlfQ", printedLocator: "L", printedSecret: "S",
-      expiresAt: "2027-09-25T09:00:00.000Z", registration: { locatorRecordId: ids.first } } as OwnerOfflineCodeSheet);
+      expiresAt: "2027-09-25T09:00:00.000Z", locatorRecordId: ids.first });
     expect(html).toContain("<dt>Reference</dt><dd>3F9A1C</dd>");
   });
 });
@@ -72,54 +74,19 @@ describe("owner offline-code client list", () => {
 });
 
 describe("owner sheet list flow", () => {
-  it("loads the owner's sheets, then revokes one after confirmation and refreshes", async () => {
+  it("loads the owner's sheets and changes nothing itself: revoking lives on each sheet's screen", async () => {
     const api = fakeClient([active(ids.first), active(ids.second)]);
-    const flow = createOwnerSheetListFlow({ client: api, verifyFreshMfa: vi.fn(), randomUUID: () => ids.key });
+    const flow = createOwnerSheetListFlow({ client: api, verifyFreshMfa: vi.fn() });
     await flow.load();
     expect(flow.getState()).toMatchObject({ status: "ready", sheets: [active(ids.first), active(ids.second)] });
-    flow.requestRevoke(ids.second);
-    expect(flow.getState()).toMatchObject({ status: "confirming", selected: ids.second });
-    await flow.confirmRevoke();
-    expect(api.revoke).toHaveBeenCalledExactlyOnceWith(ids.second, ids.key, expect.any(AbortSignal));
-    expect(flow.getState()).toMatchObject({ status: "ready", selected: null, revoked: true });
-    expect(flow.getState().sheets.map((sheet) => sheet.status)).toEqual(["active", "revoked"]);
+    expect(flow).not.toHaveProperty("requestRevoke");
+    expect(api.revoke).not.toHaveBeenCalled();
   });
 
-  it("asks for a fresh code and retries the revoke with the same idempotency key", async () => {
-    const api = fakeClient([active(ids.first)]);
-    api.revoke.mockRejectedValueOnce(new OwnerOfflineCodeClientError("fresh_mfa_required"));
-    const verifyFreshMfa = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-    let keys = 0;
-    const flow = createOwnerSheetListFlow({ client: api, verifyFreshMfa, randomUUID: () => `${ids.key.slice(0, -1)}${keys++}` });
-    await flow.load(); flow.requestRevoke(ids.first); await flow.confirmRevoke();
-    expect(flow.getState()).toMatchObject({ status: "needs_fresh_mfa", selected: ids.first });
-    await flow.submitMfaCode("000000");
-    expect(flow.getState()).toMatchObject({ status: "needs_fresh_mfa", mfaRejected: true });
-    await flow.submitMfaCode("123456");
-    expect(api.revoke.mock.calls.map(([, key]) => key)).toEqual([`${ids.key.slice(0, -1)}0`, `${ids.key.slice(0, -1)}0`]);
-    expect(flow.getState()).toMatchObject({ status: "ready", revoked: true });
-  });
-
-  it("revokes only active sheets, and keeps the list when a revoke fails", async () => {
-    const expired = { ...active(ids.second), status: "expired" as const };
-    const api = fakeClient([active(ids.first), expired]);
-    api.revoke.mockRejectedValueOnce(new OwnerOfflineCodeClientError("failed"));
-    const flow = createOwnerSheetListFlow({ client: api, verifyFreshMfa: vi.fn(), randomUUID: () => ids.key });
-    await flow.load();
-    flow.requestRevoke(ids.second); expect(flow.getState().status).toBe("ready");
-    flow.requestRevoke("not-a-sheet"); expect(flow.getState().status).toBe("ready");
-    flow.requestRevoke(ids.first); await flow.confirmRevoke();
-    expect(flow.getState()).toMatchObject({ status: "ready", revokeFailed: true, selected: null });
-    expect(flow.getState().sheets).toHaveLength(2);
-  });
-
-  it("cancels a pending revoke and ignores results that arrive after the screen closes", async () => {
+  it("ignores results that arrive after the screen closes", async () => {
     let release: (value: OwnerOfflineCodeSheetSummary[]) => void = () => undefined;
     const api = fakeClient([active(ids.first)]);
-    const flow = createOwnerSheetListFlow({ client: api, verifyFreshMfa: vi.fn(), randomUUID: () => ids.key });
-    await flow.load(); flow.requestRevoke(ids.first); flow.cancelRevoke();
-    expect(flow.getState()).toMatchObject({ status: "ready", selected: null });
-    expect(api.revoke).not.toHaveBeenCalled();
+    const flow = createOwnerSheetListFlow({ client: api, verifyFreshMfa: vi.fn() });
     api.list.mockImplementationOnce(() => new Promise((resolve) => { release = resolve; }));
     const pending = flow.load(); flow.close(); release([active(ids.second)]); await pending;
     expect(flow.getState()).toMatchObject({ status: "loading", sheets: [] });
@@ -127,7 +94,7 @@ describe("owner sheet list flow", () => {
 
   it("shows a failure without detail when the list cannot load", async () => {
     const api = fakeClient([]); api.list.mockRejectedValueOnce(new OwnerOfflineCodeClientError("failed"));
-    const flow = createOwnerSheetListFlow({ client: api, verifyFreshMfa: vi.fn(), randomUUID: () => ids.key });
+    const flow = createOwnerSheetListFlow({ client: api, verifyFreshMfa: vi.fn() });
     await flow.load();
     expect(ownerSheetListView(flow.getState())).toMatchObject({ showRetry: true, rows: [],
       notice: { title: "Sheets not loaded" } });
@@ -136,7 +103,7 @@ describe("owner sheet list flow", () => {
 
 describe("owner sheet list view", () => {
   const state = (changes: Partial<OwnerSheetListState>): OwnerSheetListState => ({ status: "ready", sheets: [],
-    selected: null, mfaRejected: false, revokeFailed: false, revoked: false, loadFailure: null, ...changes });
+    mfaRejected: false, loadFailure: null, ...changes });
 
   it("is unavailable without a handle and hidden behind the literal-false launch approval", () => {
     expect(OWNER_SHEET_FLOW_LAUNCH_APPROVED).toBe(false);
@@ -144,21 +111,15 @@ describe("owner sheet list view", () => {
     expect(ownerSheetListView(null)).toMatchObject({ body: "Emergency sheets aren't available yet.", rows: [] });
   });
 
-  it("shows each sheet's reference, dates and status, and offers revoke on active sheets only", () => {
+  it("shows each sheet's reference, dates and status, with actions on active sheets only", () => {
     const view = ownerSheetListView(state({ sheets: [active(ids.first), { ...active(ids.second), status: "revoked",
       revokedAt: "2026-09-26T09:00:00.000Z" }] }));
     expect(view.rows).toEqual([
-      { id: ids.first, reference: "3F9A1C", printed: "Printed 25 September 2026",
-        validity: "Valid until 25 September 2027", statusLabel: "Active", canRevoke: true },
-      { id: ids.second, reference: "7D0E4B", printed: "Printed 25 September 2026",
-        validity: "Revoked 26 September 2026", statusLabel: "Revoked", canRevoke: false }]);
-  });
-
-  it("names the sheet being revoked and explains the consequence", () => {
-    const view = ownerSheetListView(state({ status: "confirming", selected: ids.first, sheets: [active(ids.first)] }));
-    expect(view.confirmReference).toBe("3F9A1C");
-    expect(view.body).toContain("will no longer be able to start a claim");
-    expect(ownerSheetListView(state({ status: "needs_fresh_mfa", selected: ids.first, mfaRejected: true })))
-      .toMatchObject({ showMfaField: true, notice: { title: "Code not accepted" } });
+      { id: ids.first, reference: "3F9A1C", printed: "Created 25 September 2026",
+        validity: "Valid until 25 September 2027", statusLabel: "Active", badge: { label: "Active", tone: "active" },
+        actions: ["view", "save", "revoke"] },
+      { id: ids.second, reference: "7D0E4B", printed: "Created 25 September 2026",
+        validity: "Revoked 26 September 2026", statusLabel: "Revoked", badge: { label: "Revoked", tone: "revoked" },
+        actions: [] }]);
   });
 });

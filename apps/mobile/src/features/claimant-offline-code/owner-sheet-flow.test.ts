@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createOwnerOfflineCodeClient, OwnerOfflineCodeClientError } from "./owner-offline-code-client";
 import type { OwnerOfflineCodeSheet } from "./owner-offline-code-sheet-factory";
+import type { OwnerSheetCopy } from "./owner-sheet-copy-store";
+import type { OwnerSheetSaveResult } from "./owner-sheet-export";
 import { createOwnerSheetFlow, type OwnerSheetFlowDeps } from "./owner-sheet-flow";
 
 const ids = { owner: "10000000-0000-4000-8000-000000000001", locator: "20000000-0000-4000-8000-000000000002",
@@ -12,107 +14,133 @@ const sheet: OwnerOfflineCodeSheet = Object.freeze({ sheetPayload: "SKQ2.synthet
     publicLocator: "SK2-L-LOCATOR", locatorCommitment: "c", proofPublicKey: "p", recordBindingDigest: "d",
     kdfSalt: "s", wrapNonce: "n", wrapCiphertext: "x", wrapAssociatedDataDigest: "a",
     issuedAt: "2026-09-25T09:00:00.000Z", expiresAt: "2027-09-25T09:00:00.000Z" }) });
+const saved: OwnerSheetSaveResult = { status: "saved", fileName: "Sanduqkin-emergency-sheet-200000.pdf",
+  folder: "Download" };
 
 function deps(changes: Partial<Omit<OwnerSheetFlowDeps, "client">> = {}) {
   let counter = 0;
-  const value = {
+  const base = {
     createSheet: vi.fn(async () => sheet),
     getOwnerId: vi.fn(async () => ids.owner),
     client: { register: vi.fn(async () => ({ locatorRecordId: ids.locator, status: "active" as const, replayed: false })),
       revoke: vi.fn(async () => ({ locatorRecordId: ids.locator, status: "revoked" as const, replayed: false })) },
     verifyFreshMfa: vi.fn(async (code: string) => code === "123456"),
-    renderSheetHtml: vi.fn((value: OwnerOfflineCodeSheet) => `<html>${value.printedSecret}</html>`),
-    print: vi.fn(async () => undefined),
+    copies: { save: vi.fn(async (_owner: string, _copy: OwnerSheetCopy) => undefined) },
+    exporter: { canPickFolder: true, print: vi.fn(async (_html: string) => true),
+      save: vi.fn(async (_html: string, _id: string, _mode: string): Promise<OwnerSheetSaveResult> => saved) },
+    renderSheetHtml: vi.fn((value: OwnerSheetCopy) => `<html>${value.printedSecret}</html>`),
     randomUUID: vi.fn(() => `50000000-0000-4000-8000-${String((counter += 1)).padStart(12, "0")}`),
-    ...changes,
   };
-  return value;
+  return { ...base, ...changes } as typeof base;
 }
 
-describe("owner emergency sheet flow", () => {
-  it("generates, registers once, prints and wipes on confirmation without exposing the sheet", async () => {
-    const d = deps(); const flow = createOwnerSheetFlow(d); const states: string[] = [];
-    flow.subscribe((value) => states.push(value.status));
+describe("owner emergency sheet flow (PDF first)", () => {
+  it("generates, registers once, stores the encrypted copy, then is active without exposing the sheet", async () => {
+    const value = deps();
+    const flow = createOwnerSheetFlow(value);
     await flow.start();
-    expect(flow.getState()).toEqual({ status: "ready_to_print", expiresAt: sheet.expiresAt, mfaRejected: false,
-      printFailed: false });
-    expect(d.createSheet).toHaveBeenCalledWith(expect.objectContaining({ ownerId: ids.owner }));
-    expect(d.client.register).toHaveBeenCalledWith(sheet.registration, expect.any(String), expect.any(AbortSignal));
-    await flow.print(); await flow.print();
-    expect(d.print).toHaveBeenCalledTimes(2);
-    expect(d.print).toHaveBeenCalledWith("<html>SK2-S-SECRET</html>");
-    flow.confirmPrinted();
-    expect(states).toEqual(["generating", "generating", "registering", "ready_to_print", "printing", "printed",
-      "printing", "printed", "done"]);
-    expect(JSON.stringify(flow.getState())).not.toMatch(/SK2-|SKQ2/u);
-    await flow.print(); await flow.abandon();
-    expect(d.print).toHaveBeenCalledTimes(2); expect(d.client.revoke).not.toHaveBeenCalled();
+    expect(value.client.register).toHaveBeenCalledOnce();
+    expect(value.copies.save).toHaveBeenCalledExactlyOnceWith(ids.owner, { locatorRecordId: ids.locator,
+      sheetPayload: sheet.sheetPayload, printedLocator: sheet.printedLocator, printedSecret: sheet.printedSecret,
+      expiresAt: sheet.expiresAt });
+    expect(flow.getState()).toMatchObject({ status: "ready", reference: "200000", expiresAt: sheet.expiresAt });
+    expect(JSON.stringify(flow.getState())).not.toMatch(/SKQ2|SK2-S|SK2-L/u);
+  });
+
+  it("saves the PDF and retries a cancelled or failed save with the same sheet, never a new one", async () => {
+    const value = deps();
+    value.exporter.save.mockResolvedValueOnce({ status: "cancelled" }).mockResolvedValueOnce({ status: "failed" });
+    const flow = createOwnerSheetFlow(value);
+    await flow.start();
+    await flow.save();
+    expect(flow.getState()).toMatchObject({ status: "ready", saveResult: { status: "cancelled" } });
+    await flow.save();
+    expect(flow.getState()).toMatchObject({ status: "ready", saveResult: { status: "failed" } });
+    await flow.save("share");
+    expect(flow.getState()).toMatchObject({ status: "ready", saveResult: saved });
+    expect(value.exporter.save.mock.calls.map(([html, id, mode]) => [html, id, mode])).toEqual([
+      ["<html>SK2-S-SECRET</html>", ids.locator, "folder"], ["<html>SK2-S-SECRET</html>", ids.locator, "folder"],
+      ["<html>SK2-S-SECRET</html>", ids.locator, "share"]]);
+    expect(value.createSheet).toHaveBeenCalledOnce();
+    expect(value.client.register).toHaveBeenCalledOnce();
+    expect(value.client.revoke).not.toHaveBeenCalled();
+  });
+
+  it("prints as an optional extra and keeps the sheet active when printing fails", async () => {
+    const value = deps();
+    value.exporter.print.mockResolvedValueOnce(false);
+    const flow = createOwnerSheetFlow(value);
+    await flow.start(); await flow.print();
+    expect(flow.getState()).toMatchObject({ status: "ready", printFailed: true });
+    expect(value.client.revoke).not.toHaveBeenCalled();
+  });
+
+  it("never revokes an active sheet when the owner leaves, backgrounds or locks", async () => {
+    const value = deps();
+    const flow = createOwnerSheetFlow(value);
+    await flow.start(); await flow.save();
+    await flow.handleAppState("background");
+    expect(flow.getState().status).toBe("ready");
+    await flow.abandon();
+    expect(flow.getState().status).toBe("idle");
+    expect(value.client.revoke).not.toHaveBeenCalled();
+  });
+
+  it("revokes a registered sheet whose encrypted copy could not be stored, and reports nothing saved", async () => {
+    const value = deps({ copies: { save: vi.fn(async () => { throw new Error("disk full"); }) } });
+    const flow = createOwnerSheetFlow(value);
+    await flow.start();
+    expect(flow.getState()).toMatchObject({ status: "failed", reference: null });
+    expect(value.client.revoke).toHaveBeenCalledExactlyOnceWith(ids.locator, expect.any(String));
+    await flow.save();
+    expect(value.exporter.save).not.toHaveBeenCalled();
   });
 
   it("steps up with TOTP and retries registration with the same idempotency key", async () => {
-    const d = deps();
-    d.client.register.mockRejectedValueOnce(new OwnerOfflineCodeClientError("fresh_mfa_required"));
-    const flow = createOwnerSheetFlow(d);
+    const value = deps();
+    value.client.register.mockRejectedValueOnce(new OwnerOfflineCodeClientError("fresh_mfa_required"));
+    const flow = createOwnerSheetFlow(value);
     await flow.start();
+    expect(flow.getState().status).toBe("needs_fresh_mfa");
+    await flow.handleAppState("background");
     expect(flow.getState().status).toBe("needs_fresh_mfa");
     await flow.submitMfaCode("000000");
     expect(flow.getState()).toMatchObject({ status: "needs_fresh_mfa", mfaRejected: true });
-    expect(d.client.register).toHaveBeenCalledTimes(1);
     await flow.submitMfaCode("123456");
-    expect(flow.getState().status).toBe("ready_to_print");
-    const keys = d.client.register.mock.calls.map((call) => (call as unknown[])[1]);
+    expect(flow.getState().status).toBe("ready");
+    const keys = value.client.register.mock.calls.map((call) => (call as unknown[])[1]);
     expect(keys).toHaveLength(2); expect(keys[0]).toBe(keys[1]);
   });
 
-  it("revokes an attempted registration when abandoned before confirmation, in every live state", async () => {
-    for (const reach of ["ready_to_print", "printed", "needs_fresh_mfa"] as const) {
-      const d = deps();
-      if (reach === "needs_fresh_mfa") {
-        d.client.register.mockRejectedValueOnce(new OwnerOfflineCodeClientError("fresh_mfa_required"));
-      }
-      const flow = createOwnerSheetFlow(d);
-      await flow.start(); if (reach === "printed") await flow.print();
-      expect(flow.getState().status).toBe(reach);
-      await flow.abandon();
-      expect(d.client.revoke).toHaveBeenCalledWith(ids.locator, expect.any(String));
-      expect(flow.getState()).toMatchObject({ status: "idle", expiresAt: null });
-      await flow.print(); expect(d.print).toHaveBeenCalledTimes(reach === "printed" ? 1 : 0);
-    }
-  });
-
-  it("revokes a registration abandoned in flight and ignores its late result", async () => {
-    let finish: () => void = () => undefined;
-    const d = deps();
-    d.client.register.mockImplementationOnce(() => new Promise((resolve) => {
-      finish = () => resolve({ locatorRecordId: ids.locator, status: "active", replayed: false }); }));
-    const flow = createOwnerSheetFlow(d);
+  it("revokes a registration abandoned before the sheet became active, and ignores its late result", async () => {
+    let release: () => void = () => undefined;
+    const value = deps();
+    value.client.register.mockImplementationOnce(() => new Promise((resolve) => {
+      release = () => resolve({ locatorRecordId: ids.locator, status: "active", replayed: false });
+    }));
+    const flow = createOwnerSheetFlow(value);
     const started = flow.start();
     await vi.waitFor(() => expect(flow.getState().status).toBe("registering"));
-    await flow.abandon(); finish(); await started;
-    expect(d.client.revoke).toHaveBeenCalledTimes(1);
+    await flow.handleAppState("background");
+    release(); await started;
     expect(flow.getState().status).toBe("idle");
+    expect(value.client.revoke).toHaveBeenCalledExactlyOnceWith(ids.locator, expect.any(String));
+    expect(value.copies.save).not.toHaveBeenCalled();
   });
 
   it("fails without registering when generation fails, and revokes after a failed registration", async () => {
-    const noOwner = deps({ getOwnerId: vi.fn(async () => null) }); const first = createOwnerSheetFlow(noOwner);
+    const noSheet = deps({ createSheet: vi.fn(async () => { throw new Error("no"); }) });
+    const first = createOwnerSheetFlow(noSheet);
     await first.start();
-    expect(first.getState().status).toBe("failed"); expect(noOwner.createSheet).not.toHaveBeenCalled();
-    const badSheet = deps({ createSheet: vi.fn(async () => { throw new Error("self-check failed"); }) });
-    const second = createOwnerSheetFlow(badSheet); await second.start();
+    expect(first.getState().status).toBe("failed");
+    expect(noSheet.client.register).not.toHaveBeenCalled();
+    const value = deps();
+    value.client.register.mockRejectedValueOnce(new OwnerOfflineCodeClientError("failed"));
+    value.client.revoke.mockRejectedValueOnce(new Error("offline"));
+    const second = createOwnerSheetFlow(value);
+    await second.start();
     expect(second.getState().status).toBe("failed");
-    expect(badSheet.client.register).not.toHaveBeenCalled(); expect(badSheet.client.revoke).not.toHaveBeenCalled();
-    const serverDown = deps(); serverDown.client.register.mockRejectedValueOnce(new OwnerOfflineCodeClientError("failed"));
-    const third = createOwnerSheetFlow(serverDown); await third.start();
-    expect(third.getState().status).toBe("failed");
-    expect(serverDown.client.revoke).toHaveBeenCalledWith(ids.locator, expect.any(String));
-  });
-
-  it("keeps the sheet ready after a print error and swallows revoke failures", async () => {
-    const d = deps({ print: vi.fn(async () => { throw new Error("printer"); }) });
-    d.client.revoke.mockRejectedValueOnce(new Error("offline"));
-    const flow = createOwnerSheetFlow(d); await flow.start(); await flow.print();
-    expect(flow.getState()).toMatchObject({ status: "ready_to_print", printFailed: true });
-    await expect(flow.abandon()).resolves.toBeUndefined();
+    expect(value.client.revoke).toHaveBeenCalledOnce();
   });
 });
 
@@ -170,29 +198,3 @@ describe("owner offline-code client", () => {
   });
 });
 
-describe("owner emergency sheet flow and app state", () => {
-  it("abandons on background except while printing or waiting for the MFA code", async () => {
-    let finishPrint: () => void = () => undefined;
-    const d = deps({ print: vi.fn(() => new Promise<void>((resolve) => { finishPrint = resolve; })) });
-    const flow = createOwnerSheetFlow(d); await flow.start();
-    const printing = flow.print();
-    await flow.handleAppState("background"); await flow.handleAppState("inactive");
-    expect(flow.getState().status).toBe("printing"); expect(d.client.revoke).not.toHaveBeenCalled();
-    finishPrint(); await printing;
-    await flow.handleAppState("active"); expect(flow.getState().status).toBe("printed");
-    await flow.handleAppState("background");
-    expect(flow.getState().status).toBe("idle"); expect(d.client.revoke).toHaveBeenCalledTimes(1);
-
-    const mfa = deps(); mfa.client.register.mockRejectedValueOnce(new OwnerOfflineCodeClientError("fresh_mfa_required"));
-    const stepUp = createOwnerSheetFlow(mfa); await stepUp.start();
-    await stepUp.handleAppState("background");
-    expect(stepUp.getState().status).toBe("needs_fresh_mfa");
-    await stepUp.abandon();
-    expect(stepUp.getState().status).toBe("idle");
-  });
-
-  it("keeps the expiry date after confirmation for the success message", async () => {
-    const flow = createOwnerSheetFlow(deps()); await flow.start(); await flow.print(); flow.confirmPrinted();
-    expect(flow.getState()).toEqual({ status: "done", expiresAt: sheet.expiresAt, mfaRejected: false, printFailed: false });
-  });
-});

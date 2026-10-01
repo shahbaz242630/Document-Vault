@@ -6,7 +6,10 @@ import { createOwnerSheetListFlow } from "./owner-sheet-list-flow";
 import { ownerSheetListView } from "./owner-sheet-list-view-model";
 import { createOwnerSheetListHandle } from "./owner-sheet-runtime";
 
-vi.mock("expo-print", () => ({ printAsync: vi.fn() }));
+vi.mock("expo-print", () => ({ printAsync: vi.fn(), printToFileAsync: vi.fn() }));
+vi.mock("expo-file-system", () => ({ Directory: class {}, File: class {}, Paths: {} }));
+vi.mock("expo-sharing", () => ({ shareAsync: vi.fn() }));
+vi.mock("react-native", () => ({ Platform: { OS: "android" } }));
 vi.mock("expo-crypto", () => ({ randomUUID: () => "60000000-0000-4000-8000-000000000008" }));
 vi.mock("@/features/vault", () => ({ useVaultSession: vi.fn() }));
 vi.mock("@/shared/api/supabase-client", () => ({ createSupabaseClient: vi.fn() }));
@@ -71,20 +74,17 @@ describe("owner sheet list client errors", () => {
 describe("owner sheet list step-up", () => {
   const api = (error: OwnerOfflineCodeClientError | null) => ({
     list: vi.fn(async () => { if (error) throw error; return []; }),
-    revoke: vi.fn(),
   });
 
   it.each(["fresh_mfa_required", "unauthorized"] as const)("asks for a code on a %s list, then loads once more",
     async (kind) => {
       const client = api(new OwnerOfflineCodeClientError(kind));
       const verifyFreshMfa = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-      const flow = createOwnerSheetListFlow({ client, verifyFreshMfa, randomUUID: () => sheetId });
+      const flow = createOwnerSheetListFlow({ client, verifyFreshMfa });
       await flow.load();
-      expect(flow.getState()).toMatchObject({ status: "needs_fresh_mfa", selected: null });
-      expect(ownerSheetListView(flow.getState())).toMatchObject({ showMfaField: true, confirmReference: null,
+      expect(flow.getState()).toMatchObject({ status: "needs_fresh_mfa", sheets: [] });
+      expect(ownerSheetListView(flow.getState())).toMatchObject({ showMfaField: true,
         body: expect.stringContaining("To see your sheets") });
-      flow.cancelRevoke();
-      expect(flow.getState().status).toBe("needs_fresh_mfa");
       await flow.submitMfaCode("000000");
       expect(flow.getState()).toMatchObject({ status: "needs_fresh_mfa", mfaRejected: true });
       client.list.mockResolvedValueOnce([]);
@@ -95,7 +95,7 @@ describe("owner sheet list step-up", () => {
 
   it("reports a session that is still refused after the step-up instead of asking again", async () => {
     const client = api(new OwnerOfflineCodeClientError("unauthorized"));
-    const flow = createOwnerSheetListFlow({ client, verifyFreshMfa: async () => true, randomUUID: () => sheetId });
+    const flow = createOwnerSheetListFlow({ client, verifyFreshMfa: async () => true });
     await flow.load(); await flow.submitMfaCode("123456");
     expect(flow.getState()).toMatchObject({ status: "failed", loadFailure: "session" });
     expect(ownerSheetListView(flow.getState()).notice?.message).toContain("Sign out, sign in again");
@@ -105,7 +105,7 @@ describe("owner sheet list step-up", () => {
     for (const [kind, failure, message] of [["unreachable", "unreachable", "couldn't be reached"],
       ["failed", "server", "couldn't return your sheets"]] as const) {
       const flow = createOwnerSheetListFlow({ client: api(new OwnerOfflineCodeClientError(kind)),
-        verifyFreshMfa: vi.fn(), randomUUID: () => sheetId });
+        verifyFreshMfa: vi.fn() });
       await flow.load();
       expect(flow.getState()).toMatchObject({ status: "failed", loadFailure: failure });
       expect(ownerSheetListView(flow.getState()).notice?.message).toContain(message);

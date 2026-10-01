@@ -19,6 +19,8 @@ import {
   type SealedEmergencyCodeSetupOptions,
   type SealedEmergencyCodeSetupResult,
 } from "./sealed-emergency-code-service";
+import { openOwnerSheetCopy, sealOwnerSheetCopy, type OwnerSheetCopyAddress, type SealedOwnerSheetCopy }
+  from "./owner-sheet-copy-crypto";
 
 type VaultStore = ReturnType<typeof createVaultStore>;
 
@@ -64,6 +66,9 @@ export type VaultSession = {
   ) => Promise<void>;
   /** Slice 6H: the vault key goes straight into the sheet factory and never leaves this session. */
   createOfflineCodeEmergencySheet: (input: OwnerOfflineCodeSheetInput) => Promise<OwnerOfflineCodeSheet>;
+  /** PDF-first sheets: the owner's sheet copy is sealed and opened here, so the vault key stays in this session. */
+  sealOwnerSheetCopy: (input: OwnerSheetCopyAddress & Readonly<{ plaintext: string }>) => Promise<SealedOwnerSheetCopy>;
+  openOwnerSheetCopy: (input: OwnerSheetCopyAddress & SealedOwnerSheetCopy) => Promise<string>;
   restoreAsset: (id: string) => Promise<VaultEncryptedAssetRecord | null>;
   softDeleteAsset: (id: string) => Promise<VaultEncryptedAssetRecord | null>;
   updateAsset: (id: string, payload: AssetPlaintextPayload) => Promise<VaultDecryptedAsset | null>;
@@ -121,6 +126,8 @@ export function createVaultSession({
         mek: key,
       });
     },
+    sealOwnerSheetCopy: (input) => sealOwnerSheetCopy({ ...input, key }),
+    openOwnerSheetCopy: (input) => openOwnerSheetCopy({ ...input, key }),
     restoreAsset: (id) => changeVaultAssetDeletion({ deleted: false, id, repository, store }),
     softDeleteAsset: (id) => changeVaultAssetDeletion({ deleted: true, id, repository, store }),
     updateAsset: (id, payload) => updateVaultAsset({ id, key, payload, repository, store }),

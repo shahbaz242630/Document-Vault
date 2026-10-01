@@ -76,7 +76,41 @@ Owner-reported, on the emulator, from build `1b00c951` at `cf86de4`:
 
 The full record is in the W2a verification file.
 
-The owner asked for a PDF-first flow, with viewing and saving again later. The spec is `docs/superpowers/specs/2026-10-01-claimant-owner-sheet-pdf-first.md`, **awaiting approval**; nothing is built yet.
+The owner asked for a PDF-first flow, with viewing and saving again later. The spec is `docs/superpowers/specs/2026-10-01-claimant-owner-sheet-pdf-first.md`. It was **approved with decisions 1–5 and built**; there is no server or schema change.
+
+## PDF-first rebuild and rerun (owner, emulator)
+
+The hosted acceptance (12 of 12) and the tests already cover the server side:
+- creating a sheet without it being revoked;
+- a revoke from the sheet's screen after a fresh TOTP;
+- the live and revoked claimant checks;
+- owner isolation.
+
+What's left needs the app on the emulator.
+
+1. **Build:**
+   ```
+   git fetch origin && git checkout claude/inspiring-fermat-bbdlaf && git merge --ff-only origin/claude/inspiring-fermat-bbdlaf
+   npm ci
+   cd apps/mobile && npx --yes eas-cli@21.0.0 build --platform android --profile claimant-preview
+   ```
+2. **Install:** `adb uninstall com.sanduqkin.mobile.claimantpreview`, then `adb install <apk>`. Uninstalling removes any old sheet copies; the old Active sheet then shows "no copy on this device".
+3. **Sign in.** It should show "Second lock" with a code and no QR code; this is the pending second sign-in check.
+4. **Settings → Emergency access → "Create an emergency sheet":**
+   1. Tick the acknowledgement, then tap "Create emergency sheet", and enter a code if asked.
+   2. It should show "Sheet XXXXXX is active…".
+   3. Tap "Save PDF", pick **Downloads**, and confirm. Expect "PDF saved — Saved as Sanduqkin-emergency-sheet-XXXXXX.pdf in Download".
+   4. Cancel the picker once: expect "Not saved. Your sheet is still active." with no new sheet.
+   5. Leave the screen. The sheet must stay Active.
+5. **My emergency sheets:**
+   - The old sheets show their status badges.
+   - Tap the new sheet, then "View sheet": the QR code and both codes appear.
+   - "Save PDF" saves the same file again.
+   - Force-stop the app (`adb shell am force-stop com.sanduqkin.mobile.claimantpreview`), reopen it, sign in, and view and save again. It must be the same reference and QR code.
+6. **The old Active sheet** (made before this change) should say "This device doesn't have a copy". Use the "⋯" menu, then "Revoke sheet…", then confirm, then enter a fresh code. It shows Revoked, and the new sheet stays Active.
+7. **Optional, with a second device:** "Check an emergency sheet" on the new PDF should say valid; on a revoked one, "can't be used".
+8. **Record the results** in the W2a verification file as owner-reported.
+
 
 ## Open items
 
@@ -92,4 +126,4 @@ The owner asked for a PDF-first flow, with viewing and saving again later. The s
 
 ## Next-session opener
 
-> Continue the Sanduqkin claimant work in `shahbaz242630/Document-Vault`. Read `docs/handoff/2026-10-01-claimant-preview-mfa-fix-session-close.md` and the "MFA blocker fix" section of `docs/verification/2026-09-26-claimant-w2a-phone-preview.md`. Ask me for the results of the emulator rerun (which screen sign-in showed, whether the sheet list loaded, and the print and revoke results), and record them. Then the dependency and Expo Doctor fixes if I approve them, then the W2b claim-start spec.
+> Continue the Sanduqkin claimant work in `shahbaz242630/Document-Vault` on `claude/inspiring-fermat-bbdlaf`. Read `docs/handoff/2026-10-01-claimant-preview-mfa-fix-session-close.md` (including "PDF-first rebuild and rerun"), the PDF-first spec and the W2a verification record. Ask me for the PDF-first emulator results and record them as owner-reported. Then the dependency and Expo Doctor fixes if I approve them, the PR, and then the W2b claim-start spec.

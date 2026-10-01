@@ -1,13 +1,14 @@
 import createQrCode from "qrcode-generator";
 
-import type { OwnerOfflineCodeSheet } from "./owner-offline-code-sheet-factory";
+import type { OwnerSheetCopy } from "./owner-sheet-copy";
 import { ownerSheetReference } from "./owner-sheet-reference";
 
 /*
- * Slice 6H: the printable emergency sheet. The QR code carries the `SKQ2.` payload; the locator and secret are
- * repeated as text for reference. The HTML is handed straight to the print dialog and never saved or shared.
+ * Slice 6H, PDF-first since 2026-10-01: the emergency sheet the owner saves as a PDF or prints. The QR code carries
+ * the `SKQ2.` payload; the locator and secret are repeated as text for reference. The HTML is rendered only to a
+ * temporary PDF or the print dialog, both handled by owner-sheet-export.ts.
  */
-export function renderOwnerSheetHtml(sheet: OwnerOfflineCodeSheet): string {
+export function renderOwnerSheetHtml(sheet: OwnerSheetCopy): string {
   const code = createQrCode(0, "M");
   code.addData(sheet.sheetPayload, "Byte");
   code.make();
@@ -42,15 +43,15 @@ export function renderOwnerSheetHtml(sheet: OwnerOfflineCodeSheet): string {
   <dt>Sheet code</dt><dd>${escapeHtml(sheet.printedLocator)}</dd>
   <dt>Secret code</dt><dd>${escapeHtml(sheet.printedSecret)}</dd>
   <dt>Valid until</dt><dd>${escapeHtml(expires)}</dd>
-  <dt>Reference</dt><dd>${escapeHtml(ownerSheetReference(sheet.registration.locatorRecordId))}</dd>
+  <dt>Reference</dt><dd>${escapeHtml(ownerSheetReference(sheet.locatorRecordId))}</dd>
 </dl>
 <ol>
   <li>Open the Sanduqkin app and choose <strong>Start a claim with an emergency sheet</strong>.</li>
   <li>Scan the QR code above with the phone's camera.</li>
   <li>Follow the steps in the app. Sanduqkin reviews every claim before anything is released.</li>
 </ol>
-<p class="warning">Keep this sheet somewhere safe and private. Anyone holding it can start a claim, so store it as you
-would a will or a spare house key.</p>
+<p class="warning">Keep this sheet, printed or as a PDF, somewhere safe and private. Anyone holding it can start a
+claim, so store it as you would a will or a spare house key.</p>
 </body>
 </html>`;
 }
