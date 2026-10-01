@@ -30,6 +30,7 @@ import { configureDurableAuditLog } from "../durable-audit-log";
 import { createFailedLoginTracker } from "../failed-login-tracker";
 import { createLoginLockoutViewModel } from "../login-lockout-view-model";
 import { createMekStorage } from "../mek-storage";
+import { holdPendingSignIn } from "../pending-sign-in";
 import { unlockReturningUserVault } from "../returning-user-unlock-flow";
 import { createSignupProgressStorage } from "../signup-progress";
 import type { SupabaseAuditClient } from "../supabase-audit-event-repository";
@@ -323,13 +324,23 @@ async function routeAfterAuthSuccess({
 }) {
   if (nextResult.nextStep === "email-verification") {
     await routeToEmailVerification(router, values.email);
-  } else if (nextResult.nextStep === "totp-verification") {
+    return;
+  }
+  const unlock = () => unlockVault({ supabaseClient, values, vaultSession });
+  if (nextResult.nextStep === "vault-unlock") {
+    await unlock();
+    router.replace("/vault");
+    return;
+  }
+  // The vault waits, in memory only, until the second lock passes on the next screen.
+  holdPendingSignIn(unlock);
+  if (nextResult.nextStep === "totp-verification") {
     router.push({
       pathname: "/auth/verify-totp",
-      params: { factorId: "", flow: "returning" },
+      params: { factorId: nextResult.factorId, flow: "returning" },
     });
-  } else if (nextResult.nextStep === "vault-unlock") {
-    await routeToUnlockedVault({ router, supabaseClient, values, vaultSession });
+  } else {
+    router.push({ pathname: "/auth/setup-totp", params: { flow: "sign-in" } });
   }
 }
 
@@ -341,13 +352,11 @@ async function routeToEmailVerification(router: AppRouter, email: string) {
   router.push({ pathname: "/auth/verify-email", params: { email } });
 }
 
-async function routeToUnlockedVault({
-  router,
+async function unlockVault({
   supabaseClient,
   values,
   vaultSession,
 }: {
-  router: AppRouter;
   supabaseClient: SupabaseClient;
   values: AuthCredentialsInput;
   vaultSession: VaultSession;
@@ -374,7 +383,6 @@ async function routeToUnlockedVault({
     toBase64,
     unwrapMEK,
   });
-  router.replace("/vault");
 }
 
 function logAuthEvent(eventType: "sign_in_attempt" | "sign_up_attempt" | "sign_in_success" | "sign_up_success", email: string) {

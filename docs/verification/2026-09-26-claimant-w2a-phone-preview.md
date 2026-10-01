@@ -101,3 +101,50 @@ Run by the owner on a Windows laptop against `main` at `d85ef55`, using the owne
 - **Still behind the login.** From the owner's laptop, `https://preview-api.sanduqkin.com/health` returned a 302 to the Vercel login: standard protection covers preview custom domains, and the Hobby plan has no exceptions.
 - **Fix (owner decision): a dedicated bypass in the Preview build only.** The new `withClaimantPreviewBypass` is covered by tests: the header is added only in the Preview build with a well-formed value, and the original fetch is returned untouched otherwise. The isolation check pins its three users and that the value is never in `eas.json` or read anywhere else. The Preview app's API URL is now the branch alias.
 - **Local checks:** typecheck, lint, 1,748 workspace tests (3 established skips), the security, mobile-secret and Phase 1 checks, and every security-CI script set pass.
+
+## MFA blocker fix (2026-10-01)
+
+**Found by** the owner's local run of the Android Preview build (EAS build `fd5ef07e-1719-406f-88a6-402fc2595053`, source `5edc637`, profile `claimant-preview`, Pixel 7 emulator on Android 16).
+- Password sign-in and vault unlock worked, and Emergency access opened with the Preview options.
+- "My emergency sheets" failed to load, including on retry.
+- "Create and print sheet" reached the fresh-TOTP prompt, but the owner had no matching authenticator entry.
+
+**Causes, confirmed in the code at `5edc637`:**
+1. The enrolment screen was a placeholder. It drew no QR code, never called `mfa.enroll`, and moved on with the literal factor ID `placeholder-factor-id`. Re-authentication and the sign-up resume routes used the same placeholder.
+2. Password sign-in returned `vault-unlock` without reading the MFA state. Every owner therefore stayed at AAL1, and the owner claimant session, which is activated only after a TOTP check, was never activated.
+3. The sheet list turned every refusal into the same "Check your connection" failure.
+
+**Sheet-list diagnosis on the hosted Preview.** It was run separately, through the app's own client, against the live `claimant-preview` deployment at `5edc637`, with a synthetic owner:
+- with a password-only session (AAL1), the list returns **403**;
+- with an AAL2 session whose claimant session was never activated, it returns **401**;
+- after the TOTP check and `/owner/session/activate`, it returns **200**.
+
+A password-only sign-in therefore cannot load the list. That matches the emulator, though the emulator's own requests were not captured. The tested account's server-side factor state was not read: reading account rows on the shared project is outside what these sessions do.
+
+**What changed:**
+- **Sign-in.** After the password, the app reads the assurance level and the factors. A verified factor sends the owner to TOTP verification with its real ID. No verified factor sends them to a required enrolment. The MFA state being unreadable stops sign-in. The vault unlocks only after TOTP passes: the unlock waits in memory only, for at most ten minutes, and is used once (`pending-sign-in.ts`).
+- **Enrolment.** It uses the real `mfa.enroll`. The QR code is drawn on the device from the `otpauth` URI with the existing `qrcode-generator` package, and the setup key is shown for typing by hand. Screen capture is blocked. The real factor ID is passed on. An existing account goes straight to proving a code; sign-up keeps its order.
+- **After every successful TOTP check** (sign-in, enrolment, step-up), the owner claimant session is activated with the session token that check raised (`completeTotpVerification` → `activateOwnerClaimantSession`).
+- **Sheet list.** A 403 or 401 asks for a TOTP step-up, which also re-activates the session, then loads once more. A second refusal, an unreachable server and a server failure each show their own message.
+- **Re-authentication** uses the real factor and never passes without one.
+
+**Not changed:**
+- MFA enforcement stays as it was: AAL2, fresh TOTP for printing and revoking, and session activation.
+- Every claimant production approval constant is still literal false. No account factor was reset or removed.
+- No setup key, otpauth URI, password or code is logged, stored or put in a route.
+
+**Evidence (cloud session, 2026-10-01):**
+- **Hosted acceptance PASS, 12 of 12**, including the new list-assurance check. Cleanup removed 3 synthetic users, and a dry run then reported 0.
+- **Tests:** 1,776 workspace tests pass (3 established skips). The new ones cover:
+  - sign-in routing;
+  - enrolment, including a QR decode round trip with `jsqr`;
+  - the pending unlock;
+  - the verify → activate → unlock order;
+  - the list step-up against a simulated server through the real runtime handle;
+  - activation with the post-TOTP token.
+- **Other checks:** lint, typecheck, coverage thresholds, Phase 1 size limits, the security, mobile-secrets and GitHub Actions checks, and every claimant isolation check pass.
+- **Failing on `main` too, not caused by this change:**
+  - `check:production-dependencies`: new advisories for `next` (critical), `minimatch` and `brace-expansion`, all through `apps/web`;
+  - Expo Doctor: patch versions newer than the lockfile, `expo` 56.0.23 and `expo-constants` 56.0.27.
+
+**Owner rerun:** rebuild the Preview APK from the merged `main`, then follow the steps in `docs/handoff/2026-10-01-claimant-preview-mfa-fix-session-close.md`.

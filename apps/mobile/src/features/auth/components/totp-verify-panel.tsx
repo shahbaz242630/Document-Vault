@@ -17,6 +17,8 @@ import {
   Subtitle,
 } from "@/shared/ui";
 
+import { takePendingSignIn } from "../pending-sign-in";
+import { completeTotpVerification } from "../totp-verification-completion";
 import { createTotpVerifyService, type TotpVerifyServiceResult } from "../totp-verify-service";
 import {
   createTotpVerifyViewModel,
@@ -82,17 +84,22 @@ export function TotpVerifyPanel({ factorId, variant = "onboarding" }: TotpVerify
     setIsSubmitting(true);
 
     try {
-      const nextResult = await verifyService.verify(factorId, code);
-      setResult(nextResult);
+      const outcome = await completeTotpVerification(variant, {
+        activateOwnerSession: activateOwnerClaimantSessionAfterMfa,
+        advanceSignupProgress: async () => {
+          const progressStorage = createSignupProgressStorage(ExpoSecureStore);
+          const existing = await progressStorage.load();
+          if (existing) {
+            await progressStorage.save({ ...existing, step: "recovery-phrase" });
+          }
+        },
+        takePendingSignIn: () => takePendingSignIn(),
+        verify: () => verifyService.verify(factorId, code),
+      });
+      setResult(outcome.result);
 
-      if (nextResult.status === "ok") {
-        await activateOwnerClaimantSessionAfterMfa();
-        const progressStorage = createSignupProgressStorage(ExpoSecureStore);
-        const existing = await progressStorage.load();
-        if (existing) {
-          await progressStorage.save({ ...existing, step: "recovery-phrase" });
-        }
-        router.replace("/auth/recovery-phrase");
+      if (outcome.next) {
+        router.replace(outcome.next);
       }
     } catch (error) {
       setResult({

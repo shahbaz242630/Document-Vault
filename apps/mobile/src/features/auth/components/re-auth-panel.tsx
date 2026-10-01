@@ -76,6 +76,7 @@ export function ReAuthPanel({ email, onReAuthSuccess }: ReAuthPanelProps) {
 }
 type ReAuthFormState = {
   emailValue: string;
+  factorId: string | null;
   isSubmitting: boolean;
   password: string;
   result: ReAuthResult | null;
@@ -86,6 +87,7 @@ type ReAuthFormState = {
 function createInitialFormState(email: string | null): ReAuthFormState {
   return {
     emailValue: email ?? "",
+    factorId: null,
     isSubmitting: false,
     password: "",
     result: null,
@@ -225,13 +227,22 @@ async function submitPasswordStep({
     password: form.password,
   });
 
+  // Re-authentication always needs the second lock; an account without a verified factor cannot pass here.
+  if (nextResult.status === "ok" && nextResult.nextStep === "totp-enrollment") {
+    setForm((previous) => ({ ...previous, result: {
+      message: "Set up your second lock first: sign out, then sign in again.", status: "error" } }));
+    return;
+  }
+
   setForm((previous) => ({
     ...previous,
+    factorId: nextResult.status === "ok" && nextResult.nextStep === "totp-verification"
+      ? nextResult.factorId : previous.factorId,
     result: nextResult,
     step: nextResult.status === "ok" && nextResult.nextStep === "totp-verification" ? "totp" : previous.step,
   }));
 
-  if (nextResult.status === "ok" && nextResult.nextStep !== "totp-verification") {
+  if (nextResult.status === "ok" && nextResult.nextStep === "vault-unlock") {
     onReAuthSuccess();
   }
 }
@@ -247,7 +258,7 @@ async function submitTotpStep({
   setForm: (updater: (previous: ReAuthFormState) => ReAuthFormState) => void;
   totpService: TotpVerifyService;
 }) {
-  const nextResult = await totpService.verify("placeholder-factor-id", form.totpCode);
+  const nextResult = await totpService.verify(form.factorId ?? "", form.totpCode);
   setForm((previous) => ({ ...previous, result: nextResult }));
 
   if (nextResult.status === "ok") {

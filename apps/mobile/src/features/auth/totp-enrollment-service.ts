@@ -2,7 +2,8 @@ type SupabaseMfaEnrollResponse = Promise<{
   data: {
     id: string;
     totp?: {
-      qr_code?: string;
+      secret?: string;
+      uri?: string;
     };
   } | null;
   error: { message: string } | null;
@@ -16,12 +17,18 @@ type SupabaseMfaClient = {
   };
 };
 
+/*
+ * The real Supabase TOTP enrolment. The factor stays unverified, and gives no second lock, until the owner proves
+ * a code from it on the verify screen. The setup key and otpauth URI are shown once on the enrolment screen and are
+ * never logged, stored or passed in a route.
+ */
 export type TotpEnrollmentServiceResult =
   | { message: string; status: "error" }
   | {
       factorId: string;
       message: string;
-      qrCodeUri: string;
+      otpauthUri: string;
+      secret: string;
       status: "ok";
     }
   | { message: string; status: "unavailable" };
@@ -37,8 +44,10 @@ export function createTotpEnrollmentService(client: SupabaseMfaClient | null) {
       }
 
       const { data, error } = await client.auth.mfa.enroll({ factorType: "totp" });
+      const secret = data?.totp?.secret;
+      const otpauthUri = data?.totp?.uri;
 
-      if (error || !data?.id || !data.totp?.qr_code) {
+      if (error || !data?.id || !secret || !otpauthUri?.startsWith("otpauth://totp/")) {
         return {
           message: "Two-factor setup could not be started.",
           status: "error",
@@ -48,7 +57,8 @@ export function createTotpEnrollmentService(client: SupabaseMfaClient | null) {
       return {
         factorId: data.id,
         message: "Scan the QR code with your authenticator app.",
-        qrCodeUri: data.totp.qr_code,
+        otpauthUri,
+        secret,
         status: "ok",
       };
     },

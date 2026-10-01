@@ -15,7 +15,8 @@ export default function VerifyTotpRoute() {
   useSignupProgressStep("verify-totp", ExpoSecureStore);
   const params = useLocalSearchParams<{ factorId?: string; flow?: string }>();
   const factorId = params.factorId ?? "";
-  const variant = params.flow === "returning" ? "returning" : "onboarding";
+  const variant =
+    params.flow === "returning" || params.flow === "enrollment" ? params.flow : "onboarding";
 
   return (
     <Screen>

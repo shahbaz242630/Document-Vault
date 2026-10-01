@@ -113,16 +113,10 @@ describe("getResumeRoute", () => {
     expect(route).toBe("/auth/setup-totp");
   });
 
-  it("returns backup-codes route with placeholder factorId", () => {
-    const route = getResumeRoute({ email: "partner@example.com", step: "backup-codes" });
-
-    expect(route).toBe("/auth/backup-codes?factorId=placeholder-factor-id");
-  });
-
-  it("returns verify-totp route with placeholder factorId", () => {
-    const route = getResumeRoute({ email: "partner@example.com", step: "verify-totp" });
-
-    expect(route).toBe("/auth/verify-totp?factorId=placeholder-factor-id");
+  it("restarts an interrupted enrolment at setup, since an unverified factor cannot be resumed", () => {
+    for (const step of ["backup-codes", "verify-totp"] as const) {
+      expect(getResumeRoute({ email: "partner@example.com", step })).toBe("/auth/setup-totp");
+    }
   });
 
   it("returns recovery-phrase route without params", () => {

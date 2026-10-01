@@ -18,7 +18,7 @@ import sodium from "libsodium-wrappers-sumo";
 
 import { createOfflineCodeV2PlatformProofProducer }
   from "../../../apps/mobile/src/features/claimant-offline-code/offline-code-v2-proof-producer";
-import { createOwnerOfflineCodeClient }
+import { createOwnerOfflineCodeClient, OwnerOfflineCodeClientError }
   from "../../../apps/mobile/src/features/claimant-offline-code/owner-offline-code-client";
 import { createOwnerOfflineCodeSheet, type OwnerOfflineCodeSheet }
   from "../../../apps/mobile/src/features/claimant-offline-code/owner-offline-code-sheet-factory";
@@ -113,7 +113,8 @@ async function nextTotpWindow() {
 
 type Owner = { id: string; client: SupabaseClient; factorId: string; secret: string };
 
-async function createSyntheticOwner(keys: Awaited<ReturnType<typeof supabaseKeys>>): Promise<Owner> {
+async function createSyntheticOwner(keys: Awaited<ReturnType<typeof supabaseKeys>>, owners: Owner[],
+  withTotp = true): Promise<Owner> {
   const admin = createClient(keys.url, keys.serviceRole, { auth: { autoRefreshToken: false, persistSession: false } });
   const email = `claimant-preview-synthetic-${randomBytes(6).toString("hex")}@sanduqkin.invalid`;
   const password = randomBytes(24).toString("base64url");
@@ -122,11 +123,37 @@ async function createSyntheticOwner(keys: Awaited<ReturnType<typeof supabaseKeys
   const client = createClient(keys.url, keys.anon, { auth: { autoRefreshToken: false, persistSession: false } });
   const signedIn = await client.auth.signInWithPassword({ email, password });
   if (signedIn.error) throw new Error(`Synthetic owner sign-in failed: ${signedIn.error.message}`);
-  const enrolled = await client.auth.mfa.enroll({ factorType: "totp" });
-  if (enrolled.error) throw new Error(`Synthetic owner TOTP enrolment failed: ${enrolled.error.message}`);
-  const owner = { id: created.data.user.id, client, factorId: enrolled.data.id, secret: enrolled.data.totp.secret };
-  await verifyTotp(owner);
+  const owner: Owner = { id: created.data.user.id, client, factorId: "", secret: "" };
+  owners.push(owner);
+  if (withTotp) await enrolTotp(owner);
   return owner;
+}
+
+async function enrolTotp(owner: Owner) {
+  const enrolled = await owner.client.auth.mfa.enroll({ factorType: "totp" });
+  if (enrolled.error) throw new Error(`Synthetic owner TOTP enrolment failed: ${enrolled.error.message}`);
+  owner.factorId = enrolled.data.id; owner.secret = enrolled.data.totp.secret;
+  await verifyTotp(owner);
+}
+
+/*
+ * MFA fix diagnosis: what the owner sheet list answers at each step of an owner's sign-in, read through the app's
+ * own client. Password only (AAL1) is a step-up (403); AAL2 before the session control is activated is refused
+ * (401); after the TOTP check and activation the list loads.
+ */
+async function listAssuranceChecks(keys: Awaited<ReturnType<typeof supabaseKeys>>, hosted: Hosted,
+  bypassFetch: typeof fetch, owners: Owner[]) {
+  const owner = await createSyntheticOwner(keys, owners, false);
+  const list = () => createOwnerOfflineCodeClient({ apiBaseUrl: hosted.apiOrigin, ownerOrigin, fetch: bypassFetch,
+    getAccessToken: () => accessToken(owner) }).list();
+  const refusedAs = (kind: string) => (error: unknown) =>
+    error instanceof OwnerOfflineCodeClientError && error.kind === kind;
+  await assert.rejects(list(), refusedAs("fresh_mfa_required"), "a password-only owner session must need a step-up");
+  await enrolTotp(owner);
+  await assert.rejects(list(), refusedAs("unauthorized"), "an AAL2 session must be activated before listing");
+  await activateOwnerSession(hosted.apiOrigin, bypassFetch, owner);
+  assert.deepEqual(await list(), []);
+  pass("the owner sheet list needs AAL2 (403 before TOTP) and an activated session (401 before), then loads");
 }
 
 /* W2a: the owner activates its claimant session control through the real owner route, as the app does. */
@@ -223,9 +250,10 @@ async function main() {
 
   const owners: Owner[] = [];
   try {
-    owners.push(await createSyntheticOwner(keys), await createSyntheticOwner(keys));
-    const [first, second] = owners as [Owner, Owner];
-    for (const owner of owners) await activateOwnerSession(hosted.apiOrigin, bypassFetch, owner);
+    await listAssuranceChecks(keys, hosted, bypassFetch, owners);
+    const first = await createSyntheticOwner(keys, owners);
+    const second = await createSyntheticOwner(keys, owners);
+    for (const owner of [first, second]) await activateOwnerSession(hosted.apiOrigin, bypassFetch, owner);
     pass("two synthetic owners signed in with password and TOTP (AAL2) and activated through /owner/session/activate");
 
     const client = (owner: Owner) => createOwnerOfflineCodeClient({ apiBaseUrl: hosted.apiOrigin, ownerOrigin,

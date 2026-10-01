@@ -8,9 +8,16 @@ import {
  * Slice 6J: "My emergency sheets". The owner sees their sheets (dates and status only) and can revoke an active
  * one. Revoking needs a fresh MFA step-up; a retry after the step-up reuses the same idempotency key, so one
  * confirmed revoke is one server-side revocation however many times it is retried.
+ *
+ * Loading needs an AAL2 owner session with an active claimant session control. When the API says either is missing
+ * (403 or 401) the owner is asked for a TOTP step-up, which also activates the session control, and the list is
+ * loaded once more; a second refusal is reported as a session problem rather than another prompt.
  */
 export type OwnerSheetListStatus = "loading" | "ready" | "confirming" | "revoking" | "needs_fresh_mfa"
   | "verifying_mfa" | "failed";
+
+/** Why the list could not be loaded: no answer from the API, a session it still refused, or anything else. */
+export type OwnerSheetListLoadFailure = "unreachable" | "session" | "server";
 
 export type OwnerSheetListState = Readonly<{
   status: OwnerSheetListStatus;
@@ -20,6 +27,7 @@ export type OwnerSheetListState = Readonly<{
   mfaRejected: boolean;
   revokeFailed: boolean;
   revoked: boolean;
+  loadFailure: OwnerSheetListLoadFailure | null;
 }>;
 
 export type OwnerSheetListDeps = Readonly<{
@@ -29,7 +37,11 @@ export type OwnerSheetListDeps = Readonly<{
 }>;
 
 const initial: OwnerSheetListState = Object.freeze({ status: "loading", sheets: Object.freeze([]), selected: null,
-  mfaRejected: false, revokeFailed: false, revoked: false });
+  mfaRejected: false, revokeFailed: false, revoked: false, loadFailure: null });
+const sessionRefused = (error: unknown) => error instanceof OwnerOfflineCodeClientError
+  && (error.kind === "fresh_mfa_required" || error.kind === "unauthorized");
+const loadFailureOf = (error: unknown): OwnerSheetListLoadFailure => sessionRefused(error) ? "session"
+  : error instanceof OwnerOfflineCodeClientError && error.kind === "unreachable" ? "unreachable" : "server";
 
 export function createOwnerSheetListFlow(deps: OwnerSheetListDeps) {
   let state = initial;
@@ -52,15 +64,16 @@ export function createOwnerSheetListFlow(deps: OwnerSheetListDeps) {
   };
   const current = (run: number) => run === epoch;
 
-  async function load(): Promise<void> {
-    if (state.status === "revoking" || state.status === "verifying_mfa") return;
+  async function load(afterStepUp = false): Promise<void> {
     const { run, signal } = begin();
-    set({ status: "loading", selected: null, mfaRejected: false });
+    set({ status: "loading", selected: null, mfaRejected: false, loadFailure: null });
     try {
       const sheets = await deps.client.list(signal);
       if (current(run)) set({ status: "ready", sheets });
-    } catch {
-      if (current(run)) set({ status: "failed", sheets: Object.freeze([]) });
+    } catch (error) {
+      if (!current(run)) return;
+      if (sessionRefused(error) && !afterStepUp) set({ status: "needs_fresh_mfa", sheets: Object.freeze([]) });
+      else set({ status: "failed", sheets: Object.freeze([]), loadFailure: loadFailureOf(error) });
     }
   }
 
@@ -88,7 +101,10 @@ export function createOwnerSheetListFlow(deps: OwnerSheetListDeps) {
   }
 
   return Object.freeze({
-    load,
+    async load(): Promise<void> {
+      if (state.status === "revoking" || state.status === "verifying_mfa") return;
+      await load();
+    },
     getState: () => state,
     subscribe(listener: (value: OwnerSheetListState) => void) {
       listeners.add(listener);
@@ -101,7 +117,7 @@ export function createOwnerSheetListFlow(deps: OwnerSheetListDeps) {
       set({ status: "confirming", selected: locatorRecordId, revokeFailed: false, revoked: false });
     },
     cancelRevoke(): void {
-      if (state.status !== "confirming" && state.status !== "needs_fresh_mfa") return;
+      if ((state.status !== "confirming" && state.status !== "needs_fresh_mfa") || !state.selected) return;
       controller?.abort(); epoch += 1; revokeKey = null;
       set({ status: "ready", selected: null, mfaRejected: false });
     },
@@ -117,7 +133,8 @@ export function createOwnerSheetListFlow(deps: OwnerSheetListDeps) {
       const verified = await deps.verifyFreshMfa(code).catch(() => false);
       if (!current(run)) return;
       if (!verified) { set({ status: "needs_fresh_mfa", mfaRejected: true }); return; }
-      await revoke();
+      if (state.selected) await revoke();
+      else await load(true);
     },
     /** Leaving the screen stops any request, drops a pending revoke and resets; late results are ignored. */
     close(): void {

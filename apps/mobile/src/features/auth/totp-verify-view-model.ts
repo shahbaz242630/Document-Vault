@@ -1,4 +1,5 @@
-export type TotpVerifyVariant = "onboarding" | "returning";
+/** "enrollment" is an existing account proving the factor it has just added during sign-in. */
+export type TotpVerifyVariant = "enrollment" | "onboarding" | "returning";
 
 export type TotpVerifyViewModel = {
   body: string;
@@ -18,6 +19,16 @@ export function createTotpVerifyViewModel(
       primaryActionLabel: "Unlock vault",
       statusLabel: null,
       title: "Second lock",
+    };
+  }
+
+  if (variant === "enrollment") {
+    return {
+      body: "Enter the 6-digit code your authenticator app shows right now. This turns on your second lock.",
+      codeInputLabel: "6-digit code",
+      primaryActionLabel: "Verify and open vault",
+      statusLabel: null,
+      title: "Let's test it",
     };
   }
 

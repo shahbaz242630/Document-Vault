@@ -36,16 +36,18 @@ export function ownerSheetListView(state: OwnerSheetListState | null): OwnerShee
       return { ...none, title, busy: true, body: "Loading your sheets." };
     case "failed":
       return { ...none, title, showRetry: true, body: "We couldn't load your sheets.",
-        notice: { variant: "danger", title: "Sheets not loaded", message: "Check your connection and try again." } };
+        notice: { variant: "danger", title: "Sheets not loaded", message: failureMessage(state.loadFailure) } };
     case "confirming":
       return { ...none, title, rows, confirmReference: selected,
         body: `Revoke sheet ${selected}? Anyone holding this sheet will no longer be able to start a claim with it.` };
     case "revoking":
     case "verifying_mfa":
-      return { ...none, title, rows, busy: true, body: "Revoking the sheet securely. Keep the app open." };
+      return { ...none, title, rows, busy: true,
+        body: selected ? "Revoking the sheet securely. Keep the app open." : "Checking your code." };
     case "needs_fresh_mfa":
       return { ...none, title, rows, showMfaField: true, confirmReference: selected,
-        body: "Enter the 6-digit code from your authenticator app to confirm it's you.",
+        body: selected ? "Enter the 6-digit code from your authenticator app to confirm it's you."
+          : "To see your sheets, enter the 6-digit code from your authenticator app to confirm it's you.",
         notice: state.mfaRejected
           ? { variant: "danger", title: "Code not accepted", message: "Check the code and try again." } : null };
     case "ready":
@@ -58,6 +60,12 @@ export function ownerSheetListView(state: OwnerSheetListState | null): OwnerShee
             ? { variant: "success", title: "Sheet revoked", message: "It can no longer be used to start a claim." }
             : null };
   }
+}
+
+function failureMessage(failure: OwnerSheetListState["loadFailure"]): string {
+  if (failure === "unreachable") return "The Sanduqkin server couldn't be reached. Check your connection and try again.";
+  if (failure === "session") return "Your session couldn't be confirmed. Sign out, sign in again and retry.";
+  return "The server couldn't return your sheets. Please try again.";
 }
 
 function row(sheet: OwnerSheetListState["sheets"][number]): OwnerSheetListRow {

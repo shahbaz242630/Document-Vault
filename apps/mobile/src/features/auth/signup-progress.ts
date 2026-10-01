@@ -67,12 +67,11 @@ export function getResumeRoute(progress: SignupProgress): string {
       return `/auth/verify-email?email=${encodeURIComponent(progress.email)}`;
     case "profile-basics":
       return `/auth/profile-basics?email=${encodeURIComponent(progress.email)}`;
+    // An unverified factor cannot be resumed without its setup key, so an interrupted enrolment starts again.
     case "setup-totp":
-      return "/auth/setup-totp";
     case "backup-codes":
-      return "/auth/backup-codes?factorId=placeholder-factor-id";
     case "verify-totp":
-      return "/auth/verify-totp?factorId=placeholder-factor-id";
+      return "/auth/setup-totp";
     case "recovery-phrase":
       return "/auth/recovery-phrase";
     case "confirm-recovery-phrase":

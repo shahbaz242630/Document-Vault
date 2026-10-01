@@ -27,8 +27,14 @@ export type OwnerOfflineCodeSheetSummary = Readonly<{
   revokedAt: string | null;
 }>;
 
+/*
+ * "unauthorized" (a 401: no AAL2 session control, or a token the API refused) and "unreachable" (no answer at all)
+ * are told apart only for the sheet list, so the screen can offer a TOTP step-up or say the server can't be reached.
+ */
+export type OwnerOfflineCodeClientErrorKind = "fresh_mfa_required" | "unauthorized" | "unreachable" | "failed";
+
 export class OwnerOfflineCodeClientError extends Error {
-  constructor(readonly kind: "fresh_mfa_required" | "failed") {
+  constructor(readonly kind: OwnerOfflineCodeClientErrorKind) {
     super("The emergency sheet request could not be completed.");
     this.name = "OwnerOfflineCodeClientError";
   }
@@ -92,8 +98,10 @@ export function createOwnerOfflineCodeClient(deps: OwnerOfflineCodeClientDeps) {
     try {
       if (signal?.aborted) throw new Error("aborted");
       const response = await (deps.fetch ?? fetch)(`${base}/owner/offline-code/v2/locators`, { method: "GET",
-        signal: controller.signal, headers: { Authorization: `Bearer ${token}`, Origin: deps.ownerOrigin } });
+        signal: controller.signal, headers: { Authorization: `Bearer ${token}`, Origin: deps.ownerOrigin } })
+        .catch(() => { throw new OwnerOfflineCodeClientError("unreachable"); });
       if (response.status === 403) throw new OwnerOfflineCodeClientError("fresh_mfa_required");
+      if (response.status === 401) throw new OwnerOfflineCodeClientError("unauthorized");
       if (response.status !== 200) throw new OwnerOfflineCodeClientError("failed");
       const value = await response.json() as Record<string, unknown>;
       if (!value || typeof value !== "object" || Object.keys(value).join(",") !== "sheets"

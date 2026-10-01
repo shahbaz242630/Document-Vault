@@ -54,7 +54,7 @@ export function OwnerSheetListPanel() {
       {view.showMfaField ? (
         <CodeField accessibilityLabel="Authenticator code" onChangeText={setCode} value={code} />
       ) : null}
-      {view.confirmReference ? (
+      {view.confirmReference || view.showMfaField ? (
         <View style={{ gap: 12, marginTop: "auto" }}>
           {view.showMfaField ? (
             <PrimaryButton disabled={!/^\d{6}$/u.test(code)} label="Confirm"
@@ -62,7 +62,9 @@ export function OwnerSheetListPanel() {
           ) : (
             <PrimaryButton label="Revoke sheet" onPress={() => void flow?.confirmRevoke()} />
           )}
-          <OutlineButton label="Keep it" onPress={() => { setCode(""); flow?.cancelRevoke(); }} />
+          {view.confirmReference ? (
+            <OutlineButton label="Keep it" onPress={() => { setCode(""); flow?.cancelRevoke(); }} />
+          ) : null}
         </View>
       ) : null}
       {view.showRetry ? <PrimaryButton label="Try again" onPress={() => void flow?.load()} /> : null}

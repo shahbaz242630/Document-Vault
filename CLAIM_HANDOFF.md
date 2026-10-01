@@ -1,5 +1,25 @@
 # Sanduqkin Claimant Engineering Handoff
 
+## Current checkpoint — Preview MFA fix, 2026-10-01
+
+The canonical close-out, with exact rebuild and test steps, is `docs/handoff/2026-10-01-claimant-preview-mfa-fix-session-close.md`.
+
+The owner's emulator run found that the app never really enrolled a second factor, and that password sign-in opened the vault at AAL1. That left the owner claimant session inactive and the sheet list failing: the hosted list returns 403 at AAL1 and 401 before activation.
+
+Fixed in the mobile app only:
+- real TOTP enrolment, with a QR code and setup key;
+- sign-in that requires TOTP verification, or enrolment, before the vault opens;
+- activation after every TOTP check;
+- a step-up on the sheet list;
+- re-authentication with the real factor.
+
+No server, schema or approval change. The hosted acceptance passed 12 of 12.
+
+Next, owner-held:
+1. rebuild and install the Preview APK, then rerun on the emulator;
+2. approve the dependency and Expo Doctor fixes that turn CI red on `main`;
+3. clean up and rotate the tokens.
+
 ## Current checkpoint — session close, W2a phone access, 2026-09-29
 
 The canonical close-out and next-session opener is `docs/handoff/2026-09-29-claimant-w2a-phone-access-session-close.md`. It lives on branch `claude/gifted-turing-lm2en4` until the next code PR carries it to `main`.

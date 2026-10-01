@@ -136,7 +136,7 @@ describe("owner sheet list flow", () => {
 
 describe("owner sheet list view", () => {
   const state = (changes: Partial<OwnerSheetListState>): OwnerSheetListState => ({ status: "ready", sheets: [],
-    selected: null, mfaRejected: false, revokeFailed: false, revoked: false, ...changes });
+    selected: null, mfaRejected: false, revokeFailed: false, revoked: false, loadFailure: null, ...changes });
 
   it("is unavailable without a handle and hidden behind the literal-false launch approval", () => {
     expect(OWNER_SHEET_FLOW_LAUNCH_APPROVED).toBe(false);
