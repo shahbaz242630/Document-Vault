@@ -23,10 +23,13 @@ No server, schema or approval change. The hosted acceptance passed 12 of 12.
 
 The hosted acceptance passed 12 of 12 again.
 
+**Stopped for the night:** the PDF-first APK (`96c3a35`) is queued on EAS because the build limit was reached. No PR is open yet; `main` is at `5edc637`. See "Session close (2026-10-01, evening)" in the close-out.
+
 Next, owner-held:
-1. rebuild and install the Preview APK, then follow "PDF-first rebuild and rerun" in the close-out;
-2. approve the dependency and Expo Doctor fixes that turn CI red on `main`;
-3. clean up and rotate the tokens.
+1. when the build finishes, install it and follow "PDF-first rebuild and rerun" in the close-out;
+2. send the results to the next cloud session;
+3. decide on the dependency and Expo Doctor fixes that turn CI red on `main`;
+4. clean up and rotate the tokens when testing is finished.
 
 ## Current checkpoint — session close, W2a phone access, 2026-09-29
 

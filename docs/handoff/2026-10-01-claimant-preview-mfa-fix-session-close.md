@@ -112,6 +112,22 @@ What's left needs the app on the emulator.
 8. **Record the results** in the W2a verification file as owner-reported.
 
 
+## Session close (2026-10-01, evening): where we stopped
+
+- **Code:**
+  - Branch `claude/inspiring-fermat-bbdlaf` at `96c3a35`, pushed. It holds every commit of this session: the MFA fix `20859a6`, the lockfile fix `cf86de4`, the spec and the rerun record `662b45f`, and PDF-first sheets `96c3a35`.
+  - **No PR is open yet.** `main` and `claimant-preview` are still at `5edc637`, so the hosted Preview runs the old server code. That's fine: no server change was needed.
+- **Build:** the owner started the `claimant-preview` Android build of `96c3a35` from the laptop. It is **queued on EAS** because the plan's build limit was reached, and should finish overnight. Its build ID isn't recorded yet.
+- **Installed on the emulator:** still build `1b00c951` (`cf86de4`, the MFA fix), with one Revoked and one Active sheet from the old print flow. Neither old sheet has a copy on the device.
+- **Hosted state:** the synthetic cleanup reported 0 after the last acceptance run. No hosted setting changed this session.
+- **Owner-held:**
+  1. When the build finishes, run "PDF-first rebuild and rerun" above (the laptop session has the full message).
+  2. Then send the results to the cloud session.
+  3. Cleanup and token rotation only when the owner says testing is finished.
+- **Open decisions for the owner:**
+  - whether to fix the two checks that are red on `main` (dependency advisories, Expo patch versions) in this PR or separately;
+  - then the PR itself (auto-merge when green, as before).
+
 ## Open items
 
 - **CI on `main` is red for two reasons this change doesn't cause:**
@@ -126,4 +142,13 @@ What's left needs the app on the emulator.
 
 ## Next-session opener
 
-> Continue the Sanduqkin claimant work in `shahbaz242630/Document-Vault` on `claude/inspiring-fermat-bbdlaf`. Read `docs/handoff/2026-10-01-claimant-preview-mfa-fix-session-close.md` (including "PDF-first rebuild and rerun"), the PDF-first spec and the W2a verification record. Ask me for the PDF-first emulator results and record them as owner-reported. Then the dependency and Expo Doctor fixes if I approve them, the PR, and then the W2b claim-start spec.
+> Continue the Sanduqkin claimant work in `shahbaz242630/Document-Vault` on branch `claude/inspiring-fermat-bbdlaf`, which should be at `96c3a35` or later. Read `docs/handoff/2026-10-01-claimant-preview-mfa-fix-session-close.md`: "Session close (2026-10-01, evening)" first, then "PDF-first rebuild and rerun". Also read `docs/superpowers/specs/2026-10-01-claimant-owner-sheet-pdf-first.md` and the last two sections of `docs/verification/2026-09-26-claimant-w2a-phone-preview.md`.
+>
+> The PDF-first Preview APK was queued on EAS overnight. Ask me for its build ID and the laptop's emulator results:
+> - the second sign-in;
+> - create and Save PDF to Downloads, including a cancelled save;
+> - view and save again after a force-stop;
+> - the revoke with a fresh code;
+> - the optional second-device check.
+>
+> Record them as owner-reported and fix anything that failed. Then ask whether to fix the dependency advisories and the Expo patch versions in this PR, and open the PR with auto-merge when green. After that comes the W2b claim-start spec.
